@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <defs>
+    <radialGradient id="heartGlow" cx="38%" cy="28%" r="70%">
+      <stop offset="0%" stop-color="#fff7fa"/>
+      <stop offset="48%" stop-color="#f7c9d4"/>
+      <stop offset="100%" stop-color="#e9a9bb"/>
+    </radialGradient>
+    <filter id="softShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="3" stdDeviation="3" flood-color="#8f5f6d" flood-opacity="0.28"/>
+    </filter>
+  </defs>
+  <rect width="64" height="64" rx="18" fill="#fff8fb"/>
+  <path filter="url(#softShadow)" fill="url(#heartGlow)" d="M32 51.5S12.5 40.2 12.5 25.8c0-7.2 5.1-12.3 11.5-12.3 3.7 0 6.5 1.7 8 4.3 1.5-2.6 4.3-4.3 8-4.3 6.4 0 11.5 5.1 11.5 12.3C51.5 40.2 32 51.5 32 51.5Z"/>
+  <path fill="#ffffff" fill-opacity="0.72" d="M23.6 18.2c-3.4.2-6.1 3.1-6.3 6.8-.1 1.7.5 2.4 1.4 1.8 1.1-.8 1-3.1 2.8-4.9 1.6-1.6 4-1.8 4.5-2.8.3-.6-.7-1-2.4-.9Z"/>
+</svg>
