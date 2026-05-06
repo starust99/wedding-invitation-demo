@@ -27,15 +27,32 @@ create index if not exists rsvp_responses_accommodation_needed_idx on rsvp_respo
 create table if not exists site_settings (
   id text primary key default 'main',
   content jsonb not null,
-  theme_key text not null default 'dalat-garden-elegant',
+  theme_key text not null default 'rose-quartz-serenity',
   published_content jsonb,
   published_theme_key text,
   updated_at timestamptz not null default now(),
   published_at timestamptz
 );
 
+create table if not exists site_versions (
+  id uuid primary key default gen_random_uuid(),
+  settings jsonb not null,
+  label text not null,
+  source text not null default 'manual' check (source in ('manual', 'duplicate', 'restore', 'publish')),
+  created_at timestamptz not null default now(),
+  published_at timestamptz
+);
+
+create index if not exists site_versions_created_at_idx on site_versions (created_at desc);
+create index if not exists site_versions_published_at_idx on site_versions (published_at desc);
+
+-- Asset uploads are handled by Next.js route handlers with SUPABASE_SERVICE_ROLE_KEY.
+-- Create a public Supabase Storage bucket named `wedding-assets`, or let `/api/admin/assets`
+-- create it on the first upload when the service role key has storage permissions.
+
 alter table rsvp_responses enable row level security;
 alter table site_settings enable row level security;
+alter table site_versions enable row level security;
 
 -- This app uses Next.js route handlers with SUPABASE_SERVICE_ROLE_KEY for reads/writes.
 -- RLS is enabled and no public policies are created, so anon users cannot read/write tables directly.

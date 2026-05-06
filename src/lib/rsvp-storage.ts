@@ -51,7 +51,7 @@ export function clearRSVPResponses() {
 }
 
 export function attendingLabel(value: RSVPResponse["attending"]) {
-  if (value === "yes") return "Có";
-  if (value === "no") return "Không";
-  return "Chưa chắc";
+  if (value === "yes") return "Trân trọng tham dự";
+  if (value === "no") return "Rất tiếc vắng mặt";
+  return "Cần thêm thời gian xác nhận";
 }

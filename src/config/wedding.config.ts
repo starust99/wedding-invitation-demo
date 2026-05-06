@@ -1,11 +1,40 @@
 export const weddingConfig = {
-  themeName: "Rose Quartz Serenity Garden",
+  themeName: "Rose Serenity Glass",
+  project: {
+    visualDirectionKey: "rose-quartz-serenity",
+    ai: {
+      tweakHistory: [],
+    },
+    artifacts: {
+      enabled: ["web-invitation", "rsvp-form"],
+      recipes: {
+        "web-invitation": { status: "ready" },
+        "rsvp-form": { status: "ready" },
+        "save-the-date": { status: "draft" },
+        "print-card": { status: "draft" },
+        "story-share": { status: "draft" },
+        "guest-info-card": { status: "draft" },
+        "venue-map-card": { status: "draft" },
+        "thank-you-card": { status: "draft" },
+      },
+    },
+    discovery: {
+      coupleStory: "Chúng mình muốn một lời mời ấm áp, chỉn chu và có cảm giác như một buổi tối riêng tư.",
+      desiredTone: "romantic",
+      guestAudience: "Gia đình, bạn bè thân thiết và những người đã đồng hành cùng tụi mình.",
+      culturalNotes: "Ưu tiên tiếng Việt trang trọng vừa đủ, có thể điểm vài cụm tiếng Anh nhẹ nhàng.",
+      mustHaveSections: ["venue", "timeline", "dressCode", "accommodation", "rsvp"],
+      constraints: "Giữ tinh thần premium, không giống landing page SaaS, mobile phải đọc dễ và RSVP nổi bật.",
+      photoMoodboardNotes: "Giấy cưới ivory, Rose Quartz, Serenity blue, hiệu ứng glass nhẹ, chuyển động mềm và cảm giác điện ảnh.",
+      printDigitalPriority: "digital",
+    },
+  },
   couple: {
     bride: "Cô Dâu",
     groom: "Chú Rể",
     displayName: "Cô Dâu & Chú Rể",
     date: "2026-12-26",
-    tagline: "A warm garden celebration in Da Lat",
+    tagline: "Một buổi tiệc Rose Quartz & Serenity nhẹ nhàng, trang trọng",
   },
   sections: {
     hero: {
@@ -19,8 +48,8 @@ export const weddingConfig = {
     },
     itinerary: {
       eyebrow: "Wedding Reception",
-      title: "An Evening in the Garden",
-      description: "Một buổi tối thân mật giữa không khí se lạnh của Đà Lạt, được sắp nhịp nhẹ nhàng từ welcome drink đến after party.",
+      title: "Một buổi tối được chuẩn bị riêng",
+      description: "Một buổi tiệc thân mật, được sắp nhịp nhẹ nhàng từ welcome drink, ceremony, dinner reception đến after party.",
       cardEyebrow: "Save the evening",
       cardDescription: "{venueName} · {venueLocation}",
       items: [
@@ -32,11 +61,11 @@ export const weddingConfig = {
     },
     timeline: {
       eyebrow: "Our Evening",
-      title: "A Garden Timeline",
+      title: "Lịch trình buổi tối",
     },
     venue: {
       eyebrow: "Venue",
-      description: "Một điểm hẹn giữa rừng thông và mặt hồ, đủ riêng tư để buổi tối của chúng mình thật gần gũi.",
+      description: "Một điểm hẹn riêng tư, đủ ấm áp để gia đình và bạn bè thân thiết cùng chia sẻ buổi tối quan trọng.",
       visualEyebrow: "{venueArea}",
       visualTitle: "Hồ Tuyền Lâm",
       detailEyebrow: "Where to arrive",
@@ -50,7 +79,7 @@ export const weddingConfig = {
     guestNotes: {
       eyebrow: "Guest Notes",
       title: "For a comfortable evening",
-      description: "Một vài ghi chú nhỏ để bạn chuẩn bị thật thoải mái cho buổi tối ngoài trời ở Đà Lạt.",
+      description: "Một vài ghi chú nhỏ để bạn chuẩn bị thật thoải mái cho buổi tối.",
       weatherEyebrow: "Da Lat Weather",
       accommodationEyebrow: "Accommodation",
       rsvpDeadlinePrefix: "RSVP by",
@@ -58,15 +87,15 @@ export const weddingConfig = {
     gallery: {
       eyebrow: "Gallery",
       title: "Moments in Bloom",
-      description: "Những khung hình sẽ được thay bằng ảnh thật của tụi mình, nhưng layout đã được dựng như một trang album editorial mềm mại.",
+      description: "Một không gian ảnh tối giản, giữ nhịp cảm xúc trước khi khách mời gửi xác nhận tham dự.",
       itemLabel: "Moment",
       imageAltPrefix: "Wedding gallery",
     },
     cta: {
       eyebrow: "RSVP",
-      title: "Hẹn gặp bạn ở Đà Lạt",
-      description: "Hãy xác nhận tham dự và cho chúng mình biết nhu cầu lưu trú để chuẩn bị chu đáo hơn.",
-      buttonLabel: "Điền RSVP",
+      title: "Xác nhận lời mời",
+      description: "Hãy cho gia đình biết sự hiện diện, số khách, ghi chú thực đơn và nhu cầu lưu trú để chuẩn bị thật chu đáo.",
+      buttonLabel: "Gửi xác nhận",
     },
   },
   appearance: {
@@ -82,17 +111,18 @@ export const weddingConfig = {
       gallery: "plain",
       cta: "primaryGradient",
     },
+    galleryObjectPositions: ["center center", "center center", "center center", "center center"],
     mediaLayers: {
       hero: [
         {
           id: "hero-cover",
           type: "image",
-          src: "/hero.svg",
-          mobileSrc: "/hero.svg",
-          alt: "Enchanted garden wedding cover",
+          src: "/hero-editorial-couple.svg",
+          mobileSrc: "/hero-editorial-couple.svg",
+          alt: "Editorial couple wedding cover",
           opacity: 1,
           scale: { desktop: 1, mobile: 1 },
-          objectPosition: { desktop: "center center", mobile: "center center" },
+          objectPosition: { desktop: "72% center", mobile: "45% top" },
           animation: "slowZoom",
         },
       ],
@@ -109,8 +139,8 @@ export const weddingConfig = {
   invitation: {
     title: "Trân trọng kính mời",
     message:
-      "Chúng mình rất vui được mời bạn đến chung vui trong buổi tiệc cưới thân mật giữa không khí Đà Lạt, tại Terracotta Hotel & Resort Dalat.",
-    closing: "Sự hiện diện của bạn là niềm vui rất lớn với chúng mình.",
+      "Gia đình chúng tôi trân trọng kính mời anh/chị và những người thân yêu đến chung vui trong buổi tiệc cưới thân mật tại Terracotta Hotel & Resort Dalat.",
+    closing: "Sự hiện diện của anh/chị là niềm vinh hạnh và niềm vui rất lớn với gia đình.",
   },
   venue: {
     name: "Terracotta Hotel & Resort Dalat",
@@ -118,7 +148,7 @@ export const weddingConfig = {
     location: "Hồ Tuyền Lâm, Đà Lạt, Việt Nam",
     address: "Terracotta Hotel & Resort Dalat, khu vực Hồ Tuyền Lâm, Đà Lạt",
     mapUrl: "https://maps.google.com/?q=Terracotta+Hotel+%26+Resort+Dalat",
-    note: "Một buổi tối ngoài trời trong khu resort, gần Hồ Tuyền Lâm, với không khí se lạnh và thân mật của Đà Lạt.",
+    note: "Một buổi tối thân mật trong khu resort, được chuẩn bị riêng cho gia đình và bạn bè thân thiết.",
   },
   event: {
     dateLabel: "Thứ Bảy, 26.12.2026",
@@ -129,39 +159,39 @@ export const weddingConfig = {
   },
   timeline: [
     { time: "16:30", title: "Đón khách", description: "Check-in, chụp ảnh và welcome drink." },
-    { time: "17:45", title: "Ceremony ngoài trời", description: "Khoảnh khắc chính của buổi lễ trong khu vườn Đà Lạt." },
-    { time: "18:40", title: "Dinner reception", description: "Dùng tiệc tối trong không khí ấm áp và thân mật." },
+    { time: "17:45", title: "Ceremony", description: "Khoảnh khắc chính của buổi lễ trong không gian thân mật." },
+    { time: "18:40", title: "Dinner reception", description: "Dùng tiệc tối trong không khí ấm áp và trang trọng." },
     { time: "20:15", title: "After party", description: "Âm nhạc, đồ uống và những câu chuyện vui." },
   ],
   dressCode: {
-    title: "Elegant Garden",
-    note: "Bạn có thể chọn trang phục thanh lịch, thoải mái, phù hợp với không gian ngoài trời và tiết trời buổi tối Đà Lạt.",
-    colors: ["#F2C6CF", "#8FAADC", "#F9F7F7", "#E9DDE5", "#7B8291"],
+    title: "Rose Serenity Formal",
+    note: "Anh/chị có thể chọn trang phục thanh lịch theo sắc hồng phấn, xanh Serenity, ivory, bạc nhạt hoặc navy dịu.",
+    colors: ["#F7CAC9", "#92A8D1", "#FFFAF7", "#E9DDE5", "#252934"],
   },
   weatherNote: {
-    title: "Một chút lưu ý về thời tiết Đà Lạt",
+    title: "Một chút lưu ý cho buổi tối",
     description:
-      "Buổi tiệc được tổ chức ngoài trời. Buổi tối ở Đà Lạt có thể se lạnh hoặc có sương, bạn nên mang theo áo khoác nhẹ để thoải mái hơn.",
+      "Buổi tiệc có thể diễn ra trong không gian mở. Anh/chị có thể mang theo áo khoác nhẹ để thoải mái hơn khi di chuyển và tham dự.",
   },
   accommodation: {
     enabled: true,
     title: "Hỗ trợ lưu trú tại resort",
     description:
-      "Vì tiệc cưới diễn ra tại Đà Lạt, chúng mình cần biết bạn có cần hỗ trợ đặt phòng tại resort không để ước lượng số lượng phòng phù hợp.",
+      "Nếu anh/chị cần thông tin lưu trú tại resort, wedding concierge sẽ liên hệ riêng để xác nhận hạng phòng và thời gian phù hợp.",
     rsvpDeadline: "26.11.2026",
   },
-  gallery: ["/gallery-1.svg", "/gallery-2.svg", "/gallery-3.svg", "/gallery-4.svg"],
+  gallery: ["/gallery-clean-1.svg", "/gallery-clean-2.svg", "/gallery-clean-3.svg", "/gallery-clean-4.svg"],
   hero: {
-    coverImage: "/hero.svg",
-    mobileCoverImage: "/hero.svg",
+    coverImage: "/hero-editorial-couple.svg",
+    mobileCoverImage: "/hero-editorial-couple.svg",
   },
   theme: {
     colors: {
-      background: "#FDFBF7",
+      background: "#FFFAF7",
       card: "#FFFFFF",
-      primary: "#8FAADC",
-      accent: "#F2C6CF",
-      text: "#2F3A35",
+      primary: "#92A8D1",
+      accent: "#F7CAC9",
+      text: "#252934",
       muted: "#7B8291",
       border: "#E9DDE5",
     },
@@ -175,6 +205,6 @@ export const weddingConfig = {
     deadline: "26.11.2026",
     askAccommodation: true,
     askDietary: true,
-    askTransport: true,
+    askTransport: false,
   },
 } as const;

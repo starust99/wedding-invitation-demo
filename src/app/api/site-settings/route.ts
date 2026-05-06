@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { hasAdminSession } from "@/lib/admin-auth";
-import { defaultSettings, type SiteSettings } from "@/lib/site-settings";
+import { defaultSettings, normalizeSettings, type SiteSettings } from "@/lib/site-settings";
 import { getSupabaseServerClient, hasSupabaseEnv } from "@/lib/supabase-server";
 
 export async function GET(request: Request) {
@@ -30,13 +30,13 @@ export async function GET(request: Request) {
     return NextResponse.json({ settings: defaultSettings, backend: "supabase" });
   }
 
-  const settings: SiteSettings = draft
+  const settings = normalizeSettings(draft
     ? { content: data.content, themeKey: data.theme_key, publishedAt: data.published_at ?? undefined }
     : {
         content: data.published_content ?? data.content,
         themeKey: data.published_theme_key ?? data.theme_key,
         publishedAt: data.published_at ?? undefined,
-      };
+      });
 
   return NextResponse.json({ settings, backend: "supabase" });
 }
@@ -51,21 +51,22 @@ export async function POST(request: Request) {
   }
 
   const body = await request.json() as SiteSettings & { publish?: boolean };
+  const settings = normalizeSettings(body);
   const supabase = getSupabaseServerClient();
   const payload = body.publish
     ? {
         id: "main",
-        content: body.content,
-        theme_key: body.themeKey,
-        published_content: body.content,
-        published_theme_key: body.themeKey,
+        content: settings.content,
+        theme_key: settings.themeKey,
+        published_content: settings.content,
+        published_theme_key: settings.themeKey,
         published_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       }
     : {
         id: "main",
-        content: body.content,
-        theme_key: body.themeKey,
+        content: settings.content,
+        theme_key: settings.themeKey,
         updated_at: new Date().toISOString(),
       };
 

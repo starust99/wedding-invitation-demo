@@ -1,0 +1,157 @@
+import { NextResponse } from "next/server";
+import { aiTweakOptions, type AiPatchOperation, type AiTweakKey, type AiTweakSuggestion } from "@/lib/ai-tweak-schema";
+import type { WeddingConfig } from "@/lib/site-settings";
+
+type RequestBody = {
+  tweak: AiTweakKey;
+  content: WeddingConfig;
+};
+
+function optionLabel(key: AiTweakKey) {
+  return aiTweakOptions.find((option) => option.key === key)?.label ?? key;
+}
+
+function patchFor(key: AiTweakKey, content: WeddingConfig): { summary: string; patch: AiPatchOperation[] } {
+  if (key === "more-formal") {
+    return {
+      summary: "Làm lời mời trang trọng hơn và giảm cảm giác casual.",
+      patch: [
+        { op: "replace", path: "invitation.title", value: "Trân trọng kính mời" },
+        { op: "replace", path: "invitation.message", value: `Gia đình chúng mình trân trọng kính mời bạn đến chung vui trong lễ cưới thân mật tại ${content.venue.name}.` },
+        { op: "replace", path: "invitation.closing", value: "Sự hiện diện của bạn là niềm vinh hạnh và hạnh phúc lớn với chúng mình." },
+      ],
+    };
+  }
+
+  if (key === "less-formal") {
+    return {
+      summary: "Làm wording gần gũi hơn nhưng vẫn giữ sự chỉn chu.",
+      patch: [
+        { op: "replace", path: "invitation.title", value: "Mời bạn đến chung vui" },
+        { op: "replace", path: "invitation.message", value: "Tụi mình rất vui nếu được gặp bạn trong buổi tối đặc biệt này ở Đà Lạt, cùng ăn tối, trò chuyện và lưu lại vài khoảnh khắc thật đẹp." },
+        { op: "replace", path: "invitation.closing", value: "Có bạn ở đó, buổi tối này sẽ trọn vẹn hơn rất nhiều." },
+      ],
+    };
+  }
+
+  if (key === "more-floral") {
+    return {
+      summary: "Tăng cảm giác garden/floral bằng background mềm và palette dress code lãng mạn hơn.",
+      patch: [
+        { op: "replace", path: "appearance.backgrounds.invitation", value: "softGradient" },
+        { op: "replace", path: "appearance.backgrounds.guestNotes", value: "softGradient" },
+        { op: "replace", path: "appearance.backgrounds.gallery", value: "accentGradient" },
+        { op: "replace", path: "dressCode.colors", value: ["#F2C6CF", "#F7DDE6", "#8FAADC", "#FDFBF7", "#D8C3A5"] },
+      ],
+    };
+  }
+
+  if (key === "less-floral") {
+    return {
+      summary: "Giảm floral density, chuyển về giấy cưới/typography sạch hơn.",
+      patch: [
+        { op: "replace", path: "appearance.backgrounds.invitation", value: "card" },
+        { op: "replace", path: "appearance.backgrounds.gallery", value: "plain" },
+        { op: "replace", path: "appearance.backgrounds.dressCode", value: "card" },
+        { op: "replace", path: "dressCode.colors", value: ["#F8F6F0", "#DDD3C6", "#B6B0A6", "#6D6A63", "#2E2A25"] },
+      ],
+    };
+  }
+
+  if (key === "more-editorial") {
+    return {
+      summary: "Rút copy và tăng cảm giác editorial magazine.",
+      patch: [
+        { op: "replace", path: "sections.hero.eyebrow", value: "Wedding Editorial" },
+        { op: "replace", path: "sections.invitation.eyebrow", value: "The invitation" },
+        { op: "replace", path: "invitation.message", value: `Một buổi tối thân mật tại ${content.venue.name}, nơi chúng mình rất mong được gặp bạn và cùng lưu lại khoảnh khắc đặc biệt.` },
+        { op: "replace", path: "appearance.backgrounds.timeline", value: "card" },
+      ],
+    };
+  }
+
+  if (key === "stronger-rsvp") {
+    return {
+      summary: "Làm CTA RSVP rõ hơn, nhấn deadline và nhu cầu lưu trú.",
+      patch: [
+        { op: "replace", path: "sections.cta.eyebrow", value: "RSVP & Accommodation" },
+        { op: "replace", path: "sections.cta.title", value: "Xác nhận tham dự trước ngày RSVP nhé" },
+        { op: "replace", path: "sections.cta.description", value: `Bạn giúp tụi mình xác nhận tham dự trước ${content.rsvp.deadline} để chuẩn bị chỗ ngồi, lưu trú và các hỗ trợ cần thiết ở Đà Lạt thật chu đáo.` },
+        { op: "replace", path: "sections.cta.buttonLabel", value: "Xác nhận tham dự ngay" },
+      ],
+    };
+  }
+
+  if (key === "softer-animation") {
+    return {
+      summary: "Giảm motion để trang dịu hơn và ít lặp lại hơn.",
+      patch: [
+        { op: "replace", path: "appearance.mediaLayers.hero.0.animation", value: "fade" },
+        { op: "replace", path: "theme.animationEnabled", value: true },
+      ],
+    };
+  }
+
+  if (key === "richer-venue") {
+    return {
+      summary: "Làm venue section giàu bối cảnh Đà Lạt và hữu ích hơn cho khách.",
+      patch: [
+        { op: "replace", path: "sections.venue.description", value: `Không gian ${content.venue.name} gần ${content.venue.location}, đủ riêng tư để buổi tối của tụi mình có cảm giác ấm áp giữa khí trời Đà Lạt.` },
+        { op: "replace", path: "sections.itinerary.description", value: "Từ welcome drink đến after party, buổi tối được sắp nhịp nhẹ nhàng để bạn có thời gian check-in, chụp ảnh, dùng tiệc và tận hưởng Đà Lạt." },
+        { op: "replace", path: "appearance.backgrounds.venue", value: "accentGradient" },
+      ],
+    };
+  }
+
+  if (key === "improve-mobile-crop") {
+    return {
+      summary: "Đề xuất crop hero mobile an toàn hơn cho mặt người và text overlay.",
+      patch: [
+        { op: "replace", path: "appearance.mediaLayers.hero.0.scale.mobile", value: 1.08 },
+        { op: "replace", path: "appearance.mediaLayers.hero.0.objectPosition.mobile", value: "center top" },
+      ],
+    };
+  }
+
+  if (key === "vietnamese-english-balance") {
+    return {
+      summary: "Cân lại tiếng Việt làm chính, English label giữ vai trò editorial.",
+      patch: [
+        { op: "replace", path: "sections.hero.eyebrow", value: "Wedding Celebration" },
+        { op: "replace", path: "sections.itinerary.eyebrow", value: "Wedding Reception" },
+        { op: "replace", path: "sections.guestNotes.title", value: "Một vài lưu ý cho buổi tối" },
+        { op: "replace", path: "sections.cta.buttonLabel", value: "Điền RSVP" },
+      ],
+    };
+  }
+
+  return {
+    summary: "Rút ngắn lời mời, giữ sự ấm áp và dễ đọc trên mobile.",
+    patch: [
+      { op: "replace", path: "invitation.message", value: `Tụi mình rất vui được mời bạn đến chung vui trong buổi tiệc cưới thân mật tại ${content.venue.name}, giữa không khí Đà Lạt ấm áp và gần gũi.` },
+      { op: "replace", path: "sections.guestNotes.description", value: "Một vài ghi chú nhỏ để bạn chuẩn bị thoải mái cho buổi tối ngoài trời ở Đà Lạt." },
+      { op: "replace", path: "sections.cta.description", value: "Hãy xác nhận tham dự để tụi mình chuẩn bị chỗ ngồi và hỗ trợ lưu trú chu đáo hơn." },
+    ],
+  };
+}
+
+export async function POST(request: Request) {
+  const body = await request.json() as RequestBody;
+  const option = aiTweakOptions.find((item) => item.key === body.tweak);
+
+  if (!option) {
+    return NextResponse.json({ error: "Unsupported tweak" }, { status: 400 });
+  }
+
+  const { summary, patch } = patchFor(body.tweak, body.content);
+  const suggestion: AiTweakSuggestion = {
+    id: crypto.randomUUID(),
+    key: body.tweak,
+    label: optionLabel(body.tweak),
+    summary,
+    patch,
+    createdAt: new Date().toISOString(),
+  };
+
+  return NextResponse.json({ suggestion });
+}

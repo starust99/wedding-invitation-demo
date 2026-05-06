@@ -1,5 +1,6 @@
 import { weddingConfig } from "@/config/wedding.config";
 import { themePresets, type ThemeKey } from "@/config/theme-presets";
+import type { AiTweakSuggestion } from "@/lib/ai-tweak-schema";
 
 type Editable<T> = T extends string
   ? string
@@ -13,24 +14,37 @@ type Editable<T> = T extends string
           ? { -readonly [K in keyof T]: Editable<T[K]> }
           : T;
 
-export type WeddingConfig = Editable<typeof weddingConfig>;
+type WeddingConfigBase = Editable<typeof weddingConfig>;
+
+export type WeddingConfig = Omit<WeddingConfigBase, "project"> & {
+  project: Omit<WeddingConfigBase["project"], "ai"> & {
+    ai: {
+      tweakHistory: AiTweakSuggestion[];
+    };
+  };
+};
 
 export type SiteSettings = {
+  schemaVersion: number;
   content: WeddingConfig;
   themeKey: ThemeKey;
+  assetBucket?: string;
   publishedAt?: string;
 };
 
-type SettingsInput = Omit<SiteSettings, "content"> & {
+type SettingsInput = Partial<Omit<SiteSettings, "content">> & {
   content?: Partial<WeddingConfig>;
 };
 
 export const draftStorageKey = "wedding-demo-draft-settings";
 export const publishedStorageKey = "wedding-demo-published-settings";
+export const settingsSchemaVersion = 2;
 
 export const defaultSettings: SiteSettings = {
+  schemaVersion: settingsSchemaVersion,
   content: structuredClone(weddingConfig) as unknown as WeddingConfig,
   themeKey: "rose-quartz-serenity",
+  assetBucket: "wedding-assets",
 };
 
 function mergeDefaults<T>(defaults: T, input: unknown): T {
@@ -119,8 +133,10 @@ export function normalizeSettings(settings: SettingsInput | null): SiteSettings 
 
   return {
     ...settings,
+    schemaVersion: settingsSchemaVersion,
     content: normalizeMediaLayers(content),
     themeKey: settings.themeKey ?? defaultSettings.themeKey,
+    assetBucket: settings.assetBucket ?? defaultSettings.assetBucket,
   };
 }
 
@@ -148,8 +164,41 @@ export function readSettings(key: string): SiteSettings | null {
 }
 
 export function writeSettings(key: string, settings: SiteSettings) {
-  window.localStorage.setItem(key, JSON.stringify(settings));
-  window.dispatchEvent(new Event("wedding-settings-updated"));
+  const serialized = JSON.stringify(settings);
+
+  try {
+    window.localStorage.setItem(key, serialized);
+    window.dispatchEvent(new Event("wedding-settings-updated"));
+    return true;
+  } catch (error) {
+    const isQuotaError = error instanceof DOMException && (
+      error.name === "QuotaExceededError" ||
+      error.name === "NS_ERROR_DOM_QUOTA_REACHED" ||
+      error.code === 22 ||
+      error.code === 1014
+    );
+
+    if (isQuotaError) {
+      for (const storageKey of [draftStorageKey, publishedStorageKey, "wedding-demo-site-versions"]) {
+        if (storageKey === key) continue;
+        const value = window.localStorage.getItem(storageKey);
+        if (value?.includes("data:image/")) window.localStorage.removeItem(storageKey);
+      }
+
+      try {
+        window.localStorage.removeItem(key);
+        window.localStorage.setItem(key, serialized);
+        window.dispatchEvent(new Event("wedding-settings-updated"));
+        return true;
+      } catch (retryError) {
+        console.warn("Cannot write wedding settings to localStorage.", retryError);
+        return false;
+      }
+    }
+
+    console.warn("Cannot write wedding settings to localStorage.", error);
+    return false;
+  }
 }
 
 export function getPublishedSettings(): SiteSettings {

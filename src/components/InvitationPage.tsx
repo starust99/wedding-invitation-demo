@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { BackgroundMediaLayers } from "@/components/BackgroundMediaLayer";
@@ -120,6 +121,31 @@ function formatDateForCover(dateLabel: string) {
   return `${match[1]} . ${match[2]} . ${match[3].slice(2)}`;
 }
 
+function getWeddingTime(date: string) {
+  const parsed = new Date(`${date}T00:00:00+07:00`).getTime();
+  return Number.isFinite(parsed) ? parsed : Date.now();
+}
+
+function getCountdownParts(targetTime: number) {
+  const distance = Math.max(0, targetTime - Date.now());
+  const totalSeconds = Math.floor(distance / 1000);
+  const days = Math.floor(totalSeconds / 86400);
+  const hours = Math.floor((totalSeconds % 86400) / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const seconds = totalSeconds % 60;
+
+  return { days, hours, minutes, seconds, isComplete: distance === 0 };
+}
+
+function CountdownUnit({ value, label }: { value: number; label: string }) {
+  return (
+    <div className="rounded-2xl border border-white/28 bg-white/14 px-2.5 py-3 text-center shadow-[0_18px_45px_rgba(0,0,0,0.12)] backdrop-blur-md sm:px-4">
+      <span className="block font-serif text-2xl leading-none text-white sm:text-4xl">{String(value).padStart(2, "0")}</span>
+      <span className="mt-2 block text-[0.52rem] font-bold uppercase tracking-[0.18em] text-white/68 sm:text-[0.6rem]">{label}</span>
+    </div>
+  );
+}
+
 export function InvitationPage({ config }: { config: WeddingConfig }) {
   const reduceMotion = useReducedMotion();
   const colors = config.theme.colors;
@@ -128,6 +154,18 @@ export function InvitationPage({ config }: { config: WeddingConfig }) {
   const monogram = `${config.couple.groom[0] ?? "N"}${config.couple.bride[0] ?? "P"}`.toUpperCase();
   const motionInitial = reduceMotion ? false : "hidden";
   const itineraryTimes = [config.event.welcomeTime, config.event.ceremonyTime, config.event.dinnerTime, config.event.afterPartyTime];
+  const weddingTime = useMemo(() => getWeddingTime(config.couple.date), [config.couple.date]);
+  const [countdown, setCountdown] = useState(() => getCountdownParts(weddingTime));
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => setCountdown(getCountdownParts(weddingTime)), 0);
+    const interval = window.setInterval(() => setCountdown(getCountdownParts(weddingTime)), 1000);
+
+    return () => {
+      window.clearTimeout(timer);
+      window.clearInterval(interval);
+    };
+  }, [weddingTime]);
 
   return (
     <main className="min-h-screen overflow-hidden" style={{ ...backgroundStyle(backgrounds.page, colors), color: deepGreen }}>
@@ -152,6 +190,15 @@ export function InvitationPage({ config }: { config: WeddingConfig }) {
           <motion.div variants={motionScenes.hero.divider} transition={premiumTransition} className="mx-auto mt-7 h-px w-36 origin-center bg-[#D4AF37]" />
           <motion.p variants={motionScenes.hero.detail} transition={premiumTransition} className="mt-7 text-sm font-bold uppercase tracking-[0.46em] text-white/88 sm:text-base">{formatDateForCover(config.event.dateLabel)}</motion.p>
           <motion.p variants={motionScenes.hero.detail} transition={premiumTransition} className="mx-auto mt-5 max-w-md text-sm leading-7 text-white/78">{hydrateTemplate(sections.hero.locationLine, config)}</motion.p>
+          <motion.div variants={motionScenes.hero.detail} transition={premiumTransition} className="mx-auto mt-7 max-w-[23rem]" aria-label={countdown.isComplete ? "Ngày cưới đã đến" : "Đếm ngược đến ngày cưới"}>
+            <p className="text-[0.62rem] font-bold uppercase tracking-[0.32em] text-white/72">{countdown.isComplete ? "Ngày hẹn đã đến" : "Đếm ngược đến ngày cưới"}</p>
+            <div className="mt-3 grid grid-cols-4 gap-2 sm:gap-3">
+              <CountdownUnit value={countdown.days} label="Ngày" />
+              <CountdownUnit value={countdown.hours} label="Giờ" />
+              <CountdownUnit value={countdown.minutes} label="Phút" />
+              <CountdownUnit value={countdown.seconds} label="Giây" />
+            </div>
+          </motion.div>
         </motion.div>
 
         {sections.hero.showScrollCue && !reduceMotion ? (
