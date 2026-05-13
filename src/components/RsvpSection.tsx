@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
+import { HeartHandshake } from "lucide-react";
 import { SectionMediaLayers } from "@/components/SectionMediaLayers";
 import type { WeddingConfig } from "@/lib/site-settings";
 import { buildInvitationCopy, type GuestIdentity } from "@/lib/guest-personalization";
@@ -51,7 +52,10 @@ export function RsvpSection({
                 className="mt-8 inline-flex h-[4.2rem] items-center justify-center transition hover:-translate-y-0.5 save-date-watercolor-btn"
               >
                 <img src="/assets/wedding/ui/btn-rsvp-section.png" alt="" className="save-date-btn-bg" />
-                <span className="save-date-btn-label uppercase">Gửi hồi đáp</span>
+                <span className="save-date-btn-label">
+                  <HeartHandshake aria-hidden="true" size={18} />
+                  <span>Gửi hồi đáp</span>
+                </span>
               </button>
           </div>
         </div>

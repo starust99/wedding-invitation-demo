@@ -1,5 +1,6 @@
 "use client";
 
+import { HeartHandshake, MapPin } from "lucide-react";
 import { SectionMediaLayers } from "@/components/SectionMediaLayers";
 import type { WeddingConfig } from "@/lib/site-settings";
 import { buildInvitationCopy, type GuestIdentity } from "@/lib/guest-personalization";
@@ -61,7 +62,10 @@ export function ThankYouSection({
                     className="inline-flex h-14 sm:h-16 lg:h-20 text-base sm:text-lg items-center justify-center transition hover:-translate-y-0.5 save-date-watercolor-btn"
                   >
                     <img src="/assets/wedding/ui/btn-view-rsvp.png" alt="" className="save-date-btn-bg" />
-                    <span className="save-date-btn-label uppercase">Xem hồi đáp</span>
+                    <span className="save-date-btn-label">
+                      <HeartHandshake aria-hidden="true" size={18} />
+                      <span>Xem hồi đáp</span>
+                    </span>
                   </button>
                   {rsvpAttending !== "no" ? (
                     <a
@@ -72,7 +76,10 @@ export function ThankYouSection({
                       className="inline-flex h-14 sm:h-16 lg:h-20 text-base sm:text-lg items-center justify-center transition hover:-translate-y-0.5 save-date-watercolor-btn"
                     >
                       <img src="/assets/wedding/ui/btn-thankyou-directions.png" alt="" className="save-date-btn-bg" />
-                      <span className="save-date-btn-label uppercase">Chỉ đường</span>
+                      <span className="save-date-btn-label">
+                      <MapPin aria-hidden="true" size={18} />
+                      <span>Chỉ đường</span>
+                    </span>
                     </a>
                   ) : null}
                 </div>

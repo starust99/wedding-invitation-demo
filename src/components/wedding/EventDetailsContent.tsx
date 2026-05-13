@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { Navigation } from "lucide-react";
+import { MapPin } from "lucide-react";
 import type { ReactNode } from "react";
 import { motion } from "framer-motion";
 import type { Variants } from "framer-motion";
@@ -169,10 +169,10 @@ export function EventDetailsContent({
             {venueLocation ? <p suppressHydrationWarning className="details-map-schedule">{venueLocation}</p> : null}
             {content.mapText ? <p suppressHydrationWarning className="details-map-note">{content.mapText}</p> : null}
             {mapUrl ? (
-              <a suppressHydrationWarning href={mapUrl} target="_blank" rel="noreferrer" className="details-map-link save-date-watercolor-btn">
+              <a suppressHydrationWarning href={mapUrl} target="_blank" rel="noreferrer" className="inline-flex h-[3.5rem] mt-2 items-center justify-center transition hover:-translate-y-0.5 save-date-watercolor-btn">
                 <img src="/assets/wedding/ui/btn-directions.png" alt="" className="save-date-btn-bg" />
                 <span className="save-date-btn-label">
-                  <Navigation aria-hidden="true" size={16} />
+                  <MapPin aria-hidden="true" size={18} />
                   <span>Chỉ đường</span>
                 </span>
               </a>
