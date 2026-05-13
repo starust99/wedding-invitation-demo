@@ -324,7 +324,7 @@ function recipientLineExpression(rowIndex: number, scopeExpression = inviteScope
 function coupleInviteRecipientExpression(rowIndex: number) {
   const guestCell = `$A${rowIndex}`;
   const hostRelationshipCell = `$B${rowIndex}`;
-  return `IF(OR(${equalsAny(hostRelationshipCell, ["anh chị"])}),${excelText("vợ chồng anh chị")},IF(${hostRelationshipCell}=${excelText("anh")},${excelText("anh cùng vợ")},IF(${hostRelationshipCell}=${excelText("chị")},${excelText("chị cùng chồng")},IF(OR(${equalsAny(hostRelationshipCell, ["bạn", "bạn thân", "đồng nghiệp"])}),${excelText("vợ chồng bạn")},IF(OR(${equalsAny(hostRelationshipCell, ["em", "cháu"])}),${excelText("hai em")},IF(${hostRelationshipCell}=${excelText("bác")},${guestCell}&${excelText(" cùng gia đình")},IF(${hostRelationshipCell}=${excelText("chú")},${guestCell}&${excelText(" cùng cô")},IF(${hostRelationshipCell}=${excelText("cô")},${guestCell}&${excelText(" cùng chú")},IF(${hostRelationshipCell}=${excelText("dì")},${guestCell}&${excelText(" cùng dượng")},IF(${hostRelationshipCell}=${excelText("cậu")},${guestCell}&${excelText(" cùng mợ")},IF(${hostRelationshipCell}=${excelText("mợ")},${guestCell}&${excelText(" cùng cậu")},IF(${hostRelationshipCell}=${excelText("thím")},${guestCell}&${excelText(" cùng chú")},IF(${hostRelationshipCell}=${excelText("dượng")},${guestCell}&${excelText(" cùng dì")},IF(${hostRelationshipCell}=${excelText("ông")},${guestCell}&${excelText(" cùng bà")},IF(${hostRelationshipCell}=${excelText("bà")},${guestCell}&${excelText(" cùng ông")},${guestCell}&${excelText(" cùng gia đình")})))))))))))))))`;
+  return `IF(OR(${equalsAny(hostRelationshipCell, ["anh chị"])}),${excelText("Vợ chồng anh chị")},IF(${hostRelationshipCell}=${excelText("anh")},${excelText("Anh cùng vợ")},IF(${hostRelationshipCell}=${excelText("chị")},${excelText("Chị cùng chồng")},IF(OR(${equalsAny(hostRelationshipCell, ["bạn", "bạn thân", "đồng nghiệp"])}),${excelText("Vợ chồng bạn")},IF(OR(${equalsAny(hostRelationshipCell, ["em", "cháu"])}),${excelText("Hai em")},IF(${hostRelationshipCell}=${excelText("bác")},${guestCell}&${excelText(" cùng gia đình")},IF(${hostRelationshipCell}=${excelText("chú")},${guestCell}&${excelText(" cùng cô")},IF(${hostRelationshipCell}=${excelText("cô")},${guestCell}&${excelText(" cùng chú")},IF(${hostRelationshipCell}=${excelText("dì")},${guestCell}&${excelText(" cùng dượng")},IF(${hostRelationshipCell}=${excelText("cậu")},${guestCell}&${excelText(" cùng mợ")},IF(${hostRelationshipCell}=${excelText("mợ")},${guestCell}&${excelText(" cùng cậu")},IF(${hostRelationshipCell}=${excelText("thím")},${guestCell}&${excelText(" cùng chú")},IF(${hostRelationshipCell}=${excelText("dượng")},${guestCell}&${excelText(" cùng dì")},IF(${hostRelationshipCell}=${excelText("ông")},${guestCell}&${excelText(" cùng bà")},IF(${hostRelationshipCell}=${excelText("bà")},${guestCell}&${excelText(" cùng ông")},${guestCell}&${excelText(" cùng gia đình")})))))))))))))))`;
 }
 
 function coupleEnvelopeRecipientExpression(rowIndex: number) {
@@ -368,15 +368,15 @@ function insideInviteFormula(rowIndex: number, options: ReturnType<typeof resolv
   const invitedByCell = `$C${rowIndex}`;
   const hostPronounCell = `$D${rowIndex}`;
   const coupleReferenceCell = `$E${rowIndex}`;
-  const scopeExpression = inviteScopeExpression(rowIndex);
   const householdCell = `$G${rowIndex}`;
+  const nameAlreadyIncludesFamily = `OR(ISNUMBER(SEARCH(${excelText("gia đình")},LOWER(${guestCell}))),ISNUMBER(SEARCH(${excelText("cả nhà")},LOWER(${guestCell}))))`;
+  const familyScopeExpression = `IF(${nameAlreadyIncludesFamily},"",IF(${householdCell}=${excelText(householdModeLabels.family)},${excelText(" và gia đình")},""))`;
   const hostSubjectExpressionValue = hostSubjectExpression(rowIndex);
-  const recipientExpression = recipientLineExpression(rowIndex, scopeExpression);
+  const recipientExpression = recipientLineExpression(rowIndex, familyScopeExpression);
   const coupleInviteRecipientExpressionValue = coupleInviteRecipientExpression(rowIndex);
-  const coupleInviteRecipient = sentenceCaseFormula(coupleInviteRecipientExpressionValue);
   const coupleInviteOwner = `IF(${invitedByCell}=${excelText(invitedByLabels.parents)},${coupleReferenceCell}&${excelText(` ${options.coupleDisplayName}`)},${hostPronounCell})`;
   const isWarm = `OR(${equalsAny(hostRelationshipCell, ["bạn", "bạn thân", "đồng nghiệp", "em", "cháu"])})`;
-  const coupleInviteLine = `${excelText("Kính mời: ")}&${coupleInviteRecipient}&${excelText(" đến chung vui trong lễ cưới của ")}&${coupleInviteOwner}&${excelText(".")}`;
+  const coupleInviteLine = `${excelText("Kính mời: ")}&${coupleInviteRecipientExpressionValue}&${excelText(" đến chung vui trong lễ cưới của ")}&${coupleInviteOwner}&${excelText(".")}`;
   const normalInviteLine = `IF(${invitedByCell}=${excelText(invitedByLabels.parents)},${hostSubjectExpressionValue}&${excelText(" trân trọng kính mời ")}&${recipientExpression}&${excelText(" đến chung vui trong lễ cưới của ")}&${coupleReferenceCell}&${excelText(` ${options.coupleDisplayName}.`)},IF(${isWarm},${hostSubjectExpressionValue}&${excelText(" mời ")}&${recipientExpression}&${excelText(" đến chung vui trong lễ cưới của ")}&${hostPronounCell}&${excelText(".")},${hostSubjectExpressionValue}&${excelText(" trân trọng kính mời ")}&${recipientExpression}&${excelText(" đến chung vui trong lễ cưới của ")}&${hostPronounCell}&${excelText(".")}))`;
 
   return `IF(${guestCell}="","",IF(${householdCell}=${excelText(householdModeLabels.couple)},${coupleInviteLine},${normalInviteLine}))`;
