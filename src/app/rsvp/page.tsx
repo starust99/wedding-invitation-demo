@@ -187,7 +187,7 @@ function buildSubmissionCopy(attending: RSVPFormInput["attending"], inviteCopy: 
   if (attending === "no") {
     return {
       title: "Đã ghi nhận vắng mặt",
-      body: `${inviteCopy.rsvpReceivedLine}. Hẹn gặp ${inviteCopy.shortRecipientLabel} trong thời gian sớm nhất. Nếu lịch thay đổi, ${inviteCopy.shortRecipientLabel} có thể mở lại link này để cập nhật.`,
+      body: `${inviteCopy.rsvpReceivedLine}. Hẹn gặp ${inviteCopy.shortRecipientLabel} trong thời gian sớm nhất. Nếu lịch thay đổi, link này vẫn có thể cập nhật hồi đáp.`,
       showCalendar: false,
     };
   }

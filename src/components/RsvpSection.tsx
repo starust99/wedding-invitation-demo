@@ -4,7 +4,6 @@ import { useMemo } from "react";
 import { SectionMediaLayers } from "@/components/SectionMediaLayers";
 import type { WeddingConfig } from "@/lib/site-settings";
 import { buildInvitationCopy, type GuestIdentity } from "@/lib/guest-personalization";
-import { MagneticButton } from "@/components/ui/MagneticButton";
 import { usePageTransition } from "@/components/PageTransitionEffect";
 
 export function RsvpSection({
@@ -43,7 +42,7 @@ export function RsvpSection({
               {inviteCopy.greeting}
             </p>
             <p suppressHydrationWarning className="wedding-type-body mt-4 max-w-xl text-ink/68">
-              {inviteCopy.hostSubject} mong nhận được lời hồi đáp trước ngày {config.rsvp.deadline} để chuẩn bị đón tiếp chu đáo.
+              {inviteCopy.rsvpLead} trước ngày {config.rsvp.deadline}.
             </p>
 
               <button

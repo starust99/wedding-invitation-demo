@@ -7,6 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "check:guest-copy": "node scripts/check-guest-copy.mjs",
     "capture:browser": "node scripts/capture-browser-shots.mjs"
   },
   "dependencies": {
