@@ -210,6 +210,7 @@ export default function RSVPPage() {
   const [inviteeContext, setInviteeContext] = useState<Invitee | null>(null);
   const [inviteToken, setInviteToken] = useState("");
   const [submitError, setSubmitError] = useState("");
+  const [isHydratingGuest, setIsHydratingGuest] = useState(true);
   const { navigateWithTransition } = usePageTransition();
   const {
     control,
@@ -248,15 +249,22 @@ export default function RSVPPage() {
   const returnHref = inviteToken ? `/i/${encodeURIComponent(inviteToken)}` : "/";
   const inviteCopy = useMemo(() => buildInvitationCopy(inviteeContext ?? guestIdentity), [guestIdentity, inviteeContext]);
   const submissionCopy = useMemo(() => buildSubmissionCopy(attending, inviteCopy), [attending, inviteCopy]);
-  const displayedInsideInviteLine = inviteeContext?.insideInviteLine?.includes("vợ/chồng")
-    ? inviteCopy.insideInviteLine
-    : inviteeContext?.insideInviteLine ?? inviteCopy.insideInviteLine;
+  const displayedInsideInviteLine = isHydratingGuest
+    ? "Đang tải lời mời..."
+    : inviteeContext?.insideInviteLine?.includes("vợ/chồng")
+      ? inviteCopy.insideInviteLine
+      : inviteeContext?.insideInviteLine ?? inviteCopy.insideInviteLine;
+  const displayedClosingLine = isHydratingGuest ? "Thông tin riêng của khách mời sẽ hiện trong giây lát." : inviteCopy.closingLine;
   const lodgingGuests = normalizeLodgingGuests((watchedLodgingGuests ?? []) as Array<Partial<LodgingGuestForm> | undefined>);
   const terracottaNote = buildTerracottaNote(lodgingGuests);
   const canRegisterStay = attending !== "no";
 
   useEffect(() => {
     let cancelled = false;
+
+    function finishHydration() {
+      if (!cancelled) setIsHydratingGuest(false);
+    }
 
     function applyIdentity(identity: GuestIdentity) {
       if (cancelled) return;
@@ -309,6 +317,7 @@ export default function RSVPPage() {
         const localInvitee = readLocalInvitees().find((invitee) => invitee.token === token);
         if (localInvitee) {
           applyInvite(localInvitee);
+          finishHydration();
           return;
         }
 
@@ -318,6 +327,7 @@ export default function RSVPPage() {
             const result = await response.json() as { invitee?: Invitee };
             if (result.invitee && !cancelled) {
               applyInvite(result.invitee);
+              finishHydration();
               return;
             }
           }
@@ -328,6 +338,7 @@ export default function RSVPPage() {
 
       const identity = resolveGuestIdentity(window.location.search);
       applyIdentity(identity);
+      finishHydration();
     }
 
     const guestTimer = window.setTimeout(() => {
@@ -584,7 +595,9 @@ export default function RSVPPage() {
                     ? "Nếu cần gia đình sắp xếp phòng tại Terracotta, chọn đăng ký hỗ trợ lưu trú."
                     : currentStep.key === "message"
                       ? "Nếu muốn để lại đôi dòng nhắn gửi, đây là chỗ phù hợp."
-                      : `Chọn đúng phản hồi để gia đình ghi nhận ý của ${inviteCopy.recipientPronoun}.`}
+	                      : isHydratingGuest
+	                        ? "Đang tải thông tin lời mời riêng của khách."
+	                        : `Chọn đúng phản hồi để gia đình ghi nhận ý của ${inviteCopy.recipientPronoun}.`}
               </div>
             </aside>
 
@@ -611,7 +624,7 @@ export default function RSVPPage() {
                         <p className="wedding-type-card-title text-[#252934]">
                           {displayedInsideInviteLine}
                         </p>
-                        <p className="wedding-type-body mt-3 text-[#252934]/58">{inviteCopy.closingLine}</p>
+	                        <p className="wedding-type-body mt-3 text-[#252934]/58">{displayedClosingLine}</p>
                       </div>
 
                       <div className="grid gap-4">
@@ -879,14 +892,15 @@ export default function RSVPPage() {
                 </button>
 
                 {stepIndex < visibleSteps.length - 1 ? (
-                  <motion.button
-                    type="button"
-	                    className="light-sweep wedding-type-button inline-flex min-h-12 items-center justify-center rounded-full bg-rose-quartz px-7 text-[#252934] shadow-[0_16px_48px_rgba(146,168,209,0.22)] ring-1 ring-rose-quartz/70"
-	                    whileHover={{ scale: 1.03 }}
-	                    whileTap={{ scale: 0.97 }}
-	                    onClick={() => void goNextStep()}
-	                  >
-                    Tiếp tục <ChevronRight className="ml-2 h-4 w-4" />
+	                  <motion.button
+	                    type="button"
+		                    className="light-sweep wedding-type-button inline-flex min-h-12 items-center justify-center rounded-full bg-rose-quartz px-7 text-[#252934] shadow-[0_16px_48px_rgba(146,168,209,0.22)] ring-1 ring-rose-quartz/70 disabled:opacity-60"
+		                    disabled={isHydratingGuest}
+		                    whileHover={{ scale: 1.03 }}
+		                    whileTap={{ scale: 0.97 }}
+		                    onClick={() => void goNextStep()}
+		                  >
+	                    {isHydratingGuest ? "Đang tải..." : "Tiếp tục"} <ChevronRight className="ml-2 h-4 w-4" />
                   </motion.button>
                   ) : (
                     <motion.button
