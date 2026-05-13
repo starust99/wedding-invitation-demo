@@ -134,7 +134,6 @@ function normalizeLodgingGuests(guests: Array<Partial<LodgingGuestForm> | undefi
 function buildTerracottaNote(guests: LodgingGuest[]) {
   const childCount = countLodgingChildren(guests);
 
-  if (guests.length === 0) return "Chỉ ghi người thật sự ở lại Terracotta.";
   if (childCount === 0) return "";
   return `${childCount} bé dưới 11 tuổi đã được ghi nhận.`;
 }
@@ -303,7 +302,7 @@ export default function RSVPPage() {
       replace(response?.lodgingGuests?.length
         ? response.lodgingGuests
         : response?.accommodationNeeded
-          ? [createLodgingGuest(response.name || invitee.displayLabel)]
+          ? [createLodgingGuest("")]
           : []);
     }
 
@@ -360,7 +359,7 @@ export default function RSVPPage() {
     }
 
     if ((getValues("lodgingGuests") ?? []).length === 0) {
-      append(createLodgingGuest(getValues("name") || inviteeContext?.displayLabel || ""));
+      append(createLodgingGuest(""));
     }
   }
 
@@ -699,17 +698,14 @@ export default function RSVPPage() {
 
                       {accommodationNeeded ? (
                         <div className="grid gap-4 rounded-[1.4rem] border border-serenity/18 bg-white/44 p-5 text-center">
-                          <div className="rounded-[1.2rem] border border-serenity/14 bg-white/66 p-4">
-                            <p className="section-kicker-dark wedding-type-kicker text-serenity">Trẻ em</p>
-                            <p className="wedding-type-body mt-3 text-[#252934]/62">Chỉ điền khi có bé ở cùng phòng. Gia đình sẽ sắp xếp cho phù hợp.</p>
-                            <ul className="wedding-type-body mt-4 grid gap-2 text-[#252934]/62">
-                              {terracottaPolicy.map((line) => (
-                                <li key={line} className="grid justify-items-center gap-2">
-                                  <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-serenity" />
-                                  <span>{line}</span>
-                                </li>
-                              ))}
-                            </ul>
+                          <div className="rounded-[1.2rem] bg-serenity/10 px-5 py-4 text-left text-sm text-[#252934]/75">
+                            <p className="font-bold text-[#252934]">Lưu ý khi có trẻ em đi cùng:</p>
+                            <p className="mt-1.5 leading-relaxed">
+                              Dưới 5 tuổi: Chỉ cần ghi họ tên.<br />
+                              Từ 5 - dưới 11 tuổi: Ghi họ tên và độ tuổi.<br />
+                              Từ 11 tuổi trở lên: Khai như người lớn.<br />
+                              (Nếu cần nôi cho em bé, vui lòng ghi ở bước tiếp theo).
+                            </p>
                           </div>
 
                           <div className="grid justify-items-center gap-3">
@@ -736,53 +732,47 @@ export default function RSVPPage() {
                               const guestErrors = errors.lodgingGuests?.[index];
 
                               return (
-                                <div key={field.id} className="rounded-[1.2rem] border border-serenity/16 bg-white/62 p-4 text-center">
-                                  <div className="grid justify-items-center gap-3">
-                                    <p className="section-kicker-dark wedding-type-kicker text-[#252934]/40">Người ở lại {index + 1}</p>
+                                <div key={field.id} className="relative rounded-[1.4rem] border border-serenity/16 bg-white/60 p-4 pt-5 text-left shadow-sm">
+                                  <div className="mb-4 flex items-center justify-between">
+                                    <p className="section-kicker-dark wedding-type-kicker text-[#252934]/50">Người lưu trú {index + 1}</p>
                                     <button
                                       type="button"
                                       onClick={() => fields.length === 1 ? replace([createLodgingGuest("")]) : remove(index)}
-                                      className="rounded-full border border-serenity/18 bg-white/70 p-2 text-[#9B4E5C]"
+                                      className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-white text-[#9B4E5C] transition hover:bg-[#9B4E5C]/10"
                                       aria-label="Xóa người lưu trú"
                                     >
                                       <Trash2 className="h-4 w-4" />
                                     </button>
                                   </div>
-                                  <div className="mt-4 grid gap-4 sm:grid-cols-[1fr_0.86fr]">
-                                    <Field label="Họ tên" error={guestErrors?.fullName?.message}>
-                                      <input className={inputClass} placeholder="Họ tên trên giấy tờ" {...register(`lodgingGuests.${index}.fullName`)} />
+                                  <div className="grid gap-4 sm:grid-cols-[1fr_0.86fr]">
+                                    <Field label="Họ tên (đúng trên giấy tờ)" error={guestErrors?.fullName?.message}>
+                                      <input className={inputClass} placeholder="VD: Nguyễn Văn A" {...register(`lodgingGuests.${index}.fullName`)} />
                                     </Field>
                                     <Field label="Số giấy tờ tùy thân" error={guestErrors?.idNumber?.message}>
-                                      <input className={inputClass} placeholder={isChild ? "Bé chưa có thì để trống" : "Người lớn cần điền"} {...register(`lodgingGuests.${index}.idNumber`)} />
+                                      <input className={inputClass} placeholder={isChild ? "Bé chưa có thì để trống" : "CMND/CCCD/Passport"} {...register(`lodgingGuests.${index}.idNumber`)} />
                                     </Field>
                                   </div>
-                                  <div className="mt-4 grid gap-4 sm:grid-cols-[0.75fr_0.75fr_1fr] sm:items-end">
-                                    <label className="flex min-h-13 items-center justify-center gap-3 rounded-2xl border border-serenity/18 bg-white/54 px-4 text-center text-sm font-bold text-[#252934]/68">
-                                      <input type="checkbox" {...register(`lodgingGuests.${index}.isChild`)} />
-                                      Là trẻ em dưới 11 tuổi
+                                  <div className="mt-4 flex flex-wrap items-center gap-4">
+                                    <label className="flex h-[3.25rem] cursor-pointer items-center gap-3 rounded-2xl border border-serenity/18 bg-white/70 px-4 text-sm font-semibold text-[#252934] transition hover:bg-white">
+                                      <input type="checkbox" className="h-5 w-5 rounded text-serenity accent-serenity focus:ring-serenity/30" {...register(`lodgingGuests.${index}.isChild`)} />
+                                      Là trẻ em (dưới 11 tuổi)
                                     </label>
                                     {isChild ? (
-                                      <Field label="Tuổi của bé" error={guestErrors?.age?.message}>
-                                        <input
-                                          type="number"
-                                          min={0}
-                                          max={10}
-                                          className={inputClass}
-                                          {...register(`lodgingGuests.${index}.age`, {
-                                            setValueAs: (value) => value === "" ? undefined : Number(value),
-                                          })}
-                                        />
-                                      </Field>
-                                    ) : (
-                                      <div className="wedding-type-body rounded-2xl border border-serenity/14 bg-white/50 px-4 py-3 text-[#252934]/54">
-                                        Từ 11 tuổi trở lên khai như người lớn.
+                                      <div className="w-32">
+                                        <Field label="Tuổi của bé" error={guestErrors?.age?.message}>
+                                          <input
+                                            type="number"
+                                            min={0}
+                                            max={10}
+                                            className={inputClass}
+                                            placeholder="VD: 5"
+                                            {...register(`lodgingGuests.${index}.age`, {
+                                              setValueAs: (value) => value === "" ? undefined : Number(value),
+                                            })}
+                                          />
+                                        </Field>
                                       </div>
-                                    )}
-                                    <div className="wedding-type-body rounded-2xl border border-serenity/14 bg-white/50 px-4 py-3 text-[#252934]/54">
-                                      {watchedLodgingGuests?.[index]?.fullName
-                                        ? formatLodgingGuestLabel(normalizeLodgingGuests([watchedLodgingGuests[index]])[0] ?? createLodgingGuest(""))
-                                        : "Điền đủ họ tên để hiện trong phần xác nhận."}
-                                    </div>
+                                    ) : null}
                                   </div>
                                 </div>
                               );
