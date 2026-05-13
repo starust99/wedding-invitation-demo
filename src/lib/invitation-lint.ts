@@ -62,38 +62,38 @@ export function lintInvitation(config: WeddingConfig): InvitationIssue[] {
   const issues: InvitationIssue[] = [];
 
   if (isBlank(config.couple.bride) || isBlank(config.couple.groom) || isBlank(config.couple.displayName)) {
-    addIssue(issues, "P0_BLOCKER", "missing-couple-names", "Thiếu tên cô dâu/chú rể", "Điền đủ bride, groom và display name trước khi publish.", "Couple & Hero");
+    addIssue(issues, "P0_BLOCKER", "missing-couple-names", "Thiếu tên cô dâu/chú rể", "Điền đủ tên cô dâu, chú rể và tên hiển thị trước khi xuất bản.", "Cặp đôi & phần đầu thiệp");
   }
 
   if (hasPlaceholder(config.couple.bride) || hasPlaceholder(config.couple.groom) || hasPlaceholder(config.couple.displayName)) {
-    addIssue(issues, "P0_BLOCKER", "placeholder-couple-names", "Tên cô dâu/chú rể vẫn là placeholder", "Public invitation không nên publish khi còn Cô Dâu/Chú Rể mặc định.", "Couple & Hero");
+    addIssue(issues, "P0_BLOCKER", "placeholder-couple-names", "Tên cô dâu/chú rể vẫn là tên giữ chỗ", "Thiệp công khai không nên xuất bản khi còn tên mặc định.", "Cặp đôi & phần đầu thiệp");
   }
 
   if (isBlank(config.event.dateLabel) || isBlank(config.venue.name) || isBlank(config.venue.address)) {
-    addIssue(issues, "P0_BLOCKER", "missing-event-venue", "Thiếu ngày giờ hoặc địa điểm", "Ngày hiển thị, venue và địa chỉ cần đầy đủ để khách không bị nhầm.", "Venue & Time");
+    addIssue(issues, "P0_BLOCKER", "missing-event-venue", "Thiếu ngày cưới hoặc địa điểm", "Ngày hiển thị, địa điểm và địa chỉ cần đầy đủ để khách không bị nhầm.", "Địa điểm & giờ");
   }
 
   if (!isValidHttpUrl(config.venue.mapUrl)) {
-    addIssue(issues, "P1_WARNING", "invalid-map-url", "Google Maps URL chưa hợp lệ", "Map URL nên là link http/https để nút chỉ đường hoạt động trên public page.", "Venue & Time");
+    addIssue(issues, "P1_WARNING", "invalid-map-url", "Link Google Maps chưa hợp lệ", "Link bản đồ nên là http/https để nút chỉ đường hoạt động trên trang công khai.", "Địa điểm & giờ");
   }
 
   if (isBlank(config.rsvp.deadline) && isBlank(config.accommodation.rsvpDeadline)) {
-    addIssue(issues, "P1_WARNING", "missing-rsvp-deadline", "Thiếu deadline RSVP", "Nên có deadline rõ để khách xác nhận và báo lưu trú đúng hạn.", "Notes & Gallery");
+    addIssue(issues, "P1_WARNING", "missing-rsvp-deadline", "Thiếu hạn hồi đáp", "Nên có hạn rõ để khách xác nhận và báo lưu trú đúng lúc.", "Lưu ý & ảnh");
   }
 
   const weddingDate = parseVietnameseDate(config.event.dateLabel) ?? parseVietnameseDate(config.couple.date);
   const rsvpDate = parseVietnameseDate(config.rsvp.deadline) ?? parseVietnameseDate(config.accommodation.rsvpDeadline);
   if (weddingDate && rsvpDate && rsvpDate > weddingDate) {
-    addIssue(issues, "P0_BLOCKER", "rsvp-after-wedding", "Deadline RSVP sau ngày cưới", "Deadline RSVP cần trước ngày cưới để còn chuẩn bị chỗ ngồi/lưu trú.", "Notes & Gallery");
+    addIssue(issues, "P0_BLOCKER", "rsvp-after-wedding", "Hạn hồi đáp sau ngày cưới", "Hạn hồi đáp cần trước ngày cưới để còn chuẩn bị chỗ ngồi và lưu trú.", "Lưu ý & ảnh");
   }
 
   const eventTimes = [config.event.welcomeTime, config.event.ceremonyTime, config.event.dinnerTime, config.event.afterPartyTime].map(timeToMinutes);
   if (eventTimes.some((time) => time === null)) {
-    addIssue(issues, "P1_WARNING", "invalid-event-times", "Một số mốc giờ chưa đúng định dạng", "Dùng định dạng HH:mm để timeline và venue/time nhất quán.", "Venue & Time");
+    addIssue(issues, "P1_WARNING", "invalid-event-times", "Một số mốc giờ chưa đúng định dạng", "Dùng định dạng HH:mm để timeline và phần thông tin giờ nhất quán.", "Địa điểm & giờ");
   } else {
     for (let index = 1; index < eventTimes.length; index += 1) {
       if ((eventTimes[index] as number) < (eventTimes[index - 1] as number)) {
-        addIssue(issues, "P1_WARNING", "event-times-out-of-order", "Mốc giờ sự kiện chưa theo thứ tự", "Đón khách, ceremony, dinner và after party nên tăng dần theo thời gian.", "Venue & Time");
+        addIssue(issues, "P1_WARNING", "event-times-out-of-order", "Mốc giờ sự kiện chưa theo thứ tự", "Đón khách, nghi thức, dùng tiệc và phần giao lưu nên tăng dần theo thời gian.", "Địa điểm & giờ");
         break;
       }
     }
@@ -101,7 +101,7 @@ export function lintInvitation(config: WeddingConfig): InvitationIssue[] {
 
   config.timeline.forEach((item, index) => {
     if (timeToMinutes(item.time) === null) {
-      addIssue(issues, "P1_WARNING", `timeline-time-${index}`, "Timeline có giờ chưa đúng định dạng", `Mốc ${index + 1} nên dùng HH:mm để dễ đối chiếu với venue/time.`, "Timeline");
+      addIssue(issues, "P1_WARNING", `timeline-time-${index}`, "Lịch trình có giờ chưa đúng định dạng", `Mốc ${index + 1} nên dùng HH:mm để dễ đối chiếu với địa điểm và thời gian.`, "Lịch trình");
     }
   });
 
@@ -111,28 +111,28 @@ export function lintInvitation(config: WeddingConfig): InvitationIssue[] {
 
   allLayers.forEach(({ section, index, layer }) => {
     if (layer.type === "image" && !isBlank(layer.src) && isBlank(layer.alt)) {
-      addIssue(issues, "P1_WARNING", `missing-alt-${section}-${index}`, "Thiếu alt text cho ảnh", `Layer ${index + 1} ở ${section} cần alt text để accessibility tốt hơn.`, "Section Background Media");
+      addIssue(issues, "P1_WARNING", `missing-alt-${section}-${index}`, "Thiếu alt text cho ảnh", `Lớp ${index + 1} ở ${section} cần alt text để hỗ trợ đọc màn hình tốt hơn.`, "Nền ảnh và video");
     }
     if (layer.type === "video" && !layer.mobileSrc) {
-      addIssue(issues, "P1_WARNING", `video-no-mobile-${section}-${index}`, "Video layer thiếu mobile fallback", `Layer video ${index + 1} ở ${section} nên có mobile source/crop riêng.`, "Section Background Media");
+      addIssue(issues, "P1_WARNING", `video-no-mobile-${section}-${index}`, "Video layer thiếu bản di động", `Lớp video ${index + 1} ở ${section} nên có nguồn hoặc crop riêng cho di động.`, "Nền ảnh và video");
     }
     if (typeof layer.src === "string" && layer.src.startsWith("data:video")) {
-      addIssue(issues, "P1_WARNING", `large-data-video-${section}-${index}`, "Video upload đang nằm trong settings", "Data URL video rất dễ làm draft/publish nặng hoặc vượt giới hạn storage.", "Section Background Media");
+      addIssue(issues, "P1_WARNING", `large-data-video-${section}-${index}`, "Video đang nằm trong settings", "Video dạng data URL rất dễ làm bản nháp hoặc bản xuất bản nặng và vượt giới hạn lưu trữ.", "Nền ảnh và video");
     }
   });
 
   const animatedVideos = allLayers.filter(({ layer }) => layer.type === "video" && layer.animation !== "none").length;
   if (animatedVideos > 2) {
-    addIssue(issues, "P2_POLISH", "too-many-animated-videos", "Nhiều video layer đang animate cùng lúc", "Giữ tối đa 1-2 video animate để trang vẫn premium và nhẹ.", "Section Background Media");
+    addIssue(issues, "P2_POLISH", "too-many-animated-videos", "Nhiều video đang chạy cùng lúc", "Giữ tối đa 1-2 video có chuyển động để trang vẫn sang và nhẹ.", "Nền ảnh và video");
   }
 
   const galleryPlaceholders = config.gallery.filter((src) => src.includes("gallery-") && src.endsWith(".svg")).length;
-  if (galleryPlaceholders >= config.gallery.length) {
-    addIssue(issues, "P2_POLISH", "placeholder-gallery", "Gallery vẫn dùng placeholder", "Trước khi gửi khách thật, nên thay bằng ảnh couple/venue thật để thiệp có cảm xúc hơn.", "Notes & Gallery");
+  if (config.gallery.length > 0 && galleryPlaceholders >= config.gallery.length) {
+    addIssue(issues, "P2_POLISH", "placeholder-gallery", "Album vẫn dùng ảnh giữ chỗ", "Trước khi gửi khách thật, nên thay bằng ảnh cô dâu chú rể hoặc địa điểm thật để thiệp có cảm xúc hơn.", "Lưu ý & ảnh");
   }
 
   if (config.theme.colors.background.toLowerCase() === config.theme.colors.text.toLowerCase()) {
-    addIssue(issues, "P0_BLOCKER", "zero-contrast", "Màu chữ trùng màu nền", "Text color và background color cần khác nhau để khách đọc được.", "Theme");
+    addIssue(issues, "P0_BLOCKER", "zero-contrast", "Màu chữ trùng màu nền", "Màu chữ và màu nền cần khác nhau để khách đọc được.", "Giao diện");
   }
 
   return issues;

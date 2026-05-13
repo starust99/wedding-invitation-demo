@@ -2,7 +2,7 @@ import type { WeddingDesignSystem } from "@/lib/design-system";
 
 export const editorialBlackTieDesignSystem = {
   key: "editorial-black-tie",
-  name: "Editorial Black Tie",
+  name: "Ngà than trang trọng",
   colorTokens: {
     background: "#F7F1E8",
     card: "#FFFDF8",
@@ -12,14 +12,14 @@ export const editorialBlackTieDesignSystem = {
     muted: "#7D756B",
     border: "#E4D8CA",
   },
-  typographyIntent: ["Large serif headlines with magazine restraint.", "Short copy blocks, strong alignment, and quiet labels.", "Avoid decorative typography beyond the serif/display pairing."],
-  spacingRhythmRules: ["Use negative space as luxury.", "Prefer fewer, larger cards.", "Keep line lengths narrow for invitation copy."],
-  sectionCompositionRules: ["Hero can be formal and minimal.", "Invitation section should read like a printed announcement.", "Gallery should feel curated, not scrapbook."],
-  motifFloralRules: ["Florals should be nearly absent or monochrome.", "Use thin lines, champagne details, and paper texture.", "No lush garden overload."],
-  motionRules: ["Motion should be almost invisible: fade, lift, slow reveal.", "Avoid looping decorative motion.", "Prioritize perceived sophistication over spectacle."],
-  imageTreatmentRules: ["Black-and-white or warm editorial crops work best.", "Use high contrast with careful readability.", "Keep image count restrained."],
-  copyVoice: ["Formal.", "Concise.", "Ceremonial without being stiff."],
-  dos: ["Cut excess copy.", "Use print-card preview often.", "Keep CTA elegant but clear."],
-  donts: ["Do not use playful tone.", "Do not stack many ornaments.", "Do not over-animate."],
+  typographyIntent: ["Tiêu đề serif lớn nhưng phải có tiết chế kiểu tạp chí.", "Khối chữ ngắn, canh hàng rõ và nhãn yên.", "Tránh trang trí chữ ngoài bộ serif/display."],
+  spacingRhythmRules: ["Dùng khoảng trống như một thứ xa xỉ.", "Ưu tiên ít card hơn nhưng lớn hơn.", "Giữ độ dài dòng hẹp cho lời mời."],
+  sectionCompositionRules: ["Hero có thể rất trang trọng và tối giản.", "Section lời mời nên giống một thông báo in.", "Gallery phải có cảm giác được chọn lọc, không phải scrapbook."],
+  motifFloralRules: ["Hoa lá nên gần như vắng mặt hoặc đơn sắc.", "Dùng đường mảnh, chi tiết champagne và texture giấy.", "Không quá rậm kiểu vườn."],
+  motionRules: ["Motion gần như vô hình: fade, lift, reveal chậm.", "Tránh motion trang trí lặp.", "Ưu tiên cảm giác tinh tế hơn là trình diễn."],
+  imageTreatmentRules: ["Crop đen trắng hoặc editorial ấm là hợp nhất.", "Dùng tương phản cao nhưng vẫn phải đọc tốt.", "Giữ số lượng ảnh vừa phải."],
+  copyVoice: ["Trang trọng.", "Ngắn gọn.", "Nghi lễ nhưng không cứng."],
+  dos: ["Cắt phần chữ thừa.", "Xem trước khung thiệp in thường xuyên.", "Giữ CTA thanh lịch nhưng rõ."],
+  donts: ["Không dùng giọng vui đùa.", "Không chồng nhiều trang trí.", "Không animate quá tay."],
   recommendedPreviewContexts: ["desktop", "print-card", "mobile"],
 } satisfies WeddingDesignSystem;

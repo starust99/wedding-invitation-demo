@@ -20,20 +20,20 @@ export function DiscoveryForm({ discovery, onChange }: { discovery: Discovery; o
     <div className="rounded-[1.5rem] border border-[#E8DDCC] bg-[#FFFDF8] p-5 shadow-sm">
       <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#6B7A5A]">Guided setup</p>
-          <h2 className="font-serif text-3xl">Wedding Discovery</h2>
+          <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#6B7A5A]">Thiết lập có hướng dẫn</p>
+          <h2 className="font-serif text-3xl">Khám phá gu cưới</h2>
         </div>
-        <p className="max-w-sm text-sm leading-6 text-[#8A8178]">Brief này giúp direction, checklist và các phase AI/export sau hiểu đúng gu cưới của mày.</p>
+        <p className="max-w-sm text-sm leading-6 text-[#8A8178]">Bảng này giúp hướng hình, checklist và các bước AI hoặc xuất bản sau hiểu đúng gu cưới của gia đình.</p>
       </div>
 
       <div className="mt-5 grid gap-4">
         <label className="grid gap-2 text-sm font-medium text-[#2E2A25]">
-          Couple story
+          Câu chuyện của hai bạn
           <textarea className={textareaClass} value={discovery.coupleStory} onChange={(event) => onChange("coupleStory", event.target.value)} />
         </label>
 
         <div className="grid gap-3">
-          <p className="text-sm font-semibold text-[#2E2A25]">Desired tone</p>
+          <p className="text-sm font-semibold text-[#2E2A25]">Giọng mong muốn</p>
           <div className="grid gap-2 sm:grid-cols-2">
             {toneOptions.map((option) => (
               <button
@@ -51,17 +51,17 @@ export function DiscoveryForm({ discovery, onChange }: { discovery: Discovery; o
         </div>
 
         <label className="grid gap-2 text-sm font-medium text-[#2E2A25]">
-          Guest audience
+          Nhóm khách
           <textarea className={textareaClass} value={discovery.guestAudience} onChange={(event) => onChange("guestAudience", event.target.value)} />
         </label>
 
         <label className="grid gap-2 text-sm font-medium text-[#2E2A25]">
-          Cultural notes / language balance
+          Ghi chú văn hoá / ngôn ngữ
           <textarea className={textareaClass} value={discovery.culturalNotes} onChange={(event) => onChange("culturalNotes", event.target.value)} />
         </label>
 
         <div className="grid gap-3">
-          <p className="text-sm font-semibold text-[#2E2A25]">Must-have sections</p>
+          <p className="text-sm font-semibold text-[#2E2A25]">Mục bắt buộc</p>
           <div className="flex flex-wrap gap-2">
             {mustHaveSectionOptions.map((option) => {
               const selected = discovery.mustHaveSections.includes(option.value);
@@ -81,17 +81,17 @@ export function DiscoveryForm({ discovery, onChange }: { discovery: Discovery; o
         </div>
 
         <label className="grid gap-2 text-sm font-medium text-[#2E2A25]">
-          Constraints
+          Ràng buộc
           <textarea className={textareaClass} value={discovery.constraints} onChange={(event) => onChange("constraints", event.target.value)} />
         </label>
 
         <label className="grid gap-2 text-sm font-medium text-[#2E2A25]">
-          Photo / moodboard notes
+          Ghi chú ảnh / moodboard
           <textarea className={textareaClass} value={discovery.photoMoodboardNotes} onChange={(event) => onChange("photoMoodboardNotes", event.target.value)} />
         </label>
 
         <label className="grid gap-2 text-sm font-medium text-[#2E2A25]">
-          Print vs digital priority
+          Ưu tiên in hay digital
           <select className={inputClass} value={discovery.printDigitalPriority} onChange={(event) => onChange("printDigitalPriority", event.target.value)}>
             {priorityOptions.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
           </select>

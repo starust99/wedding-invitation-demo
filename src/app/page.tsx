@@ -8,6 +8,7 @@ import { SceneProgress } from "@/components/SceneProgress";
 import { ThankYouSection } from "@/components/ThankYouSection";
 import { TimelineSection } from "@/components/TimelineSection";
 import { WeddingDetailsSection } from "@/components/WeddingDetailsSection";
+import { WeddingSplashIntro } from "@/components/WeddingSplashIntro";
 import { resolveGuestIdentity, type GuestIdentity } from "@/lib/guest-personalization";
 import { applyTheme } from "@/lib/site-settings";
 import { usePublishedSettings } from "@/lib/use-published-settings";
@@ -17,6 +18,12 @@ export default function Home() {
   const settings = usePublishedSettings();
 
   useEffect(() => {
+    // Prevent browser from restoring scroll position on refresh
+    if ("scrollRestoration" in history) {
+      history.scrollRestoration = "manual";
+    }
+    window.scrollTo(0, 0);
+
     const guestTimer = window.setTimeout(() => {
       setGuestIdentity(resolveGuestIdentity(window.location.search));
     }, 0);
@@ -29,7 +36,8 @@ export default function Home() {
   const config = applyTheme(settings.content, settings.themeKey);
 
   return (
-    <main data-od-id="rose-serenity-invitation" className="min-h-screen overflow-x-hidden bg-cream text-[#252934]">
+    <main data-od-id="rose-serenity-invitation" className="public-invitation-page relative min-h-screen overflow-x-hidden bg-transparent text-[#252934]">
+      <WeddingSplashIntro config={config} guestIdentity={guestIdentity} storageKey="home" />
       <SceneProgress />
       <HeroSaveTheDate config={config} guestIdentity={guestIdentity} />
       <WeddingDetailsSection config={config} />

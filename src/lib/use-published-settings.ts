@@ -14,31 +14,32 @@ export function usePublishedSettings() {
   useEffect(() => {
     let cancelled = false;
 
-    const readBrowserSettings = () => {
-      if (!cancelled) setSettings(getPublishedSettings());
+    const readServerSettings = () => {
+      fetch("/api/site-settings")
+        .then((response) => (response.ok ? response.json() : null))
+        .then((result: { settings?: SiteSettings; backend?: string } | null) => {
+          if (cancelled) return;
+          if (result?.backend === "local") {
+            setSettings(getPublishedSettings());
+            return;
+          }
+
+          setSettings(result?.settings ? normalizeSettings(result.settings) : getPublishedSettings());
+        })
+        .catch(() => {
+          if (!cancelled) setSettings(getPublishedSettings());
+        });
     };
 
-    readBrowserSettings();
+    readServerSettings();
 
-    fetch("/api/site-settings")
-      .then((response) => (response.ok ? response.json() : null))
-      .then((result: { settings?: SiteSettings; backend?: string } | null) => {
-        if (cancelled) return;
-        if (result?.backend === "supabase" && result.settings) {
-          setSettings(normalizeSettings(result.settings));
-          return;
-        }
-        readBrowserSettings();
-      })
-      .catch(readBrowserSettings);
-
-    window.addEventListener("storage", readBrowserSettings);
-    window.addEventListener("wedding-settings-updated", readBrowserSettings);
+    window.addEventListener("storage", readServerSettings);
+    window.addEventListener("wedding-settings-updated", readServerSettings);
 
     return () => {
       cancelled = true;
-      window.removeEventListener("storage", readBrowserSettings);
-      window.removeEventListener("wedding-settings-updated", readBrowserSettings);
+      window.removeEventListener("storage", readServerSettings);
+      window.removeEventListener("wedding-settings-updated", readServerSettings);
     };
   }, []);
 

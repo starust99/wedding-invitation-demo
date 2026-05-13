@@ -1,19 +1,19 @@
 export const themePresets = {
   "rose-quartz-serenity": {
     name: "Rose Quartz Serenity Garden",
-    description: "Tone đã chốt: Rose Quartz + Serenity, thêm cream/gold để ra Enchanted Garden vintage.",
+    description: "Tone đã chốt: Rose Quartz + Serenity, nền sáng và glass nhẹ, không dùng vàng/đen làm màu chủ đạo.",
     colors: {
-      background: "#FDFBF7",
+      background: "#FFF7FB",
       card: "#FFFFFF",
-      primary: "#8FAADC",
-      accent: "#F2C6CF",
-      text: "#2F3A35",
-      muted: "#7B8291",
+      primary: "#92A8D1",
+      accent: "#F7CAC9",
+      text: "#252934",
+      muted: "#6F7483",
       border: "#E9DDE5",
     },
   },
   "dalat-garden-elegant": {
-    name: "Dalat Garden Elegant",
+    name: "Đà Lạt Garden Elegant",
     description: "Ivory, champagne, olive green — sang nhẹ và rất Đà Lạt.",
     colors: {
       background: "#F8F3EA",

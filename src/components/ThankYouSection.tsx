@@ -1,36 +1,89 @@
 "use client";
 
-import Link from "next/link";
-import { motion } from "framer-motion";
 import { SectionMediaLayers } from "@/components/SectionMediaLayers";
 import type { WeddingConfig } from "@/lib/site-settings";
-import { formatGuestName, type GuestIdentity } from "@/lib/guest-personalization";
+import { buildInvitationCopy, type GuestIdentity } from "@/lib/guest-personalization";
+import { usePageTransition } from "@/components/PageTransitionEffect";
+import type { RSVPResponse } from "@/lib/rsvp-storage";
 
-export function ThankYouSection({ config, guestIdentity }: { config: WeddingConfig; guestIdentity: GuestIdentity }) {
+export function ThankYouSection({
+  config,
+  guestIdentity,
+  rsvpAttending,
+  rsvpHref = "/rsvp",
+}: {
+  config: WeddingConfig;
+  guestIdentity: GuestIdentity;
+  rsvpAttending?: RSVPResponse["attending"];
+  rsvpHref?: string;
+}) {
+  const inviteCopy = buildInvitationCopy(guestIdentity);
+  const { navigateWithTransition } = usePageTransition();
+  const thankYouMessage = rsvpAttending === "no"
+    ? `${inviteCopy.rsvpReceivedLine}. Hẹn gặp ${inviteCopy.shortRecipientLabel} trong thời gian sớm nhất.`
+    : `${inviteCopy.thankYouLine} Hẹn gặp ${inviteCopy.guestLabel} tại ${config.venue.name} trong một buổi tối thật ấm áp.`;
+
   return (
-    <section className="cinematic-stage relative grid min-h-[74dvh] place-items-center bg-[linear-gradient(180deg,rgba(255,250,247,1),rgba(247,202,201,0.32),rgba(146,168,209,0.3))] px-5 py-24 text-center text-[#252934]">
-      <SectionMediaLayers config={config} section="cta" className="opacity-20" />
-      <div aria-hidden="true" className="aurora-wash -z-10 opacity-45" />
-      <div aria-hidden="true" className="film-grain-soft -z-10" />
-      <motion.div
-        className="mx-auto max-w-4xl"
-        initial={{ opacity: 0, y: 24 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, amount: 0.45 }}
-        transition={{ duration: 0.68 }}
-      >
-        <p className="text-xs font-black uppercase tracking-[0.34em] text-[#252934]/48">Thank you</p>
-        <h2 className="mt-5 font-serif text-[clamp(3rem,7vw,6rem)] leading-[1.04]">Hẹn gặp {formatGuestName(guestIdentity)}</h2>
-        <p className="mx-auto mt-7 max-w-2xl text-lg leading-8 text-[#252934]/62">
-          {config.couple.displayName} và gia đình rất trân trọng sự hiện diện của anh/chị trong buổi tối đặc biệt tại {config.venue.name}.
-        </p>
-        <Link
-          href="#rsvp"
-          className="mt-9 inline-flex min-h-12 items-center justify-center rounded-full border border-[#252934]/14 bg-white/42 px-7 text-xs font-black uppercase tracking-[0.22em] text-[#252934] backdrop-blur-xl transition hover:-translate-y-0.5"
+    <section id="thank-you" className="cinematic-stage editorial-band relative overflow-hidden px-5 py-20 text-center text-ink sm:px-8 sm:py-24 lg:py-28">
+      <SectionMediaLayers config={config} section="cta" className="opacity-[0.1]" />
+      <div aria-hidden="true" className="hero-couture-shade absolute inset-0 opacity-80" />
+      <div aria-hidden="true" className="paper-grain-luxury absolute inset-0 opacity-22" />
+
+      <div className="mx-auto flex max-w-7xl justify-center">
+        <div
+          className="glass-panel relative w-full max-w-6xl overflow-hidden rounded-[2.8rem] px-5 py-7 sm:px-8 sm:py-8 lg:px-10 lg:py-10"
         >
-          Xem lại RSVP
-        </Link>
-      </motion.div>
+          <div aria-hidden="true" className="absolute inset-x-8 top-4 h-px bg-[linear-gradient(90deg,transparent,rgba(212,175,55,0.44),transparent)] sm:inset-x-16 sm:top-5 lg:top-6" />
+          <div aria-hidden="true" className="absolute inset-x-8 bottom-4 h-px bg-[linear-gradient(90deg,transparent,rgba(212,175,55,0.32),transparent)] sm:inset-x-16 sm:bottom-5 lg:bottom-6" />
+          <div aria-hidden="true" className="absolute left-7 top-7 h-10 w-10 rounded-tl-[1.4rem] border-l border-t border-[rgba(212,175,55,0.22)] sm:left-9 sm:top-9" />
+          <div aria-hidden="true" className="absolute right-7 top-7 h-10 w-10 rounded-tr-[1.4rem] border-r border-t border-[rgba(212,175,55,0.22)] sm:right-9 sm:top-9" />
+          <div aria-hidden="true" className="absolute bottom-7 left-7 h-10 w-10 rounded-bl-[1.4rem] border-b border-l border-[rgba(212,175,55,0.22)] sm:bottom-9 sm:left-9" />
+          <div aria-hidden="true" className="absolute right-7 bottom-7 h-10 w-10 rounded-br-[1.4rem] border-b border-r border-[rgba(212,175,55,0.22)] sm:right-9 sm:bottom-9" />
+
+          <div className="relative z-10 grid min-h-[24rem] place-items-start py-4 text-center sm:min-h-[30rem] sm:place-items-center sm:py-8 lg:min-h-[34rem]">
+            <div className="flex w-full max-w-2xl flex-col items-center justify-between gap-8 text-center sm:gap-10">
+              <div>
+                <p className="section-kicker-dark wedding-type-kicker">Lời cảm ơn</p>
+                <div className="mt-6 flex items-center justify-center gap-3">
+                  <span className="h-px w-16 bg-[rgba(212,175,55,0.46)] sm:w-20" />
+                  <span className="h-2 w-2 rounded-full border border-[rgba(212,175,55,0.48)] bg-white/76" />
+                  <span className="h-px w-16 bg-[rgba(212,175,55,0.46)] sm:w-20" />
+                </div>
+                <p suppressHydrationWarning className="wedding-type-body mx-auto mt-6 max-w-xl text-ink/66">
+                  {thankYouMessage}
+                </p>
+              </div>
+
+              <div className="w-full">
+                <p suppressHydrationWarning className="wedding-type-card-title text-ink/74">
+                  {inviteCopy.signaturePrefix}
+                </p>
+
+                <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+                  <button
+                    type="button"
+                    onClick={() => navigateWithTransition(rsvpHref)}
+                    className="inline-flex h-12 items-center justify-center transition hover:-translate-y-0.5 save-date-watercolor-btn"
+                  >
+                    <img src="/assets/wedding/ui/btn-view-rsvp.png" alt="" className="save-date-btn-bg" />
+                    <span className="save-date-btn-label uppercase">Xem hồi đáp</span>
+                  </button>
+                  <a
+                    suppressHydrationWarning
+                    href={config.venue.mapUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex h-12 items-center justify-center transition hover:-translate-y-0.5 save-date-watercolor-btn"
+                  >
+                    <img src="/assets/wedding/ui/btn-thankyou-directions.png" alt="" className="save-date-btn-bg" />
+                    <span className="save-date-btn-label uppercase">Chỉ đường</span>
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </section>
   );
 }

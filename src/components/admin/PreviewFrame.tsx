@@ -16,7 +16,7 @@ export function PreviewFrame({ config, selectedKey, onChange }: { config: Weddin
     <aside className="lg:sticky lg:top-28 lg:h-[calc(100vh-8rem)] lg:overflow-hidden">
       <div className="mb-3 flex flex-col gap-3">
         <div className="flex items-center justify-between gap-3">
-          <h2 className="font-serif text-3xl">Live preview</h2>
+          <h2 className="font-serif text-3xl">Xem thử trực tiếp</h2>
           <span className="rounded-full bg-[#FFFDF8] px-3 py-1 text-xs text-[#8A8178]">{context.label}</span>
         </div>
         <div className="flex gap-2 overflow-x-auto pb-1">

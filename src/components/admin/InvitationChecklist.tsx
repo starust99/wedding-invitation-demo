@@ -1,9 +1,9 @@
 import type { InvitationIssue } from "@/lib/invitation-lint";
 
 const severityMeta = {
-  P0_BLOCKER: { label: "Blocker", color: "#B42318", bg: "#FFF1F0" },
-  P1_WARNING: { label: "Warning", color: "#B54708", bg: "#FFF7E6" },
-  P2_POLISH: { label: "Polish", color: "#475467", bg: "#F2F4F7" },
+  P0_BLOCKER: { label: "Chặn", color: "#B42318", bg: "#FFF1F0" },
+  P1_WARNING: { label: "Cảnh báo", color: "#B54708", bg: "#FFF7E6" },
+  P2_POLISH: { label: "Tinh chỉnh", color: "#475467", bg: "#F2F4F7" },
 } as const;
 
 export function InvitationChecklist({ issues }: { issues: InvitationIssue[] }) {
@@ -15,19 +15,19 @@ export function InvitationChecklist({ issues }: { issues: InvitationIssue[] }) {
     <div className="rounded-[1.5rem] border border-[#E8DDCC] bg-[#FFFDF8] p-5 shadow-sm">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#6B7A5A]">Publish quality</p>
-          <h2 className="font-serif text-3xl">Invitation Checklist</h2>
-          <p className="mt-2 text-sm leading-6 text-[#8A8178]">Anti-slop check trước khi gửi khách thật: thông tin, RSVP, media, accessibility và polish.</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#6B7A5A]">Kiểm tra trước khi xuất bản</p>
+          <h2 className="font-serif text-3xl">Danh sách kiểm tra thiệp</h2>
+          <p className="mt-2 text-sm leading-6 text-[#8A8178]">Kiểm tra trước khi gửi khách thật: thông tin, hồi đáp, ảnh, khả năng đọc và độ chỉn chu.</p>
         </div>
         <div className="flex flex-wrap gap-2 text-xs font-bold uppercase tracking-[0.12em]">
-          <span className="rounded-full bg-[#FFF1F0] px-3 py-1 text-[#B42318]">{blockerCount} blocker</span>
-          <span className="rounded-full bg-[#FFF7E6] px-3 py-1 text-[#B54708]">{warningCount} warning</span>
-          <span className="rounded-full bg-[#F2F4F7] px-3 py-1 text-[#475467]">{polishCount} polish</span>
+          <span className="rounded-full bg-[#FFF1F0] px-3 py-1 text-[#B42318]">{blockerCount} chặn</span>
+          <span className="rounded-full bg-[#FFF7E6] px-3 py-1 text-[#B54708]">{warningCount} cảnh báo</span>
+          <span className="rounded-full bg-[#F2F4F7] px-3 py-1 text-[#475467]">{polishCount} tinh chỉnh</span>
         </div>
       </div>
 
       {issues.length === 0 ? (
-        <div className="mt-4 rounded-2xl border border-[#C9DFC1] bg-[#F3FAEF] p-4 text-sm font-semibold text-[#426038]">Checklist sạch. Có thể publish bản này.</div>
+        <div className="mt-4 rounded-2xl border border-[#C9DFC1] bg-[#F3FAEF] p-4 text-sm font-semibold text-[#426038]">Checklist sạch. Có thể xuất bản bản này.</div>
       ) : (
         <div className="mt-4 grid gap-3">
           {issues.map((issue) => {

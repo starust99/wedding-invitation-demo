@@ -1,9 +1,31 @@
+import { defaultWeddingHeroConfig } from "@/lib/wedding/hero-config";
+import { defaultEventDetailsConfig } from "@/lib/wedding/event-details-config";
+import type { AiTweakSuggestion } from "@/lib/ai-tweak-schema";
+
+type MediaLayerConfig = {
+  id: string;
+  type: "image" | "video";
+  src: string;
+  mobileSrc: string;
+  alt: string;
+  opacity: number;
+  scale: {
+    desktop: number;
+    mobile: number;
+  };
+  objectPosition: {
+    desktop: string;
+    mobile: string;
+  };
+  animation: "none" | "slowZoom" | "float" | "fade";
+};
+
 export const weddingConfig = {
-  themeName: "Rose Serenity Glass",
+  themeName: "Vườn mùa đông Đà Lạt",
   project: {
     visualDirectionKey: "rose-quartz-serenity",
     ai: {
-      tweakHistory: [],
+      tweakHistory: [] as AiTweakSuggestion[],
     },
     artifacts: {
       enabled: ["web-invitation", "rsvp-form"],
@@ -19,88 +41,90 @@ export const weddingConfig = {
       },
     },
     discovery: {
-      coupleStory: "Chúng mình muốn một lời mời ấm áp, chỉn chu và có cảm giác như một buổi tối riêng tư.",
+      coupleStory: "Một buổi tối mùa đông ở Đà Lạt, nơi gia đình và những người thân quý cùng hiện diện để chứng kiến ngày vui của Nhật & Phương.",
       desiredTone: "romantic",
-      guestAudience: "Gia đình, bạn bè thân thiết và những người đã đồng hành cùng tụi mình.",
-      culturalNotes: "Ưu tiên tiếng Việt trang trọng vừa đủ, có thể điểm vài cụm tiếng Anh nhẹ nhàng.",
-      mustHaveSections: ["venue", "timeline", "dressCode", "accommodation", "rsvp"],
-      constraints: "Giữ tinh thần premium, không giống landing page SaaS, mobile phải đọc dễ và RSVP nổi bật.",
-      photoMoodboardNotes: "Giấy cưới ivory, Rose Quartz, Serenity blue, hiệu ứng glass nhẹ, chuyển động mềm và cảm giác điện ảnh.",
+      guestAudience: "Gia đình, bạn bè thân thiết và những người đã đồng hành cùng cô dâu chú rể.",
+      culturalNotes: "Tiếng Việt là chính. Câu chữ ưu tiên phép lịch sự Việt Nam, xưng hô đúng vai vế, mềm nhưng không sến.",
+      mustHaveSections: ["venue", "timeline", "gallery", "rsvp"],
+      constraints: "Mobile-first, tự nhiên, chỉn chu, không sến và không nhồi quá nhiều chi tiết.",
+      photoMoodboardNotes: "Pastel pink, pastel blue, warm white, natural green và khoảng thở lớn.",
       printDigitalPriority: "digital",
     },
   },
   couple: {
-    bride: "Cô Dâu",
-    groom: "Chú Rể",
-    displayName: "Cô Dâu & Chú Rể",
+    bride: "Phương",
+    groom: "Nhật",
+    displayName: "Nhật & Phương",
     date: "2026-12-26",
-    tagline: "Một buổi tiệc Rose Quartz & Serenity nhẹ nhàng, trang trọng",
+    tagline: "Khu vườn mùa xuân giữa Đà Lạt mùa đông",
   },
   sections: {
     hero: {
-      eyebrow: "Wedding Celebration",
-      imageAlt: "Enchanted garden wedding cover",
+      eyebrow: "26.12.2026 · Đà Lạt",
+      imageAlt: "Ảnh bìa thiệp cưới khu vườn",
       locationLine: "{venueName} · {venueLocation}",
       showScrollCue: true,
     },
     invitation: {
-      eyebrow: "The invitation",
+      eyebrow: "Lời mời từ gia đình",
     },
     itinerary: {
-      eyebrow: "Wedding Reception",
-      title: "Một buổi tối được chuẩn bị riêng",
-      description: "Một buổi tiệc thân mật, được sắp nhịp nhẹ nhàng từ welcome drink, ceremony, dinner reception đến after party.",
-      cardEyebrow: "Save the evening",
+      eyebrow: "Lịch trình",
+      title: "Buổi tiệc tại Terracotta",
+      description: "",
+      cardEyebrow: "Ngày cưới",
       cardDescription: "{venueName} · {venueLocation}",
       items: [
-        { label: "Đón khách", description: "Check-in, chụp ảnh và welcome drink." },
-        { label: "Ceremony", description: "Khoảnh khắc chính của buổi lễ ngoài trời." },
-        { label: "Khai tiệc", description: "Dùng tiệc tối trong không khí ấm áp." },
-        { label: "After party", description: "Âm nhạc, đồ uống và những câu chuyện vui." },
+        { label: "Đón khách", description: "Gia đình đón khách, chụp ảnh lưu niệm và mời khách ổn định chỗ ngồi." },
+        { label: "Nghi thức", description: "Khoảnh khắc chính của buổi lễ, nơi Nhật & Phương gửi lời chào đến hai bên gia đình và khách quý." },
+        { label: "Nâng ly", description: "Cùng nâng ly chúc mừng ngày vui của cô dâu chú rể." },
+        { label: "Dùng tiệc", description: "Dùng bữa tối ấm cúng trong không gian ngoài trời của Terracotta." },
+        { label: "Giao lưu", description: "Âm nhạc, trò chuyện và những khoảnh khắc thân tình trong buổi tối." },
+        { label: "Lời cảm ơn", description: "Gia đình gửi lời cảm ơn và chụp ảnh cùng khách mời trước khi khép lại buổi tiệc." },
       ],
     },
     timeline: {
-      eyebrow: "Our Evening",
-      title: "Lịch trình buổi tối",
+      eyebrow: "Lịch trình",
+      title: "Buổi tiệc tại Terracotta",
     },
     venue: {
-      eyebrow: "Venue",
-      description: "Một điểm hẹn riêng tư, đủ ấm áp để gia đình và bạn bè thân thiết cùng chia sẻ buổi tối quan trọng.",
-      visualEyebrow: "{venueArea}",
-      visualTitle: "Hồ Tuyền Lâm",
-      detailEyebrow: "Where to arrive",
+      eyebrow: "Thông tin và địa điểm",
+      description: "Sảnh Quảng Trường tại Terracotta Hotel & Resort Đà Lạt là điểm hẹn của buổi tối, giữa không khí se lạnh và khoảng xanh bên Hồ Tuyền Lâm.",
+      visualEyebrow: "Terracotta Đà Lạt",
+      visualTitle: "Sảnh Quảng Trường",
+      detailEyebrow: "Địa chỉ",
       areaLabel: "Khu vực",
       locationLabel: "Vị trí",
-      mapButtonLabel: "Mở Google Maps",
+      mapButtonLabel: "Mở chỉ đường",
     },
     dressCode: {
-      eyebrow: "Dress Code",
+      eyebrow: "Trang phục",
     },
     guestNotes: {
-      eyebrow: "Guest Notes",
-      title: "For a comfortable evening",
-      description: "Một vài ghi chú nhỏ để bạn chuẩn bị thật thoải mái cho buổi tối.",
-      weatherEyebrow: "Da Lat Weather",
-      accommodationEyebrow: "Accommodation",
-      rsvpDeadlinePrefix: "RSVP by",
+      eyebrow: "Lưu ý khách mời",
+      title: "Để buổi tối trọn vẹn hơn",
+      description: "Một vài ghi chú nhỏ để khách mời chuẩn bị nhẹ nhàng cho thời tiết, trang phục và việc di chuyển ở Đà Lạt.",
+      weatherEyebrow: "Thời tiết Đà Lạt",
+      accommodationEyebrow: "Lưu trú",
+      rsvpDeadlinePrefix: "Xác nhận trước",
     },
     gallery: {
-      eyebrow: "Gallery",
-      title: "Moments in Bloom",
-      description: "Một không gian ảnh tối giản, giữ nhịp cảm xúc trước khi khách mời gửi xác nhận tham dự.",
-      itemLabel: "Moment",
-      imageAltPrefix: "Wedding gallery",
+      eyebrow: "Khoảnh khắc",
+      title: "Góc ảnh cưới",
+      description: "",
+      itemLabel: "Ảnh",
+      imageAltPrefix: "Ảnh cưới",
     },
     cta: {
-      eyebrow: "RSVP",
-      title: "Xác nhận lời mời",
-      description: "Hãy cho gia đình biết sự hiện diện, số khách, ghi chú thực đơn và nhu cầu lưu trú để chuẩn bị thật chu đáo.",
-      buttonLabel: "Gửi xác nhận",
+      eyebrow: "Hồi đáp",
+      title: "Xác nhận tham dự",
+      description: "Gia đình mong nhận được lời hồi đáp sớm để chuẩn bị đón tiếp chu đáo.",
+      buttonLabel: "Gửi hồi đáp",
     },
   },
-  appearance: {
-    backgrounds: {
-      page: "cream",
+    appearance: {
+      backgrounds: {
+        page: "cream",
       hero: "plain",
       invitation: "softGradient",
       itinerary: "plain",
@@ -110,81 +134,73 @@ export const weddingConfig = {
       guestNotes: "plain",
       gallery: "plain",
       cta: "primaryGradient",
+      },
+      galleryObjectPositions: ["center center", "center center", "center center", "center center"],
+      mediaLayers: {
+        hero: [] as MediaLayerConfig[],
+        invitation: [] as MediaLayerConfig[],
+        itinerary: [] as MediaLayerConfig[],
+        timeline: [] as MediaLayerConfig[],
+        venue: [] as MediaLayerConfig[],
+        dressCode: [] as MediaLayerConfig[],
+        guestNotes: [] as MediaLayerConfig[],
+        gallery: [] as MediaLayerConfig[],
+        cta: [] as MediaLayerConfig[],
+      },
     },
-    galleryObjectPositions: ["center center", "center center", "center center", "center center"],
-    mediaLayers: {
-      hero: [
-        {
-          id: "hero-cover",
-          type: "image",
-          src: "/hero-editorial-couple.svg",
-          mobileSrc: "/hero-editorial-couple.svg",
-          alt: "Editorial couple wedding cover",
-          opacity: 1,
-          scale: { desktop: 1, mobile: 1 },
-          objectPosition: { desktop: "72% center", mobile: "45% top" },
-          animation: "slowZoom",
-        },
-      ],
-      invitation: [],
-      itinerary: [],
-      timeline: [],
-      venue: [],
-      dressCode: [],
-      guestNotes: [],
-      gallery: [],
-      cta: [],
-    },
-  },
-  invitation: {
-    title: "Trân trọng kính mời",
-    message:
-      "Gia đình chúng tôi trân trọng kính mời anh/chị và những người thân yêu đến chung vui trong buổi tiệc cưới thân mật tại Terracotta Hotel & Resort Dalat.",
-    closing: "Sự hiện diện của anh/chị là niềm vinh hạnh và niềm vui rất lớn với gia đình.",
+    invitation: {
+      title: "Trân trọng kính mời",
+      message:
+      "Gia đình trân trọng kính mời quý khách đến chung vui trong lễ cưới của Nhật & Phương tại Terracotta Hotel & Resort Đà Lạt.",
+    closing: "Sự hiện diện của quý khách là niềm vinh hạnh và là niềm vui rất lớn với gia đình.",
   },
   venue: {
-    name: "Terracotta Hotel & Resort Dalat",
+    name: "Terracotta Hotel & Resort Đà Lạt",
     area: "Sảnh Quảng trường",
     location: "Hồ Tuyền Lâm, Đà Lạt, Việt Nam",
-    address: "Terracotta Hotel & Resort Dalat, khu vực Hồ Tuyền Lâm, Đà Lạt",
-    mapUrl: "https://maps.google.com/?q=Terracotta+Hotel+%26+Resort+Dalat",
-    note: "Một buổi tối thân mật trong khu resort, được chuẩn bị riêng cho gia đình và bạn bè thân thiết.",
+    address: "Sảnh Quảng Trường, Terracotta Hotel & Resort Đà Lạt, Hồ Tuyền Lâm, Đà Lạt",
+    mapUrl: "https://www.google.com/maps/search/?api=1&query=S%E1%BA%A3nh%20Qu%E1%BA%A3ng%20Tr%C6%B0%E1%BB%9Dng%20Terracotta%20Hotel%20%26%20Resort%20%C4%90%C3%A0%20L%E1%BA%A1t",
+    note: "Không gian ngoài trời thoáng đãng, đủ trang trọng cho nghi thức và đủ ấm cúng cho một buổi tối thân tình.",
   },
   event: {
     dateLabel: "Thứ Bảy, 26.12.2026",
-    welcomeTime: "16:30",
-    ceremonyTime: "17:45",
-    dinnerTime: "18:40",
-    afterPartyTime: "20:15",
+    welcomeTime: "17:30",
+    ceremonyTime: "18:00",
+    dinnerTime: "18:30",
+    afterPartyTime: "20:00",
   },
   timeline: [
-    { time: "16:30", title: "Đón khách", description: "Check-in, chụp ảnh và welcome drink." },
-    { time: "17:45", title: "Ceremony", description: "Khoảnh khắc chính của buổi lễ trong không gian thân mật." },
-    { time: "18:40", title: "Dinner reception", description: "Dùng tiệc tối trong không khí ấm áp và trang trọng." },
-    { time: "20:15", title: "After party", description: "Âm nhạc, đồ uống và những câu chuyện vui." },
+    { time: "17:30", title: "Đón khách", description: "Gia đình đón khách, chụp ảnh lưu niệm và mời khách ổn định chỗ ngồi." },
+    { time: "18:00", title: "Nghi thức", description: "Khoảnh khắc chính của buổi lễ, với sự chứng kiến của gia đình và khách quý." },
+    { time: "18:30", title: "Nâng ly", description: "Cùng nâng ly chúc mừng ngày vui của cô dâu chú rể." },
+    { time: "19:30", title: "Dùng tiệc", description: "Dùng bữa tối ấm cúng trong không gian ngoài trời của Terracotta." },
+    { time: "20:00", title: "Giao lưu", description: "Âm nhạc, trò chuyện và những khoảnh khắc thân tình trong buổi tối." },
+    { time: "21:00", title: "Lời cảm ơn & chụp hình", description: "Gia đình gửi lời cảm ơn và chụp ảnh cùng khách mời." },
   ],
   dressCode: {
-    title: "Rose Serenity Formal",
-    note: "Anh/chị có thể chọn trang phục thanh lịch theo sắc hồng phấn, xanh Serenity, ivory, bạc nhạt hoặc navy dịu.",
-    colors: ["#F7CAC9", "#92A8D1", "#FFFAF7", "#E9DDE5", "#252934"],
+    title: "Sắc pastel vườn xuân",
+    note: "Khách mời có thể chọn trang phục thanh lịch theo sắc hồng pastel, xanh dương pastel, trắng kem hoặc xanh lá tự nhiên. Nên ưu tiên chất liệu thoải mái vì buổi tiệc diễn ra ngoài trời.",
+    colors: ["#FADCD9", "#D4E4F7", "#FEF8E7", "#B5D5A4", "#5C5247"],
   },
   weatherNote: {
     title: "Một chút lưu ý cho buổi tối",
     description:
-      "Buổi tiệc có thể diễn ra trong không gian mở. Anh/chị có thể mang theo áo khoác nhẹ để thoải mái hơn khi di chuyển và tham dự.",
+      "Buổi tiệc diễn ra trong không gian mở. Khách mời nên mang theo áo khoác nhẹ để thoải mái hơn khi di chuyển và tham dự buổi tối Đà Lạt.",
   },
   accommodation: {
     enabled: true,
     title: "Hỗ trợ lưu trú tại resort",
     description:
-      "Nếu anh/chị cần thông tin lưu trú tại resort, wedding concierge sẽ liên hệ riêng để xác nhận hạng phòng và thời gian phù hợp.",
+      "Nếu khách mời cần hỗ trợ lưu trú tại resort, vui lòng đăng ký trong form RSVP để gia đình sắp xếp thông tin với Terracotta được chu đáo.",
     rsvpDeadline: "26.11.2026",
   },
   gallery: ["/gallery-clean-1.svg", "/gallery-clean-2.svg", "/gallery-clean-3.svg", "/gallery-clean-4.svg"],
   hero: {
-    coverImage: "/hero-editorial-couple.svg",
-    mobileCoverImage: "/hero-editorial-couple.svg",
+    coverImage: "",
+    mobileCoverImage: "",
   },
+  heroEditorConfig: defaultWeddingHeroConfig,
+  eventDetailsConfig: defaultEventDetailsConfig,
   theme: {
     colors: {
       background: "#FFFAF7",
@@ -197,7 +213,7 @@ export const weddingConfig = {
     },
     fonts: {
       heading: "Cormorant Garamond",
-      body: "Inter",
+      body: "Be Vietnam Pro",
     },
     animationEnabled: true,
   },

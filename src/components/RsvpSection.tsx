@@ -1,64 +1,61 @@
 "use client";
 
-import Link from "next/link";
-import { motion } from "framer-motion";
-import { BedDouble, ChefHat, HeartHandshake, MessageCircleHeart } from "lucide-react";
+import { useMemo } from "react";
 import { SectionMediaLayers } from "@/components/SectionMediaLayers";
 import type { WeddingConfig } from "@/lib/site-settings";
-import { formatGuestName, type GuestIdentity } from "@/lib/guest-personalization";
+import { buildInvitationCopy, type GuestIdentity } from "@/lib/guest-personalization";
+import { MagneticButton } from "@/components/ui/MagneticButton";
+import { usePageTransition } from "@/components/PageTransitionEffect";
 
-export function RsvpSection({ config, guestIdentity }: { config: WeddingConfig; guestIdentity: GuestIdentity }) {
+export function RsvpSection({
+  config,
+  guestIdentity,
+  rsvpHref = "/rsvp",
+}: {
+  config: WeddingConfig;
+  guestIdentity: GuestIdentity;
+  rsvpHref?: string;
+}) {
+  const inviteCopy = useMemo(() => buildInvitationCopy(guestIdentity), [guestIdentity]);
+  const { navigateWithTransition } = usePageTransition();
+
   return (
-    <section id="rsvp" className="cinematic-stage relative bg-cream px-5 py-24 text-[#252934] sm:px-8 lg:py-32">
-      <SectionMediaLayers config={config} section="cta" className="opacity-25" />
-      <div aria-hidden="true" className="aurora-wash -z-10 opacity-55" />
-      <div className="mx-auto max-w-7xl">
-        <motion.div
-          className="glass-panel light-sweep overflow-hidden rounded-[2rem] p-6 sm:p-10 lg:p-12"
-          initial={{ opacity: 0, y: 26 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.3 }}
-          transition={{ type: "spring", bounce: 0.18, duration: 0.8 }}
-        >
-          <div className="grid gap-10 lg:grid-cols-[0.95fr_1.05fr] lg:items-center">
-            <div>
-              <p className="text-xs font-black uppercase tracking-[0.34em] text-[#252934]/50">{config.sections.cta.eyebrow}</p>
-              <h2 className="mt-4 max-w-3xl font-serif text-[clamp(2.9rem,5.8vw,5.6rem)] leading-[1.04]">{config.sections.cta.title}</h2>
-              <p className="mt-6 max-w-2xl text-lg leading-8 text-[#252934]/64">
-                {formatGuestName(guestIdentity)} thân mến, gia đình mong nhận phản hồi trước ngày {config.rsvp.deadline} để chuẩn bị chỗ ngồi, thực đơn và các ghi chú lưu trú một cách chu đáo.
-              </p>
-              <Link
-                href="/rsvp"
-                className="mt-8 inline-flex min-h-14 items-center justify-center rounded-full bg-[#252934] px-8 text-xs font-black uppercase tracking-[0.22em] text-white transition hover:-translate-y-0.5"
-              >
-                Gửi xác nhận
-              </Link>
-            </div>
+    <section id="rsvp" className="cinematic-stage editorial-band relative overflow-hidden px-5 py-20 text-ink sm:px-8 lg:py-28">
+      <SectionMediaLayers config={config} section="cta" className="opacity-[0.1]" />
+      <div aria-hidden="true" className="paper-grain-luxury -z-10 opacity-20" />
+      <div aria-hidden="true" className="hero-couture-shade absolute inset-0 opacity-55" />
 
-            <div className="grid gap-3 sm:grid-cols-2">
-              {[
-                { icon: HeartHandshake, title: "Chỗ ngồi", text: "Sắp xếp đúng số khách và nhóm khách mời." },
-                { icon: ChefHat, title: "Thực đơn", text: "Ghi nhận ăn chay, dị ứng hoặc suất trẻ em." },
-                { icon: BedDouble, title: "Lưu trú", text: "Concierge liên hệ riêng nếu anh/chị cần thông tin phòng." },
-                { icon: MessageCircleHeart, title: "Concierge", text: "Ms. Linh · 0900 000 000 tiếp nhận ghi chú quan trọng." },
-              ].map((item, index) => (
-                <motion.article
-                  key={item.title}
-                  className="rounded-[1.35rem] border border-[#252934]/10 bg-white/48 p-5 shadow-[0_16px_50px_rgba(37,41,52,0.06)] backdrop-blur-xl"
-                  initial={{ opacity: 0, y: 18 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  whileHover={{ y: -3 }}
-                  viewport={{ once: true, amount: 0.35 }}
-                  transition={{ duration: 0.52, delay: index * 0.04 }}
-                >
-                  <item.icon className="h-5 w-5 text-serenity" />
-                  <h3 className="mt-5 text-xs font-black uppercase tracking-[0.22em] text-[#252934]/48">{item.title}</h3>
-                  <p className="mt-3 text-sm leading-6 text-[#252934]/62">{item.text}</p>
-                </motion.article>
-              ))}
+      <div className="mx-auto flex max-w-7xl justify-center">
+        <div
+          className="glass-panel relative w-full max-w-4xl overflow-hidden rounded-[2.75rem] px-6 py-10 sm:px-10 sm:py-14 lg:px-16 lg:py-16"
+        >
+          <div aria-hidden="true" className="absolute inset-x-8 top-5 h-px bg-[linear-gradient(90deg,transparent,rgba(212,175,55,0.42),transparent)] sm:inset-x-16 sm:top-7 lg:top-8" />
+          <div aria-hidden="true" className="absolute inset-x-8 bottom-5 h-px bg-[linear-gradient(90deg,transparent,rgba(212,175,55,0.3),transparent)] sm:inset-x-16 sm:bottom-7 lg:bottom-8" />
+
+          <div className="relative z-10 mx-auto flex max-w-2xl flex-col items-center text-center">
+            <p className="section-kicker-dark wedding-type-kicker">{config.sections.cta.eyebrow}</p>
+            <div className="mt-6 flex items-center gap-3">
+              <span className="h-px w-16 bg-[rgba(212,175,55,0.5)] sm:w-20" />
+              <span className="h-2 w-2 rounded-full border border-[rgba(212,175,55,0.5)] bg-white/78" />
+              <span className="h-px w-16 bg-[rgba(212,175,55,0.5)] sm:w-20" />
             </div>
+            <p suppressHydrationWarning className="wedding-type-meta mt-6 max-w-xl text-ink/62">
+              {inviteCopy.greeting}
+            </p>
+            <p suppressHydrationWarning className="wedding-type-body mt-4 max-w-xl text-ink/68">
+              {inviteCopy.hostSubject} mong nhận được lời hồi đáp trước ngày {config.rsvp.deadline} để chuẩn bị đón tiếp chu đáo.
+            </p>
+
+              <button
+                type="button"
+                onClick={() => navigateWithTransition(rsvpHref)}
+                className="mt-8 inline-flex h-[4.2rem] items-center justify-center transition hover:-translate-y-0.5 save-date-watercolor-btn"
+              >
+                <img src="/assets/wedding/ui/btn-rsvp-section.png" alt="" className="save-date-btn-bg" />
+                <span className="save-date-btn-label uppercase">Gửi hồi đáp</span>
+              </button>
           </div>
-        </motion.div>
+        </div>
       </div>
     </section>
   );

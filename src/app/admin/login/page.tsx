@@ -23,7 +23,8 @@ export default function AdminLoginPage() {
     setLoading(false);
 
     if (!response.ok) {
-      setError("Sai password admin");
+      const result = await response.json().catch(() => null) as { error?: string } | null;
+      setError(result?.error || "Sai password admin");
       return;
     }
 
@@ -35,7 +36,7 @@ export default function AdminLoginPage() {
       <form onSubmit={submit} className="w-full max-w-md rounded-[2rem] border border-[#E8DDCC] bg-[#FFFDF8] p-8 shadow-sm">
         <p className="text-xs font-semibold uppercase tracking-[0.35em] text-[#6B7A5A]">Admin</p>
         <h1 className="mt-3 font-serif text-5xl">Đăng nhập</h1>
-        <p className="mt-3 text-sm leading-6 text-[#8A8178]">Demo mặc định dùng password <b>demo-admin</b>. Production đặt biến môi trường ADMIN_PASSWORD.</p>
+        <p className="mt-3 text-sm leading-6 text-[#8A8178]">Production cần ADMIN_PASSWORD. Local dev mặc định dùng demo-admin nếu chưa đặt biến môi trường.</p>
         <input type="password" value={password} onChange={(event) => setPassword(event.target.value)} className="mt-6 min-h-12 w-full rounded-2xl border border-[#E8DDCC] bg-white px-4 outline-none focus:border-[#6B7A5A]" placeholder="Admin password" />
         {error ? <p className="mt-3 text-sm text-red-700">{error}</p> : null}
         <button disabled={loading} className="mt-5 min-h-12 w-full rounded-full bg-[#6B7A5A] px-6 text-sm font-semibold text-white disabled:opacity-60">{loading ? "Đang vào..." : "Vào admin"}</button>

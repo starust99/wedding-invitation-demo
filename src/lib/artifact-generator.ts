@@ -31,11 +31,11 @@ export function summarizeArtifacts(content: WeddingConfig, designSystem: Wedding
     const state = recipeState(content.project.artifacts, recipe.key);
     const readiness: string[] = [];
 
-    if (recipe.key === "web-invitation" && content.couple.displayName.includes("Cô Dâu")) readiness.push("Thay placeholder tên couple.");
+    if (recipe.key === "web-invitation" && content.couple.displayName.includes("Cô Dâu")) readiness.push("Đổi tên cặp đôi khỏi tên giữ chỗ.");
     if (recipe.key === "venue-map-card" && !content.venue.mapUrl) readiness.push("Thêm Google Maps URL.");
-    if (recipe.key === "story-share" && !designSystem.recommendedPreviewContexts.includes("story")) readiness.push("Direction hiện tại không ưu tiên story preview.");
-    if (recipe.key === "print-card" && !designSystem.recommendedPreviewContexts.includes("print-card")) readiness.push("Kiểm tra print-card preview trước khi xuất.");
-    if (recipe.key === "guest-info-card" && !content.accommodation.enabled) readiness.push("Accommodation đang tắt, card sẽ chỉ còn weather/dress code.");
+    if (recipe.key === "story-share" && !designSystem.recommendedPreviewContexts.includes("story")) readiness.push("Hướng hiện tại không ưu tiên xem trước khung dọc.");
+    if (recipe.key === "print-card" && !designSystem.recommendedPreviewContexts.includes("print-card")) readiness.push("Kiểm tra khung thiệp in trước khi xuất.");
+    if (recipe.key === "guest-info-card" && !content.accommodation.enabled) readiness.push("Lưu trú đang tắt, card sẽ chỉ còn thời tiết và trang phục.");
 
     return {
       ...recipe,

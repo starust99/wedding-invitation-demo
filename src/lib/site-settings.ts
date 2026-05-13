@@ -1,6 +1,9 @@
 import { weddingConfig } from "@/config/wedding.config";
 import { themePresets, type ThemeKey } from "@/config/theme-presets";
+import { cleanBundledPublicAssetSrc } from "@/lib/asset-cleanup";
 import type { AiTweakSuggestion } from "@/lib/ai-tweak-schema";
+import { normalizeEventDetailsEditorConfig } from "@/lib/wedding/event-details-config";
+import { normalizeWeddingHeroEditorConfig } from "@/lib/wedding/hero-config";
 
 type Editable<T> = T extends string
   ? string
@@ -38,7 +41,7 @@ type SettingsInput = Partial<Omit<SiteSettings, "content">> & {
 
 export const draftStorageKey = "wedding-demo-draft-settings";
 export const publishedStorageKey = "wedding-demo-published-settings";
-export const settingsSchemaVersion = 2;
+export const settingsSchemaVersion = 3;
 
 export const defaultSettings: SiteSettings = {
   schemaVersion: settingsSchemaVersion,
@@ -72,19 +75,41 @@ type MediaLayersRecord = Record<MediaSectionKey, MediaLayer[]>;
 
 const mediaSectionKeys: MediaSectionKey[] = ["hero", "invitation", "itinerary", "timeline", "venue", "dressCode", "guestNotes", "gallery", "cta"];
 
+function createEmptyMediaLayer(): MediaLayer {
+  return {
+    id: "empty-media-layer",
+    type: "image",
+    src: "",
+    mobileSrc: "",
+    alt: "",
+    opacity: 1,
+    scale: {
+      desktop: 1,
+      mobile: 1,
+    },
+    objectPosition: {
+      desktop: "center center",
+      mobile: "center center",
+    },
+    animation: "none",
+  };
+}
+
 function normalizeMediaLayer(layer: Partial<MediaLayer>, fallback: MediaLayer): MediaLayer {
   const desktopScale = layer.scale?.desktop;
   const mobileScale = layer.scale?.mobile;
   const desktopPosition = layer.objectPosition?.desktop;
   const mobilePosition = layer.objectPosition?.mobile;
+  const src = cleanBundledPublicAssetSrc(layer.src ?? fallback.src);
+  const mobileSrc = cleanBundledPublicAssetSrc(layer.mobileSrc ?? layer.src ?? fallback.mobileSrc ?? fallback.src);
 
   return {
     ...fallback,
     ...layer,
     id: layer.id || crypto.randomUUID(),
     type: layer.type === "video" ? "video" : "image",
-    src: layer.src ?? "",
-    mobileSrc: layer.mobileSrc ?? layer.src ?? "",
+    src,
+    mobileSrc,
     alt: layer.alt ?? "",
     opacity: Number.isFinite(layer.opacity) ? layer.opacity as number : fallback.opacity,
     scale: {
@@ -100,18 +125,21 @@ function normalizeMediaLayer(layer: Partial<MediaLayer>, fallback: MediaLayer): 
 }
 
 function normalizeMediaLayers(content: WeddingConfig): WeddingConfig {
-  const fallbackLayer = defaultSettings.content.appearance.mediaLayers.hero[0];
+  const fallbackLayer = defaultSettings.content.appearance.mediaLayers.hero[0] ?? createEmptyMediaLayer();
   const mediaLayers = structuredClone(content.appearance.mediaLayers) as unknown as MediaLayersRecord;
 
   for (const section of mediaSectionKeys) {
     mediaLayers[section] = (mediaLayers[section] ?? []).map((layer) => normalizeMediaLayer(layer, fallbackLayer));
   }
 
-  if (mediaLayers.hero.length === 0 && content.hero.coverImage) {
+  const heroCoverImage = cleanBundledPublicAssetSrc(content.hero.coverImage);
+  const mobileHeroCoverImage = cleanBundledPublicAssetSrc(content.hero.mobileCoverImage || content.hero.coverImage);
+
+  if (mediaLayers.hero.length === 0 && heroCoverImage) {
     mediaLayers.hero = [normalizeMediaLayer({
       id: "hero-cover",
-      src: content.hero.coverImage,
-      mobileSrc: content.hero.mobileCoverImage || content.hero.coverImage,
+      src: heroCoverImage,
+      mobileSrc: mobileHeroCoverImage || heroCoverImage,
       alt: content.sections.hero.imageAlt,
       animation: "slowZoom",
     }, fallbackLayer)];
@@ -119,6 +147,14 @@ function normalizeMediaLayers(content: WeddingConfig): WeddingConfig {
 
   return {
     ...content,
+    gallery: content.gallery.map(cleanBundledPublicAssetSrc),
+    hero: {
+      ...content.hero,
+      coverImage: heroCoverImage,
+      mobileCoverImage: mobileHeroCoverImage,
+    },
+    heroEditorConfig: normalizeWeddingHeroEditorConfig(content.heroEditorConfig),
+    eventDetailsConfig: normalizeEventDetailsEditorConfig(content.eventDetailsConfig),
     appearance: {
       ...content.appearance,
       mediaLayers: mediaLayers as unknown as WeddingConfig["appearance"]["mediaLayers"],
@@ -129,7 +165,19 @@ function normalizeMediaLayers(content: WeddingConfig): WeddingConfig {
 export function normalizeSettings(settings: SettingsInput | null): SiteSettings {
   if (!settings) return structuredClone(defaultSettings);
 
-  const content = mergeDefaults(defaultSettings.content, settings.content);
+  let content = mergeDefaults(defaultSettings.content, settings.content);
+
+  // Migration: Force Vietnamese text unification but preserve user's gallery and media assets
+  if ((settings.schemaVersion ?? 0) < 3) {
+    content = {
+      ...content,
+      timeline: defaultSettings.content.timeline,
+      sections: defaultSettings.content.sections,
+      hero: defaultSettings.content.hero,
+      heroEditorConfig: defaultSettings.content.heroEditorConfig,
+      eventDetailsConfig: defaultSettings.content.eventDetailsConfig,
+    };
+  }
 
   return {
     ...settings,

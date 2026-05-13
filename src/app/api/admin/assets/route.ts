@@ -242,6 +242,8 @@ async function uploadCloudinaryAsset(file: File, section: string, mimeType: stri
 
   const optimizedUrl = cloudinary.url(result.public_id, {
     secure: true,
+    analytics: false,
+    urlAnalytics: false,
     fetch_format: "auto",
     quality: "auto",
     width: getCloudinaryDeliveryWidth(section),

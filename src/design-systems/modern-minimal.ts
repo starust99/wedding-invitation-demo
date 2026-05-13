@@ -2,7 +2,7 @@ import type { WeddingDesignSystem } from "@/lib/design-system";
 
 export const modernMinimalDesignSystem = {
   key: "modern-minimal",
-  name: "Modern Minimal",
+  name: "Tối giản hiện đại",
   colorTokens: {
     background: "#F8F6F0",
     card: "#FFFFFF",
@@ -12,14 +12,14 @@ export const modernMinimalDesignSystem = {
     muted: "#6D6A63",
     border: "#E7E0D6",
   },
-  typographyIntent: ["Typography leads the design.", "Headlines can be large, but copy should stay minimal.", "Use clear hierarchy instead of ornaments."],
-  spacingRhythmRules: ["More whitespace, fewer blocks.", "One primary action per section.", "Mobile should feel calm and fast to scan."],
-  sectionCompositionRules: ["Every section needs a reason to exist.", "Venue/time and RSVP should be extremely clear.", "Gallery should not overwhelm the main invite."],
-  motifFloralRules: ["Use little to no floral motif.", "If used, motifs should be line-art or barely visible.", "No dense borders."],
-  motionRules: ["Use minimal fade/lift only.", "No looping ornamental motion.", "Disable unnecessary media animations."],
-  imageTreatmentRules: ["Prefer one strong hero image.", "Use clean crops and neutral overlays.", "Avoid heavy texture stacks."],
-  copyVoice: ["Short.", "Direct.", "Warm only where needed."],
-  dos: ["Remove redundant copy.", "Check mobile first.", "Keep RSVP obvious."],
-  donts: ["Do not add decorative clutter.", "Do not use many media layers.", "Do not create long prose sections."],
+  typographyIntent: ["Chữ dẫn nhịp chính.", "Tiêu đề có thể lớn, nhưng phần chữ phải gọn.", "Dùng phân cấp rõ thay vì trang trí."],
+  spacingRhythmRules: ["Nhiều khoảng thở, ít khối hơn.", "Mỗi section chỉ nên có một hành động chính.", "Di động phải dễ lướt và nhanh."],
+  sectionCompositionRules: ["Mỗi section phải có lý do tồn tại.", "Thông tin địa điểm, giờ và hồi đáp phải thật rõ.", "Gallery không được lấn át thiệp chính."],
+  motifFloralRules: ["Dùng rất ít hoặc không dùng họa tiết hoa.", "Nếu có, chỉ nên là nét mảnh hoặc gần như ẩn.", "Không viền dày đặc."],
+  motionRules: ["Chỉ dùng fade/lift nhẹ.", "Không chạy motion trang trí lặp.", "Tắt animation media không cần thiết."],
+  imageTreatmentRules: ["Ưu tiên một ảnh hero mạnh.", "Dùng crop sạch và lớp phủ trung tính.", "Tránh chồng quá nhiều texture."],
+  copyVoice: ["Ngắn.", "Thẳng.", "Ấm vừa đủ."],
+  dos: ["Bỏ copy thừa.", "Kiểm tra mobile trước.", "Làm nút hồi đáp thật rõ."],
+  donts: ["Không thêm clutter trang trí.", "Không dùng quá nhiều lớp media.", "Không viết đoạn prose dài."],
   recommendedPreviewContexts: ["mobile", "desktop", "print-card"],
 } satisfies WeddingDesignSystem;

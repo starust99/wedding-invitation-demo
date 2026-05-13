@@ -1,22 +1,22 @@
 export const toneOptions = [
-  { value: "formal", label: "Formal", description: "Trang trọng, nghi lễ, wording gọn và chỉn chu." },
-  { value: "romantic", label: "Romantic", description: "Ấm áp, mềm mại, giàu cảm xúc." },
-  { value: "editorial", label: "Editorial", description: "Sang, ít chữ, giống một trang magazine cưới." },
-  { value: "playful", label: "Playful", description: "Tự nhiên, gần gũi, có chút vui tươi." },
-  { value: "minimal", label: "Minimal", description: "Tinh giản, nhiều khoảng thở, tập trung vào thông tin chính." },
+  { value: "formal", label: "Trang trọng", description: "Nghi lễ, wording gọn và chỉn chu." },
+  { value: "romantic", label: "Lãng mạn", description: "Ấm áp, mềm mại, giàu cảm xúc." },
+  { value: "editorial", label: "Sang trọng", description: "Ít chữ, giống một trang tạp chí cưới." },
+  { value: "playful", label: "Tự nhiên", description: "Gần gũi, có chút vui tươi." },
+  { value: "minimal", label: "Tối giản", description: "Nhiều khoảng thở, tập trung vào thông tin chính." },
 ] as const;
 
 export const mustHaveSectionOptions = [
-  { value: "timeline", label: "Timeline" },
-  { value: "venue", label: "Venue / Map" },
-  { value: "dressCode", label: "Dress code" },
-  { value: "accommodation", label: "Accommodation" },
-  { value: "gallery", label: "Gallery" },
-  { value: "rsvp", label: "RSVP" },
+  { value: "timeline", label: "Lịch trình" },
+  { value: "venue", label: "Địa điểm / Bản đồ" },
+  { value: "dressCode", label: "Trang phục" },
+  { value: "accommodation", label: "Lưu trú" },
+  { value: "gallery", label: "Album ảnh" },
+  { value: "rsvp", label: "Hồi đáp" },
 ] as const;
 
 export const priorityOptions = [
-  { value: "digital", label: "Digital-first" },
-  { value: "print", label: "Print-first" },
-  { value: "both", label: "Digital + Print" },
+  { value: "digital", label: "Ưu tiên bản số" },
+  { value: "print", label: "Ưu tiên bản in" },
+  { value: "both", label: "Cân bằng hai bản" },
 ] as const;

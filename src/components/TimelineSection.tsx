@@ -1,50 +1,110 @@
 "use client";
 
-import { motion } from "framer-motion";
+import type { CSSProperties } from "react";
+import { useRef } from "react";
+import { motion, useScroll, useTransform, useSpring } from "framer-motion";
 import { SectionMediaLayers } from "@/components/SectionMediaLayers";
 import type { WeddingConfig } from "@/lib/site-settings";
 
-export function TimelineSection({ config }: { config: WeddingConfig }) {
-  return (
-    <section className="cinematic-stage relative bg-[linear-gradient(180deg,rgba(146,168,209,0.22),rgba(255,250,247,1)_38%,rgba(247,202,201,0.24))] px-5 py-24 text-[#252934] sm:px-8 lg:py-32">
-      <SectionMediaLayers config={config} section="timeline" className="opacity-[0.18]" />
-      <div aria-hidden="true" className="aurora-wash -z-10 opacity-35" />
-      <div className="mx-auto max-w-7xl">
-        <div className="grid gap-12 lg:grid-cols-[0.72fr_1fr]">
-          <motion.div
-            initial={{ opacity: 0, y: 22 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, amount: 0.35 }}
-            transition={{ duration: 0.62 }}
-          >
-            <p className="text-xs font-black uppercase tracking-[0.34em] text-[#252934]/48">{config.sections.timeline.eyebrow}</p>
-            <h2 className="mt-4 max-w-xl font-serif text-[clamp(2.9rem,5.8vw,5.6rem)] leading-[1.04]">{config.sections.timeline.title}</h2>
-            <p className="mt-6 max-w-xl text-lg leading-8 text-[#252934]/62">{config.sections.itinerary.description}</p>
-          </motion.div>
+type TimelineNode = {
+  time: string;
+  title: string;
+  x: string;
+  y: string;
+  rotate: string;
+  width: string;
+};
 
-          <div className="relative grid gap-4">
-            <div aria-hidden="true" className="absolute left-4 top-4 hidden h-[calc(100%-2rem)] w-px bg-gradient-to-b from-rose-quartz via-serenity to-rose-quartz sm:block" />
-            {config.timeline.map((item, index) => (
-              <motion.article
-                key={`${item.time}-${item.title}`}
-                className="cinematic-frame grid gap-4 rounded-[1.5rem] p-5 sm:ml-12 sm:grid-cols-[7rem_1fr] sm:p-6"
-                initial={{ opacity: 0, y: 18 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                whileHover={{ y: -4 }}
-                viewport={{ once: true, amount: 0.25 }}
-                transition={{ duration: 0.56, delay: index * 0.04 }}
+const desktopTimelineNodes: Array<Pick<TimelineNode, "x" | "y" | "rotate" | "width">> = [
+  { x: "29%", y: "7.5%", rotate: "-1.2deg", width: "17rem" },
+  { x: "71%", y: "22.5%", rotate: "1deg", width: "17rem" },
+  { x: "27%", y: "40%", rotate: "-1deg", width: "17rem" },
+  { x: "69%", y: "57%", rotate: "1.1deg", width: "17rem" },
+  { x: "31%", y: "74.5%", rotate: "-0.9deg", width: "17rem" },
+  { x: "67%", y: "91%", rotate: "1deg", width: "17rem" },
+];
+
+function buildTimelineNode(item: WeddingConfig["timeline"][number], index: number): TimelineNode {
+  const fallback = desktopTimelineNodes[index % desktopTimelineNodes.length];
+  return {
+    time: item.time,
+    title: item.title,
+    x: fallback.x,
+    y: fallback.y,
+    rotate: fallback.rotate,
+    width: fallback.width,
+  };
+}
+
+export function TimelineSection({ config }: { config: WeddingConfig }) {
+  const nodes = config.timeline.map(buildTimelineNode);
+  const sectionRef = useRef<HTMLElement>(null);
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ["start 60%", "end 80%"],
+  });
+
+  // Smooth scroll for the path line
+  const pathHeight = useSpring(useTransform(scrollYProgress, [0, 1], ["0%", "100%"]), {
+    stiffness: 40,
+    damping: 15,
+  });
+
+  return (
+    <section ref={sectionRef} id="timeline" className="timeline-garden-section cinematic-stage relative overflow-hidden px-5 py-24 text-ink sm:px-8 lg:py-32">
+      <SectionMediaLayers config={config} section="timeline" className="timeline-garden-media opacity-[0.08]" />
+      <div aria-hidden="true" className="paper-grain-luxury timeline-garden-grain opacity-15" />
+
+      <div className="timeline-garden-shell mx-auto max-w-7xl">
+        <div
+          className="timeline-garden-intro grid justify-items-center gap-5 text-center"
+        >
+          <p className="section-kicker-dark wedding-type-kicker">{config.sections.timeline.eyebrow}</p>
+          {config.sections.itinerary.description && (
+            <p className="wedding-type-body mx-auto max-w-2xl text-center text-ink/62">
+              {config.sections.itinerary.description}
+            </p>
+          )}
+        </div>
+
+        <div className="timeline-garden-path-scene relative">
+          {/* Scroll-drawn line overlay */}
+          <motion.div
+            className="absolute inset-0 z-0 pointer-events-none"
+            style={{
+              backgroundColor: "rgba(214, 192, 179, 0.12)",
+              width: "2px",
+              left: "50%",
+              transform: "translateX(-50%)",
+              height: pathHeight,
+              boxShadow: "0 0 12px rgba(214, 192, 179, 0.6)"
+            }}
+          />
+          <ol className="timeline-garden-list relative z-10">
+            {nodes.map((node) => (
+              <motion.li
+                key={`${node.time}-${node.title}`}
+                initial={{ opacity: 0.3, scale: 0.9, y: 30, filter: "blur(4px)" }}
+                whileInView={{ opacity: 1, scale: 1, y: 0, filter: "blur(0px)" }}
+                viewport={{ once: false, margin: "-15% 0px -15% 0px" }}
+                transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1], delay: 0.1 }}
+                className="timeline-garden-node"
+                style={
+                  {
+                    "--node-x": node.x,
+                    "--node-y": node.y,
+                    "--node-rot": node.rotate,
+                    "--node-width": node.width,
+                  } as CSSProperties
+                }
               >
-                <div>
-                  <p className="font-serif text-3xl leading-tight sm:text-4xl">{item.time}</p>
-                  <p className="mt-2 text-[0.65rem] font-black uppercase tracking-[0.22em] text-serenity">Chapter {index + 1}</p>
+                <div className="timeline-garden-card">
+                  <p className="timeline-garden-time">{node.time}</p>
+                  <h3>{node.title}</h3>
                 </div>
-                <div>
-                  <h3 className="font-serif text-3xl leading-snug sm:text-4xl">{item.title}</h3>
-                  <p className="mt-3 max-w-xl text-sm leading-6 text-[#252934]/62">{item.description}</p>
-                </div>
-              </motion.article>
+              </motion.li>
             ))}
-          </div>
+          </ol>
         </div>
       </div>
     </section>

@@ -14,8 +14,8 @@ export type PreviewContext = {
 export const previewContexts = [
   {
     key: "mobile",
-    label: "Mobile",
-    description: "390px invitation flow, ưu tiên đọc nhanh và RSVP rõ.",
+    label: "Điện thoại",
+    description: "Luồng thiệp rộng 390px, ưu tiên đọc nhanh và phần hồi đáp rõ.",
     width: 390,
     height: 760,
     scale: 1,
@@ -23,8 +23,8 @@ export const previewContexts = [
   },
   {
     key: "tablet",
-    label: "Tablet",
-    description: "768px layout để bắt lỗi spacing ở breakpoint trung gian.",
+    label: "Máy tính bảng",
+    description: "Bố cục 768px để bắt lỗi khoảng cách ở điểm gãy trung gian.",
     width: 768,
     height: 900,
     scale: 0.72,
@@ -32,8 +32,8 @@ export const previewContexts = [
   },
   {
     key: "desktop",
-    label: "Desktop",
-    description: "1440px website view cho PC và laptop lớn.",
+    label: "Màn hình lớn",
+    description: "Khung 1440px cho máy tính bàn và laptop lớn.",
     width: 1440,
     height: 980,
     scale: 0.45,
@@ -41,8 +41,8 @@ export const previewContexts = [
   },
   {
     key: "print-card",
-    label: "Print 5x7",
-    description: "Crop tỉ lệ 5x7 để kiểm tra cảm giác thiệp in.",
+    label: "Thiệp in 5x7",
+    description: "Cắt khung 5x7 để kiểm tra cảm giác thiệp in.",
     width: 500,
     height: 700,
     scale: 0.92,
@@ -50,8 +50,8 @@ export const previewContexts = [
   },
   {
     key: "story",
-    label: "Story 9:16",
-    description: "Instagram story crop, xem hero có đủ đẹp khi share dọc không.",
+    label: "Khung dọc 9:16",
+    description: "Khung dọc 9:16, xem hero có đẹp khi chia sẻ theo chiều dọc không.",
     width: 405,
     height: 720,
     scale: 1,
@@ -59,8 +59,8 @@ export const previewContexts = [
   },
   {
     key: "rsvp",
-    label: "RSVP jump",
-    description: "Preview nhanh CTA/RSVP area để kiểm tra lời kêu gọi xác nhận.",
+    label: "Nhảy tới hồi đáp",
+    description: "Xem nhanh khu vực nút hồi đáp để kiểm tra lời mời xác nhận.",
     width: 390,
     height: 760,
     scale: 1,

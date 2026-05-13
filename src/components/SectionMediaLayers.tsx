@@ -1,26 +1,8 @@
-"use client";
-
-import { motion } from "framer-motion";
+import Image from "next/image";
 import type { WeddingConfig } from "@/lib/site-settings";
 
 type MediaSectionKey = keyof WeddingConfig["appearance"]["mediaLayers"];
 type MediaLayer = WeddingConfig["appearance"]["mediaLayers"]["hero"][number];
-
-function layerAnimation(layer: MediaLayer, scale: number) {
-  if (layer.animation === "slowZoom") {
-    return { scale: [scale, scale * 1.045, scale] };
-  }
-
-  if (layer.animation === "float") {
-    return { y: [0, -14, 0], scale };
-  }
-
-  if (layer.animation === "fade") {
-    return { opacity: [layer.opacity * 0.72, layer.opacity, layer.opacity * 0.72], scale };
-  }
-
-  return { scale, opacity: layer.opacity };
-}
 
 function MediaAsset({ layer, mobile = false }: { layer: MediaLayer; mobile?: boolean }) {
   const src = mobile ? layer.mobileSrc || layer.src : layer.src;
@@ -49,14 +31,13 @@ function MediaAsset({ layer, mobile = false }: { layer: MediaLayer; mobile?: boo
   }
 
   return (
-    <motion.img
+    <Image
       src={src}
       alt=""
+      fill
+      sizes="100vw"
       className={className}
-      style={{ opacity: layer.opacity, objectPosition }}
-      initial={{ scale, opacity: layer.opacity }}
-      animate={layerAnimation(layer, scale)}
-      transition={{ duration: 16, repeat: Infinity, ease: "easeInOut" }}
+      style={{ opacity: layer.opacity, objectPosition, transform: `scale(${scale})` }}
       draggable={false}
     />
   );
