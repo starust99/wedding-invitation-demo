@@ -603,18 +603,15 @@ export default function RSVPPage() {
                   exit={{ opacity: 0, y: -14 }}
                   transition={{ duration: 0.24 }}
                 >
-                  <p className="section-kicker-dark wedding-type-kicker text-serenity">{currentStep.eyebrow}</p>
-                  <h2 className="wedding-type-card-title mt-3 text-[#252934]">{currentStep.title}</h2>
                   {submitError ? <p className="mt-3 rounded-2xl border border-serenity/18 bg-white/60 px-4 py-3 text-sm font-semibold text-[#9B4E5C]">{submitError}</p> : null}
 
                   {currentStep.key === "attendance" ? (
                     <div className="mt-8 grid gap-5">
                       <div className="rounded-[1.4rem] border border-serenity/18 bg-white/56 p-5 text-center">
-                        <p className="section-kicker-dark wedding-type-kicker text-serenity">Xem lại lời mời</p>
-                        <p className="wedding-type-card-title mt-4 text-[#252934]">
+                        <p className="wedding-type-card-title text-[#252934]">
                           {displayedInsideInviteLine}
                         </p>
-                        <p className="wedding-type-body mt-4 text-[#252934]/58">{inviteCopy.closingLine}</p>
+                        <p className="wedding-type-body mt-3 text-[#252934]/58">{inviteCopy.closingLine}</p>
                       </div>
 
                       <div className="grid gap-4">

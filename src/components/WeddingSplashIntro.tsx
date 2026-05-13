@@ -91,7 +91,9 @@ export function WeddingSplashIntro({
     setStatus("opening");
     
     if (videoRef.current) {
-      videoRef.current.play().catch(console.error);
+      videoRef.current.play().catch((err) => {
+        if (err.name !== "AbortError") console.error("Video play error:", err);
+      });
     }
 
     // Fallback timer just in case video onEnded fails or user is on low-power mode (increased for slow networks)

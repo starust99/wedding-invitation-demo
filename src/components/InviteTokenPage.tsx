@@ -126,7 +126,9 @@ export function InviteTokenPage({ token }: { token: string }) {
       <WeddingDetailsSection config={config} />
       <TimelineSection config={config} />
       <GallerySection config={config} />
-      <RsvpSection config={config} guestIdentity={guestIdentity} rsvpHref={rsvpHref} />
+      {!shouldShowThankYou ? (
+        <RsvpSection config={config} guestIdentity={guestIdentity} rsvpHref={rsvpHref} />
+      ) : null}
       {shouldShowThankYou ? (
         <ThankYouSection
           config={config}
