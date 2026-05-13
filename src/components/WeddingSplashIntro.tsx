@@ -85,8 +85,8 @@ export function WeddingSplashIntro({
       videoRef.current.play().catch(console.error);
     }
 
-    // Fallback timer just in case video onEnded fails or user is on low-power mode
-    closeTimer.current = window.setTimeout(closeIntro, 6500);
+    // Fallback timer just in case video onEnded fails or user is on low-power mode (increased for slow networks)
+    closeTimer.current = window.setTimeout(closeIntro, 15000);
   }, [closeIntro, status]);
 
   useEffect(() => {
