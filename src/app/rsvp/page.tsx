@@ -217,6 +217,7 @@ export default function RSVPPage() {
     handleSubmit,
     setValue,
     getValues,
+    trigger,
     formState: { errors, isSubmitting },
   } = useForm<RSVPFormInput, unknown, RSVPFormOutput>({
     resolver: zodResolver(rsvpSchema),
@@ -359,6 +360,36 @@ export default function RSVPPage() {
   function goToStepByKey(stepKey: StepKey) {
     const index = visibleSteps.findIndex((item) => item.key === stepKey);
     goToStep(index < 0 ? 0 : index);
+  }
+
+  async function goNextStep() {
+    setSubmitError("");
+
+    if (currentStep.key === "attendance") {
+      const isValid = await trigger(["attending", "guestCount"], { shouldFocus: true });
+      if (!isValid) {
+        setSubmitError("Vui lòng chọn phản hồi trước khi tiếp tục.");
+        return;
+      }
+    }
+
+    if (currentStep.key === "stay") {
+      const isValid = await trigger(["accommodationNeeded", "lodgingGuests"], { shouldFocus: true });
+      if (!isValid) {
+        setSubmitError("Vui lòng điền đủ thông tin lưu trú bắt buộc trước khi tiếp tục.");
+        return;
+      }
+    }
+
+    if (currentStep.key === "message") {
+      const isValid = await trigger(["dietaryNote", "notes"], { shouldFocus: true });
+      if (!isValid) {
+        setSubmitError("Vui lòng kiểm tra lại phần lời nhắn trước khi tiếp tục.");
+        return;
+      }
+    }
+
+    goToStep(Math.min(visibleSteps.length - 1, stepIndex + 1));
   }
 
   function persistLocalRsvp(payload: Omit<RSVPResponse, "id" | "submittedAt">) {
@@ -853,11 +884,11 @@ export default function RSVPPage() {
                 {stepIndex < visibleSteps.length - 1 ? (
                   <motion.button
                     type="button"
-                    className="light-sweep wedding-type-button inline-flex min-h-12 items-center justify-center rounded-full bg-rose-quartz px-7 text-[#252934] shadow-[0_16px_48px_rgba(146,168,209,0.22)] ring-1 ring-rose-quartz/70"
-                    whileHover={{ scale: 1.03 }}
-                    whileTap={{ scale: 0.97 }}
-                    onClick={() => goToStep(Math.min(visibleSteps.length - 1, stepIndex + 1))}
-                  >
+	                    className="light-sweep wedding-type-button inline-flex min-h-12 items-center justify-center rounded-full bg-rose-quartz px-7 text-[#252934] shadow-[0_16px_48px_rgba(146,168,209,0.22)] ring-1 ring-rose-quartz/70"
+	                    whileHover={{ scale: 1.03 }}
+	                    whileTap={{ scale: 0.97 }}
+	                    onClick={() => void goNextStep()}
+	                  >
                     Tiếp tục <ChevronRight className="ml-2 h-4 w-4" />
                   </motion.button>
                   ) : (
