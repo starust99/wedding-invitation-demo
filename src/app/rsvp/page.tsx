@@ -744,13 +744,15 @@ export default function RSVPPage() {
                                       <Trash2 className="h-4 w-4" />
                                     </button>
                                   </div>
-                                  <div className="grid gap-4 sm:grid-cols-[1fr_0.86fr]">
+                                  <div className={`grid gap-4 ${isChild ? "" : "sm:grid-cols-[1fr_0.86fr]"}`}>
                                     <Field label="Họ tên (đúng trên giấy tờ)" error={guestErrors?.fullName?.message}>
                                       <input className={inputClass} placeholder="VD: Nguyễn Văn A" {...register(`lodgingGuests.${index}.fullName`)} />
                                     </Field>
-                                    <Field label="Số giấy tờ tùy thân" error={guestErrors?.idNumber?.message}>
-                                      <input className={inputClass} placeholder={isChild ? "Bé chưa có thì để trống" : "CMND/CCCD/Passport"} {...register(`lodgingGuests.${index}.idNumber`)} />
-                                    </Field>
+                                    {!isChild && (
+                                      <Field label="Số giấy tờ tùy thân" error={guestErrors?.idNumber?.message}>
+                                        <input className={inputClass} placeholder="CMND/CCCD/Passport" {...register(`lodgingGuests.${index}.idNumber`)} />
+                                      </Field>
+                                    )}
                                   </div>
                                   <div className="mt-4 flex flex-wrap items-center gap-4">
                                     <label className="flex h-[3.25rem] cursor-pointer items-center gap-3 rounded-2xl border border-serenity/18 bg-white/70 px-4 text-sm font-semibold text-[#252934] transition hover:bg-white">
