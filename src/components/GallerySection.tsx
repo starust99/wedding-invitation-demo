@@ -141,9 +141,12 @@ export function GallerySection({ config }: { config: WeddingConfig }) {
           ) : null}
 
           <motion.figure
-            layoutId={`gallery-img-${selectedImageIndex}`}
+            key={`lightbox-img-${selectedImageIndex}`}
             className={`gallery-lightbox-frame ${activeFrameClass}`}
             onClick={(event) => event.stopPropagation()}
+            initial={{ opacity: 0, scale: 0.95, y: 15 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: 10, transition: { duration: 0.2 } }}
             transition={{ type: "spring", stiffness: 260, damping: 25 }}
           >
             <Image
@@ -199,7 +202,6 @@ export function GallerySection({ config }: { config: WeddingConfig }) {
                 suppressHydrationWarning
               >
                 <motion.button
-                  layoutId={hasImage ? `gallery-img-${index}` : undefined}
                   type="button"
                   className={`gallery-mosaic-tile-shell ${hasImage ? "gallery-mosaic-trigger" : ""}`}
                   aria-label={hasImage ? `Mở ảnh cưới ${index + 1}` : undefined}
