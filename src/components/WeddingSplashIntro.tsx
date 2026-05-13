@@ -44,6 +44,15 @@ export function WeddingSplashIntro({
   const reduceMotion = useReducedMotion();
   const [status, setStatus] = useState<SplashStatus>("checking");
   const [isImmediateClose, setIsImmediateClose] = useState(false);
+  const [viewport, setViewport] = useState<"desktop" | "mobile" | null>(null);
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia("(max-width: 767px)");
+    const syncViewport = () => setViewport(mediaQuery.matches ? "mobile" : "desktop");
+    syncViewport();
+    mediaQuery.addEventListener("change", syncViewport);
+    return () => mediaQuery.removeEventListener("change", syncViewport);
+  }, []);
   const closeTimer = useRef<number | null>(null);
   const sessionKey = `wedding-splash:${storageKey}`;
   const inviteCopy = useMemo(() => buildInvitationCopy({
@@ -123,22 +132,14 @@ export function WeddingSplashIntro({
           {/* THE VIDEO - responsive sources for mobile (9:16) and desktop (16:9) */}
           <div className="absolute inset-0 flex items-center justify-center">
             <video 
-              ref={(el) => {
-                (videoRef as React.MutableRefObject<HTMLVideoElement | null>).current = el;
-                if (el) {
-                  el.poster = window.innerWidth < 768
-                    ? "/assets/wedding/ui/splash-poster-mobile.jpg"
-                    : "/assets/wedding/ui/splash-closed.png";
-                }
-              }}
+              ref={videoRef}
               className="h-full w-full object-cover"
               playsInline
               muted
               onEnded={closeIntro}
-            >
-              <source src="/assets/wedding/ui/splash-video-mobile.mp4" media="(max-width: 767px)" type="video/mp4" />
-              <source src="/assets/wedding/ui/splash-video.mp4" type="video/mp4" />
-            </video>
+              poster={viewport === "mobile" ? "/assets/wedding/ui/splash-poster-mobile.jpg" : "/assets/wedding/ui/splash-closed.png"}
+              src={viewport === "mobile" ? "/assets/wedding/ui/splash-video-mobile.mp4" : viewport === "desktop" ? "/assets/wedding/ui/splash-video.mp4" : undefined}
+            />
           </div>
 
           {/* CLICKABLE OVERLAY */}

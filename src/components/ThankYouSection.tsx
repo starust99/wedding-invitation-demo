@@ -33,12 +33,7 @@ export function ThankYouSection({
         <div
           className="glass-panel relative w-full max-w-6xl overflow-hidden rounded-[2.8rem] px-5 py-7 sm:px-8 sm:py-8 lg:px-10 lg:py-10"
         >
-          <div aria-hidden="true" className="absolute inset-x-8 top-4 h-px bg-[linear-gradient(90deg,transparent,rgba(212,175,55,0.44),transparent)] sm:inset-x-16 sm:top-5 lg:top-6" />
-          <div aria-hidden="true" className="absolute inset-x-8 bottom-4 h-px bg-[linear-gradient(90deg,transparent,rgba(212,175,55,0.32),transparent)] sm:inset-x-16 sm:bottom-5 lg:bottom-6" />
-          <div aria-hidden="true" className="absolute left-7 top-7 h-10 w-10 rounded-tl-[1.4rem] border-l border-t border-[rgba(212,175,55,0.22)] sm:left-9 sm:top-9" />
-          <div aria-hidden="true" className="absolute right-7 top-7 h-10 w-10 rounded-tr-[1.4rem] border-r border-t border-[rgba(212,175,55,0.22)] sm:right-9 sm:top-9" />
-          <div aria-hidden="true" className="absolute bottom-7 left-7 h-10 w-10 rounded-bl-[1.4rem] border-b border-l border-[rgba(212,175,55,0.22)] sm:bottom-9 sm:left-9" />
-          <div aria-hidden="true" className="absolute right-7 bottom-7 h-10 w-10 rounded-br-[1.4rem] border-b border-r border-[rgba(212,175,55,0.22)] sm:right-9 sm:bottom-9" />
+
 
           <div className="relative z-10 grid min-h-[24rem] place-items-start py-4 text-center sm:min-h-[30rem] sm:place-items-center sm:py-8 lg:min-h-[34rem]">
             <div className="flex w-full max-w-2xl flex-col items-center justify-between gap-8 text-center sm:gap-10">
@@ -63,7 +58,7 @@ export function ThankYouSection({
                   <button
                     type="button"
                     onClick={() => navigateWithTransition(rsvpHref)}
-                    className="inline-flex h-12 items-center justify-center transition hover:-translate-y-0.5 save-date-watercolor-btn"
+                    className="inline-flex h-14 sm:h-16 lg:h-20 text-base sm:text-lg items-center justify-center transition hover:-translate-y-0.5 save-date-watercolor-btn"
                   >
                     <img src="/assets/wedding/ui/btn-view-rsvp.png" alt="" className="save-date-btn-bg" />
                     <span className="save-date-btn-label uppercase">Xem hồi đáp</span>
@@ -73,7 +68,7 @@ export function ThankYouSection({
                     href={config.venue.mapUrl}
                     target="_blank"
                     rel="noreferrer"
-                    className="inline-flex h-12 items-center justify-center transition hover:-translate-y-0.5 save-date-watercolor-btn"
+                    className="inline-flex h-14 sm:h-16 lg:h-20 text-base sm:text-lg items-center justify-center transition hover:-translate-y-0.5 save-date-watercolor-btn"
                   >
                     <img src="/assets/wedding/ui/btn-thankyou-directions.png" alt="" className="save-date-btn-bg" />
                     <span className="save-date-btn-label uppercase">Chỉ đường</span>
