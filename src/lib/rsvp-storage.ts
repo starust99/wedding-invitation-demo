@@ -1,6 +1,6 @@
 export type LodgingGuest = {
   fullName: string;
-  idNumber: string;
+  idNumber?: string;
   isChild: boolean;
   age?: number;
 };
@@ -86,7 +86,7 @@ export function attendingLabel(value: RSVPResponse["attending"]) {
 }
 
 export function countLodgingChildren(guests: LodgingGuest[]) {
-  return guests.filter((guest) => guest.isChild && typeof guest.age === "number" && guest.age < 11).length;
+  return guests.filter((guest) => guest.isChild).length;
 }
 
 export function formatLodgingGuestLabel(guest: LodgingGuest) {

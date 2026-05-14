@@ -37,16 +37,8 @@ const lodgingGuestSchema = z
     age: z.number().int().min(0, "Tuổi không hợp lệ.").optional(),
   })
   .superRefine((guest, ctx) => {
-    if (!guest.isChild && !guest.idNumber?.trim()) {
-      ctx.addIssue({ code: "custom", path: ["idNumber"], message: "Người lớn vui lòng nhập số giấy tờ tùy thân để Terracotta hỗ trợ nhận phòng." });
-    }
-
     if (guest.isChild && typeof guest.age !== "number") {
       ctx.addIssue({ code: "custom", path: ["age"], message: "Nhập tuổi của bé để resort sắp xếp phù hợp." });
-    }
-
-    if (guest.isChild && typeof guest.age === "number" && guest.age >= 11) {
-      ctx.addIssue({ code: "custom", path: ["age"], message: "Từ 11 tuổi trở lên, vui lòng khai như người lớn." });
     }
   });
 
@@ -135,7 +127,7 @@ function buildTerracottaNote(guests: LodgingGuest[]) {
   const childCount = countLodgingChildren(guests);
 
   if (childCount === 0) return "";
-  return `${childCount} bé dưới 11 tuổi đã được ghi nhận.`;
+  return `${childCount} trẻ em đi cùng đã được ghi nhận.`;
 }
 
 function Field({ label, error, children }: { label: string; error?: string; children: ReactNode }) {
@@ -699,13 +691,13 @@ export default function RSVPPage() {
                       {accommodationNeeded ? (
                         <div className="grid gap-4 rounded-[1.4rem] border border-serenity/18 bg-white/44 p-5 text-center">
                           <div className="rounded-[1.2rem] bg-serenity/10 px-5 py-4 text-left text-sm text-[#252934]/75">
-                            <p className="font-bold text-[#252934]">Lưu ý khi có trẻ em đi cùng:</p>
-                            <p className="mt-1.5 leading-relaxed">
-                              Dưới 5 tuổi: Chỉ cần ghi họ tên.<br />
-                              Từ 5 - dưới 11 tuổi: Ghi họ tên và độ tuổi.<br />
-                              Từ 11 tuổi trở lên: Khai như người lớn.<br />
-                              (Nếu cần nôi cho em bé, vui lòng ghi ở bước tiếp theo).
-                            </p>
+                            <p className="font-bold text-[#252934]">Lưu ý khi có trẻ em đi cùng (Tối đa 02 bé/phòng):</p>
+                            <p className="mt-2 leading-relaxed">Vui lòng tích chọn ô <strong>"Là trẻ em"</strong> và ghi rõ số tuổi để gia đình phân bổ phòng & giường phụ chính xác:</p>
+                            <ul className="mt-1.5 list-inside list-disc space-y-1 leading-relaxed">
+                              <li><span className="font-semibold text-[#252934]">Dưới 11 tuổi:</span> Trẻ sẽ ngủ chung giường.</li>
+                              <li><span className="font-semibold text-[#252934]">Từ 11 tuổi trở lên:</span> Resort sẽ kê thêm giường phụ.</li>
+                            </ul>
+                            <p className="mt-2 text-xs italic opacity-80">(Nếu cần nôi cho em bé, vui lòng ghi chú ở bước tiếp theo).</p>
                           </div>
 
                           <div className="grid justify-items-center gap-3">
@@ -749,7 +741,7 @@ export default function RSVPPage() {
                                       <input className={inputClass} placeholder="VD: Nguyễn Văn A" {...register(`lodgingGuests.${index}.fullName`)} />
                                     </Field>
                                     {!isChild && (
-                                      <Field label="Số giấy tờ tùy thân" error={guestErrors?.idNumber?.message}>
+                                      <Field label="Số giấy tờ tùy thân (Không bắt buộc)" error={guestErrors?.idNumber?.message}>
                                         <input className={inputClass} placeholder="CMND/CCCD/Passport" {...register(`lodgingGuests.${index}.idNumber`)} />
                                       </Field>
                                     )}
@@ -757,7 +749,7 @@ export default function RSVPPage() {
                                   <div className="mt-4 flex flex-wrap items-center gap-4">
                                     <label className="flex h-[3.25rem] cursor-pointer items-center gap-3 rounded-2xl border border-serenity/18 bg-white/70 px-4 text-sm font-semibold text-[#252934] transition hover:bg-white">
                                       <input type="checkbox" className="h-5 w-5 rounded text-serenity accent-serenity focus:ring-serenity/30" {...register(`lodgingGuests.${index}.isChild`)} />
-                                      Là trẻ em (dưới 11 tuổi)
+                                      Là trẻ em (đi cùng phụ huynh)
                                     </label>
                                     {isChild ? (
                                       <div className="w-32">
