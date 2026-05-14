@@ -33,8 +33,31 @@ const fontVariables = [
 ].join(" ");
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://nhatphuong.love"),
   title: "Nhật & Phương — Thiệp cưới",
   description: "Mời bạn chung vui trong lễ cưới của Nhật & Phương tại Terracotta Đà Lạt, 26.12.2026.",
+  openGraph: {
+    title: "Nhật & Phương — Thiệp cưới",
+    description: "Mời bạn chung vui trong lễ cưới của Nhật & Phương tại Terracotta Đà Lạt, 26.12.2026.",
+    url: "https://nhatphuong.love",
+    siteName: "Nhật & Phương Wedding",
+    images: [
+      {
+        url: "/assets/og-image.png",
+        width: 1672,
+        height: 941,
+        alt: "Nhật & Phương Wedding Thumbnail",
+      },
+    ],
+    locale: "vi_VN",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Nhật & Phương — Thiệp cưới",
+    description: "Mời bạn chung vui trong lễ cưới của Nhật & Phương tại Terracotta Đà Lạt, 26.12.2026.",
+    images: ["/assets/og-image.png"],
+  },
 };
 
 export const viewport: Viewport = {
