@@ -5,6 +5,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
+  CheckSquare,
   Copy,
   Download,
   FileUp,
@@ -13,8 +14,10 @@ import {
   Loader2,
   Plus,
   RefreshCw,
+  Search,
   Save,
   Settings2,
+  Square,
   Trash2,
 } from "lucide-react";
 import {
@@ -119,14 +122,14 @@ function buildInviteCopyPatch(invitee: Invitee, coupleDisplayName: string): Pick
   };
 }
 
-function normalizeInviteeMatchKey(value: string) {
+function normalizeInviteeMatchKey(value?: string) {
   return value
-    .toLowerCase()
+    ?.toLowerCase()
     .replace(/đ/g, "d")
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
     .replace(/[^a-z0-9]+/g, " ")
-    .trim();
+    .trim() ?? "";
 }
 
 function downloadBlob(filename: string, blob: Blob) {
@@ -151,11 +154,15 @@ export function InviteAdminPanel() {
   const [responses, setResponses] = useState<RSVPResponse[]>([]);
   const [selectedInviteeId, setSelectedInviteeId] = useState<string>("");
   const [busy, setBusy] = useState(false);
+  const [bulkDeleting, setBulkDeleting] = useState(false);
   const [importNotice, setImportNotice] = useState("");
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [mediaMessage, setMediaMessage] = useState("");
   const [tab, setTab] = useState<"invitees" | "album">("invitees");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [lastImportedInviteeIds, setLastImportedInviteeIds] = useState<string[]>([]);
+  const [selectedInviteeIds, setSelectedInviteeIds] = useState<Set<string>>(() => new Set());
   const importFileRef = useRef<HTMLInputElement | null>(null);
 
   const selectedInvitee = useMemo(() => {
@@ -254,6 +261,30 @@ export function InviteAdminPanel() {
 
   const selectedRsvp = selectedInvitee?.id ? rsvpByInviteeId.get(selectedInvitee.id) : undefined;
   const visibleAlbumAssets = selectedInvitee ? filterMediaAssetsForInvitee(mediaAssets, selectedInvitee, albumRules) : mediaAssets.filter((asset) => asset.status === "published");
+  const visibleInvitees = useMemo(() => {
+    const normalizedQuery = normalizeInviteeMatchKey(searchQuery);
+    if (!normalizedQuery) return invitees;
+
+    return invitees.filter((invitee) => [
+      invitee.displayLabel,
+      invitee.guestName,
+      invitee.invitationName,
+      invitee.guestGroup,
+      invitee.relationship,
+      invitee.hostRelationship,
+      invitee.token,
+    ].some((value) => normalizeInviteeMatchKey(value).includes(normalizedQuery)));
+  }, [invitees, searchQuery]);
+  const lastImportedInvitees = useMemo(() => {
+    if (lastImportedInviteeIds.length === 0) return [];
+    const byId = new Map(invitees.map((invitee) => [invitee.id, invitee]));
+    return lastImportedInviteeIds.map((id) => byId.get(id)).filter((invitee): invitee is Invitee => Boolean(invitee));
+  }, [invitees, lastImportedInviteeIds]);
+  const allVisibleInviteesSelected = visibleInvitees.length > 0 && visibleInvitees.every((invitee) => selectedInviteeIds.has(invitee.id));
+  const selectedInvitees = useMemo(
+    () => invitees.filter((invitee) => selectedInviteeIds.has(invitee.id)),
+    [invitees, selectedInviteeIds],
+  );
 
   function persistMedia(nextMediaAssets: MediaAsset[], nextAlbumRules: AlbumRule[]) {
     setMediaAssets(nextMediaAssets);
@@ -288,6 +319,27 @@ export function InviteAdminPanel() {
     if (!selectedInvitee) return;
     patchSelectedInvitee(buildInviteCopyPatch(selectedInvitee, config.couple.displayName));
     setMessage("Đã tạo lại dòng phong bì và lời mời theo cách xưng hô hiện tại.");
+  }
+
+  function setInviteeSelection(inviteeId: string, checked: boolean) {
+    setSelectedInviteeIds((current) => {
+      const next = new Set(current);
+      if (checked) next.add(inviteeId);
+      else next.delete(inviteeId);
+      return next;
+    });
+  }
+
+  function toggleVisibleInviteesSelection() {
+    setSelectedInviteeIds((current) => {
+      const next = new Set(current);
+      if (allVisibleInviteesSelected) {
+        for (const invitee of visibleInvitees) next.delete(invitee.id);
+      } else {
+        for (const invitee of visibleInvitees) next.add(invitee.id);
+      }
+      return next;
+    });
   }
 
   async function saveSelectedInvitee() {
@@ -450,6 +502,12 @@ export function InviteAdminPanel() {
 
       const nextInvitees = invitees.filter((item) => item.id !== selectedInvitee.id);
       setInvitees(nextInvitees);
+      setLastImportedInviteeIds((current) => current.filter((id) => id !== selectedInvitee.id));
+      setSelectedInviteeIds((current) => {
+        const next = new Set(current);
+        next.delete(selectedInvitee.id);
+        return next;
+      });
       if (backend !== "supabase") writeLocalInvitees(nextInvitees);
       setResponses((current) => current.filter((response) => (
         response.inviteeId !== selectedInvitee.id && response.inviteToken !== selectedInvitee.token
@@ -460,6 +518,55 @@ export function InviteAdminPanel() {
       setError(deleteError instanceof Error ? deleteError.message : "Không xóa được khách mời.");
     } finally {
       setBusy(false);
+    }
+  }
+
+  async function deleteSelectedInvitees() {
+    if (selectedInvitees.length === 0) return;
+    if (!window.confirm(`Xóa ${selectedInvitees.length} khách mời đã chọn và toàn bộ hồi đáp gắn với các link này?`)) return;
+
+    setBulkDeleting(true);
+    setMessage("");
+    setError("");
+
+    try {
+      if (backend === "supabase") {
+        for (const invitee of selectedInvitees) {
+          const response = await fetch(`/api/admin/invites/${invitee.id}`, { method: "DELETE" });
+          if (!response.ok) {
+            const result = await response.json().catch(() => null) as { error?: string } | null;
+            throw new Error(result?.error || `Không xóa được khách mời ${invitee.displayLabel}.`);
+          }
+        }
+      } else {
+        removeRSVPResponses((response) => selectedInvitees.some((invitee) => (
+          response.inviteeId === invitee.id || response.inviteToken === invitee.token
+        )));
+      }
+
+      const deletedIds = new Set(selectedInvitees.map((invitee) => invitee.id));
+      const deletedTokens = new Set(selectedInvitees.map((invitee) => invitee.token));
+      const nextInvitees = invitees.filter((invitee) => !deletedIds.has(invitee.id));
+
+      setInvitees(nextInvitees);
+      setResponses((current) => current.filter((response) => (
+        !(response.inviteeId && deletedIds.has(response.inviteeId))
+        && !(response.inviteToken && deletedTokens.has(response.inviteToken))
+      )));
+      setLastImportedInviteeIds((current) => current.filter((id) => !deletedIds.has(id)));
+      setSelectedInviteeIds(new Set());
+      setSelectedInviteeId((current) => {
+        if (current && !deletedIds.has(current)) return current;
+        return nextInvitees[0]?.id ?? "";
+      });
+
+      if (backend !== "supabase") writeLocalInvitees(nextInvitees);
+
+      setMessage(`Đã xóa ${selectedInvitees.length} khách mời đã chọn.`);
+    } catch (deleteError) {
+      setError(deleteError instanceof Error ? deleteError.message : "Không xóa được các khách mời đã chọn.");
+    } finally {
+      setBulkDeleting(false);
     }
   }
 
@@ -500,6 +607,7 @@ export function InviteAdminPanel() {
 
       setInvitees(nextInvitees);
       setSelectedInviteeId(nextSelectedId);
+      setLastImportedInviteeIds([nextSelectedId]);
       setMessage("Đã tạo khách mời mới.");
     } catch (addError) {
       setError(addError instanceof Error ? addError.message : "Không tạo được khách mời.");
@@ -563,13 +671,15 @@ export function InviteAdminPanel() {
         const byToken = new Map(invitees.map((invitee) => [invitee.token, invitee]));
         for (const invitee of savedInvitees) byToken.set(invitee.token, invitee);
         setInvitees([...byToken.values()]);
+        setLastImportedInviteeIds(savedInvitees.map((invitee) => invitee.id));
         setSelectedInviteeId(savedInvitees[0]?.id || selectedInviteeId);
-        setMessage(`Đã nhập ${nextInvitees.length} khách mời từ Excel. Có thể xuất danh sách link riêng ngay.`);
+        setMessage(`Đã nhập ${nextInvitees.length} khách mời từ Excel. Có thể xuất file link riêng cho đúng đợt vừa nạp ngay bây giờ.`);
       } else {
         const merged = upsertLocalInvitees(nextInvitees);
         setInvitees(merged);
+        setLastImportedInviteeIds(nextInvitees.map((invitee) => invitee.id));
         setSelectedInviteeId(nextInvitees[0]?.id || selectedInviteeId);
-        setMessage(`Đã nhập ${nextInvitees.length} khách mời vào bộ nhớ trình duyệt. Có thể xuất danh sách link riêng ngay.`);
+        setMessage(`Đã nhập ${nextInvitees.length} khách mời vào bộ nhớ trình duyệt. Có thể xuất file link riêng cho đúng đợt vừa nạp ngay bây giờ.`);
       }
     } catch (importError) {
       setError(importError instanceof Error ? importError.message : "Không import được danh sách Excel.");
@@ -665,15 +775,19 @@ export function InviteAdminPanel() {
     setMessage("Đã sao chép link.");
   }
 
-  async function exportInviteLinksWorkbook() {
+  async function exportInviteLinksWorkbook(targetInvitees: Invitee[] = invitees, label = "toàn bộ danh sách") {
     setMessage("");
     setError("");
 
     try {
+      if (targetInvitees.length === 0) {
+        throw new Error("Chưa có khách mời để xuất link.");
+      }
+
       const response = await fetch("/api/admin/invite-links-workbook", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ invitees, origin: window.location.origin }),
+        body: JSON.stringify({ invitees: targetInvitees, origin: window.location.origin }),
       });
 
       if (response.status === 401) {
@@ -687,7 +801,7 @@ export function InviteAdminPanel() {
       }
 
       downloadBlob(`danh-sach-link-thiep-moi-${new Date().toISOString().slice(0, 10)}.xlsx`, await response.blob());
-      setMessage("Đã xuất Excel link thiệp mời độc bản.");
+      setMessage(`Đã xuất Excel link thiệp mời độc bản cho ${label}.`);
     } catch (exportError) {
       setError(exportError instanceof Error ? exportError.message : "Không xuất được Excel link riêng.");
     }
@@ -728,16 +842,8 @@ export function InviteAdminPanel() {
             Nguồn dữ liệu đang dùng: <b>{backendLabels[backend]}</b>. {config.event.dateLabel} tại {config.venue.name}. Link mời là độc bản, mọi lời hồi đáp, thông tin bổ sung và album đều bám theo cùng một khách.
           </p>
         </div>
-        <div className="flex flex-wrap gap-3">
-          <button type="button" onClick={() => void downloadTemplate()} className="inline-flex min-h-11 items-center gap-2 rounded-full border border-[#D6BFA3] bg-white px-4 text-sm font-semibold text-[#2E2A25]">
-            <Download className="h-4 w-4" /> Tải mẫu Excel
-          </button>
-          <button type="button" onClick={() => void exportInviteLinksWorkbook()} className="inline-flex min-h-11 items-center gap-2 rounded-full border border-[#D6BFA3] bg-white px-4 text-sm font-semibold text-[#2E2A25]">
-            <Download className="h-4 w-4" /> Xuất Excel link riêng
-          </button>
-          <button type="button" onClick={() => void addInvitee()} className="inline-flex min-h-11 items-center gap-2 rounded-full bg-[#6B7A5A] px-4 text-sm font-semibold text-white disabled:opacity-60" disabled={busy}>
-            <Plus className="h-4 w-4" /> Thêm khách mời
-          </button>
+        <div className="rounded-[1rem] border border-[#E8DDCC] bg-[#FCFAF4] px-4 py-3 text-sm leading-6 text-[#756b60] lg:max-w-md">
+          Sau mỗi lần nạp Excel, mày có thể xuất ngay file link của riêng đợt đó ở khu bên dưới. Phần đầu trang này chỉ giữ vai trò nhắc workflow chung.
         </div>
       </div>
 
@@ -762,21 +868,107 @@ export function InviteAdminPanel() {
       {tab === "invitees" ? (
         <div className="grid gap-0 lg:grid-cols-[minmax(0,1fr)_minmax(420px,0.55fr)]">
           <div className="min-w-0 border-b border-[#E8DDCC] lg:border-b-0 lg:border-r">
-            <div className="flex flex-wrap items-center gap-3 border-b border-[#E8DDCC] px-6 py-4">
-              <label className="inline-flex min-h-11 flex-1 items-center gap-2 rounded-full border border-[#E8DDCC] bg-white px-4 text-sm text-[#8A8178]">
-                <FileUp className="h-4 w-4" />
-                <span className="py-3 leading-5">Điền file Excel mẫu có dropdown và công thức lời mời, tải lên để /admin tạo link riêng cho từng khách.</span>
-              </label>
-            <button type="button" onClick={() => importFileRef.current?.click()} className="inline-flex min-h-11 items-center gap-2 rounded-full border border-[#D6BFA3] bg-white px-4 text-sm font-semibold text-[#2E2A25]" disabled={busy}>
-              {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileUp className="h-4 w-4" />} Nhập file Excel
-            </button>
-              <input ref={importFileRef} type="file" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" className="hidden" onChange={(event) => void importWorkbookFile(event.target.files?.[0])} />
+            <div className="border-b border-[#E8DDCC] px-6 py-5">
+              <div className="grid gap-3 md:grid-cols-4">
+                {[
+                  ["Tổng khách mời", invitees.length, "Toàn bộ danh sách hiện có"],
+                  ["Đã có RSVP", summary.total, "Khách đã phản hồi về form"],
+                  ["Đợt nhập gần nhất", lastImportedInvitees.length, "Có thể xuất riêng ngay"],
+                  ["Đang hiển thị", visibleInvitees.length, searchQuery ? "Kết quả theo ô tìm nhanh" : "Danh sách đang thấy trên bảng"],
+                ].map(([label, value, hint]) => (
+                  <div key={String(label)} className="rounded-[1.1rem] border border-[#E8DDCC] bg-[#FCFAF4] p-4">
+                    <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[#8A8178]">{label}</p>
+                    <p className="mt-3 font-serif text-3xl text-[#2E2A25]">{value}</p>
+                    <p className="mt-1 text-xs leading-5 text-[#8A8178]">{hint}</p>
+                  </div>
+                ))}
+              </div>
+
+              <div className="mt-4 grid gap-3 xl:grid-cols-[minmax(19rem,25rem)_minmax(0,1fr)] xl:items-start">
+                <div className="rounded-[1.2rem] border border-[#E8DDCC] bg-white px-4 py-3 text-sm leading-6 text-[#665d54]">
+                  1. Tải mẫu Excel. 2. Điền và upload từng đợt khách. 3. Xuất file link riêng cho đợt vừa nạp hoặc cho toàn bộ danh sách.
+                </div>
+                <div className="flex flex-wrap items-start gap-3">
+                  <button type="button" onClick={() => void downloadTemplate()} className="inline-flex min-h-11 items-center gap-2 rounded-full border border-[#D6BFA3] bg-white px-4 text-sm font-semibold text-[#2E2A25]">
+                    <Download className="h-4 w-4" /> Tải mẫu Excel
+                  </button>
+                  <button type="button" onClick={() => importFileRef.current?.click()} className="inline-flex min-h-11 items-center gap-2 rounded-full border border-[#D6BFA3] bg-white px-4 text-sm font-semibold text-[#2E2A25]" disabled={busy}>
+                    {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileUp className="h-4 w-4" />} Nạp danh sách khách
+                  </button>
+                  <button type="button" onClick={() => void exportInviteLinksWorkbook(lastImportedInvitees, "đợt vừa nạp")} className="inline-flex min-h-11 items-center gap-2 rounded-full border border-[#D6BFA3] bg-white px-4 text-sm font-semibold text-[#2E2A25] disabled:opacity-50" disabled={lastImportedInvitees.length === 0}>
+                    <Download className="h-4 w-4" /> Xuất link đợt vừa nạp
+                  </button>
+                  <button type="button" onClick={() => void exportInviteLinksWorkbook()} className="inline-flex min-h-11 items-center gap-2 rounded-full bg-[#6B7A5A] px-4 text-sm font-semibold text-white disabled:opacity-60" disabled={busy || invitees.length === 0}>
+                    <Link2 className="h-4 w-4" /> Xuất toàn bộ link
+                  </button>
+                  <button type="button" onClick={() => void addInvitee()} className="inline-flex min-h-11 items-center gap-2 rounded-full border border-[#E8DDCC] bg-white px-4 text-sm font-semibold text-[#2E2A25] disabled:opacity-60" disabled={busy}>
+                    <Plus className="h-4 w-4" /> Thêm thủ công
+                  </button>
+                </div>
+                <input ref={importFileRef} type="file" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" className="hidden" onChange={(event) => void importWorkbookFile(event.target.files?.[0])} />
+              </div>
+
+              <div className="mt-4 grid gap-3 xl:grid-cols-[minmax(18rem,24rem)_minmax(0,1fr)] xl:items-start">
+                <label className="relative block">
+                  <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[#8A8178]" />
+                  <input
+                    className="min-h-11 w-full rounded-full border border-[#E8DDCC] bg-white pl-11 pr-4 text-sm text-[#2E2A25] outline-none transition focus:border-[#6B7A5A] focus:ring-4 focus:ring-[#6B7A5A]/12"
+                    placeholder="Tìm theo tên khách, nhóm khách hoặc mã link"
+                    value={searchQuery}
+                    onChange={(event) => setSearchQuery(event.target.value)}
+                  />
+                </label>
+                <div className="rounded-[1.1rem] border border-[#E8DDCC] bg-[#FCFAF4] p-3">
+                  <div className="flex flex-wrap items-center gap-3 text-sm text-[#8A8178]">
+                    <button
+                      type="button"
+                      onClick={toggleVisibleInviteesSelection}
+                      className="inline-flex min-h-10 items-center gap-2 rounded-full border border-[#D6BFA3] bg-white px-4 font-semibold text-[#2E2A25] disabled:opacity-50"
+                      disabled={visibleInvitees.length === 0}
+                    >
+                      {allVisibleInviteesSelected ? <CheckSquare className="h-4 w-4" /> : <Square className="h-4 w-4" />}
+                      {allVisibleInviteesSelected ? "Bỏ chọn danh sách này" : "Chọn danh sách này"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => void deleteSelectedInvitees()}
+                      className="inline-flex min-h-10 items-center gap-2 rounded-full bg-[#9B4E5C] px-4 font-semibold text-white disabled:opacity-50"
+                      disabled={selectedInvitees.length === 0 || bulkDeleting}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                      {bulkDeleting ? "Đang xoá" : `Xoá đã chọn (${selectedInvitees.length})`}
+                    </button>
+                    <span className="inline-flex min-h-10 items-center rounded-full bg-white px-4">
+                      Đang hiện {visibleInvitees.length}/{invitees.length} khách
+                    </span>
+                    {lastImportedInvitees.length > 0 ? (
+                      <span className="inline-flex min-h-10 items-center rounded-full bg-[#F3EEE2] px-4 text-[#5F6F4E]">
+                        Đợt vừa nạp có {lastImportedInvitees.length} khách
+                      </span>
+                    ) : (
+                      <span className="inline-flex min-h-10 items-center rounded-full bg-[#F3EEE2] px-4">
+                        Chưa có đợt nhập gần nhất trong phiên này
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </div>
             </div>
             {importNotice ? <p className="border-b border-[#E8DDCC] px-6 py-3 text-xs text-[#8A8178]">{importNotice}</p> : null}
             <div className="max-h-[40rem] overflow-auto">
               <table className="w-full min-w-[1040px] text-left text-sm">
                 <thead className="sticky top-0 bg-[#F8F3EA] text-[#8A8178]">
                   <tr>
+                    <th className="w-14 p-4">
+                      <button
+                        type="button"
+                        onClick={toggleVisibleInviteesSelection}
+                        aria-label="Chọn toàn bộ khách mời đang hiển thị"
+                        className="inline-flex h-5 w-5 items-center justify-center text-[#6B7A5A]"
+                      >
+                        {allVisibleInviteesSelected ? <CheckSquare className="h-5 w-5" /> : <Square className="h-5 w-5" />}
+                      </button>
+                    </th>
                     <th className="p-4">Tên hiển thị</th>
                     <th className="p-4">Mã link riêng</th>
                     <th className="p-4">Nhóm khách</th>
@@ -785,20 +977,38 @@ export function InviteAdminPanel() {
                   </tr>
                 </thead>
                 <tbody>
-                  {invitees.length === 0 ? (
-                    <tr><td colSpan={5} className="p-8 text-center text-[#8A8178]">Chưa có khách mời. Hãy nhập danh sách hoặc thêm dòng trước.</td></tr>
-                  ) : invitees.map((invitee) => {
+                  {visibleInvitees.length === 0 ? (
+                    <tr><td colSpan={6} className="p-8 text-center text-[#8A8178]">{invitees.length === 0 ? "Chưa có khách mời. Hãy nhập danh sách hoặc thêm dòng trước." : "Không có khách nào khớp với ô tìm nhanh."}</td></tr>
+                  ) : visibleInvitees.map((invitee) => {
                     const rsvp = invitee.rsvp ?? rsvpByInviteeId.get(invitee.id);
                     const isSelected = selectedInvitee?.id === invitee.id;
+                    const isLastImported = lastImportedInviteeIds.includes(invitee.id);
+                    const isChecked = selectedInviteeIds.has(invitee.id);
                     return (
                       <tr
                         key={invitee.id}
                         className={`cursor-pointer border-t border-[#E8DDCC] align-top ${isSelected ? "bg-[#F8F3EA]" : "hover:bg-[#FCFAF4]"}`}
                         onClick={() => setSelectedInviteeId(invitee.id)}
                       >
+                        <td className="p-4 align-top">
+                          <button
+                            type="button"
+                            onClick={(event) => {
+                              event.stopPropagation();
+                              setInviteeSelection(invitee.id, !isChecked);
+                            }}
+                            aria-label={`Chọn khách mời ${invitee.displayLabel}`}
+                            className="inline-flex h-5 w-5 items-center justify-center text-[#6B7A5A]"
+                          >
+                            {isChecked ? <CheckSquare className="h-5 w-5" /> : <Square className="h-5 w-5" />}
+                          </button>
+                        </td>
                         <td className="p-4">
                           <p className="font-semibold text-[#2E2A25]">{invitee.displayLabel}</p>
-                          <p className="mt-1 text-xs text-[#8A8178]">{inviteUnitLabels[invitee.inviteUnit]} · {inviteStatusLabels[invitee.inviteStatus]}</p>
+                          <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-[#8A8178]">
+                            <span>{inviteUnitLabels[invitee.inviteUnit]} · {inviteStatusLabels[invitee.inviteStatus]}</span>
+                            {isLastImported ? <span className="rounded-full bg-[#F3EEE2] px-2 py-1 text-[#5F6F4E]">Đợt mới</span> : null}
+                          </div>
                         </td>
                         <td className="p-4 text-xs text-[#665d54]">{invitee.token}</td>
                         <td className="p-4 text-sm">{invitee.guestGroup}</td>

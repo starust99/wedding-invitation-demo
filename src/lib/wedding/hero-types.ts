@@ -38,6 +38,10 @@ export type HeroAssetConfig = {
   required: boolean;
   lockAspectRatio: boolean;
   hasTransparency: boolean;
+  objectPosition?: {
+    desktop: string;
+    mobile: string;
+  };
   desktop: ResponsiveAssetPlacement;
   mobile: ResponsiveAssetPlacement;
 };

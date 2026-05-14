@@ -562,7 +562,7 @@ textarea {
   inset: 0;
   z-index: 0;
   object-fit: cover;
-  object-position: 62% 36%;
+  object-position: var(--hero-photo-desktop-position, 62% 36%);
   filter: saturate(0.92) contrast(0.96) brightness(1.04);
   transform: scale(1);
 }
@@ -2745,7 +2745,7 @@ textarea {
   }
 
   .save-date-photo-image {
-    object-position: 50% 33%;
+    object-position: var(--hero-photo-mobile-position, 50% 33%);
   }
 
   .save-date-title {

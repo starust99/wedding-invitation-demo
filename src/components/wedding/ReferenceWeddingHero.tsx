@@ -23,8 +23,19 @@ export type ReferenceWeddingHeroSummary = {
   welcomeTime?: string;
 };
 
+const defaultHeroPhotoSrc = "/assets/wedding/hero/np-1-183a.jpg";
+const defaultHeroPhotoAlt = "Ảnh cưới Nhật và Phương";
+
 function compactDate(date: string) {
   return date.replace(/^Thứ\s+\S+,\s*/i, "");
+}
+
+function heroPhotoObjectPosition(config: WeddingHeroEditorConfig) {
+  const asset = config.assets.find((item) => item.id === "gardenPhotoPlate");
+  return {
+    desktop: asset?.objectPosition?.desktop || "62% 36%",
+    mobile: asset?.objectPosition?.mobile || "50% 33%",
+  };
 }
 
 function getVietnamWeddingTimestamp(date: string, time: string) {
@@ -94,6 +105,10 @@ export function ReferenceWeddingHero({ config, summary }: ReferenceWeddingHeroPr
   const invitationText = summary?.invitationLine || config.content.description;
   const targetTimestamp = useMemo(() => getVietnamWeddingTimestamp(dateText, countdownTime), [dateText, countdownTime]);
   const isReady = useRevealReady(true); // Photo is always in view at top of page
+  const heroPhotoAsset = config.assets.find((asset) => asset.id === "gardenPhotoPlate");
+  const heroPhotoSrc = heroPhotoAsset?.src || defaultHeroPhotoSrc;
+  const heroPhotoAlt = heroPhotoAsset?.alt || defaultHeroPhotoAlt;
+  const heroPhotoPosition = heroPhotoObjectPosition(config);
 
   return (
     <section
@@ -110,12 +125,17 @@ export function ReferenceWeddingHero({ config, summary }: ReferenceWeddingHeroPr
         >
           <div className="save-date-photo-frame">
             <Image
-              src="/assets/wedding/hero/np-1-183a.jpg"
-              alt="Ảnh cưới Nhật và Phương"
+              src={heroPhotoSrc}
+              alt={heroPhotoAlt}
               fill
               preload
               sizes="(max-width: 639px) 96vw, (max-width: 1023px) 38rem, 38rem"
               className="save-date-photo-image"
+              style={{
+                objectPosition: `var(--hero-photo-mobile-position, ${heroPhotoPosition.mobile})`,
+                ["--hero-photo-mobile-position" as string]: heroPhotoPosition.mobile,
+                ["--hero-photo-desktop-position" as string]: heroPhotoPosition.desktop,
+              }}
             />
           </div>
         </motion.article>

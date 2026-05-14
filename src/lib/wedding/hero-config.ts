@@ -21,6 +21,10 @@ type HeroSlotDefinition = {
   required: boolean;
   lockAspectRatio: boolean;
   hasTransparency: boolean;
+  objectPosition?: {
+    desktop: string;
+    mobile: string;
+  };
   defaultAspectRatio: number;
   recommendedRatio?: string;
   validationHint?: string;
@@ -461,6 +465,10 @@ export const heroSlotDefinitions: HeroSlotDefinition[] = [
     required: false,
     lockAspectRatio: true,
     hasTransparency: false,
+    objectPosition: {
+      desktop: "62% 36%",
+      mobile: "50% 33%",
+    },
     defaultAspectRatio: 2 / 3,
     recommendedRatio: "2:3 hoặc 3:4",
     validationHint: "Ảnh chân dung nên là khung dọc 2:3 hoặc 3:4.",
@@ -600,6 +608,7 @@ function normalizeAsset(asset: Partial<HeroAssetConfig> | undefined, fallback: H
     required: asset?.required ?? fallback.required,
     lockAspectRatio: asset?.lockAspectRatio ?? fallback.lockAspectRatio,
     hasTransparency: asset?.hasTransparency ?? fallback.hasTransparency,
+    objectPosition: asset?.objectPosition ?? fallback.objectPosition,
     desktop: normalizePlacement(asset?.desktop, fallback.desktop),
     mobile: normalizePlacement(asset?.mobile, fallback.mobile),
   };
