@@ -35,6 +35,50 @@ const base = {
 
 const cases = [
   {
+    name: "parents invite grandparents using parent relationship axis",
+    input: {
+      ...base,
+      guestName: "Bố mẹ",
+      invitationName: "Bố mẹ",
+      hostRelationship: "bố mẹ",
+      invitedBy: "parents",
+      hostPronoun: "gia đình chúng con",
+      coupleReference: "hai cháu",
+      relationship: "ông bà của cô dâu/chú rể",
+      householdMode: "couple",
+      plusOnePolicy: "spouse",
+    },
+    includes: [
+      ["insideInviteLine", "Kính mời: Bố mẹ đến chung vui trong lễ cưới của hai cháu Nhật & Phương."],
+      ["envelopeLine", "Kính mời: Bố mẹ"],
+      ["closingLine", "Sự hiện diện của Bố Mẹ là niềm vui rất lớn với gia đình chúng con."],
+    ],
+    excludes: [
+      ["insideInviteLine", "cùng Mẹ"],
+      ["insideInviteLine", "cùng Bố"],
+    ],
+  },
+  {
+    name: "single parent host relationship can infer spouse when couple invited",
+    input: {
+      ...base,
+      guestName: "Bố",
+      invitationName: "Bố",
+      hostRelationship: "bố",
+      invitedBy: "parents",
+      hostPronoun: "gia đình chúng con",
+      coupleReference: "hai cháu",
+      relationship: "bố/mẹ của cô dâu/chú rể",
+      householdMode: "couple",
+      plusOnePolicy: "spouse",
+    },
+    includes: [
+      ["insideInviteLine", "Kính mời: Bố cùng Mẹ đến chung vui trong lễ cưới của hai cháu Nhật & Phương."],
+      ["envelopeLine", "Kính mời: Bố cùng Mẹ"],
+      ["closingLine", "Sự hiện diện của Bố Mẹ là niềm vui rất lớn với gia đình chúng con."],
+    ],
+  },
+  {
     name: "couple invites senior with spouse",
     input: {
       ...base,
@@ -55,6 +99,47 @@ const cases = [
     excludes: [
       ["insideInviteLine", "Nhật & Phương"],
       ["insideInviteLine", "Sự hiện diện"],
+    ],
+  },
+  {
+    name: "explicit couple relationship uses vo chong anh wording",
+    input: {
+      ...base,
+      guestName: "Vợ chồng anh Hoàng",
+      invitationName: "Vợ chồng anh Hoàng",
+      hostRelationship: "vợ chồng anh",
+      invitedBy: "couple",
+      hostPronoun: "tụi em",
+      coupleReference: "tụi em",
+      householdMode: "couple",
+      plusOnePolicy: "spouse",
+    },
+    includes: [
+      ["insideInviteLine", "Kính mời: Vợ chồng anh Hoàng đến chung vui trong lễ cưới của tụi em."],
+      ["envelopeLine", "Kính mời: Vợ chồng anh Hoàng"],
+      ["closingLine", "Sự hiện diện của anh chị là niềm vui rất lớn với tụi em."],
+    ],
+    excludes: [
+      ["insideInviteLine", "Anh cùng vợ"],
+    ],
+  },
+  {
+    name: "explicit couple relationship uses vo chong em wording",
+    input: {
+      ...base,
+      guestName: "Vợ chồng em Linh",
+      invitationName: "Vợ chồng em Linh",
+      hostRelationship: "vợ chồng em",
+      invitedBy: "couple",
+      hostPronoun: "anh chị",
+      coupleReference: "anh chị",
+      householdMode: "couple",
+      plusOnePolicy: "spouse",
+    },
+    includes: [
+      ["insideInviteLine", "Kính mời: Vợ chồng em Linh đến chung vui trong lễ cưới của anh chị."],
+      ["envelopeLine", "Kính mời: Vợ chồng em Linh"],
+      ["closingLine", "Sự hiện diện của hai em là niềm vui rất lớn với anh chị."],
     ],
   },
   {

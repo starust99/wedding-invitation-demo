@@ -125,6 +125,8 @@ export function resolveShortRecipientLabel(identity: GuestIdentity, fallbackLabe
     chi: "Chị",
     em: "Em",
     chau: "Cháu",
+    bo: "Bố",
+    me: "Mẹ",
   };
 
   return kinshipTerms[normalizeText(firstWord)] ?? label;
@@ -182,11 +184,17 @@ type AddressProfile = {
 };
 
 const grandElderKeywords = ["ong", "ba", "ong ba", "noi", "ngoai", "ong noi", "ba noi", "ong ngoai", "ba ngoai"];
-const elderKeywords = ["bac", "co", "chu", "di", "cau", "mo", "thim", "duong", "phu huynh", "ba me", "bo me", "cha me"];
+const elderKeywords = ["bac", "co", "chu", "di", "cau", "mo", "thim", "duong", "phu huynh", "ba me", "bo me", "cha me", "bo", "me"];
 const seniorKeywords = ["anh", "chi", "anh chi"];
 const juniorKeywords = ["em", "chau", "be", "nho tuoi", "dan em"];
 const peerKeywords = ["ban", "ban be", "ban than", "dong nghiep", "dong mon", "cung lop", "dai hoc", "cap 3", "hoi ban", "team"];
 const formalKeywords = ["sep", "khach quy", "thay co", "doi tac"];
+
+type PairLabel = {
+  invite: string;
+  envelope: string;
+  presence: string;
+};
 
 function removeWeddingPartyReferences(value: string) {
   return normalizeText(value)
@@ -309,8 +317,76 @@ function includesFamilyLabel(label: string) {
   return normalized.includes("gia dinh") || normalized.includes("ca nha");
 }
 
+function labelAlreadyLooksLikePair(label: string) {
+  const normalized = normalizeText(label);
+  return [
+    "vo chong",
+    "ong ba",
+    "bo me",
+    "ba me",
+    "cha me",
+    "anh chi",
+    "co chu",
+    "chu thim",
+    "di duong",
+    "cau mo",
+  ].some((prefix) => normalized.startsWith(prefix));
+}
+
+function pairEnvelope(guestLabel: string) {
+  return labelAlreadyLooksLikePair(guestLabel) ? guestLabel : `Vợ chồng ${guestLabel}`;
+}
+
+function resolveExplicitPairLabel(input: InvitationCopyInput | undefined, guestLabel: string): PairLabel | undefined {
+  const relationshipText = resolveRelationshipText(input);
+  const exactPair = (phrases: string[]) => includesAny(relationshipText, phrases);
+
+  if (exactPair(["ong ba", "ông bà"])) {
+    return {
+      invite: guestLabel,
+      envelope: guestLabel,
+      presence: "Ông Bà",
+    };
+  }
+
+  if (exactPair(["bo me", "bố mẹ", "ba me", "ba mẹ", "cha me", "cha mẹ"])) {
+    return {
+      invite: guestLabel,
+      envelope: guestLabel,
+      presence: "Bố Mẹ",
+    };
+  }
+
+  const pairProfiles: { phrases: string[]; invite: string; presence: string }[] = [
+    { phrases: ["vo chong anh chi", "vợ chồng anh chị"], invite: "vợ chồng anh chị", presence: "anh chị" },
+    { phrases: ["vo chong anh", "vợ chồng anh"], invite: "vợ chồng anh", presence: "anh chị" },
+    { phrases: ["vo chong chi", "vợ chồng chị"], invite: "vợ chồng chị", presence: "anh chị" },
+    { phrases: ["vo chong em", "vợ chồng em"], invite: "vợ chồng em", presence: "hai em" },
+    { phrases: ["vo chong chau", "vợ chồng cháu"], invite: "vợ chồng cháu", presence: "hai cháu" },
+    { phrases: ["vo chong ban", "vợ chồng bạn"], invite: "vợ chồng bạn", presence: "hai bạn" },
+    { phrases: ["vo chong dong nghiep", "vợ chồng đồng nghiệp"], invite: "vợ chồng anh chị", presence: "anh chị" },
+    { phrases: ["vo chong bac", "vợ chồng bác"], invite: "vợ chồng bác", presence: "hai bác" },
+    { phrases: ["vo chong co chu", "vợ chồng cô chú"], invite: "vợ chồng cô chú", presence: "cô chú" },
+    { phrases: ["vo chong chu thim", "vợ chồng chú thím"], invite: "vợ chồng chú thím", presence: "chú thím" },
+    { phrases: ["vo chong di duong", "vợ chồng dì dượng"], invite: "vợ chồng dì dượng", presence: "dì dượng" },
+    { phrases: ["vo chong cau mo", "vợ chồng cậu mợ"], invite: "vợ chồng cậu mợ", presence: "cậu mợ" },
+  ];
+
+  const profile = pairProfiles.find((item) => exactPair(item.phrases));
+  if (!profile) return undefined;
+  const explicitGuestLabel = pairEnvelope(guestLabel);
+
+  return {
+    invite: explicitGuestLabel,
+    envelope: explicitGuestLabel,
+    presence: profile.presence,
+  };
+}
+
 function resolvePairLabel(input: InvitationCopyInput | undefined, guestLabel: string, recipientPronoun: string, audience: GuestAudience) {
   const relationshipText = resolveRelationshipText(input);
+  const explicitPair = resolveExplicitPairLabel(input, guestLabel);
+  if (explicitPair) return explicitPair;
 
   if (audience === "formal") {
     return {
@@ -366,6 +442,20 @@ function resolvePairLabel(input: InvitationCopyInput | undefined, guestLabel: st
       invite: `${guestLabel} cùng Ông`,
       envelope: `${guestLabel} cùng Ông`,
       presence: "Ông Bà",
+    };
+  }
+  if (includesAny(relationshipText, ["bo", "bố"])) {
+    return {
+      invite: `${guestLabel} cùng Mẹ`,
+      envelope: `${guestLabel} cùng Mẹ`,
+      presence: "Bố Mẹ",
+    };
+  }
+  if (includesAny(relationshipText, ["me", "mẹ"])) {
+    return {
+      invite: `${guestLabel} cùng Bố`,
+      envelope: `${guestLabel} cùng Bố`,
+      presence: "Bố Mẹ",
     };
   }
   if (includesAny(relationshipText, ["chu", "chú"])) {

@@ -20,6 +20,71 @@ const exampleSheetName = "Ví dụ";
 const maxInviteRows = 1000;
 const defaultCoupleDisplayName = weddingConfig.couple.displayName || "Nhật & Phương";
 const optionStartColumn = 11;
+const explicitPairRelationships = [
+  "ông bà",
+  "bố mẹ",
+  "ba mẹ",
+  "cha mẹ",
+  "vợ chồng anh chị",
+  "vợ chồng anh",
+  "vợ chồng chị",
+  "vợ chồng em",
+  "vợ chồng cháu",
+  "vợ chồng bạn",
+  "vợ chồng đồng nghiệp",
+  "vợ chồng bác",
+  "vợ chồng cô chú",
+  "vợ chồng chú thím",
+  "vợ chồng dì dượng",
+  "vợ chồng cậu mợ",
+] as const;
+const recommendedGuestNamePrefixes = [
+  "bố mẹ",
+  "ba mẹ",
+  "cha mẹ",
+  "bố",
+  "mẹ",
+  "ông bà",
+  "ông",
+  "bà",
+  "bác",
+  "cô",
+  "chú",
+  "dì",
+  "cậu",
+  "mợ",
+  "thím",
+  "dượng",
+  "anh chị",
+  "anh",
+  "chị",
+  "em",
+  "cháu",
+  "vợ chồng anh chị",
+  "vợ chồng anh",
+  "vợ chồng chị",
+  "vợ chồng em",
+  "vợ chồng cháu",
+  "vợ chồng bạn",
+  "vợ chồng bác",
+  "vợ chồng cô chú",
+  "vợ chồng chú thím",
+  "vợ chồng dì dượng",
+  "vợ chồng cậu mợ",
+  "gia đình",
+  "cả nhà",
+  "thầy",
+  "sếp",
+] as const;
+
+const inlineGuideRows = [
+  ["Cách nhập nhanh", "Điền tên khách theo cách người đứng mời gọi khách. Các cột còn lại chọn dropdown."],
+  ["Một người", "Anh Hoàng, Chị Mai, Em Linh, Chú Sáu, Cô Hạnh, Bác Hùng. Bạn ngang hàng có thể ghi tên riêng như Gia Hân."],
+  ["Hai vợ chồng", "Ghi Vợ chồng anh Hoàng / Vợ chồng chị Mai / Vợ chồng em Linh, rồi chọn Mời đi cùng = Hai vợ chồng."],
+  ["Gia đình", "Ghi Anh Hoàng và gia đình / Chú Sáu và gia đình, rồi chọn Mời đi cùng = Cả gia đình."],
+  ["Ba mẹ mời ông bà", "Ghi Tên khách mời = Bố mẹ hoặc Ba mẹ. Quan hệ với người mời = bố mẹ. Quan hệ với cô dâu chú rể = ông bà của cô dâu/chú rể."],
+] as const;
+const inlineGuideRowCount = inlineGuideRows.length + 1;
 
 const columns = [
   { key: "guestName", header: "Tên khách mời", width: 28 },
@@ -73,8 +138,14 @@ function resolveSpreadsheetOptions(options: SpreadsheetOptions = {}) {
 function getOptionColumns(coupleDisplayName: string): Record<OptionKey, string[]> {
   return {
     hostRelationship: [
+      "bố",
+      "mẹ",
+      "bố mẹ",
+      "ba mẹ",
+      "cha mẹ",
       "ông",
       "bà",
+      "ông bà",
       "bác",
       "cô",
       "chú",
@@ -86,6 +157,18 @@ function getOptionColumns(coupleDisplayName: string): Record<OptionKey, string[]
       "anh",
       "chị",
       "anh chị",
+      "vợ chồng anh chị",
+      "vợ chồng anh",
+      "vợ chồng chị",
+      "vợ chồng em",
+      "vợ chồng cháu",
+      "vợ chồng bạn",
+      "vợ chồng đồng nghiệp",
+      "vợ chồng bác",
+      "vợ chồng cô chú",
+      "vợ chồng chú thím",
+      "vợ chồng dì dượng",
+      "vợ chồng cậu mợ",
       "em",
       "cháu",
       "bạn",
@@ -109,16 +192,28 @@ function getOptionColumns(coupleDisplayName: string): Record<OptionKey, string[]
     ],
     coupleReference: ["hai cháu", "hai con", "hai bạn", "tụi mình", "tụi em", "anh chị", coupleDisplayName],
     relationship: [
+      "bố/mẹ của cô dâu/chú rể",
+      "bố mẹ của cô dâu/chú rể",
       "ông/bà của cô dâu/chú rể",
+      "ông bà của cô dâu/chú rể",
       "bác của cô dâu/chú rể",
+      "vợ chồng bác của cô dâu/chú rể",
       "cô/chú của cô dâu/chú rể",
+      "vợ chồng cô chú của cô dâu/chú rể",
+      "vợ chồng chú thím của cô dâu/chú rể",
       "dì/cậu/mợ/thím của cô dâu/chú rể",
+      "vợ chồng dì dượng của cô dâu/chú rể",
+      "vợ chồng cậu mợ của cô dâu/chú rể",
       "anh/chị/em của cô dâu/chú rể",
+      "vợ chồng anh/chị/em của cô dâu/chú rể",
       "cháu của cô dâu/chú rể",
+      "vợ chồng cháu của cô dâu/chú rể",
       "bạn của cô dâu/chú rể",
+      "vợ chồng bạn của cô dâu/chú rể",
       "bạn thân của cô dâu/chú rể",
       "bạn đại học",
       "đồng nghiệp",
+      "vợ chồng đồng nghiệp",
       "khách của ba mẹ",
       "khách quý",
     ],
@@ -165,8 +260,8 @@ const defaultRowValues: Record<OptionKey, string> = {
 };
 
 const headerNotes: Partial<Record<TemplateColumnKey, string>> = {
-  guestName: "Gõ đúng cách muốn hiện trên thiệp. Ví dụ: Chú Sáu, Gia Hân, Anh Hoàng.",
-  hostRelationship: "Chọn vai của khách đối với người đứng mời. Cột này thay cho Danh xưng.",
+  guestName: "Gõ đúng cách người đứng mời gọi khách. Ví dụ: Bố mẹ, Anh Hoàng, Chị Mai, Vợ chồng em Linh, Chú Sáu và gia đình.",
+  hostRelationship: "Chọn vai của khách đối với người đứng mời, không phải đối với cô dâu chú rể.",
   invitedBy: "Chọn Ba mẹ đứng mời hoặc Cô dâu chú rể đứng mời.",
   hostPronoun: "Cách người đứng mời tự xưng trong câu mời.",
   coupleReference: "Dùng khi Ba mẹ đứng mời. Ví dụ: hai cháu, hai con, hoặc tên cô dâu chú rể.",
@@ -179,6 +274,17 @@ const headerNotes: Partial<Record<TemplateColumnKey, string>> = {
 };
 
 const exampleRows: TemplateRowValues[] = [
+  {
+    guestName: "Bố mẹ",
+    hostRelationship: "bố mẹ",
+    invitedBy: invitedByLabels.parents,
+    hostPronoun: "gia đình chúng con",
+    coupleReference: "hai cháu",
+    relationship: "ông bà của cô dâu/chú rể",
+    householdMode: householdModeLabels.couple,
+    guestGroup: "Họ ngoại",
+    audienceTags: "gia đình;họ ngoại",
+  },
   {
     guestName: "Chú Sáu",
     hostRelationship: "chú",
@@ -202,24 +308,24 @@ const exampleRows: TemplateRowValues[] = [
     audienceTags: "bạn bè;bạn đại học",
   },
   {
-    guestName: "Anh Hoàng",
-    hostRelationship: "anh",
+    guestName: "Vợ chồng anh Hoàng",
+    hostRelationship: "vợ chồng anh",
     invitedBy: invitedByLabels.couple,
     hostPronoun: "tụi em",
     coupleReference: "tụi em",
-    relationship: "đồng nghiệp",
+    relationship: "vợ chồng anh/chị/em của cô dâu/chú rể",
     householdMode: householdModeLabels.couple,
     guestGroup: "Đồng nghiệp",
     audienceTags: "đồng nghiệp",
   },
   {
-    guestName: "Em Linh",
-    hostRelationship: "em",
+    guestName: "Vợ chồng em Linh",
+    hostRelationship: "vợ chồng em",
     invitedBy: invitedByLabels.couple,
     hostPronoun: "anh chị",
     coupleReference: "anh chị",
-    relationship: "bạn của cô dâu/chú rể",
-    householdMode: householdModeLabels.single,
+    relationship: "vợ chồng anh/chị/em của cô dâu/chú rể",
+    householdMode: householdModeLabels.couple,
     guestGroup: "Bạn cô dâu",
     audienceTags: "bạn bè",
   },
@@ -245,6 +351,18 @@ function excelText(value: string) {
 
 function equalsAny(cell: string, values: readonly string[]) {
   return values.map((value) => `${cell}=${excelText(value)}`).join(",");
+}
+
+function nestedExactIf(cell: string, entries: readonly (readonly [string, string])[], fallback: string) {
+  return entries.reduceRight((current, [value, result]) => `IF(${cell}=${excelText(value)},${result},${current})`, fallback);
+}
+
+function startsWithAnyExpression(cell: string, prefixes: readonly string[]) {
+  return `OR(${prefixes.map((prefix) => `LEFT(LOWER(${cell}),${prefix.length})=${excelText(prefix)}`).join(",")})`;
+}
+
+function pairNameAlreadyLooksLikePairExpression(guestCell: string) {
+  return `OR(ISNUMBER(SEARCH(${excelText("vợ chồng")},LOWER(${guestCell}))),ISNUMBER(SEARCH(${excelText("ông bà")},LOWER(${guestCell}))),ISNUMBER(SEARCH(${excelText("bố mẹ")},LOWER(${guestCell}))),ISNUMBER(SEARCH(${excelText("ba mẹ")},LOWER(${guestCell}))),ISNUMBER(SEARCH(${excelText("cha mẹ")},LOWER(${guestCell}))),ISNUMBER(SEARCH(${excelText("anh chị")},LOWER(${guestCell}))),ISNUMBER(SEARCH(${excelText("cô chú")},LOWER(${guestCell}))),ISNUMBER(SEARCH(${excelText("chú thím")},LOWER(${guestCell}))),ISNUMBER(SEARCH(${excelText("dì dượng")},LOWER(${guestCell}))),ISNUMBER(SEARCH(${excelText("cậu mợ")},LOWER(${guestCell}))))`;
 }
 
 function quoteSheetName(sheetName: string) {
@@ -305,7 +423,28 @@ function inviteScopeExpression(rowIndex: number) {
   const hostRelationshipCell = `$B${rowIndex}`;
   const householdCell = `$G${rowIndex}`;
   const nameAlreadyIncludesFamily = `OR(ISNUMBER(SEARCH(${excelText("gia đình")},LOWER(${guestCell}))),ISNUMBER(SEARCH(${excelText("cả nhà")},LOWER(${guestCell}))))`;
-  const coupleScope = `IF(${hostRelationshipCell}=${excelText("anh chị")},${excelText(" cùng gia đình")},IF(${hostRelationshipCell}=${excelText("anh")},${excelText(" cùng vợ")},IF(${hostRelationshipCell}=${excelText("chị")},${excelText(" cùng chồng")},IF(${hostRelationshipCell}=${excelText("bác")},${excelText(" cùng gia đình")},IF(${hostRelationshipCell}=${excelText("chú")},${excelText(" cùng cô")},IF(${hostRelationshipCell}=${excelText("cô")},${excelText(" cùng chú")},IF(${hostRelationshipCell}=${excelText("dì")},${excelText(" cùng dượng")},IF(${hostRelationshipCell}=${excelText("cậu")},${excelText(" cùng mợ")},IF(${hostRelationshipCell}=${excelText("mợ")},${excelText(" cùng cậu")},IF(${hostRelationshipCell}=${excelText("thím")},${excelText(" cùng chú")},IF(${hostRelationshipCell}=${excelText("dượng")},${excelText(" cùng dì")},IF(${hostRelationshipCell}=${excelText("ông")},${excelText(" cùng bà")},IF(${hostRelationshipCell}=${excelText("bà")},${excelText(" cùng ông")},${excelText(" cùng gia đình")})))))))))))))`;
+  const coupleScope = nestedExactIf(
+    hostRelationshipCell,
+    [
+      ...explicitPairRelationships.map((relationship) => [relationship, excelText("")] as const),
+      ["bố", excelText(" cùng mẹ")],
+      ["mẹ", excelText(" cùng bố")],
+      ["anh chị", excelText(" cùng gia đình")],
+      ["anh", excelText(" cùng vợ")],
+      ["chị", excelText(" cùng chồng")],
+      ["bác", excelText(" cùng gia đình")],
+      ["chú", excelText(" cùng cô")],
+      ["cô", excelText(" cùng chú")],
+      ["dì", excelText(" cùng dượng")],
+      ["cậu", excelText(" cùng mợ")],
+      ["mợ", excelText(" cùng cậu")],
+      ["thím", excelText(" cùng chú")],
+      ["dượng", excelText(" cùng dì")],
+      ["ông", excelText(" cùng bà")],
+      ["bà", excelText(" cùng ông")],
+    ],
+    excelText(" cùng gia đình"),
+  );
   return `IF(${nameAlreadyIncludesFamily},"",IF(${householdCell}=${excelText(householdModeLabels.family)},${excelText(" và gia đình")},IF(${householdCell}=${excelText(householdModeLabels.couple)},${coupleScope},"")))`;
 }
 
@@ -324,13 +463,95 @@ function recipientLineExpression(rowIndex: number, scopeExpression = inviteScope
 function coupleInviteRecipientExpression(rowIndex: number) {
   const guestCell = `$A${rowIndex}`;
   const hostRelationshipCell = `$B${rowIndex}`;
-  return `IF(OR(${equalsAny(hostRelationshipCell, ["anh chị"])}),${excelText("Vợ chồng anh chị")},IF(${hostRelationshipCell}=${excelText("anh")},${excelText("Anh cùng vợ")},IF(${hostRelationshipCell}=${excelText("chị")},${excelText("Chị cùng chồng")},IF(OR(${equalsAny(hostRelationshipCell, ["bạn", "bạn thân", "đồng nghiệp"])}),${excelText("Vợ chồng bạn")},IF(OR(${equalsAny(hostRelationshipCell, ["em", "cháu"])}),${excelText("Hai em")},IF(${hostRelationshipCell}=${excelText("bác")},${guestCell}&${excelText(" cùng gia đình")},IF(${hostRelationshipCell}=${excelText("chú")},${guestCell}&${excelText(" cùng cô")},IF(${hostRelationshipCell}=${excelText("cô")},${guestCell}&${excelText(" cùng chú")},IF(${hostRelationshipCell}=${excelText("dì")},${guestCell}&${excelText(" cùng dượng")},IF(${hostRelationshipCell}=${excelText("cậu")},${guestCell}&${excelText(" cùng mợ")},IF(${hostRelationshipCell}=${excelText("mợ")},${guestCell}&${excelText(" cùng cậu")},IF(${hostRelationshipCell}=${excelText("thím")},${guestCell}&${excelText(" cùng chú")},IF(${hostRelationshipCell}=${excelText("dượng")},${guestCell}&${excelText(" cùng dì")},IF(${hostRelationshipCell}=${excelText("ông")},${guestCell}&${excelText(" cùng bà")},IF(${hostRelationshipCell}=${excelText("bà")},${guestCell}&${excelText(" cùng ông")},${guestCell}&${excelText(" cùng gia đình")})))))))))))))))`;
+  return nestedExactIf(
+    hostRelationshipCell,
+    [
+      ["ông bà", guestCell],
+      ["bố mẹ", guestCell],
+      ["ba mẹ", guestCell],
+      ["cha mẹ", guestCell],
+      ["bố", `${guestCell}&${excelText(" cùng Mẹ")}`],
+      ["mẹ", `${guestCell}&${excelText(" cùng Bố")}`],
+      ["vợ chồng anh chị", guestCell],
+      ["vợ chồng anh", guestCell],
+      ["vợ chồng chị", guestCell],
+      ["vợ chồng em", guestCell],
+      ["vợ chồng cháu", guestCell],
+      ["vợ chồng bạn", guestCell],
+      ["vợ chồng đồng nghiệp", guestCell],
+      ["vợ chồng bác", guestCell],
+      ["vợ chồng cô chú", guestCell],
+      ["vợ chồng chú thím", guestCell],
+      ["vợ chồng dì dượng", guestCell],
+      ["vợ chồng cậu mợ", guestCell],
+      ["anh chị", excelText("Vợ chồng anh chị")],
+      ["anh", excelText("Anh cùng vợ")],
+      ["chị", excelText("Chị cùng chồng")],
+      ["bạn", excelText("Vợ chồng bạn")],
+      ["bạn thân", excelText("Vợ chồng bạn")],
+      ["đồng nghiệp", excelText("Vợ chồng bạn")],
+      ["em", excelText("Hai em")],
+      ["cháu", excelText("Hai em")],
+      ["bác", `${guestCell}&${excelText(" cùng gia đình")}`],
+      ["chú", `${guestCell}&${excelText(" cùng cô")}`],
+      ["cô", `${guestCell}&${excelText(" cùng chú")}`],
+      ["dì", `${guestCell}&${excelText(" cùng dượng")}`],
+      ["cậu", `${guestCell}&${excelText(" cùng mợ")}`],
+      ["mợ", `${guestCell}&${excelText(" cùng cậu")}`],
+      ["thím", `${guestCell}&${excelText(" cùng chú")}`],
+      ["dượng", `${guestCell}&${excelText(" cùng dì")}`],
+      ["ông", `${guestCell}&${excelText(" cùng bà")}`],
+      ["bà", `${guestCell}&${excelText(" cùng ông")}`],
+    ],
+    `${guestCell}&${excelText(" cùng gia đình")}`,
+  );
 }
 
 function coupleEnvelopeRecipientExpression(rowIndex: number) {
   const guestCell = `$A${rowIndex}`;
   const hostRelationshipCell = `$B${rowIndex}`;
-  return `IF(${hostRelationshipCell}=${excelText("anh chị")},${excelText("Vợ chồng ")}&${guestCell},IF(${hostRelationshipCell}=${excelText("anh")},${guestCell}&${excelText(" cùng vợ")},IF(${hostRelationshipCell}=${excelText("chị")},${guestCell}&${excelText(" cùng chồng")},IF(OR(${equalsAny(hostRelationshipCell, ["bạn", "bạn thân", "đồng nghiệp", "em", "cháu"])}),${excelText("Vợ chồng ")}&${guestCell},IF(${hostRelationshipCell}=${excelText("bác")},${guestCell}&${excelText(" cùng gia đình")},IF(${hostRelationshipCell}=${excelText("chú")},${guestCell}&${excelText(" cùng cô")},IF(${hostRelationshipCell}=${excelText("cô")},${guestCell}&${excelText(" cùng chú")},IF(${hostRelationshipCell}=${excelText("dì")},${guestCell}&${excelText(" cùng dượng")},IF(${hostRelationshipCell}=${excelText("cậu")},${guestCell}&${excelText(" cùng mợ")},IF(${hostRelationshipCell}=${excelText("mợ")},${guestCell}&${excelText(" cùng cậu")},IF(${hostRelationshipCell}=${excelText("thím")},${guestCell}&${excelText(" cùng chú")},IF(${hostRelationshipCell}=${excelText("dượng")},${guestCell}&${excelText(" cùng dì")},IF(${hostRelationshipCell}=${excelText("ông")},${guestCell}&${excelText(" cùng bà")},IF(${hostRelationshipCell}=${excelText("bà")},${guestCell}&${excelText(" cùng ông")},${guestCell}&${excelText(" cùng gia đình")}))))))))))))))`;
+  return nestedExactIf(
+    hostRelationshipCell,
+    [
+      ["ông bà", guestCell],
+      ["bố mẹ", guestCell],
+      ["ba mẹ", guestCell],
+      ["cha mẹ", guestCell],
+      ["bố", `${guestCell}&${excelText(" cùng Mẹ")}`],
+      ["mẹ", `${guestCell}&${excelText(" cùng Bố")}`],
+      ["vợ chồng anh chị", guestCell],
+      ["vợ chồng anh", guestCell],
+      ["vợ chồng chị", guestCell],
+      ["vợ chồng em", guestCell],
+      ["vợ chồng cháu", guestCell],
+      ["vợ chồng bạn", guestCell],
+      ["vợ chồng đồng nghiệp", guestCell],
+      ["vợ chồng bác", guestCell],
+      ["vợ chồng cô chú", guestCell],
+      ["vợ chồng chú thím", guestCell],
+      ["vợ chồng dì dượng", guestCell],
+      ["vợ chồng cậu mợ", guestCell],
+      ["anh chị", `${excelText("Vợ chồng ")}&${guestCell}`],
+      ["anh", `${guestCell}&${excelText(" cùng vợ")}`],
+      ["chị", `${guestCell}&${excelText(" cùng chồng")}`],
+      ["bạn", `${excelText("Vợ chồng ")}&${guestCell}`],
+      ["bạn thân", `${excelText("Vợ chồng ")}&${guestCell}`],
+      ["đồng nghiệp", `${excelText("Vợ chồng ")}&${guestCell}`],
+      ["em", `${excelText("Vợ chồng ")}&${guestCell}`],
+      ["cháu", `${excelText("Vợ chồng ")}&${guestCell}`],
+      ["bác", `${guestCell}&${excelText(" cùng gia đình")}`],
+      ["chú", `${guestCell}&${excelText(" cùng cô")}`],
+      ["cô", `${guestCell}&${excelText(" cùng chú")}`],
+      ["dì", `${guestCell}&${excelText(" cùng dượng")}`],
+      ["cậu", `${guestCell}&${excelText(" cùng mợ")}`],
+      ["mợ", `${guestCell}&${excelText(" cùng cậu")}`],
+      ["thím", `${guestCell}&${excelText(" cùng chú")}`],
+      ["dượng", `${guestCell}&${excelText(" cùng dì")}`],
+      ["ông", `${guestCell}&${excelText(" cùng bà")}`],
+      ["bà", `${guestCell}&${excelText(" cùng ông")}`],
+    ],
+    `${guestCell}&${excelText(" cùng gia đình")}`,
+  );
 }
 
 function envelopeFormula(rowIndex: number) {
@@ -343,6 +564,11 @@ function envelopeFormula(rowIndex: number) {
   const formalRelations = [
     "ông",
     "bà",
+    "bố",
+    "mẹ",
+    "bố mẹ",
+    "ba mẹ",
+    "cha mẹ",
     "bác",
     "cô",
     "chú",
@@ -383,7 +609,11 @@ function insideInviteFormula(rowIndex: number, options: ReturnType<typeof resolv
 }
 
 function validationFormula(rowIndex: number) {
-  return `IF($A${rowIndex}="","",IF(COUNTA($B${rowIndex}:$I${rowIndex})=8,${excelText("OK - sẵn sàng upload")},${excelText("Thiếu lựa chọn dropdown")}))`;
+  const guestCell = `$A${rowIndex}`;
+  const hostRelationshipCell = `$B${rowIndex}`;
+  const hasRecommendedNamePrefix = startsWithAnyExpression(guestCell, recommendedGuestNamePrefixes);
+  const canUsePlainName = `OR(${equalsAny(hostRelationshipCell, ["bạn", "bạn thân", "đồng nghiệp", "khách quý"])})`;
+  return `IF(${guestCell}="","",IF(COUNTA($B${rowIndex}:$I${rowIndex})<8,${excelText("Thiếu lựa chọn dropdown")},IF(OR(${hasRecommendedNamePrefix},${canUsePlainName}),${excelText("OK - sẵn sàng upload")},${excelText("Tên nên bắt đầu bằng vai xưng hô")})))`;
 }
 
 function findKeyByHeader(headers: Map<string, number>, labels: string[]) {
@@ -518,7 +748,7 @@ function fillEditableCells(row: ExcelJS.Row, values: TemplateRowValues) {
   row.getCell(9).value = values.audienceTags;
 }
 
-function applyTemplateRows(worksheet: ExcelJS.Worksheet, options: ReturnType<typeof resolveSpreadsheetOptions>) {
+function applyTemplateRows(worksheet: ExcelJS.Worksheet, options: ReturnType<typeof resolveSpreadsheetOptions>, startRowIndex = 2) {
   const optionColumns = getOptionColumns(options.coupleDisplayName);
   const optionKeys: OptionKey[] = [
     "hostRelationship",
@@ -531,7 +761,7 @@ function applyTemplateRows(worksheet: ExcelJS.Worksheet, options: ReturnType<typ
     "audienceTags",
   ];
 
-  for (let rowIndex = 2; rowIndex <= maxInviteRows + 1; rowIndex += 1) {
+  for (let rowIndex = startRowIndex; rowIndex < startRowIndex + maxInviteRows; rowIndex += 1) {
     const row = worksheet.getRow(rowIndex);
     row.height = 48;
 
@@ -553,6 +783,40 @@ function applyTemplateRows(worksheet: ExcelJS.Worksheet, options: ReturnType<typ
 
     applyFormulaCells(row, rowIndex, options);
   }
+}
+
+function applyInlineGuide(worksheet: ExcelJS.Worksheet) {
+  worksheet.mergeCells(1, 1, 1, columns.length);
+  const titleCell = worksheet.getCell(1, 1);
+  titleCell.value = "Quy ước nhập tên khách mời";
+  titleCell.font = { bold: true, color: { argb: "FFFFFFFF" }, size: 13 };
+  titleCell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FF5F6F4E" } };
+  titleCell.alignment = { vertical: "middle", horizontal: "center" };
+  worksheet.getRow(1).height = 26;
+
+  inlineGuideRows.forEach(([label, detail], index) => {
+    const rowIndex = index + 2;
+    const row = worksheet.getRow(rowIndex);
+    row.height = 34;
+    worksheet.mergeCells(rowIndex, 2, rowIndex, columns.length);
+    const labelCell = row.getCell(1);
+    const detailCell = row.getCell(2);
+    labelCell.value = label;
+    detailCell.value = detail;
+    labelCell.font = { bold: true, color: { argb: "FF3F4B35" } };
+    detailCell.font = { color: { argb: "FF2E2A25" } };
+    for (let columnIndex = 1; columnIndex <= columns.length; columnIndex += 1) {
+      const cell = row.getCell(columnIndex);
+      cell.alignment = { vertical: "middle", wrapText: true };
+      cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFFFFBF2" } };
+      cell.border = {
+        top: { style: "thin", color: { argb: "FFE8DDCC" } },
+        left: { style: "thin", color: { argb: "FFE8DDCC" } },
+        bottom: { style: "thin", color: { argb: "FFE8DDCC" } },
+        right: { style: "thin", color: { argb: "FFE8DDCC" } },
+      };
+    }
+  });
 }
 
 function buildGuideSheet(workbook: ExcelJS.Workbook, options: ReturnType<typeof resolveSpreadsheetOptions>) {
@@ -586,14 +850,26 @@ function buildGuideSheet(workbook: ExcelJS.Workbook, options: ReturnType<typeof 
   worksheet.getCell("B5").value = "Upload lại file này vào /admin, rồi bấm Xuất Excel link riêng.";
   worksheet.getCell("A7").value = "Lưu ý";
   worksheet.getCell("B7").value = "Không sửa công thức ở 3 cột cuối. Nếu lời mời chưa hiện, bấm Enter ở ô Tên khách mời hoặc mở bằng Microsoft Excel/Google Sheets để file tự tính lại.";
+  worksheet.getCell("A8").value = "Mẹo điền";
+  worksheet.getCell("B8").value = "Tên khách mời phải là cách người đứng mời gọi khách. Ví dụ ba mẹ đứng mời ông bà của cô dâu/chú rể thì ghi Tên khách mời là Bố mẹ, Quan hệ với người mời là bố mẹ, còn Quan hệ với cô dâu chú rể là ông bà của cô dâu/chú rể.";
+  worksheet.getCell("A10").value = "Công thức Tên khách mời";
+  worksheet.getCell("B10").value = "Cách ghi chuẩn";
+  worksheet.getCell("A11").value = "Một người";
+  worksheet.getCell("B11").value = "Vai + tên gọi: Anh Hoàng, Chị Mai, Em Linh, Chú Sáu, Cô Hạnh, Bác Hùng. Với bạn ngang hàng có thể ghi tên riêng: Gia Hân.";
+  worksheet.getCell("A12").value = "Hai vợ chồng";
+  worksheet.getCell("B12").value = "Vợ chồng + vai + tên gọi: Vợ chồng anh Hoàng, Vợ chồng chị Mai, Vợ chồng em Linh, Vợ chồng cháu An. Nếu chỉ ghi Anh Hoàng rồi chọn Hai vợ chồng, hệ thống vẫn hiểu là Anh Hoàng cùng vợ.";
+  worksheet.getCell("A13").value = "Gia đình";
+  worksheet.getCell("B13").value = "Vai + tên gọi + và gia đình: Anh Hoàng và gia đình, Chị Mai và gia đình, Chú Sáu và gia đình. Nếu đã có và gia đình trong tên thì hệ thống không tự thêm lại.";
+  worksheet.getCell("A14").value = "Ba mẹ mời ông bà";
+  worksheet.getCell("B14").value = "Ghi Tên khách mời là Bố mẹ hoặc Ba mẹ. Cột Quan hệ với người mời chọn bố mẹ/ba mẹ. Cột Quan hệ với cô dâu chú rể chọn ông bà của cô dâu/chú rể.";
 
   const explanations = [
-    ["Tên khách mời", "Gõ đúng cách muốn hiện trên thiệp, ví dụ: Chú Sáu, Gia Hân, Anh Hoàng."],
-    ["Quan hệ với người mời", "Vai của khách đối với người đứng mời. Cột này thay cho Danh xưng."],
+    ["Tên khách mời", "Gõ đúng cách người đứng mời gọi khách, ví dụ: Bố mẹ, Anh Hoàng, Chị Mai, Vợ chồng em Linh, Chú Sáu và gia đình."],
+    ["Quan hệ với người mời", "Vai của khách đối với người đứng mời. Ví dụ ba mẹ mời ông bà thì chọn bố mẹ, không chọn ông bà."],
     ["Người đứng mời", "Ba mẹ đứng mời hoặc Cô dâu chú rể đứng mời."],
     ["Người mời xưng là", "Cách người đứng mời tự xưng trong câu mời, ví dụ: gia đình chúng con, tụi mình."],
     ["Người mời gọi cô dâu chú rể là", `Dùng nhất là khi ba mẹ đứng mời, ví dụ: hai cháu, hai con, hoặc ${options.coupleDisplayName}.`],
-    ["Quan hệ với cô dâu chú rể", "Dùng để admin xuất danh sách link riêng và phân nhóm khách."],
+    ["Quan hệ với cô dâu chú rể", "Dùng để admin xuất danh sách link riêng và phân nhóm khách. Đã có thêm các lựa chọn theo cặp để ghi đúng vai vế."],
     ["Mời đi cùng", "Hệ thống tự suy ra người đi kèm RSVP và số khách dự kiến từ cột này."],
     ["Nhóm khách mời", "Nhóm để nhà mình lọc danh sách trong admin."],
     ["Nhóm xem album", "Nhóm ảnh/album mà khách được xem trên link riêng."],
@@ -645,6 +921,45 @@ function applyWorksheetColumns(worksheet: ExcelJS.Worksheet) {
   }));
 }
 
+function applyHeaderRow(worksheet: ExcelJS.Worksheet, rowIndex: number) {
+  const headerRow = worksheet.getRow(rowIndex);
+  headerRow.height = 28;
+  columns.forEach((column, index) => {
+    const cell = headerRow.getCell(index + 1);
+    cell.value = column.header;
+    cell.font = { bold: true, color: { argb: "FFFFFFFF" } };
+    cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FF5F6F4E" } };
+    cell.alignment = { vertical: "middle", horizontal: "center", wrapText: true };
+    cell.border = {
+      top: { style: "thin", color: { argb: "FFD7C6A8" } },
+      left: { style: "thin", color: { argb: "FFD7C6A8" } },
+      bottom: { style: "thin", color: { argb: "FFD7C6A8" } },
+      right: { style: "thin", color: { argb: "FFD7C6A8" } },
+    };
+    const note = headerNotes[column.key];
+    if (note) cell.note = note;
+  });
+}
+
+function findInviteHeaderRow(worksheet: ExcelJS.Worksheet) {
+  let headerRowIndex = 0;
+  const headers = new Map<string, number>();
+
+  worksheet.eachRow({ includeEmpty: false }, (row, rowIndex) => {
+    if (headerRowIndex) return;
+    const rowHeaders = new Map<string, number>();
+    row.eachCell((cell, columnIndex) => {
+      rowHeaders.set(normalizeText(cellText(cell)), columnIndex);
+    });
+    if (findKeyByHeader(rowHeaders, ["Tên khách mời", "guest_name", "guestName"])) {
+      headerRowIndex = rowIndex;
+      rowHeaders.forEach((columnIndex, header) => headers.set(header, columnIndex));
+    }
+  });
+
+  return { headerRowIndex, headers };
+}
+
 function buildExampleSheet(workbook: ExcelJS.Workbook, options: ReturnType<typeof resolveSpreadsheetOptions>) {
   const worksheet = workbook.addWorksheet(exampleSheetName, {
     views: [{ state: "frozen", ySplit: 1 }],
@@ -681,20 +996,22 @@ export async function buildInviteTemplateWorkbook(spreadsheetOptions: Spreadshee
   workbook.modified = new Date();
   workbook.calcProperties.fullCalcOnLoad = true;
 
-  buildGuideSheet(workbook, options);
-
   const worksheet = workbook.addWorksheet(inviteSheetName, {
-    views: [{ state: "frozen", ySplit: 1 }],
+    views: [{ state: "frozen", ySplit: inlineGuideRowCount + 1 }],
   });
   applyWorksheetColumns(worksheet);
   worksheet.autoFilter = {
-    from: { row: 1, column: 1 },
-    to: { row: 1, column: columns.length },
+    from: { row: inlineGuideRowCount + 1, column: 1 },
+    to: { row: inlineGuideRowCount + 1, column: columns.length },
   };
 
-  formatHeaderRow(worksheet);
+  applyInlineGuide(worksheet);
+  const headerRowIndex = inlineGuideRowCount + 1;
+  applyHeaderRow(worksheet, headerRowIndex);
+  const firstDataRow = headerRowIndex + 1;
+  buildGuideSheet(workbook, options);
   buildExampleSheet(workbook, options);
-  applyTemplateRows(worksheet, options);
+  applyTemplateRows(worksheet, options, firstDataRow);
 
   worksheet.getColumn(10).font = { color: { argb: "FF5F6F4E" } };
   worksheet.getColumn(11).font = { color: { argb: "FF2E2A25" } };
@@ -713,10 +1030,7 @@ export async function parseInviteWorkbook(buffer: ArrayBuffer, existingInvitees:
     return { invitees: [], errors: ["File Excel không có sheet danh sách khách mời."] };
   }
 
-  const headers = new Map<string, number>();
-  worksheet.getRow(1).eachCell((cell, columnIndex) => {
-    headers.set(normalizeText(cellText(cell)), columnIndex);
-  });
+  const { headerRowIndex, headers } = findInviteHeaderRow(worksheet);
 
   const indexes = {
     guestName: findKeyByHeader(headers, ["Tên khách mời", "guest_name", "guestName"]),
@@ -740,7 +1054,7 @@ export async function parseInviteWorkbook(buffer: ArrayBuffer, existingInvitees:
   const errors: string[] = [];
 
   worksheet.eachRow({ includeEmpty: false }, (row, rowIndex) => {
-    if (rowIndex === 1) return;
+    if (!headerRowIndex || rowIndex <= headerRowIndex) return;
 
     const read = (index: number, fallback = "") => (index ? cellText(row.getCell(index)) : fallback);
     const guestName = read(indexes.guestName);
