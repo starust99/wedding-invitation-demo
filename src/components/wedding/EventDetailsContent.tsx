@@ -125,7 +125,6 @@ function VenueMapImage() {
       if (videoRef.current.paused) {
         videoRef.current.play();
         setIsPlaying(true);
-        setHasPlayed(true);
       } else {
         videoRef.current.pause();
         setIsPlaying(false);
@@ -135,16 +134,33 @@ function VenueMapImage() {
 
   return (
     <div className="details-map-canvas group" aria-hidden="true" onClick={handlePlay} style={{ cursor: 'pointer' }}>
+      {/* 1. Base Video Layer */}
       <video
         ref={videoRef}
-        src="/assets/venue-map-video.mp4#t=0.001"
+        src="/assets/venue-map-video.mp4"
         playsInline
         muted
-        className="details-map-image w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+        className="details-map-image absolute inset-0 z-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
         onEnded={() => setIsPlaying(false)}
         onPause={() => setIsPlaying(false)}
         onPlay={() => setIsPlaying(true)}
+        onPlaying={() => setHasPlayed(true)}
       />
+
+      {/* 2. Custom Poster Overlay (Fades out smoothly) */}
+      <div
+        className={`absolute inset-0 z-[5] pointer-events-none transition-opacity duration-1000 ease-out ${hasPlayed ? 'opacity-0' : 'opacity-100'}`}
+      >
+        <Image
+          src="/assets/venue-map-poster.png"
+          alt="Bản đồ Terracotta"
+          fill
+          sizes="(max-width: 767px) 100vw, (max-width: 1023px) 100vw, 62vw"
+          className="object-cover transition-transform duration-700 group-hover:scale-105"
+        />
+      </div>
+
+      {/* 3. Hint Button Overlay */}
       {!isPlaying && !hasPlayed && (
         <div className="absolute inset-x-0 bottom-6 flex justify-center z-10 transition-opacity duration-500 pointer-events-none group-hover:opacity-100 opacity-90">
           <div className="flex items-center gap-1.5 bg-white/70 backdrop-blur-md px-3.5 py-1.5 rounded-full shadow-md text-[#3f4642] font-medium text-[0.85rem] tracking-wide animate-pulse">
@@ -207,7 +223,7 @@ export function EventDetailsContent({
             Cùng với niềm hân hoan của hai bên gia đình:
           </p>
 
-          <div className="flex flex-row gap-2 sm:gap-8 md:gap-16 justify-between items-start w-full relative">
+          <div className="flex flex-row gap-2 sm:gap-8 md:gap-16 justify-between items-stretch w-full relative">
           {/* Nhà Trai */}
           <div className="flex-1 w-full flex flex-col items-center">
             <h3 className="font-serif text-[1.1rem] sm:text-[1.35rem] md:text-[1.5rem] font-medium text-[#3f4642] mb-3 sm:mb-5 tracking-widest uppercase opacity-90" style={{ letterSpacing: '0.15em' }}>Nhà Trai</h3>
@@ -215,7 +231,7 @@ export function EventDetailsContent({
               <p>Ông <span className="font-medium text-[#3f4642]">Trần Trọng Sơn</span></p>
               <p>Bà <span className="font-medium text-[#3f4642]">Nguyễn Thị Minh Duyên</span></p>
             </div>
-            <div className="mt-4 sm:mt-6 pt-3 sm:pt-4 border-t border-[#3f4642]/15 w-[90%] sm:w-[85%] mx-auto">
+            <div className="mt-auto pt-3 sm:pt-4 border-t border-[#3f4642]/15 w-[90%] sm:w-[85%] mx-auto">
               <p className="text-[0.65rem] sm:text-[0.85rem] md:text-[0.9rem] italic text-[#3f4642]/70 mb-1 sm:mb-2 uppercase tracking-widest">Trưởng nam</p>
               <p className="font-serif text-[1.05rem] sm:text-[1.25rem] md:text-[1.4rem] font-medium text-[#3f4642] leading-snug">
                 Augustino<br/>Trần Long Nhật
@@ -233,7 +249,7 @@ export function EventDetailsContent({
               <p>Ông <span className="font-medium text-[#3f4642]">Felicite Nguyễn Đức Tài</span></p>
               <p>Bà <span className="font-medium text-[#3f4642]">Teresa Phan Thị Thu Hiền</span></p>
             </div>
-            <div className="mt-4 sm:mt-6 pt-3 sm:pt-4 border-t border-[#3f4642]/15 w-[90%] sm:w-[85%] mx-auto">
+            <div className="mt-auto pt-3 sm:pt-4 border-t border-[#3f4642]/15 w-[90%] sm:w-[85%] mx-auto">
               <p className="text-[0.65rem] sm:text-[0.85rem] md:text-[0.9rem] italic text-[#3f4642]/70 mb-1 sm:mb-2 uppercase tracking-widest">Trưởng nữ</p>
               <p className="font-serif text-[1.05rem] sm:text-[1.25rem] md:text-[1.4rem] font-medium text-[#3f4642] leading-snug">
                 Teresa<br/>Nguyễn Anh Phương

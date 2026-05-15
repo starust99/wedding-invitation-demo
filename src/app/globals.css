@@ -545,9 +545,9 @@ textarea {
 }
 
 .save-date-photo-frame {
-  position: relative;
+  position: absolute;
+  inset: 0.48rem;
   z-index: 1;
-  height: 100%;
   overflow: hidden;
   border: 1px solid rgba(255, 255, 255, 0.66);
   border-radius: 1.05rem;
