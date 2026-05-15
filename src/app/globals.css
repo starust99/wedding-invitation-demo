@@ -657,7 +657,7 @@ textarea {
     max-width: 33rem;
     margin: 1rem 0 0;
     color: rgba(72, 84, 72, 0.64);
-    font-size: var(--wedding-type-body);
+    font-size: 1.2rem;
     line-height: 1.75;
     text-align: center;
     overflow-wrap: break-word;
@@ -675,16 +675,22 @@ textarea {
 
 .save-date-actions a {
   display: inline-flex;
-  min-height: 3.15rem;
+  min-height: 4.5rem;
   align-items: center;
   justify-content: center;
   gap: 0.55rem;
   border-radius: 999px;
   padding: 0 1.25rem;
-  font-size: var(--wedding-type-button);
+  font-size: 1.125rem;
   font-weight: 700;
   text-align: center;
   transition: transform 180ms ease, box-shadow 180ms ease, background-color 180ms ease;
+}
+
+@media (min-width: 1024px) {
+  .save-date-actions a {
+    min-height: 5rem;
+  }
 }
 
 .save-date-actions a:hover {
@@ -771,16 +777,16 @@ textarea {
 .save-date-countdown-heading p,
 .save-date-countdown-heading span {
   margin: 0;
-  font-size: 0.9rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
+  font-size: 1rem;
+  font-weight: 500;
+  letter-spacing: 0.15em;
   text-transform: uppercase;
-  color: rgba(63, 70, 66, 0.72);
+  color: rgba(145, 112, 72, 0.8);
   text-align: center;
 }
 
 .save-date-countdown-heading span {
-  color: rgba(145, 112, 72, 0.68);
+  color: rgba(145, 112, 72, 0.8);
 }
 
 .save-date-countdown-grid {
@@ -789,18 +795,19 @@ textarea {
   display: grid;
   overflow: hidden;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  border: 1px solid rgba(181, 213, 164, 0.2);
+  border: 1px solid rgba(212, 175, 55, 0.18);
   border-radius: 1.05rem;
-  background:
-    linear-gradient(135deg, rgba(255, 255, 255, 0.28), rgba(255, 253, 248, 0.08)),
-    linear-gradient(180deg, rgba(255, 253, 248, 0.2), rgba(242, 198, 207, 0.06));
+  background: rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 8px 32px rgba(145, 112, 72, 0.05);
 }
 
 .save-date-countdown-item {
   min-width: 0;
   padding: 0.78rem 0.7rem 0.82rem;
   text-align: center;
-  border-left: 1px solid rgba(63, 70, 66, 0.1);
+  border-left: 1px solid rgba(212, 175, 55, 0.15);
 }
 
 .save-date-countdown-item:first-child {
@@ -817,17 +824,18 @@ textarea {
 .save-date-countdown-item strong {
   color: #3f4642;
   font-family: var(--font-serif);
-  font-size: 2.1rem;
-  font-weight: 600;
+  font-size: 2.3rem;
+  font-weight: 400;
+  font-style: italic;
   line-height: 0.95;
 }
 
 .save-date-countdown-item span {
-  margin-top: 0.35rem;
-  color: rgba(63, 70, 66, 0.55);
+  margin-top: 0.4rem;
+  color: rgba(145, 112, 72, 0.7);
   font-size: var(--wedding-type-meta);
-  font-weight: 700;
-  letter-spacing: 0.16em;
+  font-weight: 600;
+  letter-spacing: 0.2em;
   line-height: 1.1;
   text-transform: uppercase;
 }
@@ -1220,7 +1228,7 @@ textarea {
 
 @media (min-width: 640px) {
   .save-date-copy {
-    font-size: 1.05rem;
+    font-size: 1.15rem;
   }
 }
 
@@ -2754,7 +2762,7 @@ textarea {
 
   .save-date-copy {
     margin-top: 0.85rem;
-    font-size: var(--wedding-type-body);
+    font-size: 1.05rem;
     line-height: 1.68;
   }
 
@@ -2765,9 +2773,9 @@ textarea {
   }
 
   .save-date-actions a {
-    width: 100%;
-    min-height: 2.95rem;
+    min-height: 3.8rem;
     padding-inline: 1rem;
+    font-size: 0.95rem;
   }
 
   .save-date-countdown-card {

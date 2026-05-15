@@ -173,8 +173,11 @@ export function ReferenceWeddingHero({ config, summary }: ReferenceWeddingHeroPr
         </article>
 
         <article className="save-date-card save-date-countdown-card" aria-label="Đếm ngược đến lễ cưới">
-          <div className="save-date-countdown-heading">
-            <p>Save the date · 26.12.2026</p>
+          <div className="save-date-countdown-heading flex-col gap-1.5 items-center">
+            <p>Cùng đón chờ</p>
+            <strong className="font-serif text-[1.85rem] font-normal italic tracking-wide text-ink/80" style={{ textTransform: "none", letterSpacing: "0.05em" }}>
+              {dateText}
+            </strong>
           </div>
           <CountdownRail targetTimestamp={targetTimestamp} />
         </article>

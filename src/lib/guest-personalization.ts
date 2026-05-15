@@ -100,14 +100,55 @@ export function formatGuestName(identity: GuestIdentity) {
 }
 
 export function resolveShortRecipientLabel(identity: GuestIdentity, fallbackLabel?: string) {
-  const explicitHonorific = cleanString(identity.honorific);
-  if (explicitHonorific) return sentenceCase(explicitHonorific);
-
   const label = cleanString(identity.invitationName)
     || cleanString(identity.displayLabel)
     || cleanString(identity.name)
     || cleanString(fallbackLabel);
   if (!label || label === "quý khách") return "quý khách";
+
+  const compactPhrases = [
+    ["gia dinh chu thim", "gia đình chú thím"],
+    ["gia dinh cau mo", "gia đình cậu mợ"],
+    ["gia dinh co chu", "gia đình cô chú"],
+    ["gia dinh vo chong", "gia đình vợ chồng"],
+    ["gia dinh thim", "gia đình thím"],
+    ["gia dinh duong", "gia đình dượng"],
+    ["gia dinh chau", "gia đình cháu"],
+    ["gia dinh anh", "gia đình anh"],
+    ["gia dinh chi", "gia đình chị"],
+    ["gia dinh bac", "gia đình bác"],
+    ["gia dinh chu", "gia đình chú"],
+    ["gia dinh cau", "gia đình cậu"],
+    ["gia dinh ban", "gia đình bạn"],
+    ["gia dinh em", "gia đình em"],
+    ["gia dinh co", "gia đình cô"],
+    ["gia dinh di", "gia đình dì"],
+    ["gia dinh mo", "gia đình mợ"],
+    ["vo chong dong nghiep", "vợ chồng đồng nghiệp"],
+    ["vo chong anh chi", "vợ chồng anh chị"],
+    ["vo chong co chu", "vợ chồng cô chú"],
+    ["vo chong chu thim", "vợ chồng chú thím"],
+    ["vo chong di duong", "vợ chồng dì dượng"],
+    ["vo chong cau mo", "vợ chồng cậu mợ"],
+    ["vo chong chau", "vợ chồng cháu"],
+    ["vo chong anh", "vợ chồng anh"],
+    ["vo chong chi", "vợ chồng chị"],
+    ["vo chong bac", "vợ chồng bác"],
+    ["vo chong ban", "vợ chồng bạn"],
+    ["vo chong em", "vợ chồng em"],
+    ["ong ba", "ông bà"],
+    ["bo me", "bố mẹ"],
+    ["ba me", "ba mẹ"],
+    ["cha me", "cha mẹ"],
+    ["co chu", "cô chú"],
+    ["cau mo", "cậu mợ"],
+  ] as const;
+  const normalizedLabel = normalizeText(label);
+  const phrase = compactPhrases.find(([normalizedPhrase]) => normalizedLabel === normalizedPhrase || normalizedLabel.startsWith(`${normalizedPhrase} `));
+  if (phrase) return phrase[1];
+
+  const explicitHonorific = cleanString(identity.honorific);
+  if (explicitHonorific) return sentenceCase(explicitHonorific);
 
   const firstWord = label.split(/\s+/)[0];
   const kinshipTerms: Record<string, string> = {
@@ -255,9 +296,6 @@ function resolveGuestAudience(input?: InvitationCopyInput): GuestAudience {
 }
 
 function resolveParentsHostPronoun(input?: InvitationCopyInput) {
-  const explicit = cleanString(input?.hostPronoun);
-  if (explicit) return explicit;
-
   const relationshipText = [
     input?.hostRelationship,
     input?.invitationName,
@@ -266,9 +304,33 @@ function resolveParentsHostPronoun(input?: InvitationCopyInput) {
     input?.displayLabel,
   ].filter(Boolean).join(" ");
 
-  if (includesAny(relationshipText, peerKeywords) || includesAny(relationshipText, seniorKeywords) || includesAny(relationshipText, formalKeywords)) return "gia đình chúng tôi";
-  if (includesAny(relationshipText, juniorKeywords)) return "gia đình anh chị";
+  if (includesAny(relationshipText, ["chau", "cháu", "be", "bé"])) return "gia đình";
+  if (includesAny(relationshipText, seniorKeywords)) return "em";
+  if (includesAny(relationshipText, ["em"])) return "anh chị";
+
+  const explicit = cleanString(input?.hostPronoun);
+  if (explicit) return explicit;
+
+  if (includesAny(relationshipText, peerKeywords) || includesAny(relationshipText, formalKeywords)) return "gia đình chúng tôi";
+  if (includesAny(relationshipText, juniorKeywords)) return "anh chị";
   return "gia đình chúng con";
+}
+
+function resolveCoupleReference(input: InvitationCopyInput | undefined, tone: InvitationTone, hostPronoun: string) {
+  const explicit = cleanString(input?.coupleReference);
+  const relationshipText = [
+    input?.hostRelationship,
+    input?.relationship,
+    input?.invitationName,
+    input?.guestName,
+    input?.displayLabel,
+  ].filter(Boolean).join(" ");
+
+  if (tone === "parents_host" && includesAny(relationshipText, ["chau", "cháu"])) {
+    return explicit && explicit !== "hai cháu" ? explicit : "hai em";
+  }
+
+  return explicit || (tone === "parents_host" ? "hai cháu" : hostPronoun);
 }
 
 function resolveRecipientPronoun(input: InvitationCopyInput | undefined, tone: InvitationTone, guestLabel: string, audience = resolveGuestAudience(input)) {
@@ -531,6 +593,7 @@ function resolvePairLabel(input: InvitationCopyInput | undefined, guestLabel: st
 
 function resolveFamilyPresence(input: InvitationCopyInput | undefined, guestLabel: string, shortRecipientLabel: string, audience: GuestAudience) {
   if (guestLabel === "quý khách") return "quý khách và gia đình";
+  if (includesFamilyLabel(guestLabel)) return shortRecipientLabel;
   if (audience === "senior") return "anh chị và gia đình";
   if (audience === "peer") return "bạn và gia đình";
   if (audience === "junior") return "em và gia đình";
@@ -633,8 +696,18 @@ export function buildInvitationCopy(input?: InvitationCopyInput): InvitationCopy
   const envelopePrefix = isWarmPeer ? "Mời" : "Kính mời";
   const coupleDisplayName = cleanString(input?.coupleDisplayName) || "Nhật & Phương";
   const venueDisplayName = cleanString(input?.venueDisplayName) || "Terracotta Đà Lạt";
-  const coupleReference = cleanString(input?.coupleReference) || (tone === "parents_host" ? "hai cháu" : hostPronoun);
-  const inviteRecipientLine = recipientLine;
+  const coupleReference = resolveCoupleReference(input, tone, hostPronoun);
+
+  const formatRepetitiveFamily = (host: string, recipient: string) => {
+    if (host.toLowerCase() === "gia đình" && /^gia (đình|dinh)\s+/i.test(recipient)) {
+      const namePart = recipient.replace(/^gia (đình|dinh)\s+/i, "");
+      if (!namePart) return recipient;
+      return `${namePart} cùng gia đình`;
+    }
+    return recipient;
+  };
+
+  const inviteRecipientLine = formatRepetitiveFamily(hostSubject, recipientLine);
   const presenceSubject = resolvePresenceSubject(address, input);
   const coupleInviteOwner = tone === "parents_host" ? `${coupleReference} ${coupleDisplayName}` : hostPronoun;
   const envelopeRecipientLine = resolveEnvelopeRecipient(address, input);
@@ -645,20 +718,26 @@ export function buildInvitationCopy(input?: InvitationCopyInput): InvitationCopy
     : isWarmPeer
       ? `${hostSubject} ${inviteVerb} ${inviteRecipientLine} đến chung vui trong lễ cưới của ${hostPronoun}.`
       : `${hostSubject} trân trọng kính mời ${inviteRecipientLine} đến chung vui trong lễ cưới của ${hostPronoun}.`;
-  const heroRecipientLine = isFamilyInvite(input) || isCoupleInvite(input) || isOpenCompanionInvite(input)
-    ? recipientLine
+
+  const rawHeroRecipientLine = isFamilyInvite(input) || isCoupleInvite(input)
+    ? shortRecipientLabel
+    : isOpenCompanionInvite(input)
+      ? recipientLine
     : shouldUseFormalGuestLine(tone, guestLabel)
       ? guestLabel
       : recipientPronoun;
+  const heroRecipientLine = formatRepetitiveFamily(hostSubject, rawHeroRecipientLine);
   const heroInvitationLine = isCoupleInvite(input) || isOpenCompanionInvite(input)
-    ? `Kính mời ${sentenceCase(recipientLine)} đến chung vui trong lễ cưới của ${coupleInviteOwner} tại ${venueDisplayName}.`
+    ? `Kính mời ${sentenceCase(heroRecipientLine)} đến chung vui trong lễ cưới của ${coupleInviteOwner} tại ${venueDisplayName}.`
     : tone === "parents_host"
       ? `${hostSubject} trân trọng kính mời ${heroRecipientLine} đến chung vui trong lễ cưới của ${coupleReference} ${coupleDisplayName} tại ${venueDisplayName}.`
     : isWarmPeer
       ? `${hostSubject} mời ${heroRecipientLine} đến chung vui trong lễ cưới của ${hostPronoun} tại ${venueDisplayName}.`
       : `${hostSubject} trân trọng kính mời ${heroRecipientLine} đến chung vui trong lễ cưới của ${hostPronoun} tại ${venueDisplayName}.`;
-  const rsvpLead = tone === "parents_host" || tone === "elder"
-    ? `${hostSubject} mong nhận được lời hồi đáp để chuẩn bị đón tiếp chu đáo`
+  const rsvpLead = tone === "parents_host"
+    ? "Gia đình mong nhận được lời hồi đáp để chuẩn bị đón tiếp chu đáo"
+    : tone === "elder"
+      ? `${hostSubject} mong nhận được lời hồi đáp để chuẩn bị đón tiếp chu đáo`
     : tone === "senior"
       ? `${hostSubject} mong nhận được lời hồi đáp để ${hostPronoun} chuẩn bị đón tiếp được chu đáo`
       : tone === "peer"
@@ -685,7 +764,7 @@ export function buildInvitationCopy(input?: InvitationCopyInput): InvitationCopy
     recipientLine,
     invitedGuestLine,
     inviteScope,
-    greeting: `${guestLabel === "quý khách" ? "Quý khách" : guestLabel} ${isFormal ? "kính mến" : "thân mến"}`,
+    greeting: `${guestLabel === "quý khách" ? "Quý khách" : guestLabel} thân mến`,
     heroGreeting: guestLabel === "quý khách"
       ? "Trân trọng kính mời quý khách"
       : isFormal
