@@ -555,6 +555,9 @@ textarea {
     linear-gradient(180deg, rgba(255, 255, 255, 0.72), rgba(255, 255, 255, 0.4)),
     linear-gradient(135deg, rgba(247, 202, 201, 0.08), rgba(143, 170, 220, 0.08));
   box-shadow: 0 18px 46px rgba(63, 70, 66, 0.08);
+  -webkit-mask-image: -webkit-radial-gradient(white, black);
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
 }
 
 .save-date-photo-image {
@@ -1092,15 +1095,17 @@ textarea {
   position: relative;
   overflow: hidden;
   aspect-ratio: 1448 / 1086;
-  -webkit-mask-image: radial-gradient(ellipse 80% 75% at 50% 50%, black 35%, transparent 100%);
-  mask-image: radial-gradient(ellipse 80% 75% at 50% 50%, black 35%, transparent 100%);
+  border-radius: 2rem;
+  -webkit-mask-image: radial-gradient(ellipse 96% 93% at 50% 50%, black 50%, transparent 100%);
+  mask-image: radial-gradient(ellipse 96% 93% at 50% 50%, black 50%, transparent 100%);
 }
 
 .details-map-image {
   object-fit: cover;
   object-position: center center;
-  transform: scale(1.09);
+  transform: scale(1.03);
   transform-origin: center center;
+  mix-blend-mode: multiply;
 }
 
 .details-map-water {

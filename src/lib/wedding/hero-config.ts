@@ -547,7 +547,7 @@ export function createDefaultWeddingHeroConfig(): WeddingHeroEditorConfig {
       names: "Nhật & Phương",
       date: "26.12.2026",
       description:
-        "Gia đình trân trọng kính mời quý khách đến chung vui trong lễ cưới của Nhật & Phương tại Terracotta Đà Lạt.",
+        "Gia đình trân trọng kính mời quý khách đến chung vui trong tiệc cưới của Nhật & Phương tại Terracotta Hotel & Resort Đà Lạt.",
       primaryCta: "Gửi lời hồi đáp",
       secondaryCta: "Xem địa điểm",
       monogramText: "N&P",

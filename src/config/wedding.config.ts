@@ -151,7 +151,7 @@ export const weddingConfig = {
     invitation: {
       title: "Trân trọng kính mời",
       message:
-      "Gia đình trân trọng kính mời quý khách đến chung vui trong lễ cưới của Nhật & Phương tại Terracotta Hotel & Resort Đà Lạt.",
+      "Gia đình trân trọng kính mời quý khách đến chung vui trong tiệc cưới của Nhật & Phương tại Terracotta Hotel & Resort Đà Lạt.",
     closing: "Sự hiện diện của quý khách là niềm vinh hạnh và là niềm vui rất lớn với gia đình.",
   },
   venue: {

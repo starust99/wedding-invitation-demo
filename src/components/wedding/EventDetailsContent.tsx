@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { MapPin } from "lucide-react";
 import type { ReactNode } from "react";
+import { useRef, useState } from "react";
 import { motion } from "framer-motion";
 import type { Variants } from "framer-motion";
 import type { EventDetailsViewportMode, WeddingEventDetailsEditorConfig } from "@/lib/wedding/event-details-types";
@@ -31,10 +32,10 @@ type EventDetailsContentProps = {
 function formatDateLabel(dateLabel?: string) {
   if (!dateLabel) return "";
 
-  const dateMatch = dateLabel.match(/(\d{1,2}\.\d{1,2}\.\d{4})/);
+  const dateMatch = dateLabel.match(/(\d{1,2})\.(\d{1,2})\.(\d{4})/);
   if (!dateMatch) return dateLabel.trim();
 
-  return `${dateMatch[1]}, thứ 7`;
+  return `Ngày ${dateMatch[1]} tháng ${dateMatch[2]} năm ${dateMatch[3]}`;
 }
 
 function formatWelcomeTime(timeLabel?: string) {
@@ -51,7 +52,19 @@ function formatSchedule(dateLabel?: string, welcomeTime?: string, fallback = "")
   const dateText = formatDateLabel(dateLabel);
   const timeText = formatWelcomeTime(welcomeTime);
 
-  if (dateText && timeText) return `${dateText}. ${timeText}`;
+  if (dateText && timeText) {
+    return (
+      <>
+        {timeText}, Thứ 7
+        <br />
+        {dateText}
+        <br />
+        <span style={{ fontSize: '0.9em', fontStyle: 'italic', opacity: 0.85 }}>
+          (nhằm ngày 18 tháng 11 năm Bính Ngọ)
+        </span>
+      </>
+    );
+  }
   return dateText || timeText || fallback;
 }
 
@@ -103,15 +116,43 @@ function GlassPanel({ area, children, className = "", variants }: { area: string
 }
 
 function VenueMapImage() {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [hasPlayed, setHasPlayed] = useState(false);
+
+  const handlePlay = () => {
+    if (videoRef.current) {
+      if (videoRef.current.paused) {
+        videoRef.current.play();
+        setIsPlaying(true);
+        setHasPlayed(true);
+      } else {
+        videoRef.current.pause();
+        setIsPlaying(false);
+      }
+    }
+  };
+
   return (
-    <div className="details-map-canvas" aria-hidden="true">
-      <Image
-        src="/assets/terracotta-glass-map.jpg"
-        alt=""
-        fill
-        sizes="(max-width: 767px) 100vw, (max-width: 1023px) 100vw, 62vw"
-        className="details-map-image"
+    <div className="details-map-canvas group" aria-hidden="true" onClick={handlePlay} style={{ cursor: 'pointer' }}>
+      <video
+        ref={videoRef}
+        src="/assets/venue-map-video.mp4#t=0.001"
+        playsInline
+        muted
+        className="details-map-image w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+        onEnded={() => setIsPlaying(false)}
+        onPause={() => setIsPlaying(false)}
+        onPlay={() => setIsPlaying(true)}
       />
+      {!isPlaying && !hasPlayed && (
+        <div className="absolute inset-x-0 bottom-6 flex justify-center z-10 transition-opacity duration-500 pointer-events-none group-hover:opacity-100 opacity-90">
+          <div className="flex items-center gap-1.5 bg-white/70 backdrop-blur-md px-3.5 py-1.5 rounded-full shadow-md text-[#3f4642] font-medium text-[0.85rem] tracking-wide animate-pulse">
+            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+            <span className="italic font-serif">Chạm để xem không gian</span>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -154,6 +195,57 @@ export function EventDetailsContent({
       </motion.header>
 
       <motion.div 
+        className="mb-8 md:mb-12 w-full max-w-4xl mx-auto"
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, margin: "-50px" }}
+        variants={headerVariant}
+      >
+        <div className="details-glass-panel px-2 py-6 sm:px-6 sm:py-8 md:px-12 md:py-10 text-center flex flex-col relative">
+
+          <p className="font-serif italic text-[#3f4642]/80 text-[0.95rem] sm:text-[1.1rem] md:text-[1.25rem] mb-6 sm:mb-8 tracking-wide px-4">
+            Cùng với niềm hân hoan của hai bên gia đình:
+          </p>
+
+          <div className="flex flex-row gap-2 sm:gap-8 md:gap-16 justify-between items-start w-full relative">
+          {/* Nhà Trai */}
+          <div className="flex-1 w-full flex flex-col items-center">
+            <h3 className="font-serif text-[1.1rem] sm:text-[1.35rem] md:text-[1.5rem] font-medium text-[#3f4642] mb-3 sm:mb-5 tracking-widest uppercase opacity-90" style={{ letterSpacing: '0.15em' }}>Nhà Trai</h3>
+            <div className="space-y-1.5 sm:space-y-2 text-[0.8rem] sm:text-[0.95rem] md:text-[1.05rem] text-[#3f4642]/80 leading-relaxed w-full px-1">
+              <p>Ông <span className="font-medium text-[#3f4642]">Trần Trọng Sơn</span></p>
+              <p>Bà <span className="font-medium text-[#3f4642]">Nguyễn Thị Minh Duyên</span></p>
+            </div>
+            <div className="mt-4 sm:mt-6 pt-3 sm:pt-4 border-t border-[#3f4642]/15 w-[90%] sm:w-[85%] mx-auto">
+              <p className="text-[0.65rem] sm:text-[0.85rem] md:text-[0.9rem] italic text-[#3f4642]/70 mb-1 sm:mb-2 uppercase tracking-widest">Trưởng nam</p>
+              <p className="font-serif text-[1.05rem] sm:text-[1.25rem] md:text-[1.4rem] font-medium text-[#3f4642] leading-snug">
+                Augustino<br/>Trần Long Nhật
+              </p>
+            </div>
+          </div>
+
+          {/* Vertical Divider */}
+          <div className="absolute left-1/2 top-8 bottom-8 md:top-10 md:bottom-10 w-px bg-gradient-to-b from-transparent via-[#3f4642]/20 to-transparent -translate-x-1/2"></div>
+
+          {/* Nhà Gái */}
+          <div className="flex-1 w-full flex flex-col items-center">
+            <h3 className="font-serif text-[1.1rem] sm:text-[1.35rem] md:text-[1.5rem] font-medium text-[#3f4642] mb-3 sm:mb-5 tracking-widest uppercase opacity-90" style={{ letterSpacing: '0.15em' }}>Nhà Gái</h3>
+            <div className="space-y-1.5 sm:space-y-2 text-[0.8rem] sm:text-[0.95rem] md:text-[1.05rem] text-[#3f4642]/80 leading-relaxed w-full px-1">
+              <p>Ông <span className="font-medium text-[#3f4642]">Felicite Nguyễn Đức Tài</span></p>
+              <p>Bà <span className="font-medium text-[#3f4642]">Teresa Phan Thị Thu Hiền</span></p>
+            </div>
+            <div className="mt-4 sm:mt-6 pt-3 sm:pt-4 border-t border-[#3f4642]/15 w-[90%] sm:w-[85%] mx-auto">
+              <p className="text-[0.65rem] sm:text-[0.85rem] md:text-[0.9rem] italic text-[#3f4642]/70 mb-1 sm:mb-2 uppercase tracking-widest">Trưởng nữ</p>
+              <p className="font-serif text-[1.05rem] sm:text-[1.25rem] md:text-[1.4rem] font-medium text-[#3f4642] leading-snug">
+                Teresa<br/>Nguyễn Anh Phương
+              </p>
+            </div>
+          </div>
+
+          </div>
+        </div>
+      </motion.div>
+
+      <motion.div
         className="details-venue-board"
         initial="hidden"
         whileInView="visible"
