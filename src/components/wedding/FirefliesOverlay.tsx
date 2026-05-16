@@ -11,16 +11,12 @@ export function FirefliesOverlay({ active }: { active: boolean }) {
     { top: '78%', left: '88%', color: '#38bdf8', delay: '2.8s', size: '4px' },
     { top: '55%', left: '25%', color: '#f472b6', delay: '1.5s', size: '3px' },
     { top: '68%', left: '42%', color: '#38bdf8', delay: '5.2s', size: '5px' },
-    { top: '92%', left: '60%', color: '#f472b6', delay: '3.3s', size: '4px' },
   ], []);
 
   const lamps = useMemo(() => [
-    { top: '52.5%', left: '77.5%', delay: '0s' },
-    { top: '50.5%', left: '89.5%', delay: '1s' },
-    { top: '59.5%', left: '35.5%', delay: '0.5s' },
-    { top: '59.5%', left: '31%', delay: '2s' },
-    { top: '51.5%', left: '10%', delay: '1.5s' },
-    { top: '50.5%', left: '56.5%', delay: '0.8s' },
+    { top: '52.5%', left: '77.5%', delay: '0s' }, // Main right lamp
+    { top: '50.5%', left: '89.5%', delay: '1s' }, // Far right lamp
+    { top: '59.5%', left: '35.5%', delay: '0.5s' }, // Main left lamp
   ], []);
 
   return (
@@ -39,16 +35,16 @@ export function FirefliesOverlay({ active }: { active: boolean }) {
         }
 
         @keyframes lamp-flicker {
-          0%, 100% { opacity: 0.7; transform: translate(-50%, -50%) scale(1); box-shadow: 0 0 12px 4px rgba(253, 224, 71, 0.4); }
-          50% { opacity: 1; transform: translate(-50%, -50%) scale(1.15); box-shadow: 0 0 20px 8px rgba(253, 224, 71, 0.8); }
+          0%, 100% { opacity: 0.3; transform: translate(-50%, -50%) scale(1); box-shadow: 0 0 4px 1px rgba(253, 224, 71, 0.2); }
+          50% { opacity: 0.6; transform: translate(-50%, -50%) scale(1.05); box-shadow: 0 0 8px 3px rgba(253, 224, 71, 0.5); }
         }
         .lamp-glow {
           position: absolute;
           width: 3px;
           height: 10px;
           border-radius: 50%;
-          background-color: #fef08a;
-          animation: lamp-flicker 4s infinite ease-in-out;
+          background-color: rgba(254, 240, 138, 0.5); /* Soft, semi-transparent warm yellow */
+          animation: lamp-flicker 5s infinite ease-in-out;
           pointer-events: none;
           filter: blur(1px);
         }
