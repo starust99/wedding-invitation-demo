@@ -21,8 +21,10 @@ const maxInviteRows = 1000;
 const defaultCoupleDisplayName = weddingConfig.couple.displayName || "Nhật & Phương";
 const optionStartColumn = 11;
 const termLookupStartColumn = 16;
-const groupLookupStartColumn = 24;
-const ownerLookupStartColumn = 27;
+const termLookupColumnCount = 9;
+const groupLookupStartColumn = termLookupStartColumn + termLookupColumnCount;
+const groupLookupColumnCount = 2;
+const ownerLookupStartColumn = groupLookupStartColumn + groupLookupColumnCount;
 
 type SalutationDefinition = {
   label: string;
@@ -370,7 +372,7 @@ function optionRange(optionKey: OptionKey, optionIndex: number, optionColumns: R
 
 function termLookupRange() {
   const start = columnLetter(termLookupStartColumn);
-  const end = columnLetter(termLookupStartColumn + 8);
+  const end = columnLetter(termLookupStartColumn + termLookupColumnCount - 1);
   return `${quoteSheetName(guideSheetName)}!$${start}$2:$${end}$${salutationDefinitions.length + 1}`;
 }
 
