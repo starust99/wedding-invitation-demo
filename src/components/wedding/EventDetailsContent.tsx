@@ -223,40 +223,53 @@ export function EventDetailsContent({
             Cùng với niềm hân hoan của hai bên gia đình:
           </p>
 
-          <div className="flex flex-row gap-2 sm:gap-8 md:gap-16 justify-between items-stretch w-full relative">
-          {/* Nhà Trai */}
-          <div className="flex-1 w-full flex flex-col items-center">
-            <h3 className="font-serif text-[1.1rem] sm:text-[1.35rem] md:text-[1.5rem] font-medium text-[#3f4642] mb-3 sm:mb-5 tracking-widest uppercase opacity-90" style={{ letterSpacing: '0.15em' }}>Nhà Trai</h3>
-            <div className="space-y-1.5 sm:space-y-2 text-[0.8rem] sm:text-[0.95rem] md:text-[1.05rem] text-[#3f4642]/80 leading-relaxed w-full px-1">
-              <p>Ông <span className="font-medium text-[#3f4642]">Trần Trọng Sơn</span></p>
-              <p>Bà <span className="font-medium text-[#3f4642]">Nguyễn Thị Minh Duyên</span></p>
-            </div>
-            <div className="mt-auto pt-3 sm:pt-4 border-t border-[#3f4642]/15 w-[90%] sm:w-[85%] mx-auto">
-              <p className="text-[0.65rem] sm:text-[0.85rem] md:text-[0.9rem] italic text-[#3f4642]/70 mb-1 sm:mb-2 uppercase tracking-widest">Trưởng nam</p>
-              <p className="font-serif text-[1.05rem] sm:text-[1.25rem] md:text-[1.4rem] font-medium text-[#3f4642] leading-snug">
-                Augustino<br/>Trần Long Nhật
-              </p>
-            </div>
-          </div>
+          <div className="relative w-full">
+            {/* Vertical Divider */}
+            <div className="absolute left-1/2 top-8 bottom-8 md:top-10 md:bottom-10 w-px bg-gradient-to-b from-transparent via-[#3f4642]/20 to-transparent -translate-x-1/2"></div>
 
-          {/* Vertical Divider */}
-          <div className="absolute left-1/2 top-8 bottom-8 md:top-10 md:bottom-10 w-px bg-gradient-to-b from-transparent via-[#3f4642]/20 to-transparent -translate-x-1/2"></div>
+            <div className="grid grid-cols-2 gap-x-2 sm:gap-x-8 md:gap-x-16 items-start w-full">
+              {/* Header Row */}
+              <div className="flex flex-col items-center">
+                <h3 className="font-serif text-[1.1rem] sm:text-[1.35rem] md:text-[1.5rem] font-medium text-[#3f4642] mb-3 sm:mb-5 tracking-widest uppercase opacity-90" style={{ letterSpacing: '0.15em' }}>Nhà Trai</h3>
+              </div>
+              <div className="flex flex-col items-center">
+                <h3 className="font-serif text-[1.1rem] sm:text-[1.35rem] md:text-[1.5rem] font-medium text-[#3f4642] mb-3 sm:mb-5 tracking-widest uppercase opacity-90" style={{ letterSpacing: '0.15em' }}>Nhà Gái</h3>
+              </div>
 
-          {/* Nhà Gái */}
-          <div className="flex-1 w-full flex flex-col items-center">
-            <h3 className="font-serif text-[1.1rem] sm:text-[1.35rem] md:text-[1.5rem] font-medium text-[#3f4642] mb-3 sm:mb-5 tracking-widest uppercase opacity-90" style={{ letterSpacing: '0.15em' }}>Nhà Gái</h3>
-            <div className="space-y-1.5 sm:space-y-2 text-[0.8rem] sm:text-[0.95rem] md:text-[1.05rem] text-[#3f4642]/80 leading-relaxed w-full px-1">
-              <p>Ông <span className="font-medium text-[#3f4642]">Felicite Nguyễn Đức Tài</span></p>
-              <p>Bà <span className="font-medium text-[#3f4642]">Teresa Phan Thị Thu Hiền</span></p>
-            </div>
-            <div className="mt-auto pt-3 sm:pt-4 border-t border-[#3f4642]/15 w-[90%] sm:w-[85%] mx-auto">
-              <p className="text-[0.65rem] sm:text-[0.85rem] md:text-[0.9rem] italic text-[#3f4642]/70 mb-1 sm:mb-2 uppercase tracking-widest">Trưởng nữ</p>
-              <p className="font-serif text-[1.05rem] sm:text-[1.25rem] md:text-[1.4rem] font-medium text-[#3f4642] leading-snug">
-                Teresa<br/>Nguyễn Anh Phương
-              </p>
-            </div>
-          </div>
+              {/* Fathers Row */}
+              <div className="text-center text-[0.8rem] sm:text-[0.95rem] md:text-[1.05rem] text-[#3f4642]/80 leading-relaxed px-1">
+                <p>Ông <span className="font-medium text-[#3f4642]">Trần Trọng Sơn</span></p>
+              </div>
+              <div className="text-center text-[0.8rem] sm:text-[0.95rem] md:text-[1.05rem] text-[#3f4642]/80 leading-relaxed px-1">
+                <p>Ông <span className="font-medium text-[#3f4642]">Felicite Nguyễn Đức Tài</span></p>
+              </div>
 
+              {/* Mothers Row */}
+              <div className="text-center text-[0.8rem] sm:text-[0.95rem] md:text-[1.05rem] text-[#3f4642]/80 leading-relaxed px-1 mt-1.5 sm:mt-2">
+                <p>Bà <span className="font-medium text-[#3f4642]">Nguyễn Thị Minh Duyên</span></p>
+              </div>
+              <div className="text-center text-[0.8rem] sm:text-[0.95rem] md:text-[1.05rem] text-[#3f4642]/80 leading-relaxed px-1 mt-1.5 sm:mt-2">
+                <p>Bà <span className="font-medium text-[#3f4642]">Teresa Phan Thị Thu Hiền</span></p>
+              </div>
+
+              {/* Children Row */}
+              <div className="flex flex-col items-center mt-6 sm:mt-8 w-full h-full">
+                <div className="pt-3 sm:pt-4 border-t border-[#3f4642]/15 w-[90%] sm:w-[85%] flex flex-col items-center h-full">
+                  <p className="text-[0.65rem] sm:text-[0.85rem] md:text-[0.9rem] italic text-[#3f4642]/70 mb-1 sm:mb-2 uppercase tracking-widest text-center">Trưởng nam</p>
+                  <p className="font-serif text-[1.05rem] sm:text-[1.25rem] md:text-[1.4rem] font-medium text-[#3f4642] leading-snug text-center mt-auto">
+                    Augustino<br/>Trần Long Nhật
+                  </p>
+                </div>
+              </div>
+              <div className="flex flex-col items-center mt-6 sm:mt-8 w-full h-full">
+                <div className="pt-3 sm:pt-4 border-t border-[#3f4642]/15 w-[90%] sm:w-[85%] flex flex-col items-center h-full">
+                  <p className="text-[0.65rem] sm:text-[0.85rem] md:text-[0.9rem] italic text-[#3f4642]/70 mb-1 sm:mb-2 uppercase tracking-widest text-center">Trưởng nữ</p>
+                  <p className="font-serif text-[1.05rem] sm:text-[1.25rem] md:text-[1.4rem] font-medium text-[#3f4642] leading-snug text-center mt-auto">
+                    Teresa<br/>Nguyễn Anh Phương
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </motion.div>
