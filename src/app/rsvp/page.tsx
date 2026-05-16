@@ -551,8 +551,15 @@ export default function RSVPPage() {
                     <button
                       type="button"
                       onClick={() => {
-                        const isApple = /iPad|iPhone|iPod|Mac/i.test(navigator.userAgent);
+                        const userAgent = navigator.userAgent || navigator.vendor || (window as any).opera;
+                        const isApple = /iPad|iPhone|iPod|Mac/i.test(userAgent) && !(window as any).MSStream;
+                        const isInAppBrowser = /Zalo|FBAN|FBAV|Instagram|Line|TikTok/i.test(userAgent);
+
                         if (isApple) {
+                          if (isInAppBrowser) {
+                            alert("Trình duyệt tích hợp này chặn tải file lịch. Vui lòng nhấn biểu tượng dấu 3 chấm góc trên và chọn 'Mở bằng trình duyệt' (Safari) để lưu lịch.");
+                            return;
+                          }
                           const link = document.createElement("a");
                           link.href = icsUrl;
                           link.download = "wedding-nhat-phuong.ics";
