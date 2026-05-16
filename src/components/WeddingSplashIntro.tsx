@@ -7,6 +7,7 @@ import Image from "next/image";
 import { buildInvitationCopy, type GuestIdentity } from "@/lib/guest-personalization";
 import type { WeddingConfig } from "@/lib/site-settings";
 import { CanvasVideo } from "./CanvasVideo";
+import { FirefliesOverlay } from "./wedding/FirefliesOverlay";
 
 type SplashStatus = "checking" | "closed" | "opening" | "hidden";
 

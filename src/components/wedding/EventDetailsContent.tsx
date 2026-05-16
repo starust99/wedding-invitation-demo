@@ -5,6 +5,7 @@ import { MapPin } from "lucide-react";
 import type { ReactNode } from "react";
 import { useRef, useState } from "react";
 import { CanvasVideo } from "../CanvasVideo";
+import { FirefliesOverlay } from "./FirefliesOverlay";
 import { motion } from "framer-motion";
 import type { Variants } from "framer-motion";
 import type { EventDetailsViewportMode, WeddingEventDetailsEditorConfig } from "@/lib/wedding/event-details-types";
@@ -137,6 +138,9 @@ function VenueMapImage() {
         }}
         className="details-map-image absolute inset-0 z-0 w-full h-full transition-transform duration-700 group-hover:scale-105 pointer-events-none"
       />
+
+      {/* 1.5 Fireflies Overlay (Active when paused/ended and has played) */}
+      <FirefliesOverlay active={!isPlaying && hasPlayed} />
 
       {/* 2. Custom Poster Overlay (Fades out smoothly) */}
       <div
