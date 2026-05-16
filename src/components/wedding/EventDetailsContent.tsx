@@ -4,6 +4,7 @@ import Image from "next/image";
 import { MapPin } from "lucide-react";
 import type { ReactNode } from "react";
 import { useRef, useState } from "react";
+import { CanvasVideo } from "../CanvasVideo";
 import { motion } from "framer-motion";
 import type { Variants } from "framer-motion";
 import type { EventDetailsViewportMode, WeddingEventDetailsEditorConfig } from "@/lib/wedding/event-details-types";
@@ -116,43 +117,25 @@ function GlassPanel({ area, children, className = "", variants }: { area: string
 }
 
 function VenueMapImage() {
-  const videoRef = useRef<HTMLVideoElement>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [hasPlayed, setHasPlayed] = useState(false);
 
   const handlePlay = () => {
-    if (videoRef.current) {
-      if (videoRef.current.paused) {
-        videoRef.current.play();
-        setIsPlaying(true);
-      } else {
-        videoRef.current.pause();
-        setIsPlaying(false);
-      }
-    }
+    setIsPlaying((prev) => !prev);
+    if (!hasPlayed) setHasPlayed(true);
   };
 
   return (
     <div className="details-map-canvas group" aria-hidden="true" onClick={handlePlay} style={{ cursor: 'pointer' }}>
       {/* 1. Base Video Layer */}
-      <video
-        ref={videoRef}
+      <CanvasVideo
         src="/assets/venue-map-video.mp4"
-        playsInline
-        muted
-        disablePictureInPicture
-        disableRemotePlayback
-        {...{
-          "webkit-playsinline": "true",
-          "x5-playsinline": "true",
-          "x5-video-player-type": "h5",
-          "x5-video-player-fullscreen": "false",
-        } as any}
-        className="details-map-image absolute inset-0 z-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 pointer-events-none"
-        onEnded={() => setIsPlaying(false)}
-        onPause={() => setIsPlaying(false)}
-        onPlay={() => setIsPlaying(true)}
-        onPlaying={() => setHasPlayed(true)}
+        isPlaying={isPlaying}
+        onEnded={() => {
+          setIsPlaying(false);
+          setHasPlayed(true);
+        }}
+        className="details-map-image absolute inset-0 z-0 w-full h-full transition-transform duration-700 group-hover:scale-105 pointer-events-none"
       />
 
       {/* 2. Custom Poster Overlay (Fades out smoothly) */}

@@ -6,6 +6,7 @@ import { Sparkles, X } from "lucide-react";
 import Image from "next/image";
 import { buildInvitationCopy, type GuestIdentity } from "@/lib/guest-personalization";
 import type { WeddingConfig } from "@/lib/site-settings";
+import { CanvasVideo } from "./CanvasVideo";
 
 type SplashStatus = "checking" | "closed" | "opening" | "hidden";
 
@@ -40,7 +41,6 @@ export function WeddingSplashIntro({
   storageKey?: string;
   ready?: boolean;
 }) {
-  const videoRef = useRef<HTMLVideoElement>(null);
   const reduceMotion = useReducedMotion();
   const [status, setStatus] = useState<SplashStatus>("checking");
   const [isImmediateClose, setIsImmediateClose] = useState(false);
@@ -90,15 +90,9 @@ export function WeddingSplashIntro({
     if (!ready || status === "opening") return;
     setStatus("opening");
     
-    if (videoRef.current) {
-      videoRef.current.play().catch((err) => {
-        if (err.name !== "AbortError") console.error("Video play error:", err);
-      });
-    }
-
     // Fallback timer just in case video onEnded fails or user is on low-power mode (increased for slow networks)
     closeTimer.current = window.setTimeout(closeIntro, 15000);
-  }, [closeIntro, status]);
+  }, [closeIntro, status, ready]);
 
   useEffect(() => {
     if (!isVisible) return;
@@ -133,19 +127,9 @@ export function WeddingSplashIntro({
           
           {/* THE VIDEO - responsive sources for mobile (9:16) and desktop (16:9) */}
           <div className="absolute inset-0 flex items-center justify-center">
-            <video 
-              ref={videoRef}
-              className="h-full w-full object-cover pointer-events-none"
-              playsInline
-              muted
-              disablePictureInPicture
-              disableRemotePlayback
-              {...{
-                "webkit-playsinline": "true",
-                "x5-playsinline": "true",
-                "x5-video-player-type": "h5",
-                "x5-video-player-fullscreen": "false",
-              } as any}
+            <CanvasVideo 
+              className="h-full w-full pointer-events-none"
+              isPlaying={status === "opening"}
               onEnded={closeIntro}
               poster={viewport === "mobile" ? "/assets/wedding/ui/splash-poster-mobile.jpg" : "/assets/wedding/ui/splash-closed.png"}
               src={viewport === "mobile" ? "/assets/wedding/ui/splash-video-mobile.mp4" : viewport === "desktop" ? "/assets/wedding/ui/splash-video.mp4" : undefined}
