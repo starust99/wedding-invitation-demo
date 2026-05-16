@@ -138,6 +138,8 @@ export function WeddingSplashIntro({
               className="h-full w-full object-cover pointer-events-none"
               playsInline
               muted
+              disablePictureInPicture
+              disableRemotePlayback
               {...{
                 "webkit-playsinline": "true",
                 "x5-playsinline": "true",

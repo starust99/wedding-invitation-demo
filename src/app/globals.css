@@ -78,6 +78,14 @@ body {
   text-rendering: optimizeLegibility;
 }
 
+video::-webkit-media-controls,
+video::-webkit-media-controls-enclosure,
+video::-webkit-media-controls-panel {
+  display: none !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
 @keyframes page-fade-in {
   from {
     opacity: 0;

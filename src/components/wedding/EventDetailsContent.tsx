@@ -140,6 +140,8 @@ function VenueMapImage() {
         src="/assets/venue-map-video.mp4"
         playsInline
         muted
+        disablePictureInPicture
+        disableRemotePlayback
         {...{
           "webkit-playsinline": "true",
           "x5-playsinline": "true",
