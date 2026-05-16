@@ -14,6 +14,15 @@ export function FirefliesOverlay({ active }: { active: boolean }) {
     { top: '92%', left: '60%', color: '#f472b6', delay: '3.3s', size: '4px' },
   ], []);
 
+  const lamps = useMemo(() => [
+    { top: '52.5%', left: '77.5%', delay: '0s' },
+    { top: '50.5%', left: '89.5%', delay: '1s' },
+    { top: '59.5%', left: '35.5%', delay: '0.5s' },
+    { top: '59.5%', left: '31%', delay: '2s' },
+    { top: '51.5%', left: '10%', delay: '1.5s' },
+    { top: '50.5%', left: '56.5%', delay: '0.8s' },
+  ], []);
+
   return (
     <>
       <style dangerouslySetInnerHTML={{ __html: `
@@ -28,13 +37,29 @@ export function FirefliesOverlay({ active }: { active: boolean }) {
           animation: firefly-glow 6s infinite ease-in-out;
           pointer-events: none;
         }
+
+        @keyframes lamp-flicker {
+          0%, 100% { opacity: 0.7; transform: translate(-50%, -50%) scale(1); box-shadow: 0 0 12px 4px rgba(253, 224, 71, 0.4); }
+          50% { opacity: 1; transform: translate(-50%, -50%) scale(1.15); box-shadow: 0 0 20px 8px rgba(253, 224, 71, 0.8); }
+        }
+        .lamp-glow {
+          position: absolute;
+          width: 3px;
+          height: 10px;
+          border-radius: 50%;
+          background-color: #fef08a;
+          animation: lamp-flicker 4s infinite ease-in-out;
+          pointer-events: none;
+          filter: blur(1px);
+        }
       `}} />
       <div 
         className={`absolute inset-0 z-[6] pointer-events-none transition-opacity duration-[2000ms] ${active ? 'opacity-100' : 'opacity-0'}`}
       >
+        {/* Fireflies */}
         {fireflies.map((ff, i) => (
           <div
-            key={i}
+            key={`ff-${i}`}
             className="firefly-dot"
             style={{
               top: ff.top,
@@ -44,6 +69,20 @@ export function FirefliesOverlay({ active }: { active: boolean }) {
               color: ff.color,
               animationDelay: ff.delay,
               animationDuration: `${5.5 + (i % 3) * 1.5}s`
+            }}
+          />
+        ))}
+
+        {/* Lamp Glows */}
+        {lamps.map((lamp, i) => (
+          <div
+            key={`lamp-${i}`}
+            className="lamp-glow"
+            style={{
+              top: lamp.top,
+              left: lamp.left,
+              animationDelay: lamp.delay,
+              animationDuration: `${3 + (i % 3) * 0.5}s`
             }}
           />
         ))}
