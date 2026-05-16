@@ -135,9 +135,15 @@ export function WeddingSplashIntro({
           <div className="absolute inset-0 flex items-center justify-center">
             <video 
               ref={videoRef}
-              className="h-full w-full object-cover"
+              className="h-full w-full object-cover pointer-events-none"
               playsInline
               muted
+              {...{
+                "webkit-playsinline": "true",
+                "x5-playsinline": "true",
+                "x5-video-player-type": "h5",
+                "x5-video-player-fullscreen": "false",
+              } as any}
               onEnded={closeIntro}
               poster={viewport === "mobile" ? "/assets/wedding/ui/splash-poster-mobile.jpg" : "/assets/wedding/ui/splash-closed.png"}
               src={viewport === "mobile" ? "/assets/wedding/ui/splash-video-mobile.mp4" : viewport === "desktop" ? "/assets/wedding/ui/splash-video.mp4" : undefined}

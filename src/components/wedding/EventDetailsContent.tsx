@@ -140,7 +140,13 @@ function VenueMapImage() {
         src="/assets/venue-map-video.mp4"
         playsInline
         muted
-        className="details-map-image absolute inset-0 z-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+        {...{
+          "webkit-playsinline": "true",
+          "x5-playsinline": "true",
+          "x5-video-player-type": "h5",
+          "x5-video-player-fullscreen": "false",
+        } as any}
+        className="details-map-image absolute inset-0 z-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 pointer-events-none"
         onEnded={() => setIsPlaying(false)}
         onPause={() => setIsPlaying(false)}
         onPlay={() => setIsPlaying(true)}

@@ -26,6 +26,12 @@ function MediaAsset({ layer, mobile = false }: { layer: MediaLayer; mobile?: boo
         preload="metadata"
         className={className}
         style={{ opacity: layer.opacity, objectPosition, transform: `scale(${scale})` }}
+        {...{
+          "webkit-playsinline": "true",
+          "x5-playsinline": "true",
+          "x5-video-player-type": "h5",
+          "x5-video-player-fullscreen": "false",
+        } as any}
       />
     );
   }

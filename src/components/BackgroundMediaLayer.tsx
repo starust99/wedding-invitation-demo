@@ -46,6 +46,12 @@ function MediaElement({ layer, device }: { layer: MediaLayer; device: "desktop" 
         loop
         playsInline
         preload="metadata"
+        {...{
+          "webkit-playsinline": "true",
+          "x5-playsinline": "true",
+          "x5-video-player-type": "h5",
+          "x5-video-player-fullscreen": "false",
+        } as any}
       />
     );
   }
