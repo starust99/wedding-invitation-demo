@@ -206,17 +206,18 @@ video::-webkit-media-controls-panel {
 .invitation-watercolor-backdrop__wash {
   position: absolute;
   inset: 0;
-  background-image: url("/assets/invitation-watercolor-bg.png");
-  background-image: image-set(
-    url("/assets/invitation-watercolor-bg.avif") type("image/avif"),
-    url("/assets/invitation-watercolor-bg.webp") type("image/webp"),
-    url("/assets/invitation-watercolor-bg.png") type("image/png")
-  );
+  background-image: url("/assets/bg-desktop.png");
   background-position: center top;
   background-size: cover;
   background-repeat: no-repeat;
   transform-origin: center;
   will-change: transform;
+}
+
+@media (max-width: 767px) {
+  .invitation-watercolor-backdrop__wash {
+    background-image: url("/assets/bg-mobile.png");
+  }
 }
 
 .invitation-watercolor-backdrop::before,
