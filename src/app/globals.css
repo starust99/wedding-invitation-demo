@@ -214,12 +214,6 @@ video::-webkit-media-controls-panel {
   will-change: transform;
 }
 
-@media (max-width: 767px) {
-  .invitation-watercolor-backdrop__wash {
-    background-image: url("/assets/bg-mobile.png");
-  }
-}
-
 .invitation-watercolor-backdrop::before,
 .invitation-watercolor-backdrop::after {
   content: none;
@@ -269,17 +263,13 @@ video::-webkit-media-controls-panel {
     background-image:
       radial-gradient(circle at 12% 14%, rgba(242, 198, 207, 0.34), transparent 35%),
       radial-gradient(circle at 88% 80%, rgba(143, 170, 220, 0.32), transparent 40%),
-      image-set(
-        url("/assets/invitation-watercolor-bg-mobile.avif") type("image/avif"),
-        url("/assets/invitation-watercolor-bg-mobile.webp") type("image/webp"),
-        url("/assets/invitation-watercolor-bg.png") type("image/png")
-      ),
-      linear-gradient(180deg, rgba(253, 251, 247, 0.96), rgba(253, 251, 247, 0.82));
+      linear-gradient(180deg, rgba(253, 251, 247, 0.65), rgba(253, 251, 247, 0.45)),
+      url("/assets/bg-mobile.png");
     background-position:
       12% 14%,
       88% 80%,
-      center top,
-      center;
+      center,
+      center top;
     background-size:
       auto,
       auto,
@@ -296,8 +286,8 @@ video::-webkit-media-controls-panel {
     background-position:
       10% 13%,
       90% 82%,
-      center top,
-      center;
+      center,
+      center top;
     background-size:
       auto,
       auto,
