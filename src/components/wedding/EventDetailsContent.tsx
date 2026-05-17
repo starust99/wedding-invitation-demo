@@ -224,11 +224,11 @@ export function EventDetailsContent({
 
             <div className="grid grid-cols-2 gap-x-2 sm:gap-x-8 md:gap-x-16 items-start w-full">
               {/* Header Row */}
-              <div className="flex flex-col items-center">
-                <h3 className="font-serif text-[1.1rem] sm:text-[1.35rem] md:text-[1.5rem] font-medium text-[#3f4642] mb-5 sm:mb-8 md:mb-10 tracking-widest uppercase opacity-90" style={{ letterSpacing: '0.15em' }}>Nhà Trai</h3>
+              <div className="flex flex-col items-center pb-5 sm:pb-8 md:pb-12">
+                <h3 className="font-serif text-[1.1rem] sm:text-[1.35rem] md:text-[1.5rem] font-medium text-[#3f4642] tracking-widest uppercase opacity-90" style={{ letterSpacing: '0.15em' }}>Nhà Trai</h3>
               </div>
-              <div className="flex flex-col items-center">
-                <h3 className="font-serif text-[1.1rem] sm:text-[1.35rem] md:text-[1.5rem] font-medium text-[#3f4642] mb-5 sm:mb-8 md:mb-10 tracking-widest uppercase opacity-90" style={{ letterSpacing: '0.15em' }}>Nhà Gái</h3>
+              <div className="flex flex-col items-center pb-5 sm:pb-8 md:pb-12">
+                <h3 className="font-serif text-[1.1rem] sm:text-[1.35rem] md:text-[1.5rem] font-medium text-[#3f4642] tracking-widest uppercase opacity-90" style={{ letterSpacing: '0.15em' }}>Nhà Gái</h3>
               </div>
 
               {/* Fathers Row */}
