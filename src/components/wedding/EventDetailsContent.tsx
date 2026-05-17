@@ -251,7 +251,7 @@ export function EventDetailsContent({
               <div className="flex flex-col items-center mt-6 sm:mt-8 w-full h-full">
                 <div className="pt-3 sm:pt-4 border-t border-[#3f4642]/15 w-[90%] sm:w-[85%] flex flex-col items-center h-full">
                   <p className="text-[0.65rem] sm:text-[0.85rem] md:text-[0.9rem] italic text-[#3f4642]/70 mb-1 sm:mb-2 uppercase tracking-widest text-center">Trưởng nam</p>
-                  <p className="font-serif text-[1.05rem] sm:text-[1.25rem] md:text-[1.4rem] font-medium text-[#3f4642] leading-snug text-center mt-auto">
+                  <p className="font-serif text-[1.05rem] sm:text-[1.25rem] md:text-[1.4rem] font-medium text-[#3f4642] leading-snug text-center">
                     Augustino<br/>Trần Long Nhật
                   </p>
                 </div>
@@ -259,7 +259,7 @@ export function EventDetailsContent({
               <div className="flex flex-col items-center mt-6 sm:mt-8 w-full h-full">
                 <div className="pt-3 sm:pt-4 border-t border-[#3f4642]/15 w-[90%] sm:w-[85%] flex flex-col items-center h-full">
                   <p className="text-[0.65rem] sm:text-[0.85rem] md:text-[0.9rem] italic text-[#3f4642]/70 mb-1 sm:mb-2 uppercase tracking-widest text-center">Trưởng nữ</p>
-                  <p className="font-serif text-[1.05rem] sm:text-[1.25rem] md:text-[1.4rem] font-medium text-[#3f4642] leading-snug text-center mt-auto">
+                  <p className="font-serif text-[1.05rem] sm:text-[1.25rem] md:text-[1.4rem] font-medium text-[#3f4642] leading-snug text-center">
                     Teresa<br/>Nguyễn Anh Phương
                   </p>
                 </div>
