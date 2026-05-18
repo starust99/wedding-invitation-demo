@@ -6,6 +6,7 @@ import { SectionMediaLayers } from "@/components/SectionMediaLayers";
 import type { WeddingConfig } from "@/lib/site-settings";
 import { buildInvitationCopy, type GuestIdentity } from "@/lib/guest-personalization";
 import { usePageTransition } from "@/components/PageTransitionEffect";
+import { motion } from "framer-motion";
 
 export function RsvpSection({
   config,
@@ -26,7 +27,11 @@ export function RsvpSection({
       <div aria-hidden="true" className="hero-couture-shade absolute inset-0 opacity-55" />
 
       <div className="mx-auto flex max-w-7xl justify-center">
-        <div
+        <motion.div
+          initial={{ opacity: 0, y: 40, scale: 0.95, filter: "blur(10px)" }}
+          whileInView={{ opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }}
+          viewport={{ once: true, margin: "-50px" }}
+          transition={{ duration: 0.8, ease: [0.25, 0.1, 0.25, 1] }}
           className="glass-panel relative w-full max-w-4xl overflow-hidden rounded-[2.75rem] px-6 py-10 sm:px-10 sm:py-14 lg:px-16 lg:py-16"
         >
           <div aria-hidden="true" className="absolute inset-x-8 top-5 h-px bg-[linear-gradient(90deg,transparent,rgba(212,175,55,0.42),transparent)] sm:inset-x-16 sm:top-7 lg:top-8" />
@@ -60,7 +65,7 @@ export function RsvpSection({
                 </span>
               </button>
           </div>
-        </div>
+        </motion.div>
       </div>
     </section>
   );

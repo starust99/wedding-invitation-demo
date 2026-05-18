@@ -6,6 +6,7 @@ import type { WeddingConfig } from "@/lib/site-settings";
 import { buildInvitationCopy, type GuestIdentity } from "@/lib/guest-personalization";
 import { usePageTransition } from "@/components/PageTransitionEffect";
 import type { RSVPResponse } from "@/lib/rsvp-storage";
+import { motion } from "framer-motion";
 
 export function ThankYouSection({
   config,
@@ -33,7 +34,11 @@ export function ThankYouSection({
       <div aria-hidden="true" className="paper-grain-luxury absolute inset-0 opacity-22" />
 
       <div className="mx-auto flex max-w-7xl justify-center">
-        <div
+        <motion.div
+          initial={{ opacity: 0, y: 40, scale: 0.95, filter: "blur(10px)" }}
+          whileInView={{ opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }}
+          viewport={{ once: true, margin: "-50px" }}
+          transition={{ duration: 0.8, ease: [0.25, 0.1, 0.25, 1] }}
           className="glass-panel relative w-full max-w-6xl overflow-hidden rounded-[2.8rem] px-5 py-7 sm:px-8 sm:py-8 lg:px-10 lg:py-10"
         >
 
@@ -91,7 +96,7 @@ export function ThankYouSection({
               </div>
             </div>
           </div>
-        </div>
+        </motion.div>
       </div>
     </section>
   );
