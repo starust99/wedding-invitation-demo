@@ -31,7 +31,7 @@ export function WeddingDetailsSection({ config }: { config: WeddingConfig }) {
         venueArea: "Sảnh Quảng Trường",
         dressCodeTitle: "Trang phục chủ đề",
         dressCodeNote:
-          "Gia đình gợi ý những tông hồng phấn, xanh trời, kem hoặc xanh lá dịu. Quý khách chọn trang phục thanh lịch, thoải mái là đủ; bảng màu chỉ để tổng thể buổi tiệc thêm hài hòa khi lên hình.",
+          "Vì Đà Lạt vào đông rất lạnh, quý khách lưu ý mặc thật ấm. Gia đình gợi ý tông màu: hồng phấn, xanh da trời, kem hoặc xanh lá dịu để khung hình thêm phần hài hòa.",
         dressCodeImageSrc: "/assets/dresscode-theme.jpg",
       }}
     />
