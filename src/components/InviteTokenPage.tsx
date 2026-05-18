@@ -134,6 +134,7 @@ export function InviteTokenPage({ token }: { token: string }) {
           config={config}
           guestIdentity={guestIdentity}
           rsvpAttending={invitee?.rsvp?.attending}
+          rsvpAttendingCeremony={invitee?.rsvp?.attendingCeremony}
           rsvpAttendingBanquet={invitee?.rsvp?.attendingBanquet}
           rsvpHref={rsvpHref}
         />

@@ -12,12 +12,14 @@ export function ThankYouSection({
   config,
   guestIdentity,
   rsvpAttending,
+  rsvpAttendingCeremony,
   rsvpAttendingBanquet,
   rsvpHref = "/rsvp",
 }: {
   config: WeddingConfig;
   guestIdentity: GuestIdentity;
   rsvpAttending?: RSVPResponse["attending"];
+  rsvpAttendingCeremony?: RSVPResponse["attendingCeremony"];
   rsvpAttendingBanquet?: RSVPResponse["attendingBanquet"];
   rsvpHref?: string;
 }) {
@@ -29,6 +31,8 @@ export function ThankYouSection({
     thankYouMessage = `${inviteCopy.hostSubject} đã ghi nhận phản hồi không thể tham dự của ${inviteCopy.shortRecipientLabel}. Rất hy vọng sẽ có dịp được đón tiếp ${inviteCopy.shortRecipientLabel} trong những sự kiện sắp tới của ${inviteCopy.hostPronoun}.`;
   } else if (rsvpAttendingBanquet === false) {
     thankYouMessage = `${inviteCopy.thankYouLine} Hẹn gặp ${inviteCopy.shortRecipientLabel} tại Thánh lễ Hôn phối sắp tới.`;
+  } else if (rsvpAttendingCeremony === true && rsvpAttendingBanquet === true) {
+    thankYouMessage = `${inviteCopy.thankYouLine} Hẹn gặp ${inviteCopy.shortRecipientLabel} tại Thánh lễ Hôn phối và sau đó là Tiệc mừng ở ${config.venue.name} trong một buổi tối thật ấm áp.`;
   } else {
     thankYouMessage = `${inviteCopy.thankYouLine} Hẹn gặp ${inviteCopy.shortRecipientLabel} tại ${config.venue.name} trong một buổi tối thật ấm áp.`;
   }
