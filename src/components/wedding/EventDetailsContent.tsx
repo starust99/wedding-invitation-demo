@@ -261,7 +261,7 @@ export function EventDetailsContent({
         className="details-venue-header"
         initial="hidden"
         whileInView="visible"
-        viewport={{ once: false, margin: "-10% 0px -10% 0px" }}
+        viewport={{ once: true, margin: "-50px" }}
         variants={headerVariant}
       >
         <p className="section-kicker-dark wedding-type-kicker">{content.eyebrow}</p>
@@ -273,7 +273,7 @@ export function EventDetailsContent({
         className="mb-8 md:mb-12 w-full max-w-4xl mx-auto details-glass-panel px-2 py-6 sm:px-6 sm:py-8 md:px-12 md:py-10 text-center flex flex-col relative"
         initial="hidden"
         whileInView="visible"
-        viewport={{ once: false, margin: "-10% 0px -10% 0px" }}
+        viewport={{ once: true, margin: "-50px" }}
         variants={familyPanelVariant}
       >
 
