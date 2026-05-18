@@ -26,6 +26,12 @@ export function ThankYouSection({
   const inviteCopy = buildInvitationCopy(guestIdentity);
   const { navigateWithTransition } = usePageTransition();
 
+  const isDeclined = rsvpAttending === "no";
+  const isCeremonyOnly = rsvpAttending !== "no" && rsvpAttendingBanquet === false;
+  const isBanquetOnly = rsvpAttendingCeremony === false && rsvpAttendingBanquet === true;
+  const isBoth = rsvpAttendingCeremony === true && rsvpAttendingBanquet === true;
+  const isDefault = !isDeclined && !isCeremonyOnly && !isBanquetOnly && !isBoth;
+
   let thankYouMessage = "";
   if (rsvpAttending === "no") {
     thankYouMessage = `${inviteCopy.hostSubject} đã ghi nhận phản hồi không thể tham dự của ${inviteCopy.shortRecipientLabel}. Rất hy vọng sẽ có dịp được đón tiếp ${inviteCopy.shortRecipientLabel} trong những sự kiện sắp tới của ${inviteCopy.hostPronoun}.`;
@@ -91,7 +97,22 @@ export function ThankYouSection({
                         <span>Chỉnh sửa hồi đáp</span>
                       </span>
                     </button>
-                    {rsvpAttending !== "no" ? (
+                    {(isCeremonyOnly || isBoth) ? (
+                      <a
+                        suppressHydrationWarning
+                        href={config.church?.mapUrl || config.venue.mapUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-flex h-[3.8rem] sm:h-[4.5rem] lg:h-[5rem] text-[0.92rem] sm:text-lg items-center justify-center transition hover:-translate-y-0.5 save-date-watercolor-btn"
+                      >
+                        <span className="save-date-btn-label">
+                        <MapPin aria-hidden="true" size={16} className="sm:w-[18px] sm:h-[18px]" />
+                        <span>Đến Nhà thờ</span>
+                      </span>
+                      </a>
+                    ) : null}
+                    
+                    {(isBanquetOnly || isBoth || isDefault) ? (
                       <a
                         suppressHydrationWarning
                         href={config.venue.mapUrl}
@@ -101,7 +122,7 @@ export function ThankYouSection({
                       >
                         <span className="save-date-btn-label">
                         <MapPin aria-hidden="true" size={16} className="sm:w-[18px] sm:h-[18px]" />
-                        <span>Chỉ đường</span>
+                        <span>{isBanquetOnly || isBoth ? "Đến Tiệc mừng" : "Chỉ đường"}</span>
                       </span>
                       </a>
                     ) : null}
