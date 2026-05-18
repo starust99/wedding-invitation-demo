@@ -705,7 +705,7 @@ export default function RSVPPage() {
                         {/* Question 1: Ceremony */}
                         <div className="rounded-[1.4rem] premium-glass p-5">
                           <p className="wedding-type-card-title text-[#252934] mb-1 text-center">
-                            {inviteCopy.recipientPronoun ? inviteCopy.recipientPronoun.charAt(0).toUpperCase() + inviteCopy.recipientPronoun.slice(1) : "Bạn"} có thể tham dự Thánh lễ Hôn phối chứ?
+                            {isHydratingGuest ? "Đang tải lời mời..." : `${inviteCopy.recipientPronoun ? inviteCopy.recipientPronoun.charAt(0).toUpperCase() + inviteCopy.recipientPronoun.slice(1) : "Bạn"} có thể tham dự Thánh lễ Hôn phối chứ?`}
                           </p>
                           <p className="text-[0.9rem] text-[#252934]/60 text-center mb-5 font-serif italic">
                             Vào lúc 09:30 Thứ Bảy. Tại Nhà Thờ Giáo Xứ Tam Hải.
@@ -752,7 +752,7 @@ export default function RSVPPage() {
                         {/* Question 2: Banquet */}
                         <div className="rounded-[1.4rem] premium-glass p-5">
                           <p className="wedding-type-card-title text-[#252934] mb-1 text-center">
-                            {inviteCopy.recipientPronoun ? inviteCopy.recipientPronoun.charAt(0).toUpperCase() + inviteCopy.recipientPronoun.slice(1) : "Bạn"} sẽ đến chung vui trong đêm Tiệc mừng chứ?
+                            {isHydratingGuest ? "Đang tải lời mời..." : `${inviteCopy.recipientPronoun ? inviteCopy.recipientPronoun.charAt(0).toUpperCase() + inviteCopy.recipientPronoun.slice(1) : "Bạn"} sẽ đến chung vui trong đêm Tiệc mừng chứ?`}
                           </p>
                           <p className="text-[0.9rem] text-[#252934]/60 text-center mb-5 font-serif italic">
                             Vào lúc 17:30 Thứ Bảy. Tại Terracotta Đà Lạt.
