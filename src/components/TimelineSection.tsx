@@ -1,8 +1,7 @@
 "use client";
 
 import type { CSSProperties } from "react";
-import { useRef } from "react";
-import { motion, useScroll, useTransform, useSpring } from "framer-motion";
+import { motion } from "framer-motion";
 import { SectionMediaLayers } from "@/components/SectionMediaLayers";
 import type { WeddingConfig } from "@/lib/site-settings";
 
@@ -38,20 +37,9 @@ function buildTimelineNode(item: WeddingConfig["timeline"][number], index: numbe
 
 export function TimelineSection({ config }: { config: WeddingConfig }) {
   const nodes = config.timeline.map(buildTimelineNode);
-  const sectionRef = useRef<HTMLElement>(null);
-  const { scrollYProgress } = useScroll({
-    target: sectionRef,
-    offset: ["start 60%", "end 80%"],
-  });
-
-  // Smooth scroll for the path line
-  const pathHeight = useSpring(useTransform(scrollYProgress, [0, 1], ["0%", "100%"]), {
-    stiffness: 40,
-    damping: 15,
-  });
 
   return (
-    <section ref={sectionRef} id="timeline" className="timeline-garden-section cinematic-stage relative overflow-hidden px-5 py-24 text-ink sm:px-8 lg:py-32">
+    <section id="timeline" className="timeline-garden-section cinematic-stage relative overflow-hidden px-5 py-24 text-ink sm:px-8 lg:py-32">
       <SectionMediaLayers config={config} section="timeline" className="timeline-garden-media opacity-[0.08]" />
       <div aria-hidden="true" className="paper-grain-luxury timeline-garden-grain opacity-15" />
 
@@ -68,18 +56,6 @@ export function TimelineSection({ config }: { config: WeddingConfig }) {
         </div>
 
         <div className="timeline-garden-path-scene relative">
-          {/* Scroll-drawn line overlay */}
-          <motion.div
-            className="absolute inset-0 z-0 pointer-events-none"
-            style={{
-              backgroundColor: "rgba(214, 192, 179, 0.12)",
-              width: "2px",
-              left: "50%",
-              transform: "translateX(-50%)",
-              height: pathHeight,
-              boxShadow: "0 0 12px rgba(214, 192, 179, 0.6)"
-            }}
-          />
           <ol className="timeline-garden-list relative z-10">
             {nodes.map((node) => (
               <motion.li
