@@ -285,7 +285,7 @@ export function EventDetailsContent({
             {/* Vertical Divider */}
             <motion.div variants={familyItemVariant} className="hidden sm:block absolute left-1/2 top-8 bottom-8 md:top-10 md:bottom-10 w-px bg-gradient-to-b from-transparent via-[#3f4642]/20 to-transparent -translate-x-1/2"></motion.div>
 
-            <div className="grid grid-cols-2 gap-x-2 sm:gap-x-8 md:gap-x-16 items-start w-full">
+            <div className="grid grid-cols-2 gap-x-2 sm:gap-x-8 md:gap-x-16 items-center w-full">
               {/* Header Row */}
               <motion.div variants={familyItemVariant} className="flex flex-col items-center pb-5 sm:pb-8 md:pb-12">
                 <h3 className="font-serif text-[1.1rem] sm:text-[1.35rem] md:text-[1.5rem] font-medium text-[#3f4642] tracking-widest uppercase opacity-90" style={{ letterSpacing: '0.15em' }}>Nhà Trai</h3>
@@ -299,7 +299,10 @@ export function EventDetailsContent({
                 <p>Ông <span className="font-medium text-[#3f4642]">Trần Trọng Sơn</span></p>
               </motion.div>
               <motion.div variants={familyItemVariant} className="text-center text-[0.8rem] sm:text-[0.95rem] md:text-[1.05rem] text-[#3f4642]/80 leading-relaxed px-1">
-                <p>Ông <span className="font-medium text-[#3f4642]">Felicite Nguyễn Đức Tài</span></p>
+                <p>
+                  Ông <span className="font-medium text-[#3f4642]">Felicite</span><br className="block sm:hidden" />
+                  <span className="font-medium text-[#3f4642] sm:ml-1">Nguyễn Đức Tài</span>
+                </p>
               </motion.div>
 
               {/* Mothers Row */}
@@ -307,7 +310,10 @@ export function EventDetailsContent({
                 <p>Bà <span className="font-medium text-[#3f4642]">Nguyễn Thị Minh Duyên</span></p>
               </motion.div>
               <motion.div variants={familyItemVariant} className="text-center text-[0.8rem] sm:text-[0.95rem] md:text-[1.05rem] text-[#3f4642]/80 leading-relaxed px-1 mt-1.5 sm:mt-2">
-                <p>Bà <span className="font-medium text-[#3f4642]">Teresa Phan Thị Thu Hiền</span></p>
+                <p>
+                  Bà <span className="font-medium text-[#3f4642]">Teresa</span><br className="block sm:hidden" />
+                  <span className="font-medium text-[#3f4642] sm:ml-1">Phan Thị Thu Hiền</span>
+                </p>
               </motion.div>
 
               {/* Children Row */}
