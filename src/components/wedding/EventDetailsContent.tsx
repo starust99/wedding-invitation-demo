@@ -70,6 +70,35 @@ function formatSchedule(dateLabel?: string, welcomeTime?: string, fallback = "")
   return dateText || timeText || fallback;
 }
 
+function formatChurchSchedule(dateLabel?: string, timeLabel?: string) {
+  const dateText = formatDateLabel(dateLabel);
+  const timeText = formatWelcomeTime(timeLabel);
+
+  let dayOfWeek = "Thứ 7";
+  if (dateLabel && dateLabel.includes(",")) {
+    const parts = dateLabel.split(",");
+    if (parts.length > 1) {
+      dayOfWeek = parts[1].trim();
+      dayOfWeek = dayOfWeek.charAt(0).toUpperCase() + dayOfWeek.slice(1);
+    }
+  }
+
+  if (dateText && timeText) {
+    return (
+      <>
+        {timeText}, {dayOfWeek},
+        <br />
+        {dateText.toLowerCase()}
+        <br />
+        <span style={{ fontSize: '0.9em', fontStyle: 'italic', opacity: 0.85 }}>
+          (nhằm ngày 12 tháng 11 năm Bính Ngọ)
+        </span>
+      </>
+    );
+  }
+  return dateLabel && timeLabel ? `${dateLabel} · ${timeLabel}` : dateLabel || timeLabel || "";
+}
+
 const staggerContainer: Variants = {
   hidden: { opacity: 0 },
   visible: {
@@ -127,7 +156,14 @@ function VenueMapImage() {
   };
 
   return (
-    <div className="details-map-canvas group" aria-hidden="true" onClick={handlePlay} style={{ cursor: 'pointer' }}>
+    <motion.div 
+      className="details-map-canvas group" 
+      aria-hidden="true" 
+      onClick={handlePlay} 
+      style={{ cursor: 'pointer' }}
+      animate={!isPlaying && !hasPlayed ? { y: [0, -6, 0] } : { y: 0 }}
+      transition={!isPlaying && !hasPlayed ? { repeat: Infinity, duration: 2.5, ease: "easeInOut" } : { duration: 0.3 }}
+    >
       {/* 1. Base Video Layer */}
       <CanvasVideo
         src="/assets/venue-map-video.mp4"
@@ -164,7 +200,7 @@ function VenueMapImage() {
           </div>
         </div>
       )}
-    </div>
+    </motion.div>
   );
 }
 
@@ -220,7 +256,7 @@ export function EventDetailsContent({
 
           <div className="relative w-full">
             {/* Vertical Divider */}
-            <div className="absolute left-1/2 top-8 bottom-8 md:top-10 md:bottom-10 w-px bg-gradient-to-b from-transparent via-[#3f4642]/20 to-transparent -translate-x-1/2"></div>
+            <div className="hidden sm:block absolute left-1/2 top-8 bottom-8 md:top-10 md:bottom-10 w-px bg-gradient-to-b from-transparent via-[#3f4642]/20 to-transparent -translate-x-1/2"></div>
 
             <div className="grid grid-cols-2 gap-x-2 sm:gap-x-8 md:gap-x-16 items-start w-full">
               {/* Header Row */}
@@ -276,7 +312,50 @@ export function EventDetailsContent({
         viewport={{ once: true, margin: "-100px" }}
         variants={staggerContainer}
       >
-        <GlassPanel area="map-card" variants={cardVariant}>
+        <GlassPanel area="church-card" variants={cardVariant} className="flex flex-col justify-start">
+          <div className="mb-5 mt-2 px-2 text-center lg:mt-3">
+            <h3 className="font-serif text-[#3f4642] text-[1.35rem] sm:text-[1.5rem] font-semibold tracking-wide">
+              Thánh lễ Hôn phối
+            </h3>
+            <p className="text-[0.7rem] uppercase tracking-widest text-[#3f4642]/80 font-medium mt-1">được cử hành tại</p>
+          </div>
+          {content.churchImageUrl ? (
+            <div className="details-map-canvas group overflow-hidden rounded-[1.2rem]">
+              <Image
+                src={content.churchImageUrl}
+                alt={content.churchLocation || "Nhà thờ"}
+                fill
+                sizes="(max-width: 767px) 100vw, (max-width: 1023px) 50vw, 32vw"
+                className="object-cover transition-transform duration-700 group-hover:scale-105"
+              />
+            </div>
+          ) : (
+            <div className="details-map-canvas group overflow-hidden rounded-[1.2rem] bg-[#3f4642]/5 flex items-center justify-center">
+              <span className="font-serif italic text-[#3f4642]/40">Ảnh Thánh lễ</span>
+            </div>
+          )}
+          <div className="details-map-caption">
+            <h3 suppressHydrationWarning className="details-map-title">
+              {content.churchLocation}
+            </h3>
+            <p suppressHydrationWarning className="details-map-schedule">{formatChurchSchedule(content.churchDate, content.churchTime)}</p>
+            <a href="https://www.google.com/maps/place/Nh%C3%A0+Th%E1%BB%9D+Gi%C3%A1o+X%E1%BB%A9+Tam+H%E1%BA%A3i/@10.8715759,106.7403534,760m/data=!3m2!1e3!4b1!4m6!3m5!1s0x317527f5b6727625:0x87d79427b7dfd720!8m2!3d10.8715706!4d106.7429283!16s%2Fg%2F1tdx1ml5?entry=ttu&g_ep=EgoyMDI2MDUxMy4wIKXMDSoASAFQAw%3D%3D" target="_blank" rel="noreferrer" className="inline-flex h-[3.5rem] mt-2 items-center justify-center transition hover:-translate-y-0.5 save-date-watercolor-btn">
+              <span className="save-date-btn-label">
+                <MapPin aria-hidden="true" size={18} />
+                <span>Chỉ đường</span>
+              </span>
+            </a>
+          </div>
+        </GlassPanel>
+
+        <GlassPanel area="banquet-group" variants={cardVariant} className="grid grid-cols-1 lg:grid-cols-[1.2fr_0.9fr] divide-y lg:divide-y-0 lg:divide-x divide-white/40">
+          <div className="details-map-card flex flex-col justify-start">
+            <div className="mb-5 mt-2 px-2 text-center lg:mt-3">
+              <h3 className="font-serif text-[#3f4642] text-[1.35rem] sm:text-[1.5rem] font-semibold tracking-wide">
+                Tiệc cưới thân mật
+              </h3>
+              <p className="text-[0.7rem] uppercase tracking-widest text-[#3f4642]/80 font-medium mt-1">được tổ chức tại</p>
+            </div>
           <VenueMapImage />
           <div className="details-map-caption">
             <h3 suppressHydrationWarning className="details-map-title">
@@ -286,7 +365,6 @@ export function EventDetailsContent({
             {content.mapText ? <p suppressHydrationWarning className="details-map-note">{content.mapText}</p> : null}
             {mapUrl ? (
               <a suppressHydrationWarning href={mapUrl} target="_blank" rel="noreferrer" className="inline-flex h-[3.5rem] mt-2 items-center justify-center transition hover:-translate-y-0.5 save-date-watercolor-btn">
-                <img src="/assets/wedding/ui/btn-directions.png" alt="" className="save-date-btn-bg" />
                 <span className="save-date-btn-label">
                   <MapPin aria-hidden="true" size={18} />
                   <span>Chỉ đường</span>
@@ -294,12 +372,13 @@ export function EventDetailsContent({
               </a>
             ) : null}
           </div>
-        </GlassPanel>
-
-        <GlassPanel area="dress-card" variants={cardVariant}>
-          <div className="details-dress-head">
-            <h3>{dressCodeTitle}</h3>
           </div>
+
+          <div className="details-dress-card justify-start">
+            <div className="details-dress-head mb-5 mt-2 px-2 lg:mt-3">
+              <h3 className="font-serif text-[#3f4642] text-[1.35rem] sm:text-[1.5rem] font-semibold tracking-wide m-0">{dressCodeTitle}</h3>
+              <span className="text-[0.7rem] uppercase tracking-widest text-[#3f4642]/80 font-medium mt-1">Áp dụng cho Tiệc mừng</span>
+            </div>
           <p className="details-panel-copy">{dressCodeNote}</p>
           <div className="details-dress-image-frame">
             <Image
@@ -310,7 +389,10 @@ export function EventDetailsContent({
               className="details-dress-image"
             />
           </div>
+          </div>
         </GlassPanel>
+
+
       </motion.div>
     </div>
   );

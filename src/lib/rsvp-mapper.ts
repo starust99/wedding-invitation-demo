@@ -7,6 +7,8 @@ export type RSVPDatabaseRow = {
   display_label: string | null;
   name: string;
   phone: string;
+  attending_ceremony: boolean | null;
+  attending_banquet: boolean | null;
   attending: "yes" | "no" | "maybe";
   guest_count: number;
   guest_group: string;
@@ -73,6 +75,8 @@ export function mapRSVPRow(row: RSVPDatabaseRow): RSVPResponse {
     displayLabel: row.display_label ?? undefined,
     name: row.name,
     phone: row.phone,
+    attendingCeremony: row.attending_ceremony ?? undefined,
+    attendingBanquet: row.attending_banquet ?? undefined,
     attending: row.attending,
     guestCount: row.guest_count,
     guestGroup: row.guest_group,
@@ -104,6 +108,8 @@ export function toRSVPInsert(response: Omit<RSVPResponse, "id" | "submittedAt">)
     ...tokenColumns,
     name: response.name,
     phone: response.phone,
+    attending_ceremony: response.attendingCeremony ?? null,
+    attending_banquet: response.attendingBanquet ?? null,
     attending: response.attending,
     guest_count: response.guestCount,
     guest_group: response.guestGroup,

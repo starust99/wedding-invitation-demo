@@ -91,7 +91,7 @@ const directions = [
       content: {
         sections: {
           itinerary: {
-            eyebrow: "Lịch trình tiệc cưới",
+            eyebrow: "Lịch trình buổi tiệc",
             title: "Một buổi tối giữa rừng thông Đà Lạt",
             description: "Gia đình chuẩn bị một buổi tiệc ngoài trời thân mật, có đón khách, nghi thức, dùng tiệc và giao lưu nhẹ nhàng.",
             cardEyebrow: "Terracotta Đà Lạt",
@@ -145,12 +145,12 @@ const directions = [
       content: {
         invitation: {
           title: "Trân trọng kính mời",
-          message: "Gia đình trân trọng kính mời quý khách đến chung vui trong buổi tiệc cưới thân mật tại Đà Lạt.",
+          message: "Trân trọng kính mời quý khách cùng chia vui trong ngày chung đôi thân mật tại Đà Lạt.",
           closing: "Sự hiện diện của quý khách là niềm vinh hạnh và niềm vui rất lớn với gia đình.",
         },
         sections: {
           hero: {
-            eyebrow: "Lễ cưới",
+            eyebrow: "Thánh lễ Hôn phối & Tiệc mừng",
             imageAlt: "Ảnh bìa thiệp cưới cao cấp",
             locationLine: "{eventDate} · {venueName}",
             showScrollCue: true,

@@ -73,7 +73,7 @@ export function HeroSection() {
             variants={fadeVariants}
             className="wedding-type-meta mt-4 text-[#FDFBF7]/90"
           >
-            Lễ cưới
+            Thánh lễ Hôn phối & Tiệc mừng
           </motion.p>
 
           <motion.p

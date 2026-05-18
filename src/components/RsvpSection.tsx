@@ -20,7 +20,7 @@ export function RsvpSection({
   const { navigateWithTransition } = usePageTransition();
 
   return (
-    <section id="rsvp" className="cinematic-stage editorial-band relative overflow-hidden px-5 py-20 text-ink sm:px-8 lg:py-28">
+    <section id="rsvp" className="cinematic-stage editorial-band relative overflow-hidden px-5 py-24 text-ink sm:px-8 sm:py-28 lg:py-32">
       <SectionMediaLayers config={config} section="cta" className="opacity-[0.1]" />
       <div aria-hidden="true" className="paper-grain-luxury -z-10 opacity-20" />
       <div aria-hidden="true" className="hero-couture-shade absolute inset-0 opacity-55" />
@@ -40,9 +40,12 @@ export function RsvpSection({
               <span className="h-px w-16 bg-[rgba(212,175,55,0.5)] sm:w-20" />
             </div>
             <p suppressHydrationWarning className="wedding-type-meta mt-6 max-w-xl text-ink/62">
-              {inviteCopy.greeting}
+              {inviteCopy.greeting},
             </p>
-            <p suppressHydrationWarning className="wedding-type-body mt-4 max-w-xl text-ink/68">
+            <p className="wedding-type-body mt-4 max-w-xl text-ink/68">
+              {inviteCopy.closingLine}
+            </p>
+            <p suppressHydrationWarning className="wedding-type-body mt-2 max-w-xl text-ink/68">
               {inviteCopy.rsvpLead} trước ngày {config.rsvp.deadline}.
             </p>
 
@@ -51,7 +54,6 @@ export function RsvpSection({
                 onClick={() => navigateWithTransition(rsvpHref)}
                 className="mt-8 inline-flex h-[4.2rem] items-center justify-center transition hover:-translate-y-0.5 save-date-watercolor-btn"
               >
-                <img src="/assets/wedding/ui/btn-rsvp-section.png" alt="" className="save-date-btn-bg" />
                 <span className="save-date-btn-label">
                   <HeartHandshake aria-hidden="true" size={18} />
                   <span>Gửi hồi đáp</span>

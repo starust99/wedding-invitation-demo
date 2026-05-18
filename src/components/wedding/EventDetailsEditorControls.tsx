@@ -198,6 +198,10 @@ export function EventDetailsEditorControls({
         <TextInput label="Dòng nhỏ" value={config.content.eyebrow} onChange={(value) => updateContent("eyebrow", value)} />
         <TextInput label="Tiêu đề" value={config.content.title} onChange={(value) => updateContent("title", value)} />
         <TextInput label="Lời dẫn" value={config.content.intro} multiline onChange={(value) => updateContent("intro", value)} />
+        <TextInput label="Ngày Thánh lễ" value={config.content.churchDate} onChange={(value) => updateContent("churchDate", value)} />
+        <TextInput label="Giờ Thánh lễ" value={config.content.churchTime} onChange={(value) => updateContent("churchTime", value)} />
+        <TextInput label="Địa điểm Thánh lễ" value={config.content.churchLocation} onChange={(value) => updateContent("churchLocation", value)} />
+        <TextInput label="Link ảnh Nhà thờ" value={config.content.churchImageUrl} onChange={(value) => updateContent("churchImageUrl", value)} />
         <TextInput label="Nhãn phần nghi thức" value={config.content.ceremonyLabel} onChange={(value) => updateContent("ceremonyLabel", value)} />
         <TextInput label="Giờ nghi thức" value={config.content.ceremonyTime} onChange={(value) => updateContent("ceremonyTime", value)} />
         <TextInput label="Địa điểm nghi thức" value={config.content.ceremonyLocation} onChange={(value) => updateContent("ceremonyLocation", value)} />

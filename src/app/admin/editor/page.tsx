@@ -304,6 +304,18 @@ export default function AdminEditorPage() {
     setNotice("Đã trả ảnh hero về ảnh mặc định hiện tại của website.");
   }
 
+  function updateChurchInfo(field: "churchDate" | "churchTime" | "churchLocation", value: string) {
+    markDirty();
+    setSettings((current) => {
+      if (!current) return current;
+      const next = normalizeGallerySettings(current);
+      if (next.content.eventDetailsConfig?.content) {
+        next.content.eventDetailsConfig.content[field] = value;
+      }
+      return next;
+    });
+  }
+
   async function uploadGalleryImage(index: number, file: File | undefined) {
     if (!file || !settings) return;
 
@@ -655,6 +667,42 @@ export default function AdminEditorPage() {
                   Khuyên dùng ảnh ngang sáng, rõ mặt, để khung đầu thiệp nhìn sang hơn. Nếu để trống, web sẽ quay về ảnh mặc định hiện tại.
                 </p>
               </aside>
+            </div>
+          </div>
+
+          <div className={`${shellClass} grid gap-5 p-4 sm:p-5 lg:p-6 xl:col-span-2`}>
+            <div className="grid gap-2 text-left">
+              <p className="text-[0.68rem] font-black uppercase tracking-[0.32em] text-[#2F3A35]/48">Thánh Lễ</p>
+              <h2 className="font-serif text-[clamp(2rem,3vw,3rem)] leading-none">Thông tin Nhà thờ</h2>
+            </div>
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              <label className="grid gap-2 text-sm font-black text-[#2F3A35]/60 text-left">
+                Tên Nhà Thờ
+                <input
+                  className={fieldClass}
+                  value={settings?.content.eventDetailsConfig?.content?.churchLocation || ""}
+                  placeholder="Nhà Thờ Giáo Xứ Tam Hải"
+                  onChange={(e) => updateChurchInfo("churchLocation", e.target.value)}
+                />
+              </label>
+              <label className="grid gap-2 text-sm font-black text-[#2F3A35]/60 text-left">
+                Ngày diễn ra
+                <input
+                  className={fieldClass}
+                  value={settings?.content.eventDetailsConfig?.content?.churchDate || ""}
+                  placeholder="20.12.2026, thứ 7"
+                  onChange={(e) => updateChurchInfo("churchDate", e.target.value)}
+                />
+              </label>
+              <label className="grid gap-2 text-sm font-black text-[#2F3A35]/60 text-left">
+                Giờ cử hành
+                <input
+                  className={fieldClass}
+                  value={settings?.content.eventDetailsConfig?.content?.churchTime || ""}
+                  placeholder="15:00"
+                  onChange={(e) => updateChurchInfo("churchTime", e.target.value)}
+                />
+              </label>
             </div>
           </div>
 

@@ -21,13 +21,13 @@ export function ThankYouSection({
   const inviteCopy = buildInvitationCopy(guestIdentity);
   const { navigateWithTransition } = usePageTransition();
   const thankYouMessage = rsvpAttending === "no"
-    ? `Gia đình đã ghi nhận phản hồi không thể tham dự của ${inviteCopy.shortRecipientLabel}. Rất hy vọng sẽ có dịp được đón tiếp ${inviteCopy.shortRecipientLabel} trong những sự kiện sắp tới của gia đình.`
+    ? `${inviteCopy.hostSubject} đã ghi nhận phản hồi không thể tham dự của ${inviteCopy.shortRecipientLabel}. Rất hy vọng sẽ có dịp được đón tiếp ${inviteCopy.shortRecipientLabel} trong những sự kiện sắp tới của ${inviteCopy.hostPronoun}.`
     : `${inviteCopy.thankYouLine} Hẹn gặp ${inviteCopy.shortRecipientLabel} tại ${config.venue.name} trong một buổi tối thật ấm áp.`;
 
   const instructionMessage = `(Nếu có thay đổi về kế hoạch, ${inviteCopy.shortRecipientLabel} vui lòng điều chỉnh lại thông tin bằng cách bấm nút bên dưới trước ngày 26/9/2026).`;
 
   return (
-    <section id="thank-you" className="cinematic-stage editorial-band relative overflow-hidden px-5 py-20 text-center text-ink sm:px-8 sm:py-24 lg:py-28">
+    <section id="thank-you" className="cinematic-stage editorial-band relative overflow-hidden px-5 py-24 text-center text-ink sm:px-8 sm:py-28 lg:py-32">
       <SectionMediaLayers config={config} section="cta" className="opacity-[0.1]" />
       <div aria-hidden="true" className="hero-couture-shade absolute inset-0 opacity-80" />
       <div aria-hidden="true" className="paper-grain-luxury absolute inset-0 opacity-22" />
@@ -67,7 +67,6 @@ export function ThankYouSection({
                       onClick={() => navigateWithTransition(rsvpHref)}
                       className="inline-flex h-[3.8rem] sm:h-[4.5rem] lg:h-[5rem] text-[0.92rem] sm:text-lg items-center justify-center transition hover:-translate-y-0.5 save-date-watercolor-btn"
                     >
-                      <img src="/assets/wedding/ui/btn-view-rsvp.png" alt="" className="save-date-btn-bg" />
                       <span className="save-date-btn-label">
                         <HeartHandshake aria-hidden="true" size={16} className="sm:w-[18px] sm:h-[18px]" />
                         <span>Chỉnh sửa hồi đáp</span>
@@ -81,7 +80,6 @@ export function ThankYouSection({
                         rel="noreferrer"
                         className="inline-flex h-[3.8rem] sm:h-[4.5rem] lg:h-[5rem] text-[0.92rem] sm:text-lg items-center justify-center transition hover:-translate-y-0.5 save-date-watercolor-btn"
                       >
-                        <img src="/assets/wedding/ui/btn-thankyou-directions.png" alt="" className="save-date-btn-bg" />
                         <span className="save-date-btn-label">
                         <MapPin aria-hidden="true" size={16} className="sm:w-[18px] sm:h-[18px]" />
                         <span>Chỉ đường</span>

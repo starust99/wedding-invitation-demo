@@ -1,0 +1,40 @@
+
+=== SCENARIO: Quý Khách (Chưa cá nhân hoá) ===
+- Lời mời (Hero): Gia đình chúng tôi trân trọng kính mời quý khách đến chia vui trong ngày chung đôi của Nhật & Phương tại Terracotta Đà Lạt.
+- Lời mời (Bên trong): Gia đình chúng tôi trân trọng kính mời quý khách đến chia vui trong ngày chung đôi của Nhật & Phương.
+- Lời cảm ơn: Sự hiện diện của quý khách là niềm vinh hạnh và lời chúc phúc trọn vẹn nhất dành cho gia đình.
+
+=== SCENARIO: Bạn bè (Peer) ===
+- Lời mời (Hero): Tụi mình mời bạn đến chung vui cùng tụi mình tại Terracotta Đà Lạt.
+- Lời mời (Bên trong): Tụi mình mời bạn đến chung vui cùng tụi mình.
+- Lời cảm ơn: Sự hiện diện của bạn là niềm vinh hạnh và lời chúc phúc trọn vẹn nhất dành cho tụi mình.
+
+=== SCENARIO: Em (Junior) ===
+- Lời mời (Hero): Anh chị mời em đến chung vui cùng anh chị tại Terracotta Đà Lạt.
+- Lời mời (Bên trong): Anh chị mời em đến chung vui cùng anh chị.
+- Lời cảm ơn: Sự hiện diện của em là niềm vinh hạnh và lời chúc phúc trọn vẹn nhất dành cho anh chị.
+
+=== SCENARIO: Anh chị (Senior) ===
+- Lời mời (Hero): Tụi em trân trọng kính mời anh đến chung vui cùng tụi em tại Terracotta Đà Lạt.
+- Lời mời (Bên trong): Tụi em trân trọng kính mời anh đến chung vui cùng tụi em.
+- Lời cảm ơn: Sự hiện diện của anh là niềm vinh hạnh và lời chúc phúc trọn vẹn nhất dành cho tụi em.
+
+=== SCENARIO: Cô Chú (Elder) ===
+- Lời mời (Hero): Tụi con trân trọng kính mời chú Tư đến chung vui cùng tụi con tại Terracotta Đà Lạt.
+- Lời mời (Bên trong): Tụi con trân trọng kính mời chú Tư đến chung vui cùng tụi con.
+- Lời cảm ơn: Sự hiện diện của chú Tư là niềm vinh hạnh và lời chúc phúc trọn vẹn nhất dành cho tụi con.
+
+=== SCENARIO: Bố mẹ mời khách (Parents host) ===
+- Lời mời (Hero): Gia đình chúng con trân trọng kính mời chú Thành đến chia vui trong ngày chung đôi của Nhật & Phương tại Terracotta Đà Lạt.
+- Lời mời (Bên trong): Gia đình chúng con trân trọng kính mời chú Thành đến chia vui trong ngày chung đôi của Nhật & Phương.
+- Lời cảm ơn: Sự hiện diện của chú Thành là niềm vinh hạnh và lời chúc phúc trọn vẹn nhất dành cho gia đình chúng con.
+
+=== SCENARIO: Mời gia đình (Family) ===
+- Lời mời (Hero): Tụi em trân trọng kính mời Anh đến chung vui cùng tụi em tại Terracotta Đà Lạt.
+- Lời mời (Bên trong): Tụi em trân trọng kính mời anh Hoàng và gia đình đến chung vui cùng tụi em.
+- Lời cảm ơn: Sự hiện diện của anh chị và gia đình là niềm vinh hạnh và lời chúc phúc trọn vẹn nhất dành cho tụi em.
+
+=== SCENARIO: Mời vợ chồng (Couple) ===
+- Lời mời (Hero): Kính mời Bạn đến chia vui trong ngày chung đôi của tụi mình tại Terracotta Đà Lạt.
+- Lời mời (Bên trong): Kính mời: Vợ chồng bạn đến chia vui trong ngày chung đôi của tụi mình.
+- Lời cảm ơn: Sự hiện diện của hai bạn là niềm vinh hạnh và lời chúc phúc trọn vẹn nhất dành cho tụi mình.

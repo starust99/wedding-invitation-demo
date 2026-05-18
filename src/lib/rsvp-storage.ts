@@ -12,6 +12,8 @@ export type RSVPResponse = {
   displayLabel?: string;
   name: string;
   phone: string;
+  attendingCeremony?: boolean;
+  attendingBanquet?: boolean;
   attending: "yes" | "no" | "maybe";
   guestCount: number;
   guestGroup: string;

@@ -69,7 +69,7 @@ export const weddingConfig = {
       eyebrow: "Lời mời từ gia đình",
     },
     itinerary: {
-      eyebrow: "Lịch trình",
+      eyebrow: "Lịch trình Tiệc cưới",
       title: "Buổi tiệc tại Terracotta",
       description: "",
       cardEyebrow: "Ngày cưới",
@@ -84,7 +84,7 @@ export const weddingConfig = {
       ],
     },
     timeline: {
-      eyebrow: "Lịch trình",
+      eyebrow: "Lịch trình Tiệc cưới",
       title: "Buổi tiệc tại Terracotta",
     },
     venue: {
@@ -151,7 +151,7 @@ export const weddingConfig = {
     invitation: {
       title: "Trân trọng kính mời",
       message:
-      "Gia đình trân trọng kính mời quý khách đến chung vui trong tiệc cưới của Nhật & Phương tại Terracotta Hotel & Resort Đà\u00A0Lạt.",
+      "Trân trọng kính mời quý khách cùng chia vui trong ngày chung đôi của Nhật & Phương.",
     closing: "Sự hiện diện của quý khách là niềm vinh hạnh và là niềm vui rất lớn với gia đình.",
   },
   venue: {
@@ -161,6 +161,11 @@ export const weddingConfig = {
     address: "Sảnh Quảng Trường, Terracotta Hotel & Resort Đà Lạt, Hồ Tuyền Lâm, Đà Lạt",
     mapUrl: "https://www.google.com/maps/search/?api=1&query=S%E1%BA%A3nh%20Qu%E1%BA%A3ng%20Tr%C6%B0%E1%BB%9Dng%20Terracotta%20Hotel%20%26%20Resort%20%C4%90%C3%A0%20L%E1%BA%A1t",
     note: "Không gian ngoài trời thoáng đãng, đủ trang trọng cho nghi thức và đủ ấm cúng cho một buổi tối thân tình.",
+  },
+  church: {
+    name: "Nhà Thờ Giáo Xứ Tam Hải",
+    address: "220/60/28 Đ. số 1, Bình Chiểu, Thủ Đức, Hồ Chí Minh",
+    mapUrl: "https://maps.app.goo.gl/Ndo7fXMnptEt1LfF6",
   },
   event: {
     dateLabel: "Thứ Bảy, 26.12.2026",
@@ -192,7 +197,7 @@ export const weddingConfig = {
     title: "Hỗ trợ lưu trú tại resort",
     description:
       "Nếu khách mời cần hỗ trợ lưu trú tại resort, vui lòng đăng ký trong form RSVP để gia đình sắp xếp thông tin với Terracotta được chu đáo.",
-    rsvpDeadline: "26.11.2026",
+    rsvpDeadline: "26/09/2026",
   },
   gallery: ["/gallery-clean-1.svg", "/gallery-clean-2.svg", "/gallery-clean-3.svg", "/gallery-clean-4.svg"],
   hero: {
@@ -218,7 +223,7 @@ export const weddingConfig = {
     animationEnabled: true,
   },
   rsvp: {
-    deadline: "26.11.2026",
+    deadline: "26/09/2026",
     askAccommodation: true,
     askDietary: true,
     askTransport: false,

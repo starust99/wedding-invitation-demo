@@ -41,7 +41,7 @@ type SettingsInput = Partial<Omit<SiteSettings, "content">> & {
 
 export const draftStorageKey = "wedding-demo-draft-settings";
 export const publishedStorageKey = "wedding-demo-published-settings";
-export const settingsSchemaVersion = 3;
+export const settingsSchemaVersion = 9;
 
 export const defaultSettings: SiteSettings = {
   schemaVersion: settingsSchemaVersion,
@@ -177,6 +177,96 @@ export function normalizeSettings(settings: SettingsInput | null): SiteSettings 
       heroEditorConfig: defaultSettings.content.heroEditorConfig,
       eventDetailsConfig: defaultSettings.content.eventDetailsConfig,
     };
+  }
+
+  // Migration: Force update RSVP deadlines
+  if ((settings.schemaVersion ?? 0) < 4) {
+    content = {
+      ...content,
+      rsvp: {
+        ...content.rsvp,
+        deadline: defaultSettings.content.rsvp.deadline,
+      },
+      accommodation: {
+        ...content.accommodation,
+        rsvpDeadline: defaultSettings.content.accommodation.rsvpDeadline,
+      },
+    };
+  }
+
+  // Migration v7: Replace the entire old default text to fix location and repetition issues
+  if ((settings.schemaVersion ?? 0) < 7) {
+    const exactNewString = "Trân trọng kính mời quý khách cùng chia vui trong ngày chung đôi của Nhật & Phương.";
+    const isOldDefault = (text: string) => /chung vui|lễ cưới|tiệc cưới/i.test(text);
+
+    const invMsg = content.invitation?.message ?? "";
+    if (isOldDefault(invMsg)) {
+      content = {
+        ...content,
+        invitation: {
+          ...content.invitation,
+          message: exactNewString,
+        },
+      };
+    }
+    // Also fix heroEditorConfig description (the text shown in the Hero section)
+    const heroDesc = (content as any).heroEditorConfig?.content?.description ?? "";
+    if (isOldDefault(heroDesc)) {
+      content = {
+        ...content,
+        heroEditorConfig: {
+          ...(content as any).heroEditorConfig,
+          content: {
+            ...(content as any).heroEditorConfig?.content,
+            description: exactNewString,
+          },
+        },
+      };
+    }
+  }
+
+  // Migration v8: Clarify that the timeline is for the wedding banquet
+  if ((settings.schemaVersion ?? 0) < 8) {
+    if (content.sections?.timeline?.eyebrow === "Lịch trình" || content.sections?.timeline?.eyebrow === "Lịch trình buổi tiệc") {
+      content = {
+        ...content,
+        sections: {
+          ...content.sections,
+          timeline: {
+            ...content.sections.timeline,
+            eyebrow: "Lịch trình Tiệc cưới",
+          },
+        },
+      };
+    }
+    if (content.sections?.itinerary?.eyebrow === "Lịch trình" || content.sections?.itinerary?.eyebrow === "Lịch trình buổi tiệc") {
+      content = {
+        ...content,
+        sections: {
+          ...content.sections,
+          itinerary: {
+            ...content.sections.itinerary,
+            eyebrow: "Lịch trình Tiệc cưới",
+          },
+        },
+      };
+    }
+  }
+
+  // Migration v9: Set default church image
+  if ((settings.schemaVersion ?? 0) < 9) {
+    if (!content.eventDetailsConfig?.content?.churchImageUrl) {
+      content = {
+        ...content,
+        eventDetailsConfig: {
+          ...content.eventDetailsConfig,
+          content: {
+            ...content.eventDetailsConfig?.content,
+            churchImageUrl: "/assets/wedding/church-tam-hai.png",
+          },
+        },
+      };
+    }
   }
 
   return {

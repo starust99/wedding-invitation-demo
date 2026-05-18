@@ -712,12 +712,12 @@ export function buildInvitationCopy(input?: InvitationCopyInput): InvitationCopy
   const coupleInviteOwner = tone === "parents_host" ? `${coupleReference} ${coupleDisplayName}` : hostPronoun;
   const envelopeRecipientLine = resolveEnvelopeRecipient(address, input);
   const insideInviteLine = isCoupleInvite(input) || isOpenCompanionInvite(input)
-    ? `Kính mời: ${sentenceCase(recipientLine)} đến chung vui trong lễ cưới của ${coupleInviteOwner}.`
-    : tone === "parents_host"
-    ? `${hostSubject} trân trọng kính mời ${inviteRecipientLine} đến chung vui trong lễ cưới của ${coupleReference} ${coupleDisplayName}.`
+    ? `Kính mời: ${sentenceCase(recipientLine)} đến chia vui trong ngày chung đôi của ${coupleInviteOwner}.`
+    : tone === "parents_host" || tone === "neutral"
+    ? `${hostSubject} trân trọng kính mời ${inviteRecipientLine} đến chia vui trong ngày chung đôi của ${coupleDisplayName}.`
     : isWarmPeer
-      ? `${hostSubject} ${inviteVerb} ${inviteRecipientLine} đến chung vui trong lễ cưới của ${hostPronoun}.`
-      : `${hostSubject} trân trọng kính mời ${inviteRecipientLine} đến chung vui trong lễ cưới của ${hostPronoun}.`;
+      ? `${hostSubject} mời ${inviteRecipientLine} đến chung vui cùng ${hostPronoun}.`
+      : `${hostSubject} trân trọng kính mời ${inviteRecipientLine} đến chung vui cùng ${hostPronoun}.`;
 
   const rawHeroRecipientLine = isFamilyInvite(input) || isCoupleInvite(input)
     ? shortRecipientLabel
@@ -728,14 +728,14 @@ export function buildInvitationCopy(input?: InvitationCopyInput): InvitationCopy
       : recipientPronoun;
   const heroRecipientLine = formatRepetitiveFamily(hostSubject, rawHeroRecipientLine);
   const heroInvitationLine = isCoupleInvite(input) || isOpenCompanionInvite(input)
-    ? `Kính mời ${sentenceCase(heroRecipientLine)} đến chung vui trong lễ cưới của ${coupleInviteOwner} tại ${venueDisplayName}.`
-    : tone === "parents_host"
-      ? `${hostSubject} trân trọng kính mời ${heroRecipientLine} đến chung vui trong lễ cưới của ${coupleReference} ${coupleDisplayName} tại ${venueDisplayName}.`
+    ? `Kính mời ${sentenceCase(heroRecipientLine)} đến chia vui trong ngày chung đôi của ${coupleInviteOwner} tại ${venueDisplayName}.`
+    : tone === "parents_host" || tone === "neutral"
+      ? `${hostSubject} trân trọng kính mời ${heroRecipientLine} đến chia vui trong ngày chung đôi của ${coupleDisplayName} tại ${venueDisplayName}.`
     : isWarmPeer
-      ? `${hostSubject} mời ${heroRecipientLine} đến chung vui trong lễ cưới của ${hostPronoun} tại ${venueDisplayName}.`
-      : `${hostSubject} trân trọng kính mời ${heroRecipientLine} đến chung vui trong lễ cưới của ${hostPronoun} tại ${venueDisplayName}.`;
+      ? `${hostSubject} mời ${heroRecipientLine} đến chung vui cùng ${hostPronoun} tại ${venueDisplayName}.`
+      : `${hostSubject} trân trọng kính mời ${heroRecipientLine} đến chung vui cùng ${hostPronoun} tại ${venueDisplayName}.`;
   const rsvpLead = tone === "parents_host"
-    ? "Gia đình mong nhận được lời hồi đáp để chuẩn bị đón tiếp chu đáo"
+    ? `${hostSubject} mong nhận được lời hồi đáp để chuẩn bị đón tiếp chu đáo`
     : tone === "elder"
       ? `${hostSubject} mong nhận được lời hồi đáp để chuẩn bị đón tiếp chu đáo`
     : tone === "senior"
@@ -749,10 +749,10 @@ export function buildInvitationCopy(input?: InvitationCopyInput): InvitationCopy
     ? `${hostSubject} đã nhận được phản hồi`
     : `${hostSubject} đã nhận được lời hồi đáp`;
   const thankYouLine = tone === "peer"
-    ? `${hostSubject} cảm ơn ${presenceSubject} đã dành thời gian chung vui trong ngày cưới.`
+    ? `${hostSubject} cảm ơn ${presenceSubject} đã dành thời gian chung vui trong ngày chung đôi.`
     : tone === "junior"
-      ? `${hostSubject} cảm ơn ${presenceSubject} đã dành thời gian chung vui trong ngày cưới.`
-      : `${hostSubject} chân thành cảm ơn ${presenceSubject} đã dành thời gian chung vui trong ngày cưới.`;
+      ? `${hostSubject} cảm ơn ${presenceSubject} đã dành thời gian chung vui trong ngày chung đôi.`
+      : `${hostSubject} chân thành cảm ơn ${presenceSubject} đã dành thời gian chung vui trong ngày chung đôi.`;
 
   return {
     tone,
@@ -776,7 +776,7 @@ export function buildInvitationCopy(input?: InvitationCopyInput): InvitationCopy
     rsvpLead,
     rsvpReceivedLine,
     thankYouLine,
-    closingLine: `Sự hiện diện của ${presenceSubject} là niềm vui rất lớn với ${hostPronoun}.`,
+    closingLine: `Sự hiện diện của ${presenceSubject} là niềm vinh hạnh và lời chúc phúc trọn vẹn nhất dành cho ${hostPronoun}.`,
     signaturePrefix: tone === "elder" ? "Thương kính" : tone === "peer" || tone === "junior" ? "Thân mến" : "Trân trọng",
   };
 }

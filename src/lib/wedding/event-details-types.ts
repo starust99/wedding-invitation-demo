@@ -40,6 +40,10 @@ export type EventDetailsContentConfig = {
   eyebrow: string;
   title: string;
   intro: string;
+  churchDate: string;
+  churchTime: string;
+  churchLocation: string;
+  churchImageUrl: string;
   ceremonyLabel: string;
   ceremonyTime: string;
   ceremonyLocation: string;

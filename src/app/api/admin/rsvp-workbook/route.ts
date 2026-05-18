@@ -41,6 +41,8 @@ function normalizeResponses(value: unknown): RSVPResponse[] {
       displayLabel: response.displayLabel ? text(response.displayLabel) : undefined,
       name: text(response.name),
       phone: text(response.phone),
+      attendingCeremony: typeof response.attendingCeremony === "boolean" ? response.attendingCeremony : undefined,
+      attendingBanquet: typeof response.attendingBanquet === "boolean" ? response.attendingBanquet : undefined,
       attending: response.attending === "no" ? "no" : response.attending === "maybe" ? "maybe" : "yes",
       guestCount: Number(response.guestCount) || 0,
       guestGroup: text(response.guestGroup),
@@ -124,7 +126,9 @@ function addResponsesSheet(workbook: ExcelJS.Workbook, responses: RSVPResponse[]
     { key: "displayLabel", header: "Tên trên link", width: 28 },
     { key: "name", header: "Họ tên khách điền", width: 30 },
     { key: "phone", header: "Số điện thoại", width: 18 },
-    { key: "attending", header: "Phản hồi", width: 24 },
+    { key: "attendingCeremony", header: "Dự Thánh lễ", width: 18 },
+    { key: "attendingBanquet", header: "Dự Tiệc mừng", width: 18 },
+    { key: "attending", header: "Phản hồi chung", width: 20 },
     { key: "guestCount", header: "Số khách", width: 12 },
     { key: "guestGroup", header: "Nhóm khách", width: 22 },
     { key: "transport", header: "Cần đưa đón", width: 14 },
@@ -144,6 +148,8 @@ function addResponsesSheet(workbook: ExcelJS.Workbook, responses: RSVPResponse[]
       displayLabel: response.displayLabel || response.inviteToken || "",
       name: response.name,
       phone: response.phone,
+      attendingCeremony: response.attendingCeremony !== undefined ? formatBoolean(response.attendingCeremony) : "-",
+      attendingBanquet: response.attendingBanquet !== undefined ? formatBoolean(response.attendingBanquet) : "-",
       attending: attendingLabel(response.attending),
       guestCount: response.guestCount,
       guestGroup: response.guestGroup,
@@ -160,7 +166,7 @@ function addResponsesSheet(workbook: ExcelJS.Workbook, responses: RSVPResponse[]
     });
   });
 
-  styleWorksheet(worksheet, "A1:P1");
+  styleWorksheet(worksheet, "A1:R1");
 }
 
 function addLodgingSheet(workbook: ExcelJS.Workbook, responses: RSVPResponse[]) {

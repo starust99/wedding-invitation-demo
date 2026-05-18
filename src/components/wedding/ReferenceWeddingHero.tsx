@@ -156,30 +156,18 @@ export function ReferenceWeddingHero({ config, summary }: ReferenceWeddingHeroPr
 
           <FadeUp delay={0.8} className="save-date-actions">
             <a href="#rsvp" className="save-date-watercolor-btn">
-              <img src="/assets/wedding/ui/btn-rsvp.png" alt="" className="save-date-btn-bg" />
               <span className="save-date-btn-label">
                 <HeartHandshake aria-hidden="true" size={18} />
                 <span>Gửi hồi đáp</span>
               </span>
             </a>
             <a href="#details" className="save-date-watercolor-btn">
-              <img src="/assets/wedding/ui/btn-map.png" alt="" className="save-date-btn-bg" />
               <span className="save-date-btn-label">
                 <MapPin aria-hidden="true" size={18} />
                 <span>{config.content.secondaryCta}</span>
               </span>
             </a>
           </FadeUp>
-        </article>
-
-        <article className="save-date-card save-date-countdown-card" aria-label="Đếm ngược đến lễ cưới">
-          <div className="save-date-countdown-heading flex-col gap-1.5 items-center">
-            <p>Cùng đón chờ</p>
-            <strong className="font-serif text-[1.85rem] font-normal italic tracking-wide text-ink/80" style={{ textTransform: "none", letterSpacing: "0.05em" }}>
-              {dateText}
-            </strong>
-          </div>
-          <CountdownRail targetTimestamp={targetTimestamp} />
         </article>
       </div>
 
