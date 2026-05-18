@@ -5,7 +5,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
 import { createPortal } from "react-dom";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, Variants } from "framer-motion";
 import { SectionMediaLayers } from "@/components/SectionMediaLayers";
 import { galleryMosaicSlotCount, galleryMosaicSlots, getGalleryTileSizes } from "@/config/gallery-mosaic";
 import { cleanBundledPublicAssetSrc } from "@/lib/asset-cleanup";
@@ -26,6 +26,42 @@ const galleryBlurSvg = `
 </svg>`;
 
 const galleryBlurDataUrl = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(galleryBlurSvg)}`;
+
+const galleryContainerVariant: Variants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.15,
+      delayChildren: 0.1,
+    },
+  },
+};
+
+const galleryTileVariant: Variants = {
+  hidden: { opacity: 0, y: 40, scale: 0.95 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    transition: {
+      duration: 0.8,
+      ease: [0.25, 0.1, 0.25, 1],
+    },
+  },
+};
+
+const galleryIntroVariant: Variants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.8,
+      ease: "easeOut",
+    },
+  },
+};
 
 export function GallerySection({ config }: { config: WeddingConfig }) {
   const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(null);
@@ -171,8 +207,12 @@ export function GallerySection({ config }: { config: WeddingConfig }) {
       <div aria-hidden="true" className="paper-grain-luxury gallery-mosaic-grain opacity-15" />
 
       <div className="gallery-mosaic-shell mx-auto max-w-7xl">
-        <div
+        <motion.div
           className="gallery-mosaic-intro grid max-w-4xl justify-items-center gap-5 pb-8 text-center lg:pb-10"
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: "-50px" }}
+          variants={galleryIntroVariant}
         >
           <div className="grid justify-items-center gap-5 text-center">
             <p className="section-kicker-dark wedding-type-kicker">{section.eyebrow}</p>
@@ -182,10 +222,14 @@ export function GallerySection({ config }: { config: WeddingConfig }) {
               {section.description}
             </p>
           )}
-        </div>
+        </motion.div>
 
-        <div
+        <motion.div
           className="gallery-mosaic-stage mt-12 lg:mt-14"
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: "-50px" }}
+          variants={galleryContainerVariant}
         >
           {tiles.map((tile, index) => {
             const hasImage = Boolean(tile.src);
@@ -195,13 +239,14 @@ export function GallerySection({ config }: { config: WeddingConfig }) {
             } as CSSProperties;
 
             return (
-              <figure
+              <motion.figure
                 key={`${tile.src || "placeholder"}-${index}`}
                 className={`gallery-mosaic-tile ${tile.aspectClass} lg:aspect-auto`}
                 style={style}
                 suppressHydrationWarning
+                variants={galleryTileVariant}
               >
-                <motion.button
+                <button
                   type="button"
                   className={`gallery-mosaic-tile-shell ${hasImage ? "gallery-mosaic-trigger" : ""}`}
                   aria-label={hasImage ? `Mở ảnh cưới ${index + 1}` : undefined}
@@ -227,11 +272,11 @@ export function GallerySection({ config }: { config: WeddingConfig }) {
                       style={{ backgroundImage: tile.fallback }}
                     />
                   )}
-                </motion.button>
-              </figure>
+                </button>
+              </motion.figure>
             );
           })}
-        </div>
+        </motion.div>
       </div>
 
       {lightboxHost && lightbox ? createPortal(lightbox, lightboxHost) : null}
