@@ -709,7 +709,7 @@ export default function RSVPPage() {
                           </p>
                           {!isHydratingGuest && (
                             <p className="text-[1.1rem] sm:text-[1.15rem] text-[#252934]/75 text-center mb-5 font-serif italic leading-relaxed px-2">
-                              Vào lúc 09:30 Thứ Bảy. Tại Nhà Thờ Giáo Xứ Tam Hải.
+                              Vào lúc 15:30 Thứ 7, 20/12/2026. Tại Nhà Thờ Giáo Xứ Tam Hải.
                             </p>
                           )}
                           <div className="grid grid-cols-2 gap-3">
@@ -758,7 +758,7 @@ export default function RSVPPage() {
                           </p>
                           {!isHydratingGuest && (
                             <p className="text-[1.1rem] sm:text-[1.15rem] text-[#252934]/75 text-center mb-5 font-serif italic leading-relaxed px-2">
-                              Vào lúc 17:30 Thứ Bảy. Tại Terracotta Đà Lạt.
+                              Vào lúc 17:30 Thứ 7, 26/12/2026. Tại Terracotta Đà Lạt.
                             </p>
                           )}
                           <div className="grid grid-cols-2 gap-3">
