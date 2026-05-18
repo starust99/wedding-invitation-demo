@@ -156,22 +156,18 @@ export function ReferenceWeddingHero({ config, summary }: ReferenceWeddingHeroPr
           </LineReveal>
 
           <div className="save-date-actions">
-            <PopReveal delay={0.7}>
-              <a href="#rsvp" className="save-date-watercolor-btn">
-                <span className="save-date-btn-label">
-                  <HeartHandshake aria-hidden="true" size={18} />
-                  <span>Gửi hồi đáp</span>
-                </span>
-              </a>
-            </PopReveal>
-            <PopReveal delay={0.8}>
-              <a href="#details" className="save-date-watercolor-btn">
-                <span className="save-date-btn-label">
-                  <MapPin aria-hidden="true" size={18} />
-                  <span>{config.content.secondaryCta}</span>
-                </span>
-              </a>
-            </PopReveal>
+            <a href="#rsvp" className="save-date-watercolor-btn">
+              <span className="save-date-btn-label">
+                <HeartHandshake aria-hidden="true" size={18} />
+                <span>Gửi hồi đáp</span>
+              </span>
+            </a>
+            <a href="#details" className="save-date-watercolor-btn">
+              <span className="save-date-btn-label">
+                <MapPin aria-hidden="true" size={18} />
+                <span>{config.content.secondaryCta}</span>
+              </span>
+            </a>
           </div>
         </article>
       </div>
