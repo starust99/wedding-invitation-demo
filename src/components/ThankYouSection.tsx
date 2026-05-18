@@ -12,18 +12,26 @@ export function ThankYouSection({
   config,
   guestIdentity,
   rsvpAttending,
+  rsvpAttendingBanquet,
   rsvpHref = "/rsvp",
 }: {
   config: WeddingConfig;
   guestIdentity: GuestIdentity;
   rsvpAttending?: RSVPResponse["attending"];
+  rsvpAttendingBanquet?: RSVPResponse["attendingBanquet"];
   rsvpHref?: string;
 }) {
   const inviteCopy = buildInvitationCopy(guestIdentity);
   const { navigateWithTransition } = usePageTransition();
-  const thankYouMessage = rsvpAttending === "no"
-    ? `${inviteCopy.hostSubject} đã ghi nhận phản hồi không thể tham dự của ${inviteCopy.shortRecipientLabel}. Rất hy vọng sẽ có dịp được đón tiếp ${inviteCopy.shortRecipientLabel} trong những sự kiện sắp tới của ${inviteCopy.hostPronoun}.`
-    : `${inviteCopy.thankYouLine} Hẹn gặp ${inviteCopy.shortRecipientLabel} tại ${config.venue.name} trong một buổi tối thật ấm áp.`;
+
+  let thankYouMessage = "";
+  if (rsvpAttending === "no") {
+    thankYouMessage = `${inviteCopy.hostSubject} đã ghi nhận phản hồi không thể tham dự của ${inviteCopy.shortRecipientLabel}. Rất hy vọng sẽ có dịp được đón tiếp ${inviteCopy.shortRecipientLabel} trong những sự kiện sắp tới của ${inviteCopy.hostPronoun}.`;
+  } else if (rsvpAttendingBanquet === false) {
+    thankYouMessage = `${inviteCopy.thankYouLine} Hẹn gặp ${inviteCopy.shortRecipientLabel} tại Thánh lễ Hôn phối sắp tới.`;
+  } else {
+    thankYouMessage = `${inviteCopy.thankYouLine} Hẹn gặp ${inviteCopy.shortRecipientLabel} tại ${config.venue.name} trong một buổi tối thật ấm áp.`;
+  }
 
   const instructionMessage = `(Nếu có thay đổi về kế hoạch, ${inviteCopy.shortRecipientLabel} vui lòng điều chỉnh lại thông tin bằng cách bấm nút bên dưới trước ngày 26/9/2026).`;
 
