@@ -749,10 +749,10 @@ export function buildInvitationCopy(input?: InvitationCopyInput): InvitationCopy
     ? `${hostSubject} đã nhận được phản hồi`
     : `${hostSubject} đã nhận được lời hồi đáp`;
   const thankYouLine = tone === "peer"
-    ? `${hostSubject} cảm ơn ${presenceSubject} đã dành thời gian chung vui trong ngày chung đôi.`
+    ? `${hostSubject} cảm ơn ${presenceSubject} đã dành thời gian chung vui trong ngày cưới.`
     : tone === "junior"
-      ? `${hostSubject} cảm ơn ${presenceSubject} đã dành thời gian chung vui trong ngày chung đôi.`
-      : `${hostSubject} chân thành cảm ơn ${presenceSubject} đã dành thời gian chung vui trong ngày chung đôi.`;
+      ? `${hostSubject} cảm ơn ${presenceSubject} đã dành thời gian chung vui trong ngày cưới.`
+      : `${hostSubject} chân thành cảm ơn ${presenceSubject} đã dành thời gian chung vui trong ngày cưới.`;
 
   return {
     tone,
