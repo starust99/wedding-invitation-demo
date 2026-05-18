@@ -296,7 +296,10 @@ export function EventDetailsContent({
 
               {/* Fathers Row */}
               <motion.div variants={familyItemVariant} className="text-center text-[0.8rem] sm:text-[0.95rem] md:text-[1.05rem] text-[#3f4642]/80 leading-relaxed px-1">
-                <p>Ông <span className="font-medium text-[#3f4642]">Trần Trọng Sơn</span></p>
+                <p>
+                  Ông<br className="block sm:hidden" />
+                  <span className="font-medium text-[#3f4642] sm:ml-1">Trần Trọng Sơn</span>
+                </p>
               </motion.div>
               <motion.div variants={familyItemVariant} className="text-center text-[0.8rem] sm:text-[0.95rem] md:text-[1.05rem] text-[#3f4642]/80 leading-relaxed px-1">
                 <p>
@@ -307,7 +310,10 @@ export function EventDetailsContent({
 
               {/* Mothers Row */}
               <motion.div variants={familyItemVariant} className="text-center text-[0.8rem] sm:text-[0.95rem] md:text-[1.05rem] text-[#3f4642]/80 leading-relaxed px-1 mt-1.5 sm:mt-2">
-                <p>Bà <span className="font-medium text-[#3f4642]">Nguyễn Thị Minh Duyên</span></p>
+                <p>
+                  Bà<br className="block sm:hidden" />
+                  <span className="font-medium text-[#3f4642] sm:ml-1">Nguyễn Thị Minh Duyên</span>
+                </p>
               </motion.div>
               <motion.div variants={familyItemVariant} className="text-center text-[0.8rem] sm:text-[0.95rem] md:text-[1.05rem] text-[#3f4642]/80 leading-relaxed px-1 mt-1.5 sm:mt-2">
                 <p>
