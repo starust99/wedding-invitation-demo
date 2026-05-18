@@ -135,6 +135,34 @@ const headerVariant: Variants = {
   },
 };
 
+const familyPanelVariant: Variants = {
+  hidden: { opacity: 0, y: 30, scale: 0.98, filter: "blur(8px)" },
+  visible: {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    filter: "blur(0px)",
+    transition: {
+      duration: 0.8,
+      ease: [0.25, 0.1, 0.25, 1],
+      staggerChildren: 0.15,
+      delayChildren: 0.2,
+    },
+  },
+};
+
+const familyItemVariant: Variants = {
+  hidden: { opacity: 0, y: 15 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.5,
+      ease: "easeOut",
+    },
+  },
+};
+
 function GlassPanel({ area, children, className = "", variants }: { area: string; children: ReactNode; className?: string; variants?: Variants }) {
   return (
     <motion.article 
@@ -242,67 +270,65 @@ export function EventDetailsContent({
       </motion.header>
 
       <motion.div 
-        className="mb-8 md:mb-12 w-full max-w-4xl mx-auto"
+        className="mb-8 md:mb-12 w-full max-w-4xl mx-auto details-glass-panel px-2 py-6 sm:px-6 sm:py-8 md:px-12 md:py-10 text-center flex flex-col relative"
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true, margin: "-50px" }}
-        variants={headerVariant}
+        variants={familyPanelVariant}
       >
-        <div className="details-glass-panel px-2 py-6 sm:px-6 sm:py-8 md:px-12 md:py-10 text-center flex flex-col relative">
 
-          <p className="font-serif italic text-[#3f4642]/80 text-[0.95rem] sm:text-[1.1rem] md:text-[1.25rem] mb-6 sm:mb-8 tracking-wide px-4">
+          <motion.p variants={familyItemVariant} className="font-serif italic text-[#3f4642]/80 text-[0.95rem] sm:text-[1.1rem] md:text-[1.25rem] mb-6 sm:mb-8 tracking-wide px-4">
             Cùng với niềm hân hoan của hai bên gia đình:
-          </p>
+          </motion.p>
 
           <div className="relative w-full">
             {/* Vertical Divider */}
-            <div className="hidden sm:block absolute left-1/2 top-8 bottom-8 md:top-10 md:bottom-10 w-px bg-gradient-to-b from-transparent via-[#3f4642]/20 to-transparent -translate-x-1/2"></div>
+            <motion.div variants={familyItemVariant} className="hidden sm:block absolute left-1/2 top-8 bottom-8 md:top-10 md:bottom-10 w-px bg-gradient-to-b from-transparent via-[#3f4642]/20 to-transparent -translate-x-1/2"></motion.div>
 
             <div className="grid grid-cols-2 gap-x-2 sm:gap-x-8 md:gap-x-16 items-start w-full">
               {/* Header Row */}
-              <div className="flex flex-col items-center pb-5 sm:pb-8 md:pb-12">
+              <motion.div variants={familyItemVariant} className="flex flex-col items-center pb-5 sm:pb-8 md:pb-12">
                 <h3 className="font-serif text-[1.1rem] sm:text-[1.35rem] md:text-[1.5rem] font-medium text-[#3f4642] tracking-widest uppercase opacity-90" style={{ letterSpacing: '0.15em' }}>Nhà Trai</h3>
-              </div>
-              <div className="flex flex-col items-center pb-5 sm:pb-8 md:pb-12">
+              </motion.div>
+              <motion.div variants={familyItemVariant} className="flex flex-col items-center pb-5 sm:pb-8 md:pb-12">
                 <h3 className="font-serif text-[1.1rem] sm:text-[1.35rem] md:text-[1.5rem] font-medium text-[#3f4642] tracking-widest uppercase opacity-90" style={{ letterSpacing: '0.15em' }}>Nhà Gái</h3>
-              </div>
+              </motion.div>
 
               {/* Fathers Row */}
-              <div className="text-center text-[0.8rem] sm:text-[0.95rem] md:text-[1.05rem] text-[#3f4642]/80 leading-relaxed px-1">
+              <motion.div variants={familyItemVariant} className="text-center text-[0.8rem] sm:text-[0.95rem] md:text-[1.05rem] text-[#3f4642]/80 leading-relaxed px-1">
                 <p>Ông <span className="font-medium text-[#3f4642]">Trần Trọng Sơn</span></p>
-              </div>
-              <div className="text-center text-[0.8rem] sm:text-[0.95rem] md:text-[1.05rem] text-[#3f4642]/80 leading-relaxed px-1">
+              </motion.div>
+              <motion.div variants={familyItemVariant} className="text-center text-[0.8rem] sm:text-[0.95rem] md:text-[1.05rem] text-[#3f4642]/80 leading-relaxed px-1">
                 <p>Ông <span className="font-medium text-[#3f4642]">Felicite Nguyễn Đức Tài</span></p>
-              </div>
+              </motion.div>
 
               {/* Mothers Row */}
-              <div className="text-center text-[0.8rem] sm:text-[0.95rem] md:text-[1.05rem] text-[#3f4642]/80 leading-relaxed px-1 mt-1.5 sm:mt-2">
+              <motion.div variants={familyItemVariant} className="text-center text-[0.8rem] sm:text-[0.95rem] md:text-[1.05rem] text-[#3f4642]/80 leading-relaxed px-1 mt-1.5 sm:mt-2">
                 <p>Bà <span className="font-medium text-[#3f4642]">Nguyễn Thị Minh Duyên</span></p>
-              </div>
-              <div className="text-center text-[0.8rem] sm:text-[0.95rem] md:text-[1.05rem] text-[#3f4642]/80 leading-relaxed px-1 mt-1.5 sm:mt-2">
+              </motion.div>
+              <motion.div variants={familyItemVariant} className="text-center text-[0.8rem] sm:text-[0.95rem] md:text-[1.05rem] text-[#3f4642]/80 leading-relaxed px-1 mt-1.5 sm:mt-2">
                 <p>Bà <span className="font-medium text-[#3f4642]">Teresa Phan Thị Thu Hiền</span></p>
-              </div>
+              </motion.div>
 
               {/* Children Row */}
-              <div className="flex flex-col items-center mt-6 sm:mt-8 w-full h-full">
+              <motion.div variants={familyItemVariant} className="flex flex-col items-center mt-6 sm:mt-8 w-full h-full">
                 <div className="pt-3 sm:pt-4 border-t border-[#3f4642]/15 w-[90%] sm:w-[85%] flex flex-col items-center h-full">
                   <p className="text-[0.65rem] sm:text-[0.85rem] md:text-[0.9rem] italic text-[#3f4642]/70 mb-1 sm:mb-2 uppercase tracking-widest text-center">Trưởng nam</p>
                   <p className="font-serif text-[1.05rem] sm:text-[1.25rem] md:text-[1.4rem] font-medium text-[#3f4642] leading-snug text-center">
                     Augustino<br/>Trần Long Nhật
                   </p>
                 </div>
-              </div>
-              <div className="flex flex-col items-center mt-6 sm:mt-8 w-full h-full">
+              </motion.div>
+              <motion.div variants={familyItemVariant} className="flex flex-col items-center mt-6 sm:mt-8 w-full h-full">
                 <div className="pt-3 sm:pt-4 border-t border-[#3f4642]/15 w-[90%] sm:w-[85%] flex flex-col items-center h-full">
                   <p className="text-[0.65rem] sm:text-[0.85rem] md:text-[0.9rem] italic text-[#3f4642]/70 mb-1 sm:mb-2 uppercase tracking-widest text-center">Trưởng nữ</p>
                   <p className="font-serif text-[1.05rem] sm:text-[1.25rem] md:text-[1.4rem] font-medium text-[#3f4642] leading-snug text-center">
                     Teresa<br/>Nguyễn Anh Phương
                   </p>
                 </div>
-              </div>
+              </motion.div>
             </div>
           </div>
-        </div>
       </motion.div>
 
       <motion.div
