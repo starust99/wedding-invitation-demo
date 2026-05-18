@@ -33,6 +33,8 @@ export function ThankYouSection({
     thankYouMessage = `${inviteCopy.thankYouLine} Hẹn gặp ${inviteCopy.shortRecipientLabel} tại Thánh lễ Hôn phối sắp tới.`;
   } else if (rsvpAttendingCeremony === true && rsvpAttendingBanquet === true) {
     thankYouMessage = `${inviteCopy.thankYouLine} Hẹn gặp ${inviteCopy.shortRecipientLabel} tại Thánh lễ Hôn phối và sau đó là Tiệc mừng ở ${config.venue.name} trong một buổi tối thật ấm áp.`;
+  } else if (rsvpAttendingCeremony === false && rsvpAttendingBanquet === true) {
+    thankYouMessage = `${inviteCopy.thankYouLine} Hẹn gặp ${inviteCopy.shortRecipientLabel} tại Tiệc mừng ở ${config.venue.name} trong một buổi tối thật ấm áp.`;
   } else {
     thankYouMessage = `${inviteCopy.thankYouLine} Hẹn gặp ${inviteCopy.shortRecipientLabel} tại ${config.venue.name} trong một buổi tối thật ấm áp.`;
   }
