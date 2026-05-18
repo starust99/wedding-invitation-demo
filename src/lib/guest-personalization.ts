@@ -707,17 +707,26 @@ export function buildInvitationCopy(input?: InvitationCopyInput): InvitationCopy
     return recipient;
   };
 
+  const ensureGiaDinhHost = (subject: string) => {
+    const s = subject.toLowerCase();
+    if (s.startsWith("gia đình") || s.startsWith("gia dinh")) {
+      return sentenceCase(subject);
+    }
+    return `Gia đình ${subject.toLowerCase()}`;
+  };
+
+  const familyHostSubject = ensureGiaDinhHost(hostPronoun);
   const inviteRecipientLine = formatRepetitiveFamily(hostSubject, recipientLine);
   const presenceSubject = resolvePresenceSubject(address, input);
   const coupleInviteOwner = tone === "parents_host" ? `${coupleReference} ${coupleDisplayName}` : hostPronoun;
   const envelopeRecipientLine = resolveEnvelopeRecipient(address, input);
   const insideInviteLine = isCoupleInvite(input) || isOpenCompanionInvite(input)
-    ? `Kính mời: ${sentenceCase(recipientLine)} đến chia vui trong ngày chung đôi của ${coupleInviteOwner}.`
+    ? `${familyHostSubject} trân trọng kính mời ${sentenceCase(recipientLine)} đến chia vui trong ngày cưới của ${coupleInviteOwner}.`
     : tone === "parents_host" || tone === "neutral"
-    ? `${hostSubject} trân trọng kính mời ${inviteRecipientLine} đến chia vui trong ngày chung đôi của ${coupleDisplayName}.`
+    ? `${familyHostSubject} trân trọng kính mời ${inviteRecipientLine} đến chia vui trong ngày cưới của ${coupleDisplayName}.`
     : isWarmPeer
-      ? `${hostSubject} mời ${inviteRecipientLine} đến chung vui cùng ${hostPronoun}.`
-      : `${hostSubject} trân trọng kính mời ${inviteRecipientLine} đến chung vui cùng ${hostPronoun}.`;
+      ? `${familyHostSubject} mời ${inviteRecipientLine} đến chung vui cùng ${hostPronoun}.`
+      : `${familyHostSubject} trân trọng kính mời ${inviteRecipientLine} đến chung vui cùng ${hostPronoun}.`;
 
   const rawHeroRecipientLine = isFamilyInvite(input) || isCoupleInvite(input)
     ? shortRecipientLabel
