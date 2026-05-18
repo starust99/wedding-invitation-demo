@@ -705,7 +705,7 @@ export default function RSVPPage() {
                         {/* Question 1: Ceremony */}
                         <div className="rounded-[1.4rem] premium-glass p-5">
                           <p className="wedding-type-card-title text-[#252934] mb-4 text-center">
-                            Bạn có thể tham dự Thánh lễ Hôn phối cùng {inviteCopy.tone === "parents_host" || inviteCopy.tone === "neutral" ? "gia đình" : inviteCopy.hostPronoun} chứ?
+                            {inviteCopy.recipientPronoun ? inviteCopy.recipientPronoun.charAt(0).toUpperCase() + inviteCopy.recipientPronoun.slice(1) : "Bạn"} có thể tham dự Thánh lễ Hôn phối cùng {inviteCopy.tone === "parents_host" || inviteCopy.tone === "neutral" ? "gia đình" : inviteCopy.hostPronoun} chứ?
                           </p>
                           <div className="grid grid-cols-2 gap-3">
                             <button
@@ -749,7 +749,7 @@ export default function RSVPPage() {
                         {/* Question 2: Banquet */}
                         <div className="rounded-[1.4rem] premium-glass p-5">
                           <p className="wedding-type-card-title text-[#252934] mb-4 text-center">
-                            Bạn sẽ đến chung vui trong đêm Tiệc mừng chứ?
+                            {inviteCopy.recipientPronoun ? inviteCopy.recipientPronoun.charAt(0).toUpperCase() + inviteCopy.recipientPronoun.slice(1) : "Bạn"} sẽ đến chung vui trong đêm Tiệc mừng chứ?
                           </p>
                           <div className="grid grid-cols-2 gap-3">
                             <button
