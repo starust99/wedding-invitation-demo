@@ -707,9 +707,11 @@ export default function RSVPPage() {
                           <p className="wedding-type-card-title text-[#252934] mb-1 text-center">
                             {isHydratingGuest ? "Đang tải lời mời..." : `${inviteCopy.recipientPronoun ? inviteCopy.recipientPronoun.charAt(0).toUpperCase() + inviteCopy.recipientPronoun.slice(1) : "Bạn"} có thể tham dự Thánh lễ Hôn phối chứ?`}
                           </p>
-                          <p className="text-base text-[#252934]/70 text-center mb-5 font-serif italic">
-                            Vào lúc 09:30 Thứ Bảy. Tại Nhà Thờ Giáo Xứ Tam Hải.
-                          </p>
+                          {!isHydratingGuest && (
+                            <p className="text-[1.1rem] sm:text-[1.15rem] text-[#252934]/75 text-center mb-5 font-serif italic leading-relaxed px-2">
+                              Vào lúc 09:30 Thứ Bảy. Tại Nhà Thờ Giáo Xứ Tam Hải.
+                            </p>
+                          )}
                           <div className="grid grid-cols-2 gap-3">
                             <button
                               type="button"
@@ -754,9 +756,11 @@ export default function RSVPPage() {
                           <p className="wedding-type-card-title text-[#252934] mb-1 text-center">
                             {isHydratingGuest ? "Đang tải lời mời..." : `${inviteCopy.recipientPronoun ? inviteCopy.recipientPronoun.charAt(0).toUpperCase() + inviteCopy.recipientPronoun.slice(1) : "Bạn"} sẽ đến chung vui trong đêm Tiệc mừng chứ?`}
                           </p>
-                          <p className="text-base text-[#252934]/70 text-center mb-5 font-serif italic">
-                            Vào lúc 17:30 Thứ Bảy. Tại Terracotta Đà Lạt.
-                          </p>
+                          {!isHydratingGuest && (
+                            <p className="text-[1.1rem] sm:text-[1.15rem] text-[#252934]/75 text-center mb-5 font-serif italic leading-relaxed px-2">
+                              Vào lúc 17:30 Thứ Bảy. Tại Terracotta Đà Lạt.
+                            </p>
+                          )}
                           <div className="grid grid-cols-2 gap-3">
                             <button
                               type="button"
