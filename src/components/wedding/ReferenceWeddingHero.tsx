@@ -120,7 +120,8 @@ export function ReferenceWeddingHero({ config, summary }: ReferenceWeddingHeroPr
           className="save-date-card save-date-photo-card"
           aria-label="Khung ảnh cưới"
           initial={{ opacity: 0, scale: 0.92, y: 30, filter: "blur(6px)" }}
-          animate={isReady ? { opacity: 1, scale: 1, y: 0, filter: "blur(0px)" } : { opacity: 0, scale: 0.92, y: 30, filter: "blur(6px)" }}
+          whileInView={{ opacity: 1, scale: 1, y: 0, filter: "blur(0px)" }}
+          viewport={{ once: false, margin: "-10% 0px -10% 0px" }}
           transition={{ duration: 1.8, ease: [0.22, 1, 0.36, 1], delay: 0.1 }}
         >
           <div className="save-date-photo-frame">

@@ -34,7 +34,7 @@ export function useRevealReady(isInView: boolean) {
 
 export function LineReveal({ children, delay = 0, className = "" }: { children: React.ReactNode; delay?: number; className?: string }) {
   const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, margin: "-5%" });
+  const isInView = useInView(ref, { once: false, margin: "-10% 0px -10% 0px" });
   const ready = useRevealReady(isInView);
 
   return (
@@ -52,7 +52,7 @@ export function LineReveal({ children, delay = 0, className = "" }: { children: 
 
 export function WriteReveal({ children, delay = 0, className = "" }: { children: React.ReactNode; delay?: number; className?: string }) {
   const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, margin: "-5%" });
+  const isInView = useInView(ref, { once: false, margin: "-10% 0px -10% 0px" });
   const ready = useRevealReady(isInView);
 
   return (
@@ -70,7 +70,7 @@ export function WriteReveal({ children, delay = 0, className = "" }: { children:
 
 export function FadeUp({ children, delay = 0, className = "" }: { children: React.ReactNode; delay?: number; className?: string }) {
   const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, margin: "-5%" });
+  const isInView = useInView(ref, { once: false, margin: "-10% 0px -10% 0px" });
   const ready = useRevealReady(isInView);
 
   return (
@@ -88,7 +88,7 @@ export function FadeUp({ children, delay = 0, className = "" }: { children: Reac
 
 export function PopReveal({ children, delay = 0, className = "" }: { children: React.ReactNode; delay?: number; className?: string }) {
   const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, margin: "-5%" });
+  const isInView = useInView(ref, { once: false, margin: "-10% 0px -10% 0px" });
   const ready = useRevealReady(isInView);
 
   return (

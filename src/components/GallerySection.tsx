@@ -211,7 +211,7 @@ export function GallerySection({ config }: { config: WeddingConfig }) {
           className="gallery-mosaic-intro grid max-w-4xl justify-items-center gap-5 pb-8 text-center lg:pb-10"
           initial="hidden"
           whileInView="visible"
-          viewport={{ once: true, margin: "-50px" }}
+          viewport={{ once: false, margin: "-10% 0px -10% 0px" }}
           variants={galleryIntroVariant}
         >
           <div className="grid justify-items-center gap-5 text-center">
@@ -228,7 +228,7 @@ export function GallerySection({ config }: { config: WeddingConfig }) {
           className="gallery-mosaic-stage mt-12 lg:mt-14"
           initial="hidden"
           whileInView="visible"
-          viewport={{ once: true, margin: "-50px" }}
+          viewport={{ once: false, margin: "-10% 0px -10% 0px" }}
           variants={galleryContainerVariant}
         >
           {tiles.map((tile, index) => {
