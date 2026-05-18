@@ -728,12 +728,12 @@ export function buildInvitationCopy(input?: InvitationCopyInput): InvitationCopy
       : recipientPronoun;
   const heroRecipientLine = formatRepetitiveFamily(hostSubject, rawHeroRecipientLine);
   const heroInvitationLine = isCoupleInvite(input) || isOpenCompanionInvite(input)
-    ? `Kính mời ${sentenceCase(heroRecipientLine)} đến chia vui trong ngày chung đôi của ${coupleInviteOwner} tại ${venueDisplayName}.`
+    ? `Kính mời ${sentenceCase(heroRecipientLine)} đến chia vui trong ngày cưới của ${coupleInviteOwner}.`
     : tone === "parents_host" || tone === "neutral"
-      ? `${hostSubject} trân trọng kính mời ${heroRecipientLine} đến chia vui trong ngày chung đôi của ${coupleDisplayName} tại ${venueDisplayName}.`
+      ? `${hostSubject} trân trọng kính mời ${heroRecipientLine} đến chia vui trong ngày cưới của ${coupleDisplayName}.`
     : isWarmPeer
-      ? `${hostSubject} mời ${heroRecipientLine} đến chung vui cùng ${hostPronoun} tại ${venueDisplayName}.`
-      : `${hostSubject} trân trọng kính mời ${heroRecipientLine} đến chung vui cùng ${hostPronoun} tại ${venueDisplayName}.`;
+      ? `${hostSubject} mời ${heroRecipientLine} đến chung vui cùng ${hostPronoun}.`
+      : `${hostSubject} trân trọng kính mời ${heroRecipientLine} đến chung vui cùng ${hostPronoun}.`;
   const rsvpLead = tone === "parents_host"
     ? `${hostSubject} mong nhận được lời hồi đáp để chuẩn bị đón tiếp chu đáo`
     : tone === "elder"
