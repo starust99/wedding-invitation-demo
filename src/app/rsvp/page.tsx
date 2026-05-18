@@ -704,8 +704,11 @@ export default function RSVPPage() {
                       <div className="grid gap-6">
                         {/* Question 1: Ceremony */}
                         <div className="rounded-[1.4rem] premium-glass p-5">
-                          <p className="wedding-type-card-title text-[#252934] mb-4 text-center">
-                            {inviteCopy.recipientPronoun ? inviteCopy.recipientPronoun.charAt(0).toUpperCase() + inviteCopy.recipientPronoun.slice(1) : "Bạn"} có thể tham dự Thánh lễ Hôn phối cùng {inviteCopy.tone === "parents_host" || inviteCopy.tone === "neutral" ? "gia đình" : inviteCopy.hostPronoun} chứ?
+                          <p className="wedding-type-card-title text-[#252934] mb-1 text-center">
+                            {inviteCopy.recipientPronoun ? inviteCopy.recipientPronoun.charAt(0).toUpperCase() + inviteCopy.recipientPronoun.slice(1) : "Bạn"} có thể tham dự Thánh lễ Hôn phối chứ?
+                          </p>
+                          <p className="text-[0.9rem] text-[#252934]/60 text-center mb-5 font-serif italic">
+                            Vào lúc 09:30 Thứ Bảy. Tại Nhà Thờ Giáo Xứ Tam Hải.
                           </p>
                           <div className="grid grid-cols-2 gap-3">
                             <button
@@ -721,7 +724,7 @@ export default function RSVPPage() {
                                 }
                               }}
                             >
-                              Có, tôi sẽ đến
+                              Có, sẽ tham dự
                             </button>
                             <button
                               type="button"
@@ -740,7 +743,7 @@ export default function RSVPPage() {
                                 }
                               }}
                             >
-                              Rất tiếc, tôi không thể
+                              Rất tiếc, không thể tham dự
                             </button>
                           </div>
                           {errors.attendingCeremony && <p className="mt-2 text-xs text-center text-[#9B4E5C] font-bold">{errors.attendingCeremony.message}</p>}
@@ -748,8 +751,11 @@ export default function RSVPPage() {
 
                         {/* Question 2: Banquet */}
                         <div className="rounded-[1.4rem] premium-glass p-5">
-                          <p className="wedding-type-card-title text-[#252934] mb-4 text-center">
+                          <p className="wedding-type-card-title text-[#252934] mb-1 text-center">
                             {inviteCopy.recipientPronoun ? inviteCopy.recipientPronoun.charAt(0).toUpperCase() + inviteCopy.recipientPronoun.slice(1) : "Bạn"} sẽ đến chung vui trong đêm Tiệc mừng chứ?
+                          </p>
+                          <p className="text-[0.9rem] text-[#252934]/60 text-center mb-5 font-serif italic">
+                            Vào lúc 17:30 Thứ Bảy. Tại Terracotta Đà Lạt.
                           </p>
                           <div className="grid grid-cols-2 gap-3">
                             <button
@@ -785,7 +791,7 @@ export default function RSVPPage() {
                                 }
                               }}
                             >
-                              Rất tiếc, tôi không thể
+                              Rất tiếc, không thể tham dự
                             </button>
                           </div>
                           {errors.attendingBanquet && <p className="mt-2 text-xs text-center text-[#9B4E5C] font-bold">{errors.attendingBanquet.message}</p>}
