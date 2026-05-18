@@ -4,7 +4,7 @@ import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { ChevronDown, HeartHandshake, MapPin } from "lucide-react";
-import { LineReveal, WriteReveal, FadeUp, useRevealReady } from "@/components/ui/CinematicReveal";
+import { LineReveal, WriteReveal, FadeUp, PopReveal, useRevealReady } from "@/components/ui/CinematicReveal";
 import type { WeddingHeroEditorConfig } from "@/lib/wedding/hero-types";
 
 type ReferenceWeddingHeroProps = {
@@ -154,20 +154,24 @@ export function ReferenceWeddingHero({ config, summary }: ReferenceWeddingHeroPr
             </p>
           </LineReveal>
 
-          <FadeUp delay={0.8} className="save-date-actions">
-            <a href="#rsvp" className="save-date-watercolor-btn">
-              <span className="save-date-btn-label">
-                <HeartHandshake aria-hidden="true" size={18} />
-                <span>Gửi hồi đáp</span>
-              </span>
-            </a>
-            <a href="#details" className="save-date-watercolor-btn">
-              <span className="save-date-btn-label">
-                <MapPin aria-hidden="true" size={18} />
-                <span>{config.content.secondaryCta}</span>
-              </span>
-            </a>
-          </FadeUp>
+          <div className="save-date-actions">
+            <PopReveal delay={0.7}>
+              <a href="#rsvp" className="save-date-watercolor-btn">
+                <span className="save-date-btn-label">
+                  <HeartHandshake aria-hidden="true" size={18} />
+                  <span>Gửi hồi đáp</span>
+                </span>
+              </a>
+            </PopReveal>
+            <PopReveal delay={0.8}>
+              <a href="#details" className="save-date-watercolor-btn">
+                <span className="save-date-btn-label">
+                  <MapPin aria-hidden="true" size={18} />
+                  <span>{config.content.secondaryCta}</span>
+                </span>
+              </a>
+            </PopReveal>
+          </div>
         </article>
       </div>
 

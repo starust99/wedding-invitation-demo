@@ -85,3 +85,21 @@ export function FadeUp({ children, delay = 0, className = "" }: { children: Reac
     </motion.div>
   );
 }
+
+export function PopReveal({ children, delay = 0, className = "" }: { children: React.ReactNode; delay?: number; className?: string }) {
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: true, margin: "-5%" });
+  const ready = useRevealReady(isInView);
+
+  return (
+    <motion.div
+      ref={ref}
+      initial={{ y: 20, opacity: 0, scale: 0.9 }}
+      animate={ready ? { y: 0, opacity: 1, scale: 1 } : { y: 20, opacity: 0, scale: 0.9 }}
+      transition={{ type: "spring", stiffness: 350, damping: 25, delay }}
+      className={className}
+    >
+      {children}
+    </motion.div>
+  );
+}
