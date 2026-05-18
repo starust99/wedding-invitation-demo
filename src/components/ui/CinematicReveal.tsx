@@ -94,9 +94,9 @@ export function PopReveal({ children, delay = 0, className = "" }: { children: R
   return (
     <motion.div
       ref={ref}
-      initial={{ y: 20, opacity: 0, scale: 0.9 }}
-      animate={ready ? { y: 0, opacity: 1, scale: 1 } : { y: 20, opacity: 0, scale: 0.9 }}
-      transition={{ type: "spring", stiffness: 350, damping: 25, delay }}
+      initial={{ y: 20, opacity: 0, filter: "blur(5px)", scale: 0.96 }}
+      animate={ready ? { y: 0, opacity: 1, filter: "blur(0px)", scale: 1 } : { y: 20, opacity: 0, filter: "blur(5px)", scale: 0.96 }}
+      transition={{ duration: 0.85, ease: [0.22, 1, 0.36, 1], delay }}
       className={className}
     >
       {children}
