@@ -228,4 +228,15 @@ export const weddingConfig = {
     askDietary: true,
     askTransport: false,
   },
+  postWeddingGallery: {
+    enabled: true,
+    availableAfter: "2026-12-27T00:00:00+07:00",
+    defaultUrl: "https://drive.google.com/drive/folders/link-anh-mac-dinh",
+    groupLinks: {
+      "[Nhà Trai] Họ nội": "https://drive.google.com/drive/folders/link-anh-nha-trai",
+      "[Nhà Gái] Họ ngoại": "https://drive.google.com/drive/folders/link-anh-nha-gai",
+      "[Nhật] Bạn bè & Đồng nghiệp": "https://drive.google.com/drive/folders/link-anh-ban-be-nhat",
+      "[Phương] Bạn bè & Đồng nghiệp": "https://drive.google.com/drive/folders/link-anh-ban-be-phuong",
+    } as Record<string, string>,
+  },
 } as const;

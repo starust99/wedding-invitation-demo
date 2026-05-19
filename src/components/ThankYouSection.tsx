@@ -1,6 +1,6 @@
 "use client";
 
-import { HeartHandshake, MapPin } from "lucide-react";
+import { HeartHandshake, MapPin, Image as ImageIcon } from "lucide-react";
 import { SectionMediaLayers } from "@/components/SectionMediaLayers";
 import type { WeddingConfig } from "@/lib/site-settings";
 import { buildInvitationCopy, type GuestIdentity } from "@/lib/guest-personalization";
@@ -25,6 +25,10 @@ export function ThankYouSection({
 }) {
   const inviteCopy = buildInvitationCopy(guestIdentity);
   const { navigateWithTransition } = usePageTransition();
+
+  const { postWeddingGallery } = config;
+  const isPostWedding = postWeddingGallery?.enabled && new Date() >= new Date(postWeddingGallery.availableAfter);
+  const galleryLink = postWeddingGallery?.groupLinks[guestIdentity.group || ""] || postWeddingGallery?.defaultUrl;
 
   const isDeclined = rsvpAttending === "no";
   const isCeremonyOnly = rsvpAttending !== "no" && rsvpAttendingBanquet === false;
@@ -87,16 +91,30 @@ export function ThankYouSection({
                     {instructionMessage}
                   </p>
                   <div className="flex flex-wrap items-center justify-center gap-3">
-                    <button
-                      type="button"
-                      onClick={() => navigateWithTransition(rsvpHref)}
-                      className="inline-flex h-[3.8rem] sm:h-[4.5rem] lg:h-[5rem] text-[0.92rem] sm:text-lg items-center justify-center transition hover:-translate-y-0.5 save-date-watercolor-btn"
-                    >
-                      <span className="save-date-btn-label">
-                        <HeartHandshake aria-hidden="true" size={16} className="sm:w-[18px] sm:h-[18px]" />
-                        <span>Chỉnh sửa hồi đáp</span>
-                      </span>
-                    </button>
+                    {isPostWedding && galleryLink ? (
+                      <a
+                        href={galleryLink}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-flex h-[3.8rem] sm:h-[4.5rem] lg:h-[5rem] text-[0.92rem] sm:text-lg items-center justify-center transition hover:-translate-y-0.5 save-date-watercolor-btn"
+                      >
+                        <span className="save-date-btn-label">
+                          <ImageIcon aria-hidden="true" size={16} className="sm:w-[18px] sm:h-[18px]" />
+                          <span>Xem ảnh tiệc cưới</span>
+                        </span>
+                      </a>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => navigateWithTransition(rsvpHref)}
+                        className="inline-flex h-[3.8rem] sm:h-[4.5rem] lg:h-[5rem] text-[0.92rem] sm:text-lg items-center justify-center transition hover:-translate-y-0.5 save-date-watercolor-btn"
+                      >
+                        <span className="save-date-btn-label">
+                          <HeartHandshake aria-hidden="true" size={16} className="sm:w-[18px] sm:h-[18px]" />
+                          <span>Chỉnh sửa hồi đáp</span>
+                        </span>
+                      </button>
+                    )}
                     {(isCeremonyOnly || isBoth) ? (
                       <a
                         suppressHydrationWarning
