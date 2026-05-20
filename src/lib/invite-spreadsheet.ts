@@ -144,6 +144,7 @@ const columns = [
   { key: "relationship", header: "Quan hệ với cô dâu chú rể", width: 34 },
   { key: "householdMode", header: "Mời đi cùng", width: 24 },
   { key: "audienceTags", header: "Nhóm xem album", width: 28 },
+  { key: "hostSubjectHelper", header: "Chủ ngữ người mời", width: 24 },
 ] as const;
 
 type TemplateColumnKey = (typeof columns)[number]["key"];
@@ -480,6 +481,7 @@ function previewFromLegacyValues(
   return {
     envelopeLine: preview.envelopeLine,
     insideInviteLine: preview.insideInviteLine,
+    invitationHostSubject: preview.invitationHostSubject,
     validationLine: flags?.missingDropdown
       ? "Thiếu lựa chọn dropdown"
       : flags?.missingName
@@ -521,6 +523,25 @@ function helperHouseholdModeFormula(rowIndex: number) {
 
 function helperAudienceTagsFormula(rowIndex: number) {
   return `IF($C${rowIndex}="","",IFERROR(VLOOKUP($C${rowIndex},${groupLookupRange()},2,FALSE),""))`;
+}
+
+function helperHostSubjectFormula(rowIndex: number) {
+  const hostRelationshipCell = `$I${rowIndex}`;
+  const guestCell = `$H${rowIndex}`;
+  const householdCell = `$N${rowIndex}`;
+  const invitedByCell = `$J${rowIndex}`;
+  const hostPronounCell = `$K${rowIndex}`;
+
+  const isFamilyCell = `OR(${householdCell}=${excelText(householdModeLabels.family)},ISNUMBER(SEARCH(${excelText("gia đình")},LOWER(${guestCell}))),ISNUMBER(SEARCH(${excelText("cả nhà")},LOWER(${guestCell}))))`;
+
+  const isChauCell = `OR(ISNUMBER(SEARCH(${excelText("cháu")},LOWER(${hostRelationshipCell}))),ISNUMBER(SEARCH(${excelText("chau")},LOWER(${hostRelationshipCell}))))`;
+
+  const familyHostSubjectExpressionValue = familyHostSubjectExpression(rowIndex);
+  const cleanHostSubjectExpressionValue = cleanHostSubjectExpression(rowIndex);
+  const pluralHostSubjectExpressionValue = pluralHostSubjectExpression(rowIndex);
+  const isParentsHost = `${invitedByCell}=${excelText(invitedByLabels.parents)}`;
+
+  return `IF(${isChauCell},${excelText("Gia đình")},IF(${isFamilyCell},${pluralHostSubjectExpressionValue},IF(${isParentsHost},${familyHostSubjectExpressionValue},${cleanHostSubjectExpressionValue})))`;
 }
 
 function inviteScopeExpression(rowIndex: number) {
@@ -732,11 +753,7 @@ function insideInviteFormula(rowIndex: number, options: ReturnType<typeof resolv
 
   const isChauCell = `OR(ISNUMBER(SEARCH(${excelText("cháu")},LOWER(${hostRelationshipCell}))),ISNUMBER(SEARCH(${excelText("chau")},LOWER(${hostRelationshipCell}))))`;
 
-  const familyHostSubjectExpressionValue = familyHostSubjectExpression(rowIndex);
-  const cleanHostSubjectExpressionValue = cleanHostSubjectExpression(rowIndex);
-  const pluralHostSubjectExpressionValue = pluralHostSubjectExpression(rowIndex);
-  const isParentsHost = `${invitedByCell}=${excelText(invitedByLabels.parents)}`;
-  const invitationHostSubject = `IF(${isChauCell},${excelText("Gia đình")},IF(${isFamilyCell},${pluralHostSubjectExpressionValue},IF(${isParentsHost},${familyHostSubjectExpressionValue},${cleanHostSubjectExpressionValue})))`;
+  const invitationHostSubject = `$P${rowIndex}`;
 
   const nameAlreadyIncludesFamily = `OR(ISNUMBER(SEARCH(${excelText("gia đình")},LOWER(${guestCell}))),ISNUMBER(SEARCH(${excelText("cả nhà")},LOWER(${guestCell}))))`;
   const familyScopeExpression = `IF(${nameAlreadyIncludesFamily},"",IF(${householdCell}=${excelText(householdModeLabels.family)},${excelText(" và gia đình")},""))`;
@@ -892,6 +909,7 @@ function applyFormulaCells(row: ExcelJS.Row, rowIndex: number, options: ReturnTy
     [13, helperRelationshipFormula(rowIndex), values ? inferTemplateValues(values).relationship : ""],
     [14, helperHouseholdModeFormula(rowIndex), values ? householdModeLabels[inferTemplateValues(values).householdMode] : ""],
     [15, helperAudienceTagsFormula(rowIndex), values ? inferTemplateValues(values).audienceTagsText : ""],
+    [16, helperHostSubjectFormula(rowIndex), values ? preview?.invitationHostSubject ?? "" : ""],
   ] as const;
 
   helperCells.forEach(([columnIndex, formula, result]) => {
@@ -1167,7 +1185,7 @@ function findInviteHeaderRow(worksheet: ExcelJS.Worksheet) {
 }
 
 function hideHelperColumns(worksheet: ExcelJS.Worksheet) {
-  for (let columnIndex = 8; columnIndex <= 15; columnIndex += 1) {
+  for (let columnIndex = 8; columnIndex <= 16; columnIndex += 1) {
     worksheet.getColumn(columnIndex).hidden = true;
   }
 }

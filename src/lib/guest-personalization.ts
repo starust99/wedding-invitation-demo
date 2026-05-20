@@ -199,6 +199,7 @@ export type InvitationCopy = {
   heroInvitationLine: string;
   envelopeLine: string;
   insideInviteLine: string;
+  invitationHostSubject: string;
   rsvpLead: string;
   rsvpReceivedLine: string;
   thankYouLine: string;
@@ -836,6 +837,7 @@ export function buildInvitationCopy(input?: InvitationCopyInput): InvitationCopy
     heroInvitationLine,
     envelopeLine: `${isCoupleInvite(input) || isOpenCompanionInvite(input) ? "Kính mời" : envelopePrefix}: ${envelopeRecipientLine}`,
     insideInviteLine,
+    invitationHostSubject,
     rsvpLead,
     rsvpReceivedLine,
     thankYouLine,
