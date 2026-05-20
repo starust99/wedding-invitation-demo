@@ -748,10 +748,23 @@ export function buildInvitationCopy(input?: InvitationCopyInput): InvitationCopy
   const coupleInviteOwner = tone === "parents_host" ? `${coupleReference} ${coupleDisplayName}` : hostPronoun;
   const envelopeRecipientLine = resolveEnvelopeRecipient(address, input);
   const isFamily = isFamilyInvite(input) || includesFamilyLabel(guestLabel);
-  const kinshipPronoun = isFamily ? "gia đình" : resolveKinshipPronoun(input, tone, guestLabel).toLowerCase();
+  const relationshipText = resolveRelationshipText(input);
+  const isChauRelation = includesAny(relationshipText, ["cháu", "chau"]);
+
+  const kinshipPronoun = isChauRelation
+    ? "các cháu"
+    : isFamily
+    ? "gia đình"
+    : resolveKinshipPronoun(input, tone, guestLabel).toLowerCase();
+
   const cleanHostPronoun = hostPronoun.replace(/^gia (đình|dinh)\s+/i, "");
   const isParentsHost = input?.invitedBy === "parents" || tone === "parents_host";
-  const invitationHostSubject = isParentsHost
+  
+  const invitationHostSubject = isChauRelation
+    ? "Gia đình"
+    : isFamily
+    ? sentenceCase(cleanHostPronoun)
+    : isParentsHost
     ? familyHostSubject
     : sentenceCase(cleanHostPronoun);
 

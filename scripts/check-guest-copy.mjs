@@ -199,7 +199,7 @@ const cases = [
       plusOnePolicy: "family",
     },
     includes: [
-      ["insideInviteLine", "Gia đình chúng con trân trọng kính mời gia đình đến chung vui trong ngày cưới của hai cháu Nhật & Phương."],
+      ["insideInviteLine", "Chúng con trân trọng kính mời gia đình đến chung vui trong ngày cưới của hai cháu Nhật & Phương."],
       ["closingLine", "Sự hiện diện của Chú và gia đình là niềm vinh hạnh và lời chúc phúc trọn vẹn nhất dành cho gia đình chúng con."],
       ["rsvpLead", "Gia đình chúng con mong nhận được lời hồi đáp để chuẩn bị đón tiếp chu đáo"],
     ],
