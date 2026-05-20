@@ -706,7 +706,7 @@ export default function RSVPPage() {
                   : currentStep.key === "stay"
                     ? `Để tiện chung vui, ${inviteCopy.hostPronoun} có chuẩn bị phòng nghỉ tại Terracotta. Vui lòng chọn bên dưới nếu ${rsvpRecipientLabel} cần hỗ trợ giữ phòng nhé.`
                     : currentStep.key === "message"
-                      ? "Nếu muốn để lại đôi dòng nhắn gửi, đây là chỗ phù hợp."
+                      ? "Đôi dòng nhắn gửi"
                       : isHydratingGuest
                         ? "Đang tải thông tin lời mời riêng của khách."
                         : `Vui lòng phản hồi bên dưới để ${inviteCopy.hostPronoun} chuẩn bị đón tiếp ${rsvpRecipientLabel} được chu đáo nhất.`}
