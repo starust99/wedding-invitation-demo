@@ -841,7 +841,7 @@ export function buildInvitationCopy(input?: InvitationCopyInput): InvitationCopy
     rsvpLead,
     rsvpReceivedLine,
     thankYouLine,
-    closingLine: `Sự hiện diện của ${presenceSubject} là niềm vinh hạnh và lời chúc phúc trọn vẹn nhất dành cho ${hostPronoun}.`,
+    closingLine: `Sự hiện diện của ${presenceSubject} là niềm vinh hạnh và lời chúc phúc trọn vẹn nhất.`,
     signaturePrefix: tone === "elder" ? "Thương kính" : tone === "peer" || tone === "junior" ? "Thân mến" : "Trân trọng",
   };
 }
