@@ -726,7 +726,7 @@ function insideInviteFormula(rowIndex: number, options: ReturnType<typeof resolv
   const familyHostSubjectExpressionValue = familyHostSubjectExpression(rowIndex);
   const cleanHostSubjectExpressionValue = cleanHostSubjectExpression(rowIndex);
   const isParentsHost = `${invitedByCell}=${excelText(invitedByLabels.parents)}`;
-  const invitationHostSubject = `IF(${isParentsHost},IF(${isFamilyCell},${cleanHostSubjectExpressionValue},${familyHostSubjectExpressionValue}),${cleanHostSubjectExpressionValue})`;
+  const invitationHostSubject = `IF(${isParentsHost},${familyHostSubjectExpressionValue},${cleanHostSubjectExpressionValue})`;
 
   const nameAlreadyIncludesFamily = `OR(ISNUMBER(SEARCH(${excelText("gia đình")},LOWER(${guestCell}))),ISNUMBER(SEARCH(${excelText("cả nhà")},LOWER(${guestCell}))))`;
   const familyScopeExpression = `IF(${nameAlreadyIncludesFamily},"",IF(${householdCell}=${excelText(householdModeLabels.family)},${excelText(" và gia đình")},""))`;

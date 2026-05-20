@@ -752,7 +752,7 @@ export function buildInvitationCopy(input?: InvitationCopyInput): InvitationCopy
   const cleanHostPronoun = hostPronoun.replace(/^gia (đình|dinh)\s+/i, "");
   const isParentsHost = input?.invitedBy === "parents" || tone === "parents_host";
   const invitationHostSubject = isParentsHost
-    ? (isFamily ? sentenceCase(cleanHostPronoun) : familyHostSubject)
+    ? familyHostSubject
     : sentenceCase(cleanHostPronoun);
 
   const insideInviteLine = isCoupleInvite(input) || isOpenCompanionInvite(input) || tone === "parents_host"
