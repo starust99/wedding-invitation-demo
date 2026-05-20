@@ -713,6 +713,13 @@ function cleanHostSubjectExpression(rowIndex: number) {
   return `UPPER(LEFT(${cleanFormula},1))&MID(${cleanFormula},2,200)`;
 }
 
+function pluralHostSubjectExpression(rowIndex: number) {
+  const hostPronounCell = `$K${rowIndex}`;
+  const cleanFormula = `IF(OR(LEFT(LOWER(${hostPronounCell}),9)="gia đình ",LEFT(LOWER(${hostPronounCell}),9)="gia dinh "),MID(${hostPronounCell},10,200),${hostPronounCell})`;
+  const pluralFormula = `IF(LOWER(TRIM(${cleanFormula}))="em",${excelText("chúng em")},IF(LOWER(TRIM(${cleanFormula}))="con",${excelText("chúng con")},IF(LOWER(TRIM(${cleanFormula}))="tôi",${excelText("chúng tôi")},IF(OR(LOWER(TRIM(${cleanFormula}))="anh",LOWER(TRIM(${cleanFormula}))="chị"),${excelText("anh chị")},IF(LOWER(TRIM(${cleanFormula}))="bác",${excelText("chúng tôi")},${cleanFormula})))))`;
+  return `UPPER(LEFT(${pluralFormula},1))&MID(${pluralFormula},2,200)`;
+}
+
 function insideInviteFormula(rowIndex: number, options: ReturnType<typeof resolveSpreadsheetOptions>) {
   const guestCell = `$H${rowIndex}`;
   const hostRelationshipCell = `$I${rowIndex}`;
@@ -727,8 +734,9 @@ function insideInviteFormula(rowIndex: number, options: ReturnType<typeof resolv
 
   const familyHostSubjectExpressionValue = familyHostSubjectExpression(rowIndex);
   const cleanHostSubjectExpressionValue = cleanHostSubjectExpression(rowIndex);
+  const pluralHostSubjectExpressionValue = pluralHostSubjectExpression(rowIndex);
   const isParentsHost = `${invitedByCell}=${excelText(invitedByLabels.parents)}`;
-  const invitationHostSubject = `IF(${isChauCell},${excelText("Gia đình")},IF(${isFamilyCell},${cleanHostSubjectExpressionValue},IF(${isParentsHost},${familyHostSubjectExpressionValue},${cleanHostSubjectExpressionValue})))`;
+  const invitationHostSubject = `IF(${isChauCell},${excelText("Gia đình")},IF(${isFamilyCell},${pluralHostSubjectExpressionValue},IF(${isParentsHost},${familyHostSubjectExpressionValue},${cleanHostSubjectExpressionValue})))`;
 
   const nameAlreadyIncludesFamily = `OR(ISNUMBER(SEARCH(${excelText("gia đình")},LOWER(${guestCell}))),ISNUMBER(SEARCH(${excelText("cả nhà")},LOWER(${guestCell}))))`;
   const familyScopeExpression = `IF(${nameAlreadyIncludesFamily},"",IF(${householdCell}=${excelText(householdModeLabels.family)},${excelText(" và gia đình")},""))`;

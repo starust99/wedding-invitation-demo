@@ -759,11 +759,21 @@ export function buildInvitationCopy(input?: InvitationCopyInput): InvitationCopy
 
   const cleanHostPronoun = hostPronoun.replace(/^gia (đình|dinh)\s+/i, "");
   const isParentsHost = input?.invitedBy === "parents" || tone === "parents_host";
+
+  const pluralizePronoun = (pronoun: string): string => {
+    const p = pronoun.toLowerCase().trim();
+    if (p === "em") return "chúng em";
+    if (p === "con") return "chúng con";
+    if (p === "tôi") return "chúng tôi";
+    if (p === "anh" || p === "chị") return "anh chị";
+    if (p === "bác") return "chúng tôi";
+    return pronoun;
+  };
   
   const invitationHostSubject = isChauRelation
     ? "Gia đình"
     : isFamily
-    ? sentenceCase(cleanHostPronoun)
+    ? sentenceCase(pluralizePronoun(cleanHostPronoun))
     : isParentsHost
     ? familyHostSubject
     : sentenceCase(cleanHostPronoun);
