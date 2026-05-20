@@ -701,8 +701,8 @@ export default function RSVPPage() {
               <div className="wedding-type-body mt-10 rounded-[1.4rem] premium-glass p-5 text-[#252934]/62">
                 {currentStep.key === "review"
                   ? hasBanquet 
-                    ? `Đọc lại toàn bộ thông tin trước khi gửi. Sau khi gửi, ${inviteCopy.hostPronoun} sẽ dựa vào phản hồi này để làm việc với nhà hàng và Terracotta.`
-                    : `Đọc lại toàn bộ thông tin trước khi gửi. Bấm gửi là lời hồi đáp này được ghi nhận.`
+                    ? "Đọc lại toàn bộ thông tin trước khi gửi. Sau khi gửi, thông tin sẽ được dùng để chuẩn bị tiếp đón chu đáo"
+                    : "Đọc lại toàn bộ thông tin trước khi gửi. Bấm gửi là lời hồi đáp này được ghi nhận."
                   : currentStep.key === "stay"
                     ? `Để tiện chung vui, ${inviteCopy.hostPronoun} có chuẩn bị phòng nghỉ tại Terracotta. Vui lòng chọn bên dưới nếu ${rsvpRecipientLabel} cần hỗ trợ giữ phòng nhé.`
                     : currentStep.key === "message"
