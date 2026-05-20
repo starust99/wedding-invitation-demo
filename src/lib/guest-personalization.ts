@@ -205,6 +205,8 @@ export type InvitationCopy = {
   thankYouLine: string;
   closingLine: string;
   signaturePrefix: string;
+  kinshipPronoun: string;
+  dressCodeLine: string;
 };
 
 type GuestAudience = "grand_elder" | "elder" | "senior" | "peer" | "junior" | "formal" | "neutral";
@@ -843,5 +845,7 @@ export function buildInvitationCopy(input?: InvitationCopyInput): InvitationCopy
     thankYouLine,
     closingLine: `Sự hiện diện của ${presenceSubject} là niềm vinh hạnh và lời chúc phúc trọn vẹn nhất.`,
     signaturePrefix: tone === "elder" ? "Thương kính" : tone === "peer" || tone === "junior" ? "Thân mến" : "Trân trọng",
+    kinshipPronoun,
+    dressCodeLine: `Vì Đà Lạt vào đông rất lạnh, xin lưu ý ${kinshipPronoun} mặc thật ấm.\n\nTông màu trang phục gợi ý: hồng phấn, xanh da trời, kem hoặc xanh lá dịu để khung hình thêm phần hài hòa.`,
   };
 }

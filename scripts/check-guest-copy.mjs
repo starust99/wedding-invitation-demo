@@ -95,6 +95,7 @@ const cases = [
       ["insideInviteLine", "Tụi em trân trọng kính mời anh chị đến chung vui trong ngày cưới của tụi em."],
       ["closingLine", "Sự hiện diện của anh chị là niềm vinh hạnh và lời chúc phúc trọn vẹn nhất."],
       ["envelopeLine", "Kính mời: Anh Hoàng cùng vợ"],
+      ["dressCodeLine", "Vì Đà Lạt vào đông rất lạnh, xin lưu ý anh chị mặc thật ấm.\n\nTông màu trang phục gợi ý: hồng phấn, xanh da trời, kem hoặc xanh lá dịu để khung hình thêm phần hài hòa."],
     ],
     excludes: [
       ["insideInviteLine", "Nhật & Phương"],
@@ -235,6 +236,7 @@ const cases = [
     },
     includes: [
       ["insideInviteLine", "Chúng tôi trân trọng kính mời bạn đến chung vui trong ngày cưới của Nhật & Phương."],
+      ["dressCodeLine", "Vì Đà Lạt vào đông rất lạnh, xin lưu ý bạn mặc thật ấm.\n\nTông màu trang phục gợi ý: hồng phấn, xanh da trời, kem hoặc xanh lá dịu để khung hình thêm phần hài hòa."],
     ],
     excludes: [
       ["insideInviteLine", "ngày cưới của gia đình."],

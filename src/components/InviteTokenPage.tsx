@@ -123,7 +123,7 @@ export function InviteTokenPage({ token }: { token: string }) {
       <WeddingSplashIntro config={config} guestIdentity={guestIdentity} storageKey={token} ready={!loading} />
       <SceneProgress />
       <HeroSaveTheDate config={config} guestIdentity={guestIdentity} />
-      <WeddingDetailsSection config={config} />
+      <WeddingDetailsSection config={config} guestIdentity={guestIdentity} />
       <TimelineSection config={config} />
       <GallerySection config={config} />
       {!shouldShowThankYou ? (

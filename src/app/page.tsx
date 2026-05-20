@@ -75,7 +75,7 @@ export default function Home() {
       <WeddingSplashIntro config={config} guestIdentity={guestIdentity} storageKey="home" />
       <SceneProgress />
       <HeroSaveTheDate config={config} guestIdentity={guestIdentity} />
-      <WeddingDetailsSection config={config} />
+      <WeddingDetailsSection config={config} guestIdentity={guestIdentity} />
       <TimelineSection config={config} />
       <GallerySection config={config} />
       {!hasRsvp ? (
