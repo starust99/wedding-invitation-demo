@@ -319,7 +319,7 @@ export function createDefaultEventDetailsConfig(): WeddingEventDetailsEditorConf
       eyebrow: "Thông tin và địa điểm",
       title: "",
       intro: "",
-      churchDate: "20.12.2026, thứ 7",
+      churchDate: "20.12.2026, Chúa Nhật",
       churchTime: "15:00",
       churchLocation: "Nhà Thờ Giáo Xứ Tam Hải",
       churchImageUrl: "/assets/wedding/church-tam-hai-v2.jpg",

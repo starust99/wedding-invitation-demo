@@ -9,12 +9,15 @@ import { ThankYouSection } from "@/components/ThankYouSection";
 import { TimelineSection } from "@/components/TimelineSection";
 import { WeddingDetailsSection } from "@/components/WeddingDetailsSection";
 import { WeddingSplashIntro } from "@/components/WeddingSplashIntro";
-import { resolveGuestIdentity, type GuestIdentity } from "@/lib/guest-personalization";
+import { resolveGuestIdentity, normalizeText, type GuestIdentity } from "@/lib/guest-personalization";
 import { applyTheme } from "@/lib/site-settings";
 import { usePublishedSettings } from "@/lib/use-published-settings";
+import { readRSVPResponses, type RSVPResponse } from "@/lib/rsvp-storage";
 
 export default function Home() {
   const [guestIdentity, setGuestIdentity] = useState<GuestIdentity>({});
+  const [hasRsvp, setHasRsvp] = useState(false);
+  const [activeRsvp, setActiveRsvp] = useState<RSVPResponse | undefined>(undefined);
   const settings = usePublishedSettings();
 
   useEffect(() => {
@@ -24,12 +27,44 @@ export default function Home() {
     }
     window.scrollTo(0, 0);
 
-    const guestTimer = window.setTimeout(() => {
-      setGuestIdentity(resolveGuestIdentity(window.location.search));
-    }, 0);
+    const identity = resolveGuestIdentity(window.location.search);
+    setGuestIdentity(identity);
 
+    const checkRsvp = () => {
+      const responses = readRSVPResponses();
+      if (responses.length === 0) {
+        setHasRsvp(false);
+        setActiveRsvp(undefined);
+        return;
+      }
+
+      const searchParams = new URLSearchParams(window.location.search);
+      const searchToken = searchParams.get("invite") ?? searchParams.get("token") ?? "";
+
+      // If guest identity name is loaded, try to match by name or token
+      if (identity.name) {
+        const targetName = normalizeText(identity.name);
+        const match = responses.find((item) => {
+          if (item.inviteToken && searchToken && item.inviteToken === searchToken) return true;
+          return normalizeText(item.name) === targetName || (item.displayLabel && normalizeText(item.displayLabel) === targetName);
+        });
+        if (match) {
+          setHasRsvp(true);
+          setActiveRsvp(match);
+          return;
+        }
+      }
+
+      // Fallback: pick the most recent session RSVP if any exists
+      setHasRsvp(true);
+      setActiveRsvp(responses[0]);
+    };
+
+    checkRsvp();
+
+    window.addEventListener("wedding-rsvp-updated", checkRsvp);
     return () => {
-      window.clearTimeout(guestTimer);
+      window.removeEventListener("wedding-rsvp-updated", checkRsvp);
     };
   }, []);
 
@@ -43,8 +78,18 @@ export default function Home() {
       <WeddingDetailsSection config={config} />
       <TimelineSection config={config} />
       <GallerySection config={config} />
-      <RsvpSection config={config} guestIdentity={guestIdentity} />
-      <ThankYouSection config={config} guestIdentity={guestIdentity} />
+      {!hasRsvp ? (
+        <RsvpSection config={config} guestIdentity={guestIdentity} />
+      ) : null}
+      {hasRsvp && activeRsvp ? (
+        <ThankYouSection
+          config={config}
+          guestIdentity={guestIdentity}
+          rsvpAttending={activeRsvp.attending}
+          rsvpAttendingCeremony={activeRsvp.attendingCeremony}
+          rsvpAttendingBanquet={activeRsvp.attendingBanquet}
+        />
+      ) : null}
     </main>
   );
 }

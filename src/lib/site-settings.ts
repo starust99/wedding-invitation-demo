@@ -41,7 +41,7 @@ type SettingsInput = Partial<Omit<SiteSettings, "content">> & {
 
 export const draftStorageKey = "wedding-demo-draft-settings";
 export const publishedStorageKey = "wedding-demo-published-settings";
-export const settingsSchemaVersion = 9;
+export const settingsSchemaVersion = 10;
 
 export const defaultSettings: SiteSettings = {
   schemaVersion: settingsSchemaVersion,
@@ -264,6 +264,28 @@ export function normalizeSettings(settings: SettingsInput | null): SiteSettings 
             ...content.eventDetailsConfig?.content,
             churchImageUrl: "/assets/wedding/church-tam-hai.png",
           },
+        },
+      };
+    }
+  }
+
+  // Migration v10: Replace all occurrences of "chia vui" with "chung vui" in invitation and hero configurations
+  if ((settings.schemaVersion ?? 0) < 10) {
+    const replaceChiaVui = (text?: string) => {
+      if (!text) return "";
+      return text.replace(/chia\s+vui/gi, "chung vui");
+    };
+
+    if (content.invitation?.message) {
+      content.invitation.message = replaceChiaVui(content.invitation.message);
+    }
+    const heroDesc = (content as any).heroEditorConfig?.content?.description ?? "";
+    if (heroDesc) {
+      (content as any).heroEditorConfig = {
+        ...(content as any).heroEditorConfig,
+        content: {
+          ...(content as any).heroEditorConfig?.content,
+          description: replaceChiaVui(heroDesc),
         },
       };
     }

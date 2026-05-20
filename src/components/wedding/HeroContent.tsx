@@ -66,7 +66,7 @@ export function HeroContent({ config, mode = "public" }: HeroContentProps) {
             Giữ ngày cưới
           </p>
           <p suppressHydrationWarning className="wedding-type-body mt-3 text-text-primary/70">
-            Cùng chia vui trong ngày chung đôi của Nhật & Phương, tháng 12.2026.
+            Cùng chung vui trong ngày chung đôi của Nhật & Phương, tháng 12.2026.
           </p>
         </div>
       </div>

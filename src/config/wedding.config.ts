@@ -151,7 +151,7 @@ export const weddingConfig = {
     invitation: {
       title: "Trân trọng kính mời",
       message:
-      "Trân trọng kính mời quý khách cùng chia vui trong ngày chung đôi của Nhật & Phương.",
+      "Trân trọng kính mời quý khách cùng chung vui trong ngày chung đôi của Nhật & Phương.",
     closing: "Sự hiện diện của quý khách là niềm vinh hạnh và là niềm vui rất lớn với gia đình.",
   },
   venue: {

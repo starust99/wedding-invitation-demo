@@ -203,15 +203,52 @@ function getVisibleSteps(attending: RSVPFormInput["attending"], attendingBanquet
   return allSteps;
 }
 
-function buildSubmissionCopy(attending: RSVPFormInput["attending"], inviteCopy: InvitationCopy) {
+function buildSubmissionCopy(
+  attending: RSVPFormInput["attending"],
+  attendingCeremony: RSVPFormInput["attendingCeremony"],
+  attendingBanquet: RSVPFormInput["attendingBanquet"],
+  inviteCopy: InvitationCopy
+) {
+  const host = inviteCopy.hostSubject;
+  const recipient = inviteCopy.shortRecipientLabel;
+
+  // 1. Từ chối hoàn toàn
   if (attending === "no") {
     return {
-      title: "Đã ghi nhận vắng mặt",
-      body: `${inviteCopy.rsvpReceivedLine}. Hẹn gặp ${inviteCopy.shortRecipientLabel} trong thời gian sớm nhất. Nếu lịch thay đổi, link này vẫn có thể cập nhật hồi đáp.`,
+      title: "Đã gửi lời nhắn",
+      body: `${inviteCopy.rsvpReceivedLine} thành công. ${host} chân thành cảm ơn ${recipient} đã gửi lời nhắn chúc phúc. Dù rất tiếc không thể chung vui trực tiếp, ${host} vẫn luôn trân trọng tình cảm của ${recipient} và hẹn gặp lại vào một dịp sớm nhất.`,
       showCalendar: false,
     };
   }
 
+  // 2. Dự cả hai
+  if (attendingCeremony === "yes" && attendingBanquet === "yes") {
+    return {
+      title: "Đã xác nhận tham dự",
+      body: `Lời hồi đáp đã được gửi thành công. ${host} vô cùng hạnh phúc khi biết ${recipient} sẽ có mặt ở cả Thánh lễ Hôn phối lẫn Tiệc mừng để chung vui. Sự hiện diện của ${recipient} chính là món quà ý nghĩa nhất dành cho ${inviteCopy.tone === "parents_host" ? "gia đình" : "hai đứa"}. Hẹn gặp ${recipient} tại ngày cưới sắp tới!`,
+      showCalendar: true,
+    };
+  }
+
+  // 3. Chỉ dự Thánh lễ
+  if (attendingCeremony === "yes" && attendingBanquet === "no") {
+    return {
+      title: "Xác nhận tham dự Thánh lễ",
+      body: `Lời hồi đáp đã được gửi thành công. ${host} vô cùng trân quý và cảm ơn ${recipient} đã sắp xếp thời gian đến chứng kiến Thánh lễ Hôn phối của ${inviteCopy.tone === "parents_host" ? "hai cháu" : "hai đứa"}. Dù rất tiếc không thể đồng hành cùng ${recipient} trong đêm Tiệc mừng, sự hiện diện của ${recipient} tại Nhà thờ đã là niềm hạnh phúc vô cùng lớn đối với ${inviteCopy.tone === "parents_host" ? "gia đình" : "chúng em"}.`,
+      showCalendar: true,
+    };
+  }
+
+  // 4. Chỉ dự Tiệc mừng
+  if (attendingCeremony === "no" && attendingBanquet === "yes") {
+    return {
+      title: "Xác nhận tham dự Tiệc mừng",
+      body: `Lời hồi đáp đã được gửi thành công. ${host} rất vui mừng khi ${recipient} sẽ đến chung vui trong đêm Tiệc mừng ấm áp. Chân thành cảm ơn sự hiện diện và những lời chúc phúc ngọt ngào của ${recipient}. Hẹn sớm gặp ${recipient} tại Đà Lạt!`,
+      showCalendar: true,
+    };
+  }
+
+  // Fallback mặc định
   return {
     title: "Đã ghi nhận tham dự",
     body: `Lời hồi đáp đã được gửi thành công. ${inviteCopy.closingLine}`,
@@ -266,6 +303,7 @@ export default function RSVPPage() {
 
   const { fields, append, remove, replace } = useFieldArray({ control, name: "lodgingGuests" });
   const attending = useWatch({ control, name: "attending" });
+  const attendingCeremony = useWatch({ control, name: "attendingCeremony" });
   const attendingBanquet = useWatch({ control, name: "attendingBanquet" });
   const guestCount = useWatch({ control, name: "guestCount" });
   const accommodationNeeded = useWatch({ control, name: "accommodationNeeded" });
@@ -277,7 +315,7 @@ export default function RSVPPage() {
   const progress = useMemo(() => `${Math.round(((stepIndex + 1) / visibleSteps.length) * 100)}%`, [stepIndex, visibleSteps.length]);
   const returnHref = inviteToken ? `/i/${encodeURIComponent(inviteToken)}` : "/";
   const inviteCopy = useMemo(() => buildInvitationCopy(inviteeContext ?? guestIdentity), [guestIdentity, inviteeContext]);
-  const submissionCopy = useMemo(() => buildSubmissionCopy(attending, inviteCopy), [attending, inviteCopy]);
+  const submissionCopy = useMemo(() => buildSubmissionCopy(attending, attendingCeremony, attendingBanquet, inviteCopy), [attending, attendingCeremony, attendingBanquet, inviteCopy]);
   const storedInsideInviteLine = inviteeContext?.insideInviteLine ?? "";
   const staleHostSubjects = ["Gia đình chúng tôi", "Gia đình anh chị", "Gia đình chúng con", "Anh chị", "Cô chú", "Em"]
     .filter((subject) => subject !== inviteCopy.hostSubject);
@@ -532,8 +570,8 @@ export default function RSVPPage() {
   const ceremonyCalTitle = `Thánh lễ Hôn phối ${weddingConfig.couple.displayName}`;
   const ceremonyCalLocation = weddingConfig.church?.address || "Nhà Thờ Giáo Xứ Tam Hải";
   const ceremonyCalDesc = `Thánh lễ Hôn phối của ${weddingConfig.couple.displayName}.`;
-  const ceremonyGcalUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(ceremonyCalTitle)}&dates=20261226T080000Z/20261226T093000Z&details=${encodeURIComponent(ceremonyCalDesc)}&location=${encodeURIComponent(ceremonyCalLocation)}`;
-  const ceremonyIcsContent = `BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//Wedding//EN\nBEGIN:VEVENT\nDTSTART:20261226T080000Z\nDTEND:20261226T093000Z\nSUMMARY:${ceremonyCalTitle}\nLOCATION:${ceremonyCalLocation}\nDESCRIPTION:${ceremonyCalDesc}\nEND:VEVENT\nEND:VCALENDAR`;
+  const ceremonyGcalUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(ceremonyCalTitle)}&dates=20261220T080000Z/20261220T093000Z&details=${encodeURIComponent(ceremonyCalDesc)}&location=${encodeURIComponent(ceremonyCalLocation)}`;
+  const ceremonyIcsContent = `BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//Wedding//EN\nBEGIN:VEVENT\nDTSTART:20261220T080000Z\nDTEND:20261220T093000Z\nSUMMARY:${ceremonyCalTitle}\nLOCATION:${ceremonyCalLocation}\nDESCRIPTION:${ceremonyCalDesc}\nEND:VEVENT\nEND:VCALENDAR`;
   const ceremonyIcsUrl = `data:text/calendar;charset=utf8,${encodeURIComponent(ceremonyIcsContent)}`;
 
   const banquetCalTitle = `Tiệc mừng ${weddingConfig.couple.displayName}`;
@@ -709,7 +747,7 @@ export default function RSVPPage() {
                           </p>
                           {!isHydratingGuest && (
                             <p className="text-[1.1rem] sm:text-[1.15rem] text-[#252934]/75 text-center mb-5 font-serif italic leading-relaxed px-2">
-                              Vào lúc 15:30 Thứ 7, 20/12/2026. Tại Nhà Thờ Giáo Xứ Tam Hải.
+                              Vào lúc 15:00 Chúa Nhật, 20/12/2026. Tại Nhà Thờ Giáo Xứ Tam Hải.
                             </p>
                           )}
                           <div className="grid grid-cols-2 gap-3">
@@ -776,7 +814,7 @@ export default function RSVPPage() {
                                 }
                               }}
                             >
-                              Có, tôi sẽ đến
+                              Có, sẽ tham dự
                             </button>
                             <button
                               type="button"
@@ -817,7 +855,9 @@ export default function RSVPPage() {
                         >
                           <BedDouble className="mb-4 h-6 w-6 text-serenity" />
                           <p className="wedding-type-card-title text-[#252934]">Nhờ chuẩn bị phòng</p>
-                          <p className="wedding-type-body mt-2 text-[#252934]/58">Nhập thông tin người lưu trú để {inviteCopy.hostPronoun} tiện sắp xếp.</p>
+                          <p className="wedding-type-body mt-2 text-[#252934]/58">
+                            Vui lòng nhập thông tin người lưu trú để gia đình sắp xếp phòng.
+                          </p>
                         </button>
                         <button
                           type="button"
@@ -971,8 +1011,8 @@ export default function RSVPPage() {
                   {currentStep.key === "review" ? (
                     <div className={`mt-8 grid gap-5 ${hasBanquet ? "lg:grid-cols-[1fr_0.92fr]" : "max-w-xl mx-auto"}`}>
                       <div className="grid gap-4 rounded-[1.5rem] premium-glass p-5 text-center">
-                        <ReviewLine label="Dự Thánh lễ Hôn phối" value={formValues.attendingCeremony === "yes" ? "Có, tôi sẽ đến" : formValues.attendingCeremony === "no" ? "Rất tiếc, không thể" : "Chưa chọn"} />
-                        <ReviewLine label="Dự Tiệc mừng" value={formValues.attendingBanquet === "yes" ? "Có, tôi sẽ đến" : formValues.attendingBanquet === "no" ? "Rất tiếc, không thể" : "Chưa chọn"} />
+                        <ReviewLine label="Dự Thánh lễ Hôn phối" value={formValues.attendingCeremony === "yes" ? "Có, sẽ tham dự" : formValues.attendingCeremony === "no" ? "Rất tiếc, không thể" : "Chưa chọn"} />
+                        <ReviewLine label="Dự Tiệc mừng" value={formValues.attendingBanquet === "yes" ? "Có, sẽ tham dự" : formValues.attendingBanquet === "no" ? "Rất tiếc, không thể" : "Chưa chọn"} />
                         <ReviewLine label="Phản hồi chung" value={formValues.attending === "no" ? "Rất tiếc không tham dự" : "Xác nhận tham dự"} />
                         <ReviewLine label="Tên mời" value={inviteCopy.guestLabel} />
                         {formValues.attending === "no" ? (

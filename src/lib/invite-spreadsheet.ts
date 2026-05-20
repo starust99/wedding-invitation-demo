@@ -49,52 +49,54 @@ type InviteOwnerDefinition = {
 };
 
 const salutationDefinitions: SalutationDefinition[] = [
-  { label: "Ông bà", hostRelationship: "ông bà", relationship: "ông bà của cô dâu/chú rể", householdMode: "couple", needsName: false, coupleHostPronoun: "tụi con", parentsHostPronoun: "gia đình chúng con" },
-  { label: "Bố mẹ", hostRelationship: "bố mẹ", relationship: "ông bà của cô dâu/chú rể", householdMode: "couple", needsName: false, coupleHostPronoun: "tụi con", parentsHostPronoun: "gia đình chúng con" },
-  { label: "Ba mẹ", hostRelationship: "ba mẹ", relationship: "ông bà của cô dâu/chú rể", householdMode: "couple", needsName: false, coupleHostPronoun: "tụi con", parentsHostPronoun: "gia đình chúng con" },
-  { label: "Bố", hostRelationship: "bố", relationship: "bố/mẹ của cô dâu/chú rể", householdMode: "couple", needsName: false, coupleHostPronoun: "tụi con", parentsHostPronoun: "gia đình chúng con" },
-  { label: "Mẹ", hostRelationship: "mẹ", relationship: "bố/mẹ của cô dâu/chú rể", householdMode: "couple", needsName: false, coupleHostPronoun: "tụi con", parentsHostPronoun: "gia đình chúng con" },
-  { label: "Bác", hostRelationship: "bác", relationship: "bác của cô dâu/chú rể", householdMode: "single", needsName: true, coupleHostPronoun: "tụi con", parentsHostPronoun: "gia đình chúng con" },
-  { label: "Vợ chồng bác", hostRelationship: "vợ chồng bác", relationship: "vợ chồng bác của cô dâu/chú rể", householdMode: "couple", needsName: true, coupleHostPronoun: "tụi con", parentsHostPronoun: "gia đình chúng con" },
-  { label: "Gia đình bác", hostRelationship: "bác", relationship: "bác của cô dâu/chú rể", householdMode: "family", needsName: true, coupleHostPronoun: "tụi con", parentsHostPronoun: "gia đình chúng con" },
-  { label: "Cô", hostRelationship: "cô", relationship: "cô/chú của cô dâu/chú rể", householdMode: "single", needsName: true, coupleHostPronoun: "tụi con", parentsHostPronoun: "gia đình chúng con" },
-  { label: "Gia đình cô", hostRelationship: "cô", relationship: "cô/chú của cô dâu/chú rể", householdMode: "family", needsName: true, coupleHostPronoun: "tụi con", parentsHostPronoun: "gia đình chúng con" },
-  { label: "Chú", hostRelationship: "chú", relationship: "cô/chú của cô dâu/chú rể", householdMode: "single", needsName: true, coupleHostPronoun: "tụi con", parentsHostPronoun: "gia đình chúng con" },
-  { label: "Gia đình chú", hostRelationship: "chú", relationship: "cô/chú của cô dâu/chú rể", householdMode: "family", needsName: true, coupleHostPronoun: "tụi con", parentsHostPronoun: "gia đình chúng con" },
-  { label: "Cô chú", hostRelationship: "vợ chồng cô chú", relationship: "vợ chồng cô chú của cô dâu/chú rể", householdMode: "couple", needsName: true, coupleHostPronoun: "tụi con", parentsHostPronoun: "gia đình chúng con" },
-  { label: "Gia đình cô chú", hostRelationship: "cô", relationship: "cô/chú của cô dâu/chú rể", householdMode: "family", needsName: true, coupleHostPronoun: "tụi con", parentsHostPronoun: "gia đình chúng con" },
-  { label: "Dượng", hostRelationship: "dượng", relationship: "cô/chú/dì/dượng của cô dâu/chú rể", householdMode: "single", needsName: true, coupleHostPronoun: "tụi con", parentsHostPronoun: "gia đình chúng con" },
-  { label: "Cô dượng", hostRelationship: "vợ chồng cô dượng", relationship: "vợ chồng cô dượng của cô dâu/chú rể", householdMode: "couple", needsName: true, coupleHostPronoun: "tụi con", parentsHostPronoun: "gia đình chúng con" },
-  { label: "Gia đình cô dượng", hostRelationship: "cô dượng", relationship: "cô dượng của cô dâu/chú rể", householdMode: "family", needsName: true, coupleHostPronoun: "tụi con", parentsHostPronoun: "gia đình chúng con" },
-  { label: "Thím", hostRelationship: "thím", relationship: "dì/cậu/mợ/thím của cô dâu/chú rể", householdMode: "single", needsName: true, coupleHostPronoun: "tụi con", parentsHostPronoun: "gia đình chúng con" },
-  { label: "Gia đình thím", hostRelationship: "thím", relationship: "dì/cậu/mợ/thím của cô dâu/chú rể", householdMode: "family", needsName: true, coupleHostPronoun: "tụi con", parentsHostPronoun: "gia đình chúng con" },
-  { label: "Gia đình chú thím", hostRelationship: "chú", relationship: "cô/chú của cô dâu/chú rể", householdMode: "family", needsName: true, coupleHostPronoun: "tụi con", parentsHostPronoun: "gia đình chúng con" },
-  { label: "Dì", hostRelationship: "dì", relationship: "dì/cậu/mợ/thím của cô dâu/chú rể", householdMode: "single", needsName: true, coupleHostPronoun: "tụi con", parentsHostPronoun: "gia đình chúng con" },
-  { label: "Gia đình dì", hostRelationship: "dì", relationship: "dì/cậu/mợ/thím của cô dâu/chú rể", householdMode: "family", needsName: true, coupleHostPronoun: "tụi con", parentsHostPronoun: "gia đình chúng con" },
-  { label: "Cậu", hostRelationship: "cậu", relationship: "dì/cậu/mợ/thím của cô dâu/chú rể", householdMode: "single", needsName: true, coupleHostPronoun: "tụi con", parentsHostPronoun: "gia đình chúng con" },
-  { label: "Gia đình cậu", hostRelationship: "cậu", relationship: "dì/cậu/mợ/thím của cô dâu/chú rể", householdMode: "family", needsName: true, coupleHostPronoun: "tụi con", parentsHostPronoun: "gia đình chúng con" },
-  { label: "Cậu mợ", hostRelationship: "vợ chồng cậu mợ", relationship: "vợ chồng cậu mợ của cô dâu/chú rể", householdMode: "couple", needsName: true, coupleHostPronoun: "tụi con", parentsHostPronoun: "gia đình chúng con" },
-  { label: "Gia đình cậu mợ", hostRelationship: "cậu", relationship: "dì/cậu/mợ/thím của cô dâu/chú rể", householdMode: "family", needsName: true, coupleHostPronoun: "tụi con", parentsHostPronoun: "gia đình chúng con" },
-  { label: "Mợ", hostRelationship: "mợ", relationship: "dì/cậu/mợ/thím của cô dâu/chú rể", householdMode: "single", needsName: true, coupleHostPronoun: "tụi con", parentsHostPronoun: "gia đình chúng con" },
-  { label: "Gia đình mợ", hostRelationship: "mợ", relationship: "dì/cậu/mợ/thím của cô dâu/chú rể", householdMode: "family", needsName: true, coupleHostPronoun: "tụi con", parentsHostPronoun: "gia đình chúng con" },
-  { label: "Anh", hostRelationship: "anh", relationship: "anh/chị/em của cô dâu/chú rể", householdMode: "single", needsName: true, coupleHostPronoun: "tụi em", parentsHostPronoun: "em" },
-  { label: "Vợ chồng anh", hostRelationship: "vợ chồng anh", relationship: "vợ chồng anh/chị/em của cô dâu/chú rể", householdMode: "couple", needsName: true, coupleHostPronoun: "tụi em", parentsHostPronoun: "em" },
-  { label: "Gia đình anh", hostRelationship: "anh", relationship: "anh/chị/em của cô dâu/chú rể", householdMode: "family", needsName: true, coupleHostPronoun: "tụi em", parentsHostPronoun: "em" },
-  { label: "Chị", hostRelationship: "chị", relationship: "anh/chị/em của cô dâu/chú rể", householdMode: "single", needsName: true, coupleHostPronoun: "tụi em", parentsHostPronoun: "em" },
-  { label: "Vợ chồng chị", hostRelationship: "vợ chồng chị", relationship: "vợ chồng anh/chị/em của cô dâu/chú rể", householdMode: "couple", needsName: true, coupleHostPronoun: "tụi em", parentsHostPronoun: "em" },
-  { label: "Gia đình chị", hostRelationship: "chị", relationship: "anh/chị/em của cô dâu/chú rể", householdMode: "family", needsName: true, coupleHostPronoun: "tụi em", parentsHostPronoun: "em" },
+  { label: "Ông bà", hostRelationship: "ông bà", relationship: "ông bà của cô dâu/chú rể", householdMode: "couple", needsName: false, coupleHostPronoun: "chúng con", parentsHostPronoun: "gia đình chúng con" },
+  { label: "Bố mẹ", hostRelationship: "bố mẹ", relationship: "bố mẹ của cô dâu/chú rể", householdMode: "couple", needsName: false, coupleHostPronoun: "chúng con", parentsHostPronoun: "gia đình chúng con" },
+  { label: "Ba mẹ", hostRelationship: "ba mẹ", relationship: "bố mẹ của cô dâu/chú rể", householdMode: "couple", needsName: false, coupleHostPronoun: "chúng con", parentsHostPronoun: "gia đình chúng con" },
+  { label: "Bố", hostRelationship: "bố", relationship: "bố/mẹ của cô dâu/chú rể", householdMode: "couple", needsName: false, coupleHostPronoun: "chúng con", parentsHostPronoun: "gia đình chúng con" },
+  { label: "Mẹ", hostRelationship: "mẹ", relationship: "bố/mẹ của cô dâu/chú rể", householdMode: "couple", needsName: false, coupleHostPronoun: "chúng con", parentsHostPronoun: "gia đình chúng con" },
+  { label: "Bác", hostRelationship: "bác", relationship: "bác của cô dâu/chú rể", householdMode: "single", needsName: true, coupleHostPronoun: "chúng con", parentsHostPronoun: "gia đình chúng con" },
+  { label: "Vợ chồng bác", hostRelationship: "vợ chồng bác", relationship: "vợ chồng bác của cô dâu/chú rể", householdMode: "couple", needsName: true, coupleHostPronoun: "chúng con", parentsHostPronoun: "gia đình chúng con" },
+  { label: "Gia đình bác", hostRelationship: "bác", relationship: "bác của cô dâu/chú rể", householdMode: "family", needsName: true, coupleHostPronoun: "chúng con", parentsHostPronoun: "gia đình chúng con" },
+  { label: "Cô", hostRelationship: "cô", relationship: "cô/chú của cô dâu/chú rể", householdMode: "single", needsName: true, coupleHostPronoun: "chúng con", parentsHostPronoun: "gia đình chúng con" },
+  { label: "Gia đình cô", hostRelationship: "cô", relationship: "cô/chú của cô dâu/chú rể", householdMode: "family", needsName: true, coupleHostPronoun: "chúng con", parentsHostPronoun: "gia đình chúng con" },
+  { label: "Chú", hostRelationship: "chú", relationship: "cô/chú của cô dâu/chú rể", householdMode: "single", needsName: true, coupleHostPronoun: "chúng con", parentsHostPronoun: "gia đình chúng con" },
+  { label: "Gia đình chú", hostRelationship: "chú", relationship: "cô/chú của cô dâu/chú rể", householdMode: "family", needsName: true, coupleHostPronoun: "chúng con", parentsHostPronoun: "gia đình chúng con" },
+  { label: "Cô chú", hostRelationship: "vợ chồng cô chú", relationship: "vợ chồng cô chú của cô dâu/chú rể", householdMode: "couple", needsName: true, coupleHostPronoun: "chúng con", parentsHostPronoun: "gia đình chúng con" },
+  { label: "Gia đình cô chú", hostRelationship: "cô", relationship: "cô/chú của cô dâu/chú rể", householdMode: "family", needsName: true, coupleHostPronoun: "chúng con", parentsHostPronoun: "gia đình chúng con" },
+  { label: "Dượng", hostRelationship: "dượng", relationship: "cô/chú/dì/dượng của cô dâu/chú rể", householdMode: "single", needsName: true, coupleHostPronoun: "chúng con", parentsHostPronoun: "gia đình chúng con" },
+  { label: "Cô dượng", hostRelationship: "vợ chồng cô dượng", relationship: "vợ chồng cô dượng của cô dâu/chú rể", householdMode: "couple", needsName: true, coupleHostPronoun: "chúng con", parentsHostPronoun: "gia đình chúng con" },
+  { label: "Gia đình cô dượng", hostRelationship: "cô dượng", relationship: "cô dượng của cô dâu/chú rể", householdMode: "family", needsName: true, coupleHostPronoun: "chúng con", parentsHostPronoun: "gia đình chúng con" },
+  { label: "Thím", hostRelationship: "thím", relationship: "dì/cậu/mợ/thím của cô dâu/chú rể", householdMode: "single", needsName: true, coupleHostPronoun: "chúng con", parentsHostPronoun: "gia đình chúng con" },
+  { label: "Gia đình thím", hostRelationship: "thím", relationship: "dì/cậu/mợ/thím của cô dâu/chú rể", householdMode: "family", needsName: true, coupleHostPronoun: "chúng con", parentsHostPronoun: "gia đình chúng con" },
+  { label: "Gia đình chú thím", hostRelationship: "chú", relationship: "cô/chú của cô dâu/chú rể", householdMode: "family", needsName: true, coupleHostPronoun: "chúng con", parentsHostPronoun: "gia đình chúng con" },
+  { label: "Dì", hostRelationship: "dì", relationship: "dì/cậu/mợ/thím của cô dâu/chú rể", householdMode: "single", needsName: true, coupleHostPronoun: "chúng con", parentsHostPronoun: "gia đình chúng con" },
+  { label: "Gia đình dì", hostRelationship: "dì", relationship: "dì/cậu/mợ/thím của cô dâu/chú rể", householdMode: "family", needsName: true, coupleHostPronoun: "chúng con", parentsHostPronoun: "gia đình chúng con" },
+  { label: "Cậu", hostRelationship: "cậu", relationship: "dì/cậu/mợ/thím của cô dâu/chú rể", householdMode: "single", needsName: true, coupleHostPronoun: "chúng con", parentsHostPronoun: "gia đình chúng con" },
+  { label: "Gia đình cậu", hostRelationship: "cậu", relationship: "dì/cậu/mợ/thím của cô dâu/chú rể", householdMode: "family", needsName: true, coupleHostPronoun: "chúng con", parentsHostPronoun: "gia đình chúng con" },
+  { label: "Cậu mợ", hostRelationship: "vợ chồng cậu mợ", relationship: "vợ chồng cậu mợ của cô dâu/chú rể", householdMode: "couple", needsName: true, coupleHostPronoun: "chúng con", parentsHostPronoun: "gia đình chúng con" },
+  { label: "Gia đình cậu mợ", hostRelationship: "cậu", relationship: "dì/cậu/mợ/thím của cô dâu/chú rể", householdMode: "family", needsName: true, coupleHostPronoun: "chúng con", parentsHostPronoun: "gia đình chúng con" },
+  { label: "Mợ", hostRelationship: "mợ", relationship: "dì/cậu/mợ/thím của cô dâu/chú rể", householdMode: "single", needsName: true, coupleHostPronoun: "chúng con", parentsHostPronoun: "gia đình chúng con" },
+  { label: "Gia đình mợ", hostRelationship: "mợ", relationship: "dì/cậu/mợ/thím của cô dâu/chú rể", householdMode: "family", needsName: true, coupleHostPronoun: "chúng con", parentsHostPronoun: "gia đình chúng con" },
+  { label: "Anh", hostRelationship: "anh", relationship: "anh/chị/em của cô dâu/chú rể", householdMode: "single", needsName: true, coupleHostPronoun: "chúng em", parentsHostPronoun: "bố mẹ" },
+  { label: "Vợ chồng anh", hostRelationship: "vợ chồng anh", relationship: "vợ chồng anh/chị/em của cô dâu/chú rể", householdMode: "couple", needsName: true, coupleHostPronoun: "chúng em", parentsHostPronoun: "bố mẹ" },
+  { label: "Gia đình anh", hostRelationship: "anh", relationship: "anh/chị/em của cô dâu/chú rể", householdMode: "family", needsName: true, coupleHostPronoun: "chúng em", parentsHostPronoun: "bố mẹ" },
+  { label: "Chị", hostRelationship: "chị", relationship: "anh/chị/em của cô dâu/chú rể", householdMode: "single", needsName: true, coupleHostPronoun: "chúng em", parentsHostPronoun: "bố mẹ" },
+  { label: "Vợ chồng chị", hostRelationship: "vợ chồng chị", relationship: "vợ chồng anh/chị/em của cô dâu/chú rể", householdMode: "couple", needsName: true, coupleHostPronoun: "chúng em", parentsHostPronoun: "bố mẹ" },
+  { label: "Gia đình chị", hostRelationship: "chị", relationship: "anh/chị/em của cô dâu/chú rể", householdMode: "family", needsName: true, coupleHostPronoun: "chúng em", parentsHostPronoun: "bố mẹ" },
+  { label: "Anh chị", hostRelationship: "anh chị", relationship: "anh chị của cô dâu/chú rể", householdMode: "couple", needsName: true, coupleHostPronoun: "chúng em", parentsHostPronoun: "bố mẹ" },
+  { label: "Gia đình anh chị", hostRelationship: "anh chị", relationship: "anh chị của cô dâu/chú rể", householdMode: "family", needsName: true, coupleHostPronoun: "chúng em", parentsHostPronoun: "bố mẹ" },
   { label: "Em", hostRelationship: "em", relationship: "anh/chị/em của cô dâu/chú rể", householdMode: "single", needsName: true, coupleHostPronoun: "anh chị", parentsHostPronoun: "gia đình anh chị" },
   { label: "Vợ chồng em", hostRelationship: "vợ chồng em", relationship: "vợ chồng anh/chị/em của cô dâu/chú rể", householdMode: "couple", needsName: true, coupleHostPronoun: "anh chị", parentsHostPronoun: "gia đình anh chị" },
   { label: "Gia đình em", hostRelationship: "em", relationship: "anh/chị/em của cô dâu/chú rể", householdMode: "family", needsName: true, coupleHostPronoun: "anh chị", parentsHostPronoun: "gia đình anh chị" },
-  { label: "Cháu - gọi Nhật & Phương là em", displayPrefix: "Cháu", hostRelationship: "cháu", relationship: "cháu của cô dâu/chú rể", householdMode: "single", needsName: true, coupleHostPronoun: "anh chị", parentsHostPronoun: "cô chú", parentsCoupleReference: "hai em" },
+  { label: "Cháu - gọi Nhật & Phương là em", displayPrefix: "Cháu", hostRelationship: "cháu", relationship: "cháu của cô dâu/chú rể", householdMode: "single", needsName: true, coupleHostPronoun: "chúng em", parentsHostPronoun: "cô chú", parentsCoupleReference: "hai em" },
   { label: "Cháu - gọi Nhật & Phương là anh chị", displayPrefix: "Cháu", hostRelationship: "cháu", relationship: "cháu của cô dâu/chú rể", householdMode: "single", needsName: true, coupleHostPronoun: "anh chị", parentsHostPronoun: "cô chú", parentsCoupleReference: "hai anh chị" },
-  { label: "Vợ chồng cháu - gọi Nhật & Phương là em", displayPrefix: "Vợ chồng cháu", hostRelationship: "vợ chồng cháu", relationship: "vợ chồng cháu của cô dâu/chú rể", householdMode: "couple", needsName: true, coupleHostPronoun: "anh chị", parentsHostPronoun: "cô chú", parentsCoupleReference: "hai em" },
+  { label: "Vợ chồng cháu - gọi Nhật & Phương là em", displayPrefix: "Vợ chồng cháu", hostRelationship: "vợ chồng cháu", relationship: "vợ chồng cháu của cô dâu/chú rể", householdMode: "couple", needsName: true, coupleHostPronoun: "chúng em", parentsHostPronoun: "cô chú", parentsCoupleReference: "hai em" },
   { label: "Vợ chồng cháu - gọi Nhật & Phương là anh chị", displayPrefix: "Vợ chồng cháu", hostRelationship: "vợ chồng cháu", relationship: "vợ chồng cháu của cô dâu/chú rể", householdMode: "couple", needsName: true, coupleHostPronoun: "anh chị", parentsHostPronoun: "cô chú", parentsCoupleReference: "hai anh chị" },
-  { label: "Gia đình cháu - gọi Nhật & Phương là em", displayPrefix: "Gia đình cháu", hostRelationship: "cháu", relationship: "cháu của cô dâu/chú rể", householdMode: "family", needsName: true, coupleHostPronoun: "anh chị", parentsHostPronoun: "cô chú", parentsCoupleReference: "hai em" },
+  { label: "Gia đình cháu - gọi Nhật & Phương là em", displayPrefix: "Gia đình cháu", hostRelationship: "cháu", relationship: "cháu của cô dâu/chú rể", householdMode: "family", needsName: true, coupleHostPronoun: "chúng em", parentsHostPronoun: "cô chú", parentsCoupleReference: "hai em" },
   { label: "Gia đình cháu - gọi Nhật & Phương là anh chị", displayPrefix: "Gia đình cháu", hostRelationship: "cháu", relationship: "cháu của cô dâu/chú rể", householdMode: "family", needsName: true, coupleHostPronoun: "anh chị", parentsHostPronoun: "cô chú", parentsCoupleReference: "hai anh chị" },
-  { label: "Bạn", hostRelationship: "bạn", relationship: "bạn của cô dâu/chú rể", householdMode: "single", needsName: true, coupleHostPronoun: "tụi mình", parentsHostPronoun: "gia đình chúng tôi" },
-  { label: "Vợ chồng bạn", hostRelationship: "vợ chồng bạn", relationship: "vợ chồng bạn của cô dâu/chú rể", householdMode: "couple", needsName: true, coupleHostPronoun: "tụi mình", parentsHostPronoun: "gia đình chúng tôi" },
-  { label: "Gia đình bạn", hostRelationship: "bạn", relationship: "bạn của cô dâu/chú rể", householdMode: "family", needsName: true, coupleHostPronoun: "tụi mình", parentsHostPronoun: "gia đình chúng tôi" },
+  { label: "Bạn", hostRelationship: "bạn", relationship: "bạn của cô dâu/chú rể", householdMode: "single", needsName: true, coupleHostPronoun: "chúng mình", parentsHostPronoun: "gia đình chúng tôi" },
+  { label: "Vợ chồng bạn", hostRelationship: "vợ chồng bạn", relationship: "vợ chồng bạn của cô dâu/chú rể", householdMode: "couple", needsName: true, coupleHostPronoun: "chúng mình", parentsHostPronoun: "gia đình chúng tôi" },
+  { label: "Gia đình bạn", hostRelationship: "bạn", relationship: "bạn của cô dâu/chú rể", householdMode: "family", needsName: true, coupleHostPronoun: "chúng mình", parentsHostPronoun: "gia đình chúng tôi" },
 ] as const;
 
 const guestGroupDefinitions: GuestGroupDefinition[] = [
@@ -121,7 +123,7 @@ const inlineGuideRows = [
   ["Cách nhập nhanh", "Chỉ điền 4 cột đầu. Tên khách là cột duy nhất gõ tay, 3 cột còn lại chọn dropdown."],
   ["Một người", "Ví dụ: cụm danh xưng = Anh, tên khách = Hoàng. Hệ thống tự ra Anh Hoàng."],
   ["Hai vợ chồng", "Ví dụ: cụm danh xưng = Vợ chồng bác, tên khách = Tiến. Hệ thống tự ra Vợ chồng bác Tiến."],
-  ["Cả gia đình", "Ví dụ: cụm danh xưng = Gia đình dì, tên khách = Sáu. Hệ thống tự ra Gia đình dì Sáu."],
+  ["Cả gia đình", "Ví dụ: cụm danh xưng = Gia đình dì, tên khách = Sáu (Hệ thống tự ra Gia đình dì Sáu), hoặc Gia đình anh chị, Gia đình anh, Gia đình chị..."],
   ["Ba mẹ mời ông bà", "Chọn cụm danh xưng = Bố mẹ hoặc Ông bà, có thể để trống tên khách nếu không cần gọi thêm tên riêng."],
 ] as const;
 const inlineGuideRowCount = inlineGuideRows.length + 1;
@@ -187,8 +189,8 @@ const legacyFallbackRowValues: LegacyRowValues = {
   guestName: "",
   hostRelationship: "bạn",
   invitedBy: "couple",
-  hostPronoun: "tụi mình",
-  coupleReference: "tụi mình",
+  hostPronoun: "chúng mình",
+  coupleReference: "chúng mình",
   relationship: "bạn của cô dâu/chú rể",
   householdMode: "single",
   guestGroup: "[Nhật] Bạn bè & Đồng nghiệp",
@@ -196,7 +198,7 @@ const legacyFallbackRowValues: LegacyRowValues = {
 };
 
 const headerNotes: Partial<Record<TemplateColumnKey, string>> = {
-  salutationCluster: "Chọn cụm danh xưng chuẩn. Ví dụ: Anh, Vợ chồng bác, Gia đình dì, Cô chú.",
+  salutationCluster: "Chọn cụm danh xưng chuẩn. Ví dụ: Anh, Vợ chồng bác, Gia đình dì, Gia đình anh chị, Gia đình anh, Gia đình chị, Cô chú.",
   guestNameCore: "Chỉ gõ phần tên riêng. Ví dụ: Hoàng, Tiến, Sáu, Linh.",
   guestGroup: "Chọn theo nhóm lớn để dễ lọc danh sách và chia bàn sau này.",
   inviteOwner: "Ba mẹ hoặc một trong hai bạn là người phụ trách khách này.",
@@ -235,6 +237,18 @@ const exampleRows: TemplateRowValues[] = [
   {
     salutationCluster: "Anh",
     guestNameCore: "Hoàng",
+    guestGroup: "[Nhật] Bạn bè & Đồng nghiệp",
+    inviteOwner: "Nhật",
+  },
+  {
+    salutationCluster: "Anh chị",
+    guestNameCore: "Thành",
+    guestGroup: "[Nhật] Bạn bè & Đồng nghiệp",
+    inviteOwner: "Nhật",
+  },
+  {
+    salutationCluster: "Gia đình anh chị",
+    guestNameCore: "Tuấn",
     guestGroup: "[Nhật] Bạn bè & Đồng nghiệp",
     inviteOwner: "Nhật",
   },
@@ -285,12 +299,37 @@ function normalizeText(value: unknown) {
     .trim();
 }
 
+function cleanRedundantPrefix(salutationCluster: string, guestNameCore: string): string {
+  const name = guestNameCore.trim();
+  const words = name.split(/\s+/);
+  if (words.length <= 1) return name;
+
+  const firstWord = words[0].toLowerCase();
+  const normalizedFirst = normalizeText(firstWord);
+
+  const prefixesToRemove = new Set([
+    "anh", "chi", "em", "co", "chu", "bac", "di", "duong", "cau", "mo", "thim", "ong", "ba", "thay", "co"
+  ]);
+
+  if (prefixesToRemove.has(normalizedFirst)) {
+    return words.slice(1).join(" ");
+  }
+
+  const normalizedCluster = normalizeText(salutationCluster);
+  if (normalizedCluster.includes(normalizedFirst)) {
+    return words.slice(1).join(" ");
+  }
+
+  return name;
+}
+
 function buildDisplayGuestName(salutationCluster: string, guestNameCore: string) {
   const cluster = clean(salutationCluster);
-  const name = clean(guestNameCore);
-  if (!cluster) return name;
-  if (!name) return cluster;
-  return `${cluster} ${name}`.replace(/\s+/g, " ").trim();
+  const rawName = clean(guestNameCore);
+  if (!cluster) return rawName;
+  if (!rawName) return cluster;
+  const cleanedName = cleanRedundantPrefix(salutationCluster, rawName);
+  return `${cluster} ${cleanedName}`.replace(/\s+/g, " ").trim();
 }
 
 function findSalutationDefinition(value: string) {
@@ -309,7 +348,7 @@ function findInviteOwnerDefinition(value: string) {
 }
 
 function resolveParentsCoupleReference(hostRelationship: string) {
-  return normalizeText(hostRelationship).includes("chau") ? "hai em" : "hai cháu";
+  return "hai cháu";
 }
 
 function inferTemplateValues(values: TemplateRowValues): InferredTemplateValues {
@@ -469,7 +508,7 @@ function helperHostPronounFormula(rowIndex: number) {
 }
 
 function helperCoupleReferenceFormula(rowIndex: number) {
-  return `IF($J${rowIndex}=${excelText(invitedByLabels.parents)},IFERROR(VLOOKUP($A${rowIndex},${termLookupRange()},8,FALSE),IF(ISNUMBER(SEARCH(${excelText("cháu")},LOWER($I${rowIndex}))),${excelText("hai em")},${excelText("hai cháu")})),$K${rowIndex})`;
+  return `IF($J${rowIndex}=${excelText(invitedByLabels.parents)},IFERROR(VLOOKUP($A${rowIndex},${termLookupRange()},8,FALSE),IF(ISNUMBER(SEARCH(${excelText("cháu")},LOWER($I${rowIndex}))),${excelText("hai cháu")},${excelText("hai cháu")})),$K${rowIndex})`;
 }
 
 function helperRelationshipFormula(rowIndex: number) {
@@ -495,6 +534,7 @@ function inviteScopeExpression(rowIndex: number) {
       ...salutationDefinitions
         .filter((item) => item.householdMode === "couple" && item.hostRelationship.startsWith("vợ chồng"))
         .map((item) => [item.hostRelationship, excelText("")] as const),
+      ["cô dượng", excelText("")],
       ["ông bà", excelText("")],
       ["bố mẹ", excelText("")],
       ["ba mẹ", excelText("")],
@@ -556,6 +596,7 @@ function coupleInviteRecipientExpression(rowIndex: number) {
       ["vợ chồng chú thím", guestCell],
       ["vợ chồng dì dượng", guestCell],
       ["vợ chồng cậu mợ", guestCell],
+      ["vợ chồng cô dượng", guestCell],
       ["anh chị", excelText("Vợ chồng anh chị")],
       ["anh", excelText("Anh cùng vợ")],
       ["chị", excelText("Chị cùng chồng")],
@@ -603,6 +644,7 @@ function coupleEnvelopeRecipientExpression(rowIndex: number) {
       ["vợ chồng chú thím", guestCell],
       ["vợ chồng dì dượng", guestCell],
       ["vợ chồng cậu mợ", guestCell],
+      ["vợ chồng cô dượng", guestCell],
       ["anh chị", `${excelText("Vợ chồng ")}&${guestCell}`],
       ["anh", `${guestCell}&${excelText(" cùng vợ")}`],
       ["chị", `${guestCell}&${excelText(" cùng chồng")}`],
@@ -660,6 +702,11 @@ function envelopeFormula(rowIndex: number) {
   return `IF(${guestCell}="","",IF(${householdCell}=${excelText(householdModeLabels.couple)},${excelText("Kính mời: ")}&${coupleEnvelopeRecipient},IF(${isFormal},${excelText("Kính mời: ")},${excelText("Mời: ")})&${guestCell}&${scopeExpression}))`;
 }
 
+function familyHostSubjectExpression(rowIndex: number) {
+  const hostPronounCell = `$K${rowIndex}`;
+  return `IF(OR(LEFT(LOWER(${hostPronounCell}),8)="gia đình",LEFT(LOWER(${hostPronounCell}),8)="gia dinh"),UPPER(LEFT(${hostPronounCell},1))&MID(${hostPronounCell},2,200),${excelText("Gia đình ")}&LOWER(${hostPronounCell}))`;
+}
+
 function insideInviteFormula(rowIndex: number, options: ReturnType<typeof resolveSpreadsheetOptions>) {
   const guestCell = `$H${rowIndex}`;
   const hostRelationshipCell = `$I${rowIndex}`;
@@ -669,13 +716,13 @@ function insideInviteFormula(rowIndex: number, options: ReturnType<typeof resolv
   const householdCell = `$N${rowIndex}`;
   const nameAlreadyIncludesFamily = `OR(ISNUMBER(SEARCH(${excelText("gia đình")},LOWER(${guestCell}))),ISNUMBER(SEARCH(${excelText("cả nhà")},LOWER(${guestCell}))))`;
   const familyScopeExpression = `IF(${nameAlreadyIncludesFamily},"",IF(${householdCell}=${excelText(householdModeLabels.family)},${excelText(" và gia đình")},""))`;
-  const hostSubjectExpressionValue = hostSubjectExpression(rowIndex);
+  const familyHostSubjectExpressionValue = familyHostSubjectExpression(rowIndex);
   const recipientExpression = recipientLineExpression(rowIndex, familyScopeExpression);
   const coupleInviteRecipientExpressionValue = coupleInviteRecipientExpression(rowIndex);
   const coupleInviteOwner = `IF(${invitedByCell}=${excelText(invitedByLabels.parents)},${coupleReferenceCell}&${excelText(` ${options.coupleDisplayName}`)},${hostPronounCell})`;
   const isWarm = `OR(${equalsAny(hostRelationshipCell, ["bạn", "bạn thân", "đồng nghiệp", "em", "cháu"])})`;
-  const coupleInviteLine = `${excelText("Kính mời: ")}&${coupleInviteRecipientExpressionValue}&${excelText(" đến chung vui trong ngày cưới của ")}&${coupleInviteOwner}&${excelText(".")}`;
-  const normalInviteLine = `IF(${invitedByCell}=${excelText(invitedByLabels.parents)},${hostSubjectExpressionValue}&${excelText(" trân trọng kính mời ")}&${recipientExpression}&${excelText(" đến chung vui trong ngày cưới của ")}&${coupleReferenceCell}&${excelText(` ${options.coupleDisplayName}.`)},IF(${isWarm},${hostSubjectExpressionValue}&${excelText(" mời ")}&${recipientExpression}&${excelText(" đến chung vui trong ngày cưới của ")}&${hostPronounCell}&${excelText(".")},${hostSubjectExpressionValue}&${excelText(" trân trọng kính mời ")}&${recipientExpression}&${excelText(" đến chung vui trong ngày cưới của ")}&${hostPronounCell}&${excelText(".")}))`;
+  const coupleInviteLine = `${familyHostSubjectExpressionValue}&${excelText(" trân trọng kính mời ")}&${coupleInviteRecipientExpressionValue}&${excelText(" đến chung vui trong ngày cưới của ")}&${coupleInviteOwner}&${excelText(".")}`;
+  const normalInviteLine = `IF(${invitedByCell}=${excelText(invitedByLabels.parents)},${familyHostSubjectExpressionValue}&${excelText(" trân trọng kính mời ")}&${recipientExpression}&${excelText(" đến chung vui trong ngày cưới của ")}&${coupleReferenceCell}&${excelText(` ${options.coupleDisplayName}.`)},IF(${isWarm},${familyHostSubjectExpressionValue}&${excelText(" mời ")}&${recipientExpression}&${excelText(" đến chung vui cùng ")}&${hostPronounCell}&${excelText(".")},${familyHostSubjectExpressionValue}&${excelText(" trân trọng kính mời ")}&${recipientExpression}&${excelText(" đến chung vui cùng ")}&${hostPronounCell}&${excelText(".")}))`;
 
   return `IF(${guestCell}="","",IF(${householdCell}=${excelText(householdModeLabels.couple)},${coupleInviteLine},${normalInviteLine}))`;
 }
@@ -947,14 +994,14 @@ function buildGuideSheet(workbook: ExcelJS.Workbook, options: ReturnType<typeof 
   worksheet.getCell("A11").value = "Một người";
   worksheet.getCell("B11").value = "Cụm danh xưng = Anh/Chị/Em/Bác/Chú..., Tên khách = phần tên riêng.";
   worksheet.getCell("A12").value = "Hai vợ chồng";
-  worksheet.getCell("B12").value = "Cụm danh xưng = Vợ chồng bác/Vợ chồng anh/Vợ chồng em..., Tên khách = phần tên riêng.";
+  worksheet.getCell("B12").value = "Cụm danh xưng = Vợ chồng bác/Anh chị/Vợ chồng em..., Tên khách = phần tên riêng.";
   worksheet.getCell("A13").value = "Gia đình";
-  worksheet.getCell("B13").value = "Cụm danh xưng = Gia đình dì/Gia đình anh/Gia đình bạn..., Tên khách = phần tên riêng.";
+  worksheet.getCell("B13").value = "Cụm danh xưng = Gia đình dì/Gia đình anh chị/Gia đình bạn..., Tên khách = phần tên riêng.";
   worksheet.getCell("A14").value = "Ba mẹ mời ông bà";
   worksheet.getCell("B14").value = "Chọn Cụm danh xưng = Bố mẹ hoặc Ông bà, Người mời là = Ba mẹ, có thể để trống Tên khách.";
 
   const explanations = [
-    ["Cụm danh xưng", "Chọn cách gọi khách: Anh, Vợ chồng bác, Gia đình dì, Cô chú..."],
+    ["Cụm danh xưng", "Chọn cách gọi khách: Anh, Vợ chồng bác, Gia đình dì, Gia đình anh chị, Cô chú..."],
     ["Tên khách", "Chỉ gõ phần tên riêng. Có thể để trống với các cụm như Bố mẹ, Ba mẹ, Ông bà."],
     ["Nhóm khách", "Nhóm đã được gom theo tiền tố [Nhà Trai], [Nhà Gái], [Nhật], [Phương] để dễ dò và dễ lọc chia bàn."],
     ["Người mời là", "Chọn Ba mẹ, Nhật, Phương hoặc Nhật & Phương để hệ thống tự chọn giọng văn."],

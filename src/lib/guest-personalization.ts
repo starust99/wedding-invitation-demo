@@ -19,7 +19,7 @@ function clean(value: string | null) {
   return value?.trim() || undefined;
 }
 
-function normalizeText(value: string) {
+export function normalizeText(value: string) {
   return value
     .toLowerCase()
     .replace(/đ/g, "d")
@@ -356,6 +356,31 @@ function resolveRecipientPronoun(input: InvitationCopyInput | undefined, tone: I
   }
 
   return guestLabel;
+}
+
+function resolveKinshipPronoun(input: InvitationCopyInput | undefined, tone: InvitationTone, guestLabel: string) {
+  const relationshipText = resolveRelationshipText(input);
+  const isFamilyOrCouple = isFamilyInvite(input) || isCoupleInvite(input) || includesFamilyLabel(guestLabel) || labelAlreadyLooksLikePair(guestLabel);
+
+  if (includesAny(relationshipText, ["ong", "ba", "ông", "bà"])) return "ông bà";
+  if (includesAny(relationshipText, ["bac", "bác"])) return isFamilyOrCouple ? "hai bác" : "bác";
+  if (includesAny(relationshipText, ["chu", "chú"])) return isFamilyOrCouple ? "cô chú" : "chú";
+  if (includesAny(relationshipText, ["co", "cô"])) return isFamilyOrCouple ? "cô chú" : "cô";
+  if (includesAny(relationshipText, ["cau", "cậu"])) return isFamilyOrCouple ? "cậu mợ" : "cậu";
+  if (includesAny(relationshipText, ["di", "dì"])) return isFamilyOrCouple ? "dì dượng" : "dì";
+  if (includesAny(relationshipText, ["mo", "mợ"])) return isFamilyOrCouple ? "cậu mợ" : "mợ";
+  
+  if (includesAny(relationshipText, ["anh chi", "anh chị"])) return "anh chị";
+  if (includesAny(relationshipText, ["anh"])) return isFamilyOrCouple ? "anh chị" : "anh";
+  if (includesAny(relationshipText, ["chi", "chị"])) return isFamilyOrCouple ? "anh chị" : "chị";
+  
+  if (includesAny(relationshipText, ["em"])) return "em";
+  if (includesAny(relationshipText, ["chau", "cháu"])) return "cháu";
+  
+  if (tone === "peer") return "bạn";
+  if (tone === "junior") return "em";
+  
+  return "bạn";
 }
 
 function shouldUseFormalGuestLine(tone: InvitationTone, guestLabel: string) {
@@ -720,29 +745,30 @@ export function buildInvitationCopy(input?: InvitationCopyInput): InvitationCopy
   const presenceSubject = resolvePresenceSubject(address, input);
   const coupleInviteOwner = tone === "parents_host" ? `${coupleReference} ${coupleDisplayName}` : hostPronoun;
   const envelopeRecipientLine = resolveEnvelopeRecipient(address, input);
-  const insideInviteLine = isCoupleInvite(input) || isOpenCompanionInvite(input)
-    ? `${familyHostSubject} trân trọng kính mời ${sentenceCase(recipientLine)} đến chia vui trong ngày cưới của ${coupleInviteOwner}.`
-    : tone === "parents_host" || tone === "neutral"
-    ? `${familyHostSubject} trân trọng kính mời ${inviteRecipientLine} đến chia vui trong ngày cưới của ${coupleDisplayName}.`
-    : isWarmPeer
-      ? `${familyHostSubject} mời ${inviteRecipientLine} đến chung vui cùng ${hostPronoun}.`
-      : `${familyHostSubject} trân trọng kính mời ${inviteRecipientLine} đến chung vui cùng ${hostPronoun}.`;
+  const isFamily = isFamilyInvite(input) || includesFamilyLabel(guestLabel);
+  const kinshipPronoun = isFamily ? "gia đình" : resolveKinshipPronoun(input, tone, guestLabel).toLowerCase();
+  const cleanHostPronoun = hostPronoun.replace(/^gia (đình|dinh)\s+/i, "");
+  const invitationHostSubject = isFamily ? sentenceCase(cleanHostPronoun) : familyHostSubject;
 
-  const rawHeroRecipientLine = isFamilyInvite(input) || isCoupleInvite(input)
-    ? shortRecipientLabel
-    : isOpenCompanionInvite(input)
-      ? recipientLine
-    : shouldUseFormalGuestLine(tone, guestLabel)
-      ? guestLabel
-      : recipientPronoun;
-  const heroRecipientLine = formatRepetitiveFamily(hostSubject, rawHeroRecipientLine);
-  const heroInvitationLine = isCoupleInvite(input) || isOpenCompanionInvite(input)
-    ? `Kính mời ${sentenceCase(heroRecipientLine)} đến chia vui trong ngày cưới của ${coupleInviteOwner}.`
+  const insideInviteLine = isCoupleInvite(input) || isOpenCompanionInvite(input)
+    ? `${invitationHostSubject} trân trọng kính mời ${kinshipPronoun} đến chung vui trong ngày cưới của ${coupleInviteOwner}.`
     : tone === "parents_host" || tone === "neutral"
-      ? `${hostSubject} trân trọng kính mời ${heroRecipientLine} đến chia vui trong ngày cưới của ${coupleDisplayName}.`
+    ? `${invitationHostSubject} trân trọng kính mời ${kinshipPronoun} đến chung vui trong ngày cưới của ${coupleDisplayName}.`
     : isWarmPeer
-      ? `${hostSubject} mời ${heroRecipientLine} đến chung vui cùng ${hostPronoun}.`
-      : `${hostSubject} trân trọng kính mời ${heroRecipientLine} đến chung vui cùng ${hostPronoun}.`;
+      ? `${invitationHostSubject} mời ${kinshipPronoun} đến chung vui trong ngày cưới.`
+      : `${invitationHostSubject} trân trọng kính mời ${kinshipPronoun} đến chung vui trong ngày cưới.`;
+
+  const heroInvitationLine = isCoupleInvite(input) || isOpenCompanionInvite(input)
+    ? `Kính mời ${kinshipPronoun} đến chung vui trong ngày cưới của ${coupleInviteOwner}.`
+    : tone === "parents_host"
+      ? `${invitationHostSubject} trân trọng kính mời ${kinshipPronoun} đến chung vui trong ngày cưới của hai cháu ${coupleDisplayName}.`
+      : tone === "neutral"
+        ? `${invitationHostSubject} trân trọng kính mời ${kinshipPronoun} đến chung vui trong ngày cưới của ${coupleDisplayName}.`
+        : tone === "elder"
+          ? `${invitationHostSubject} trân trọng kính mời ${kinshipPronoun} đến chung vui trong ngày cưới và chứng kiến ngày vui trọng đại của hai chúng con.`
+          : tone === "senior"
+            ? `${invitationHostSubject} trân trọng kính mời ${kinshipPronoun} đến chung vui trong ngày cưới và cùng chúng em lưu giữ những khoảnh khắc hạnh phúc nhất.`
+            : `${hostSubject} rất mong được đón ${kinshipPronoun} đến chung vui trong ngày cưới, đánh dấu cột mốc hai đứa chính thức về chung một nhà.`;
   const rsvpLead = tone === "parents_host"
     ? `${hostSubject} mong nhận được lời hồi đáp để chuẩn bị đón tiếp chu đáo`
     : tone === "elder"
