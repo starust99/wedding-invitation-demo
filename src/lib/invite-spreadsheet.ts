@@ -77,14 +77,14 @@ const salutationDefinitions: SalutationDefinition[] = [
   { label: "Gia đình cậu mợ", hostRelationship: "cậu", relationship: "dì/cậu/mợ/thím của cô dâu/chú rể", householdMode: "family", needsName: true, coupleHostPronoun: "chúng con", parentsHostPronoun: "gia đình chúng con" },
   { label: "Mợ", hostRelationship: "mợ", relationship: "dì/cậu/mợ/thím của cô dâu/chú rể", householdMode: "single", needsName: true, coupleHostPronoun: "chúng con", parentsHostPronoun: "gia đình chúng con" },
   { label: "Gia đình mợ", hostRelationship: "mợ", relationship: "dì/cậu/mợ/thím của cô dâu/chú rể", householdMode: "family", needsName: true, coupleHostPronoun: "chúng con", parentsHostPronoun: "gia đình chúng con" },
-  { label: "Anh", hostRelationship: "anh", relationship: "anh/chị/em của cô dâu/chú rể", householdMode: "single", needsName: true, coupleHostPronoun: "chúng em", parentsHostPronoun: "bố mẹ" },
-  { label: "Vợ chồng anh", hostRelationship: "vợ chồng anh", relationship: "vợ chồng anh/chị/em của cô dâu/chú rể", householdMode: "couple", needsName: true, coupleHostPronoun: "chúng em", parentsHostPronoun: "bố mẹ" },
-  { label: "Gia đình anh", hostRelationship: "anh", relationship: "anh/chị/em của cô dâu/chú rể", householdMode: "family", needsName: true, coupleHostPronoun: "chúng em", parentsHostPronoun: "bố mẹ" },
-  { label: "Chị", hostRelationship: "chị", relationship: "anh/chị/em của cô dâu/chú rể", householdMode: "single", needsName: true, coupleHostPronoun: "chúng em", parentsHostPronoun: "bố mẹ" },
-  { label: "Vợ chồng chị", hostRelationship: "vợ chồng chị", relationship: "vợ chồng anh/chị/em của cô dâu/chú rể", householdMode: "couple", needsName: true, coupleHostPronoun: "chúng em", parentsHostPronoun: "bố mẹ" },
-  { label: "Gia đình chị", hostRelationship: "chị", relationship: "anh/chị/em của cô dâu/chú rể", householdMode: "family", needsName: true, coupleHostPronoun: "chúng em", parentsHostPronoun: "bố mẹ" },
-  { label: "Anh chị", hostRelationship: "anh chị", relationship: "anh chị của cô dâu/chú rể", householdMode: "couple", needsName: true, coupleHostPronoun: "chúng em", parentsHostPronoun: "bố mẹ" },
-  { label: "Gia đình anh chị", hostRelationship: "anh chị", relationship: "anh chị của cô dâu/chú rể", householdMode: "family", needsName: true, coupleHostPronoun: "chúng em", parentsHostPronoun: "bố mẹ" },
+  { label: "Anh", hostRelationship: "anh", relationship: "anh/chị/em của cô dâu/chú rể", householdMode: "single", needsName: true, coupleHostPronoun: "chúng em", parentsHostPronoun: "em" },
+  { label: "Vợ chồng anh", hostRelationship: "vợ chồng anh", relationship: "vợ chồng anh/chị/em của cô dâu/chú rể", householdMode: "couple", needsName: true, coupleHostPronoun: "chúng em", parentsHostPronoun: "em" },
+  { label: "Gia đình anh", hostRelationship: "anh", relationship: "anh/chị/em của cô dâu/chú rể", householdMode: "family", needsName: true, coupleHostPronoun: "chúng em", parentsHostPronoun: "em" },
+  { label: "Chị", hostRelationship: "chị", relationship: "anh/chị/em của cô dâu/chú rể", householdMode: "single", needsName: true, coupleHostPronoun: "chúng em", parentsHostPronoun: "em" },
+  { label: "Vợ chồng chị", hostRelationship: "vợ chồng chị", relationship: "vợ chồng anh/chị/em của cô dâu/chú rể", householdMode: "couple", needsName: true, coupleHostPronoun: "chúng em", parentsHostPronoun: "em" },
+  { label: "Gia đình chị", hostRelationship: "chị", relationship: "anh/chị/em của cô dâu/chú rể", householdMode: "family", needsName: true, coupleHostPronoun: "chúng em", parentsHostPronoun: "em" },
+  { label: "Anh chị", hostRelationship: "anh chị", relationship: "anh chị của cô dâu/chú rể", householdMode: "couple", needsName: true, coupleHostPronoun: "chúng em", parentsHostPronoun: "em" },
+  { label: "Gia đình anh chị", hostRelationship: "anh chị", relationship: "anh chị của cô dâu/chú rể", householdMode: "family", needsName: true, coupleHostPronoun: "chúng em", parentsHostPronoun: "em" },
   { label: "Em", hostRelationship: "em", relationship: "anh/chị/em của cô dâu/chú rể", householdMode: "single", needsName: true, coupleHostPronoun: "anh chị", parentsHostPronoun: "gia đình anh chị" },
   { label: "Vợ chồng em", hostRelationship: "vợ chồng em", relationship: "vợ chồng anh/chị/em của cô dâu/chú rể", householdMode: "couple", needsName: true, coupleHostPronoun: "anh chị", parentsHostPronoun: "gia đình anh chị" },
   { label: "Gia đình em", hostRelationship: "em", relationship: "anh/chị/em của cô dâu/chú rể", householdMode: "family", needsName: true, coupleHostPronoun: "anh chị", parentsHostPronoun: "gia đình anh chị" },
@@ -597,7 +597,7 @@ function coupleInviteRecipientExpression(rowIndex: number) {
       ["vợ chồng dì dượng", guestCell],
       ["vợ chồng cậu mợ", guestCell],
       ["vợ chồng cô dượng", guestCell],
-      ["anh chị", excelText("Vợ chồng anh chị")],
+      ["anh chị", excelText("anh chị")],
       ["anh", excelText("Anh cùng vợ")],
       ["chị", excelText("Chị cùng chồng")],
       ["bạn", excelText("Vợ chồng bạn")],
@@ -615,7 +615,7 @@ function coupleInviteRecipientExpression(rowIndex: number) {
       ["dượng", `${guestCell}&${excelText(" cùng dì")}`],
       ["ông", `${guestCell}&${excelText(" cùng bà")}`],
       ["bà", `${guestCell}&${excelText(" cùng ông")}`],
-    ],
+      ],
     `${guestCell}&${excelText(" cùng gia đình")}`,
   );
 }
@@ -645,7 +645,7 @@ function coupleEnvelopeRecipientExpression(rowIndex: number) {
       ["vợ chồng dì dượng", guestCell],
       ["vợ chồng cậu mợ", guestCell],
       ["vợ chồng cô dượng", guestCell],
-      ["anh chị", `${excelText("Vợ chồng ")}&${guestCell}`],
+      ["anh chị", guestCell],
       ["anh", `${guestCell}&${excelText(" cùng vợ")}`],
       ["chị", `${guestCell}&${excelText(" cùng chồng")}`],
       ["bạn", `${excelText("Vợ chồng ")}&${guestCell}`],
@@ -707,6 +707,12 @@ function familyHostSubjectExpression(rowIndex: number) {
   return `IF(OR(LEFT(LOWER(${hostPronounCell}),8)="gia đình",LEFT(LOWER(${hostPronounCell}),8)="gia dinh"),UPPER(LEFT(${hostPronounCell},1))&MID(${hostPronounCell},2,200),${excelText("Gia đình ")}&LOWER(${hostPronounCell}))`;
 }
 
+function cleanHostSubjectExpression(rowIndex: number) {
+  const hostPronounCell = `$K${rowIndex}`;
+  const cleanFormula = `IF(OR(LEFT(LOWER(${hostPronounCell}),9)="gia đình ",LEFT(LOWER(${hostPronounCell}),9)="gia dinh "),MID(${hostPronounCell},10,200),${hostPronounCell})`;
+  return `UPPER(LEFT(${cleanFormula},1))&MID(${cleanFormula},2,200)`;
+}
+
 function insideInviteFormula(rowIndex: number, options: ReturnType<typeof resolveSpreadsheetOptions>) {
   const guestCell = `$H${rowIndex}`;
   const hostRelationshipCell = `$I${rowIndex}`;
@@ -714,15 +720,26 @@ function insideInviteFormula(rowIndex: number, options: ReturnType<typeof resolv
   const hostPronounCell = `$K${rowIndex}`;
   const coupleReferenceCell = `$L${rowIndex}`;
   const householdCell = `$N${rowIndex}`;
+
+  const isFamilyCell = `OR(${householdCell}=${excelText(householdModeLabels.family)},ISNUMBER(SEARCH(${excelText("gia đình")},LOWER(${guestCell}))),ISNUMBER(SEARCH(${excelText("cả nhà")},LOWER(${guestCell}))))`;
+
+  const familyHostSubjectExpressionValue = familyHostSubjectExpression(rowIndex);
+  const cleanHostSubjectExpressionValue = cleanHostSubjectExpression(rowIndex);
+  const isParentsHost = `${invitedByCell}=${excelText(invitedByLabels.parents)}`;
+  const invitationHostSubject = `IF(${isParentsHost},IF(${isFamilyCell},${cleanHostSubjectExpressionValue},${familyHostSubjectExpressionValue}),${cleanHostSubjectExpressionValue})`;
+
   const nameAlreadyIncludesFamily = `OR(ISNUMBER(SEARCH(${excelText("gia đình")},LOWER(${guestCell}))),ISNUMBER(SEARCH(${excelText("cả nhà")},LOWER(${guestCell}))))`;
   const familyScopeExpression = `IF(${nameAlreadyIncludesFamily},"",IF(${householdCell}=${excelText(householdModeLabels.family)},${excelText(" và gia đình")},""))`;
-  const familyHostSubjectExpressionValue = familyHostSubjectExpression(rowIndex);
+
   const recipientExpression = recipientLineExpression(rowIndex, familyScopeExpression);
+  const finalRecipient = `IF(${isFamilyCell},${excelText("gia đình")},${recipientExpression})`;
+
   const coupleInviteRecipientExpressionValue = coupleInviteRecipientExpression(rowIndex);
   const coupleInviteOwner = `IF(${invitedByCell}=${excelText(invitedByLabels.parents)},${coupleReferenceCell}&${excelText(` ${options.coupleDisplayName}`)},${hostPronounCell})`;
   const isWarm = `OR(${equalsAny(hostRelationshipCell, ["bạn", "bạn thân", "đồng nghiệp", "em", "cháu"])})`;
-  const coupleInviteLine = `${familyHostSubjectExpressionValue}&${excelText(" trân trọng kính mời ")}&${coupleInviteRecipientExpressionValue}&${excelText(" đến chung vui trong ngày cưới của ")}&${coupleInviteOwner}&${excelText(".")}`;
-  const normalInviteLine = `IF(${invitedByCell}=${excelText(invitedByLabels.parents)},${familyHostSubjectExpressionValue}&${excelText(" trân trọng kính mời ")}&${recipientExpression}&${excelText(" đến chung vui trong ngày cưới của ")}&${coupleReferenceCell}&${excelText(` ${options.coupleDisplayName}.`)},IF(${isWarm},${familyHostSubjectExpressionValue}&${excelText(" mời ")}&${recipientExpression}&${excelText(" đến chung vui cùng ")}&${hostPronounCell}&${excelText(".")},${familyHostSubjectExpressionValue}&${excelText(" trân trọng kính mời ")}&${recipientExpression}&${excelText(" đến chung vui cùng ")}&${hostPronounCell}&${excelText(".")}))`;
+
+  const coupleInviteLine = `${invitationHostSubject}&${excelText(" trân trọng kính mời ")}&${coupleInviteRecipientExpressionValue}&${excelText(" đến chung vui trong ngày cưới của ")}&${coupleInviteOwner}&${excelText(".")}`;
+  const normalInviteLine = `IF(${invitedByCell}=${excelText(invitedByLabels.parents)},${invitationHostSubject}&${excelText(" trân trọng kính mời ")}&${finalRecipient}&${excelText(" đến chung vui trong ngày cưới của ")}&${coupleReferenceCell}&${excelText(` ${options.coupleDisplayName}.`)},IF(${isWarm},${invitationHostSubject}&${excelText(" mời ")}&${finalRecipient}&${excelText(" đến chung vui cùng ")}&${hostPronounCell}&${excelText(".")},${invitationHostSubject}&${excelText(" trân trọng kính mời ")}&${finalRecipient}&${excelText(" đến chung vui cùng ")}&${hostPronounCell}&${excelText(".")}))`;
 
   return `IF(${guestCell}="","",IF(${householdCell}=${excelText(householdModeLabels.couple)},${coupleInviteLine},${normalInviteLine}))`;
 }

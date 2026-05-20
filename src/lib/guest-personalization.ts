@@ -363,6 +363,8 @@ function resolveKinshipPronoun(input: InvitationCopyInput | undefined, tone: Inv
   const isFamilyOrCouple = isFamilyInvite(input) || isCoupleInvite(input) || includesFamilyLabel(guestLabel) || labelAlreadyLooksLikePair(guestLabel);
 
   if (includesAny(relationshipText, ["ong", "ba", "ông", "bà"])) return "ông bà";
+  if (includesAny(relationshipText, ["bo me", "bố mẹ", "ba me", "ba mẹ", "cha me", "cha mẹ"])) return "bố mẹ";
+  if (includesAny(relationshipText, ["bo", "bố", "ba", "mẹ", "me", "cha"])) return isFamilyOrCouple ? "bố mẹ" : (includesAny(relationshipText, ["mẹ", "me"]) ? "mẹ" : "bố");
   if (includesAny(relationshipText, ["bac", "bác"])) return isFamilyOrCouple ? "hai bác" : "bác";
   if (includesAny(relationshipText, ["chu", "chú"])) return isFamilyOrCouple ? "cô chú" : "chú";
   if (includesAny(relationshipText, ["co", "cô"])) return isFamilyOrCouple ? "cô chú" : "cô";
@@ -748,11 +750,14 @@ export function buildInvitationCopy(input?: InvitationCopyInput): InvitationCopy
   const isFamily = isFamilyInvite(input) || includesFamilyLabel(guestLabel);
   const kinshipPronoun = isFamily ? "gia đình" : resolveKinshipPronoun(input, tone, guestLabel).toLowerCase();
   const cleanHostPronoun = hostPronoun.replace(/^gia (đình|dinh)\s+/i, "");
-  const invitationHostSubject = isFamily ? sentenceCase(cleanHostPronoun) : familyHostSubject;
+  const isParentsHost = input?.invitedBy === "parents" || tone === "parents_host";
+  const invitationHostSubject = isParentsHost
+    ? (isFamily ? sentenceCase(cleanHostPronoun) : familyHostSubject)
+    : sentenceCase(cleanHostPronoun);
 
-  const insideInviteLine = isCoupleInvite(input) || isOpenCompanionInvite(input)
+  const insideInviteLine = isCoupleInvite(input) || isOpenCompanionInvite(input) || tone === "parents_host"
     ? `${invitationHostSubject} trân trọng kính mời ${kinshipPronoun} đến chung vui trong ngày cưới của ${coupleInviteOwner}.`
-    : tone === "parents_host" || tone === "neutral"
+    : tone === "neutral"
     ? `${invitationHostSubject} trân trọng kính mời ${kinshipPronoun} đến chung vui trong ngày cưới của ${coupleDisplayName}.`
     : isWarmPeer
       ? `${invitationHostSubject} mời ${kinshipPronoun} đến chung vui trong ngày cưới.`

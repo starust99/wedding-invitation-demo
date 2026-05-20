@@ -49,9 +49,9 @@ const cases = [
       plusOnePolicy: "spouse",
     },
     includes: [
-      ["insideInviteLine", "Kính mời: Bố mẹ đến chung vui trong lễ cưới của hai cháu Nhật & Phương."],
+      ["insideInviteLine", "Gia đình chúng con trân trọng kính mời bố mẹ đến chung vui trong ngày cưới của hai cháu Nhật & Phương."],
       ["envelopeLine", "Kính mời: Bố mẹ"],
-      ["closingLine", "Sự hiện diện của Bố Mẹ là niềm vui rất lớn với gia đình chúng con."],
+      ["closingLine", "Sự hiện diện của Bố Mẹ là niềm vinh hạnh và lời chúc phúc trọn vẹn nhất dành cho gia đình chúng con."],
     ],
     excludes: [
       ["insideInviteLine", "cùng Mẹ"],
@@ -73,9 +73,9 @@ const cases = [
       plusOnePolicy: "spouse",
     },
     includes: [
-      ["insideInviteLine", "Kính mời: Bố cùng Mẹ đến chung vui trong lễ cưới của hai cháu Nhật & Phương."],
+      ["insideInviteLine", "Gia đình chúng con trân trọng kính mời bố mẹ đến chung vui trong ngày cưới của hai cháu Nhật & Phương."],
       ["envelopeLine", "Kính mời: Bố cùng Mẹ"],
-      ["closingLine", "Sự hiện diện của Bố Mẹ là niềm vui rất lớn với gia đình chúng con."],
+      ["closingLine", "Sự hiện diện của Bố Mẹ là niềm vinh hạnh và lời chúc phúc trọn vẹn nhất dành cho gia đình chúng con."],
     ],
   },
   {
@@ -92,13 +92,12 @@ const cases = [
       plusOnePolicy: "spouse",
     },
     includes: [
-      ["insideInviteLine", "Kính mời: Anh cùng vợ đến chung vui trong lễ cưới của tụi em."],
-      ["closingLine", "Sự hiện diện của anh chị là niềm vui rất lớn với tụi em."],
+      ["insideInviteLine", "Tụi em trân trọng kính mời anh chị đến chung vui trong ngày cưới của tụi em."],
+      ["closingLine", "Sự hiện diện của anh chị là niềm vinh hạnh và lời chúc phúc trọn vẹn nhất dành cho tụi em."],
       ["envelopeLine", "Kính mời: Anh Hoàng cùng vợ"],
     ],
     excludes: [
       ["insideInviteLine", "Nhật & Phương"],
-      ["insideInviteLine", "Sự hiện diện"],
     ],
   },
   {
@@ -115,9 +114,9 @@ const cases = [
       plusOnePolicy: "spouse",
     },
     includes: [
-      ["insideInviteLine", "Kính mời: Vợ chồng anh Hoàng đến chung vui trong lễ cưới của tụi em."],
+      ["insideInviteLine", "Tụi em trân trọng kính mời anh chị đến chung vui trong ngày cưới của tụi em."],
       ["envelopeLine", "Kính mời: Vợ chồng anh Hoàng"],
-      ["closingLine", "Sự hiện diện của anh chị là niềm vui rất lớn với tụi em."],
+      ["closingLine", "Sự hiện diện của anh chị là niềm vinh hạnh và lời chúc phúc trọn vẹn nhất dành cho tụi em."],
     ],
     excludes: [
       ["insideInviteLine", "Anh cùng vợ"],
@@ -137,9 +136,9 @@ const cases = [
       plusOnePolicy: "spouse",
     },
     includes: [
-      ["insideInviteLine", "Kính mời: Vợ chồng em Linh đến chung vui trong lễ cưới của anh chị."],
+      ["insideInviteLine", "Anh chị trân trọng kính mời em đến chung vui trong ngày cưới của anh chị."],
       ["envelopeLine", "Kính mời: Vợ chồng em Linh"],
-      ["closingLine", "Sự hiện diện của hai em là niềm vui rất lớn với anh chị."],
+      ["closingLine", "Sự hiện diện của hai em là niềm vinh hạnh và lời chúc phúc trọn vẹn nhất dành cho anh chị."],
     ],
   },
   {
@@ -156,8 +155,8 @@ const cases = [
       plusOnePolicy: "spouse",
     },
     includes: [
-      ["insideInviteLine", "Kính mời: Vợ chồng anh chị đến chung vui trong lễ cưới của tụi em."],
-      ["closingLine", "Sự hiện diện của anh chị là niềm vui rất lớn với tụi em."],
+      ["insideInviteLine", "Tụi em trân trọng kính mời anh chị đến chung vui trong ngày cưới của tụi em."],
+      ["closingLine", "Sự hiện diện của anh chị là niềm vinh hạnh và lời chúc phúc trọn vẹn nhất dành cho tụi em."],
     ],
     excludes: [
       ["insideInviteLine", "anh cùng vợ"],
@@ -178,8 +177,8 @@ const cases = [
       plusOnePolicy: "spouse",
     },
     includes: [
-      ["insideInviteLine", "Kính mời: Bác Hùng cùng gia đình đến chung vui trong lễ cưới của tụi con."],
-      ["closingLine", "Sự hiện diện của Bác và gia đình là niềm vui rất lớn với tụi con."],
+      ["insideInviteLine", "Tụi con trân trọng kính mời hai bác đến chung vui trong ngày cưới của tụi con."],
+      ["closingLine", "Sự hiện diện của Bác và gia đình là niềm vinh hạnh và lời chúc phúc trọn vẹn nhất dành cho tụi con."],
     ],
     excludes: [
       ["insideInviteLine", "người bạn đời"],
@@ -200,8 +199,8 @@ const cases = [
       plusOnePolicy: "family",
     },
     includes: [
-      ["insideInviteLine", "Gia đình chúng con trân trọng kính mời Chú Sáu và gia đình đến chung vui trong lễ cưới của hai cháu Nhật & Phương."],
-      ["closingLine", "Sự hiện diện của Chú và gia đình là niềm vui rất lớn với gia đình chúng con."],
+      ["insideInviteLine", "Chúng con trân trọng kính mời gia đình đến chung vui trong ngày cưới của hai cháu Nhật & Phương."],
+      ["closingLine", "Sự hiện diện của Chú và gia đình là niềm vinh hạnh và lời chúc phúc trọn vẹn nhất dành cho gia đình chúng con."],
       ["rsvpLead", "Gia đình chúng con mong nhận được lời hồi đáp để chuẩn bị đón tiếp chu đáo"],
     ],
   },
@@ -220,7 +219,7 @@ const cases = [
     },
     includes: [
       ["heroGreeting", "Gửi Hoàng"],
-      ["insideInviteLine", "Tụi mình mời bạn đến chung vui trong lễ cưới của tụi mình."],
+      ["insideInviteLine", "Tụi mình mời bạn đến chung vui trong ngày cưới."],
       ["signaturePrefix", "Thân mến"],
     ],
   },
@@ -235,10 +234,10 @@ const cases = [
       plusOnePolicy: "none",
     },
     includes: [
-      ["insideInviteLine", "Gia đình chúng tôi trân trọng kính mời Khách mời đến chung vui trong lễ cưới của gia đình chúng tôi."],
+      ["insideInviteLine", "Chúng tôi trân trọng kính mời bạn đến chung vui trong ngày cưới của Nhật & Phương."],
     ],
     excludes: [
-      ["insideInviteLine", "lễ cưới của gia đình."],
+      ["insideInviteLine", "ngày cưới của gia đình."],
     ],
   },
   {
@@ -255,8 +254,8 @@ const cases = [
       plusOnePolicy: "spouse",
     },
     includes: [
-      ["insideInviteLine", "Kính mời: Thầy Minh cùng gia đình đến chung vui trong lễ cưới của tụi em."],
-      ["closingLine", "Sự hiện diện của quý khách và gia đình là niềm vui rất lớn với tụi em."],
+      ["insideInviteLine", "Tụi em trân trọng kính mời cô chú đến chung vui trong ngày cưới của tụi em."],
+      ["closingLine", "Sự hiện diện của quý khách và gia đình là niềm vinh hạnh và lời chúc phúc trọn vẹn nhất dành cho tụi em."],
     ],
     excludes: [
       ["insideInviteLine", "cùng Chú"],
