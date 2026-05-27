@@ -225,6 +225,51 @@ const cases = [
     ],
   },
   {
+    name: "hai ban pair keeps non-married wording",
+    input: {
+      ...base,
+      guestName: "Hai bạn Tùng & Hương",
+      invitationName: "Hai bạn Tùng & Hương",
+      hostRelationship: "bạn",
+      relationship: "bạn của cô dâu/chú rể",
+      invitedBy: "couple",
+      hostPronoun: "tụi mình",
+      coupleReference: "tụi mình",
+      householdMode: "couple",
+      plusOnePolicy: "spouse",
+    },
+    includes: [
+      ["heroGreeting", "Gửi Hai bạn Tùng & Hương"],
+      ["insideInviteLine", "Tụi mình trân trọng kính mời hai bạn đến chung vui trong ngày cưới của tụi mình."],
+      ["envelopeLine", "Kính mời: Hai bạn Tùng & Hương"],
+      ["closingLine", "Sự hiện diện của hai bạn là niềm vinh hạnh và lời chúc phúc trọn vẹn nhất."],
+    ],
+    excludes: [
+      ["insideInviteLine", "vợ chồng"],
+      ["envelopeLine", "Vợ chồng"],
+    ],
+  },
+  {
+    name: "gia dinh anh chi keeps both roles in short label",
+    input: {
+      ...base,
+      guestName: "Gia đình Anh Chị Hiền & Hồng",
+      invitationName: "Gia đình Anh Chị Hiền & Hồng",
+      hostRelationship: "anh chị",
+      relationship: "anh chị của cô dâu/chú rể",
+      invitedBy: "couple",
+      hostPronoun: "tụi em",
+      coupleReference: "tụi em",
+      householdMode: "couple",
+      plusOnePolicy: "spouse",
+    },
+    includes: [
+      ["heroGreeting", "Kính gửi Gia đình Anh Chị Hiền & Hồng"],
+      ["shortRecipientLabel", "gia đình anh chị"],
+      ["closingLine", "Sự hiện diện của anh chị là niềm vinh hạnh và lời chúc phúc trọn vẹn nhất."],
+    ],
+  },
+  {
     name: "neutral fallback stays human",
     input: {
       ...base,

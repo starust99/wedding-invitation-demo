@@ -356,6 +356,7 @@ export default function RSVPPage() {
         honorific: invitee.honorific,
         group: invitee.guestGroup,
         displayLabel: invitee.displayLabel,
+        displaySalutation: invitee.displaySalutation,
         invitationName: invitee.invitationName,
         relationship: invitee.relationship,
         invitedBy: invitee.invitedBy,
@@ -427,6 +428,23 @@ export default function RSVPPage() {
     };
   }, [replace, setValue]);
 
+  useEffect(() => {
+    if (attendingCeremony === "no" && attendingBanquet === "no" && attending !== "no") {
+      setValue("attending", "no", { shouldDirty: true });
+      setValue("guestCount", 0, { shouldDirty: true });
+      setValue("accommodationNeeded", false, { shouldDirty: true });
+      replace([]);
+      return;
+    }
+
+    if ((attendingCeremony === "yes" || attendingBanquet === "yes") && attending !== "yes") {
+      setValue("attending", "yes", { shouldDirty: true });
+      if (guestCount === 0) {
+        setValue("guestCount", inviteeContext?.expectedGuestCount || 1, { shouldDirty: true });
+      }
+    }
+  }, [attending, attendingBanquet, attendingCeremony, guestCount, inviteeContext?.expectedGuestCount, replace, setValue]);
+
   function toggleAccommodation(nextValue: boolean) {
     if (!canRegisterStay) return;
     setValue("accommodationNeeded", nextValue, { shouldDirty: true });
@@ -495,7 +513,7 @@ export default function RSVPPage() {
   }
 
   function redirectToInvitePage(token?: string, hash: string = "") {
-    const target = token ? `/i/${encodeURIComponent(token)}${hash}` : `/${hash}`;
+    const target = token ? `/i/${encodeURIComponent(token)}${hash}` : "/";
     navigateWithTransition(target);
   }
 
@@ -647,6 +665,9 @@ export default function RSVPPage() {
               <p className="wedding-type-body mt-4 max-w-lg mx-auto text-[#252934]/62">
                 {submissionCopy.body}
               </p>
+              <p className="wedding-type-body mt-3 max-w-lg mx-auto text-[#252934]/54">
+                Ngay sau khi quay lại trang thiệp, phần cảm ơn và hướng dẫn tiếp theo sẽ hiện sẵn ở cuối trang để {inviteCopy.shortRecipientLabel} dễ theo dõi.
+              </p>
 
               {submissionCopy.showCalendar ? (
                 <div className="mt-10 grid gap-4 w-full max-w-md">
@@ -679,7 +700,7 @@ export default function RSVPPage() {
                   onClick={() => redirectToInvitePage(inviteToken, "#thank-you")}
                   className="light-sweep wedding-type-button inline-flex min-h-12 items-center justify-center rounded-full bg-rose-quartz px-8 text-[#252934] shadow-[0_16px_48px_rgba(146,168,209,0.22)] ring-1 ring-rose-quartz/70 transition hover:-translate-y-0.5"
                 >
-                  <ArrowLeft className="mr-2 h-4 w-4" /> Về trang thiệp
+                  <ArrowLeft className="mr-2 h-4 w-4" /> Quay lại trang thiệp
                 </button>
               </div>
             </motion.div>
@@ -774,7 +795,7 @@ export default function RSVPPage() {
                               ].join(" ")}
                               onClick={() => {
                                 setValue("attendingCeremony", "no", { shouldDirty: true, shouldValidate: true });
-                                if (formValues.attendingBanquet === "no") {
+                                if (getValues("attendingBanquet") === "no") {
                                   setValue("attending", "no", { shouldDirty: true });
                                   setValue("guestCount", 0, { shouldDirty: true });
                                   setValue("accommodationNeeded", false, { shouldDirty: true });
@@ -824,7 +845,7 @@ export default function RSVPPage() {
                               ].join(" ")}
                               onClick={() => {
                                 setValue("attendingBanquet", "no", { shouldDirty: true, shouldValidate: true });
-                                if (formValues.attendingCeremony === "no") {
+                                if (getValues("attendingCeremony") === "no") {
                                   setValue("attending", "no", { shouldDirty: true });
                                   setValue("guestCount", 0, { shouldDirty: true });
                                   setValue("accommodationNeeded", false, { shouldDirty: true });

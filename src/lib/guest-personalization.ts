@@ -3,6 +3,7 @@ export type GuestIdentity = {
   honorific?: string;
   group?: string;
   displayLabel?: string;
+  displaySalutation?: string;
   invitationName?: string;
   relationship?: string;
   invitedBy?: string;
@@ -50,6 +51,7 @@ export function readGuestIdentityFromSearch(search: string): GuestIdentity {
     honorific: clean(params.get("honorific") ?? params.get("title")),
     group: clean(params.get("group")),
     displayLabel: clean(params.get("displayLabel") ?? params.get("display_label")),
+    displaySalutation: clean(params.get("displaySalutation") ?? params.get("display_salutation")),
     invitationName: clean(params.get("invitationName") ?? params.get("invitation_name")),
     relationship: clean(params.get("relationship") ?? params.get("relation")),
     invitedBy: clean(params.get("invitedBy") ?? params.get("invited_by")),
@@ -93,6 +95,7 @@ export function resolveGuestIdentity(search: string): GuestIdentity {
 }
 
 export function formatGuestName(identity: GuestIdentity) {
+  if (identity.displaySalutation) return identity.displaySalutation;
   if (identity.invitationName) return identity.invitationName;
   if (identity.displayLabel) return identity.displayLabel;
   if (!identity.name) return "quý khách";
@@ -101,6 +104,7 @@ export function formatGuestName(identity: GuestIdentity) {
 
 export function resolveShortRecipientLabel(identity: GuestIdentity, fallbackLabel?: string) {
   const label = cleanString(identity.invitationName)
+    || cleanString(identity.displaySalutation)
     || cleanString(identity.displayLabel)
     || cleanString(identity.name)
     || cleanString(fallbackLabel);
@@ -111,6 +115,7 @@ export function resolveShortRecipientLabel(identity: GuestIdentity, fallbackLabe
     ["gia dinh cau mo", "gia đình cậu mợ"],
     ["gia dinh co chu", "gia đình cô chú"],
     ["gia dinh vo chong", "gia đình vợ chồng"],
+    ["gia dinh anh chi", "gia đình anh chị"],
     ["gia dinh thim", "gia đình thím"],
     ["gia dinh duong", "gia đình dượng"],
     ["gia dinh chau", "gia đình cháu"],
@@ -365,6 +370,7 @@ function resolveKinshipPronoun(input: InvitationCopyInput | undefined, tone: Inv
   const relationshipText = resolveRelationshipText(input);
   const isFamilyOrCouple = isFamilyInvite(input) || isCoupleInvite(input) || includesFamilyLabel(guestLabel) || labelAlreadyLooksLikePair(guestLabel);
 
+  if (labelStartsWithHaiBan(guestLabel)) return "hai bạn";
   if (includesAny(relationshipText, ["ong", "ba", "ông", "bà"])) return "ông bà";
   if (includesAny(relationshipText, ["bo me", "bố mẹ", "ba me", "ba mẹ", "cha me", "cha mẹ"])) return "bố mẹ";
   if (includesAny(relationshipText, ["bo", "bố", "ba", "mẹ", "me", "cha"])) return isFamilyOrCouple ? "bố mẹ" : (includesAny(relationshipText, ["mẹ", "me"]) ? "mẹ" : "bố");
@@ -412,6 +418,7 @@ function includesFamilyLabel(label: string) {
 function labelAlreadyLooksLikePair(label: string) {
   const normalized = normalizeText(label);
   return [
+    "hai ban",
     "vo chong",
     "ong ba",
     "bo me",
@@ -423,6 +430,10 @@ function labelAlreadyLooksLikePair(label: string) {
     "di duong",
     "cau mo",
   ].some((prefix) => normalized.startsWith(prefix));
+}
+
+function labelStartsWithHaiBan(label: string) {
+  return normalizeText(label).startsWith("hai ban");
 }
 
 function pairEnvelope(guestLabel: string) {
@@ -477,6 +488,14 @@ function resolveExplicitPairLabel(input: InvitationCopyInput | undefined, guestL
 
 function resolvePairLabel(input: InvitationCopyInput | undefined, guestLabel: string, recipientPronoun: string, audience: GuestAudience) {
   const relationshipText = resolveRelationshipText(input);
+  if (labelStartsWithHaiBan(guestLabel)) {
+    return {
+      invite: "hai bạn",
+      envelope: guestLabel,
+      presence: "hai bạn",
+    };
+  }
+
   const explicitPair = resolveExplicitPairLabel(input, guestLabel);
   if (explicitPair) return explicitPair;
 
