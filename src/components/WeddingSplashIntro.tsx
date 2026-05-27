@@ -155,6 +155,11 @@ export function WeddingSplashIntro({
               >
                 {/* Invisible click target covering the wax seal */}
                 <div className="w-28 h-28 sm:w-36 sm:h-36 rounded-full" />
+                {inviteCopy.heroGreeting ? (
+                  <p className="mb-3 text-center text-[0.72rem] font-medium uppercase tracking-[0.22em] text-[#8C7355]/88">
+                    {inviteCopy.heroGreeting}
+                  </p>
+                ) : null}
                 <p className="mt-5 whitespace-nowrap text-[0.65rem] font-medium uppercase tracking-[0.25em] text-[#8C7355] bg-white/60 px-4 py-1.5 rounded-full backdrop-blur-md shadow-sm">
                   Chạm để mở
                 </p>

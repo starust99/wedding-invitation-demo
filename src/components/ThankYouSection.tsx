@@ -49,7 +49,9 @@ export function ThankYouSection({
     thankYouMessage = `${inviteCopy.thankYouLine} Hẹn gặp ${inviteCopy.shortRecipientLabel} tại ${config.venue.name} trong một buổi tối thật ấm áp.`;
   }
 
-  const instructionMessage = `(Nếu có thay đổi về kế hoạch, ${inviteCopy.shortRecipientLabel} vui lòng điều chỉnh lại thông tin bằng cách bấm nút bên dưới trước ngày 26/9/2026).`;
+  const instructionMessage = rsvpAttending === "no"
+    ? `${inviteCopy.shortRecipientLabel} có thể giữ lại link này như một lời nhắn riêng từ ${inviteCopy.hostPronoun}. Nếu cần cập nhật lại phản hồi, vẫn có thể bấm nút bên dưới trước hạn chốt.`
+    : `${inviteCopy.shortRecipientLabel} vui lòng giữ lại link này để xem lại thông tin thiệp, chỉ đường và cập nhật sau này. Nếu kế hoạch thay đổi, có thể điều chỉnh lại hồi đáp bằng nút bên dưới trước ngày ${config.rsvp.deadline}.`;
 
   return (
     <section id="thank-you" className="cinematic-stage editorial-band relative overflow-hidden px-5 py-24 text-center text-ink sm:px-8 sm:py-28 lg:py-32">
@@ -70,7 +72,7 @@ export function ThankYouSection({
           <div className="relative z-10 grid min-h-[24rem] place-items-start py-4 text-center sm:min-h-[30rem] sm:place-items-center sm:py-8 lg:min-h-[34rem]">
             <div className="flex w-full max-w-2xl flex-col items-center justify-between gap-8 text-center sm:gap-10">
               <div>
-                <p className="section-kicker-dark wedding-type-kicker">Lời cảm ơn</p>
+                <p className="section-kicker-dark wedding-type-kicker">Phản hồi đã được ghi nhận</p>
                 <div className="mt-6 flex items-center justify-center gap-3">
                   <span className="h-px w-16 bg-[rgba(212,175,55,0.46)] sm:w-20" />
                   <span className="h-2 w-2 rounded-full border border-[rgba(212,175,55,0.48)] bg-white/76" />
@@ -87,7 +89,7 @@ export function ThankYouSection({
                 </p>
 
                 <div className="mx-auto mt-10 max-w-lg">
-                  <p suppressHydrationWarning className="mb-6 text-[0.95rem] text-ink/50 italic leading-relaxed">
+                  <p suppressHydrationWarning className="mb-6 text-[0.95rem] text-ink/56 italic leading-relaxed">
                     {instructionMessage}
                   </p>
                   <div className="flex flex-wrap items-center justify-center gap-3">

@@ -27,6 +27,7 @@ function toGuestIdentity(invitee?: Invitee): GuestIdentity {
     honorific: invitee.honorific || undefined,
     group: invitee.guestGroup || undefined,
     displayLabel: invitee.displayLabel || undefined,
+    displaySalutation: invitee.displaySalutation || undefined,
     invitationName: invitee.invitationName || undefined,
     relationship: invitee.relationship || undefined,
     invitedBy: invitee.invitedBy,
@@ -104,7 +105,7 @@ export function InviteTokenPage({ token }: { token: string }) {
   const invitee = payload.invitee;
   const guestIdentity = useMemo(() => toGuestIdentity(invitee), [invitee]);
   const rsvpHref = `/rsvp?invite=${encodeURIComponent(token)}`;
-  const shouldShowThankYou = invitee?.rsvp?.attending === "yes" || invitee?.rsvp?.attending === "no";
+  const shouldShowThankYou = Boolean(invitee?.rsvp);
 
   useEffect(() => {
     if (!shouldShowThankYou || window.location.hash !== "#thank-you") return;

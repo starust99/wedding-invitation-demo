@@ -47,11 +47,14 @@ export function RsvpSection({
             <p suppressHydrationWarning className="wedding-type-meta mt-6 max-w-xl text-ink/62">
               {inviteCopy.greeting},
             </p>
-            <p className="wedding-type-body mt-4 max-w-xl text-ink/68">
-              {inviteCopy.closingLine}
+            <p className="wedding-type-body mt-4 max-w-2xl text-ink/68">
+              {inviteCopy.hostSubject} rất trân trọng sự hiện diện của {inviteCopy.shortRecipientLabel} trong ngày vui này. Vui lòng dành ít phút xác nhận để {inviteCopy.hostPronoun} chuẩn bị đón tiếp chu đáo, đủ thông tin và thoải mái nhất cho {inviteCopy.shortRecipientLabel}.
             </p>
             <p suppressHydrationWarning className="wedding-type-body mt-2 max-w-xl text-ink/68">
               {inviteCopy.rsvpLead} trước ngày {config.rsvp.deadline}.
+            </p>
+            <p className="wedding-type-body mt-4 max-w-xl text-ink/56">
+              Biểu mẫu hồi đáp được tách riêng để {inviteCopy.shortRecipientLabel} dễ điền từng bước, xem lại trước khi gửi và có thể chỉnh sửa lại sau nếu kế hoạch thay đổi.
             </p>
 
               <button

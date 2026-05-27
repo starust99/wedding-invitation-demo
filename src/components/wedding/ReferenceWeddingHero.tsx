@@ -150,7 +150,7 @@ export function ReferenceWeddingHero({ config, summary }: ReferenceWeddingHeroPr
           </WriteReveal>
           <LineReveal delay={0.6}>
             <p className="save-date-copy">
-              {summary?.guestGreeting ? `${summary.guestGreeting}. ` : summary?.guestName ? `Gửi ${summary.guestName}. ` : ""}
+              {summary?.guestGreeting ? `${summary.guestGreeting}. ` : ""}
               {invitationText}
             </p>
           </LineReveal>

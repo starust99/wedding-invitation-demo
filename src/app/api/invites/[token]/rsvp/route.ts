@@ -59,5 +59,9 @@ export async function POST(request: Request, { params }: { params: Promise<{ tok
     .update({ invite_status: getInviteStatusFromRsvp(payload.attending), updated_at: new Date().toISOString() })
     .eq("id", invitee.id);
 
-  return NextResponse.json({ response: mapRSVPRow(data as RSVPDatabaseRow), backend: "supabase" });
+  return NextResponse.json({
+    response: mapRSVPRow(data as RSVPDatabaseRow),
+    backend: "supabase",
+    hasSubmittedRsvp: true,
+  });
 }

@@ -47,6 +47,7 @@ export function toRSVPCsv(responses: RSVPResponse[]) {
 export function serializeInviteLinksCsv(invitees: Invitee[], origin = "") {
   const header = [
     "Tên hiển thị",
+    "Cụm xưng hô hiển thị",
     "Tên gốc hoặc cách nhà mình gọi",
     "Cách xưng hô in trên thiệp",
     "Mã link riêng",
@@ -60,6 +61,7 @@ export function serializeInviteLinksCsv(invitees: Invitee[], origin = "") {
 
   const rows = invitees.map((invitee) => [
     escapeCsv(invitee.displayLabel),
+    escapeCsv(invitee.displaySalutation),
     escapeCsv(invitee.guestName),
     escapeCsv(invitee.invitationName),
     escapeCsv(invitee.token),
