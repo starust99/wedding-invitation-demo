@@ -116,9 +116,9 @@ const [status, setStatus] = useState<SplashStatus>("checking");
         >
           
           {/* THE VIDEO - responsive sources for mobile (9:16) and desktop (16:9) */}
-          <div className="absolute inset-0 flex items-center justify-center">
+          <div className="absolute inset-0 flex items-center justify-center overflow-hidden">
             <CanvasVideo 
-              className="h-full w-full pointer-events-none"
+              className="h-full w-full pointer-events-none scale-[1.08] md:scale-100"
               isPlaying={status === "opening"}
               onEnded={closeIntro}
               poster={viewport === "mobile" ? "/assets/wedding/ui/splash-poster-mobile.jpg" : "/assets/wedding/ui/splash-closed.png"}
