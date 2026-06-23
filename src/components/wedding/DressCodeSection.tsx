@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -18,43 +19,43 @@ const DRESS_COLORS: DressCodeColor[] = [
     id: "pink",
     name: "Hồng phấn",
     hex: "#E5B3B3",
-    imgSrc: "/assets/dresscode-pink-v3.png",
+    imgSrc: "/assets/dresscode-pink-v3.jpg",
   },
   {
     id: "blue",
     name: "Xanh biển",
     hex: "#A4C3D2",
-    imgSrc: "/assets/dresscode-blue-v3.png",
+    imgSrc: "/assets/dresscode-blue-v3.jpg",
   },
   {
     id: "yellow",
     name: "Vàng",
     hex: "#F5D6A4",
-    imgSrc: "/assets/dresscode-yellow-v3.png",
+    imgSrc: "/assets/dresscode-yellow-v3.jpg",
   },
   {
     id: "green",
     name: "Xanh lá",
     hex: "#B8C6A3",
-    imgSrc: "/assets/dresscode-green-v3.png",
+    imgSrc: "/assets/dresscode-green-v3.jpg",
   },
   {
     id: "cream",
     name: "Kem",
     hex: "#FAF0DD",
-    imgSrc: "/assets/dresscode-cream-v3.png",
+    imgSrc: "/assets/dresscode-cream-v3.jpg",
   },
   {
     id: "beige",
     name: "Be",
     hex: "#E8D8C8",
-    imgSrc: "/assets/dresscode-beige-v3.png",
+    imgSrc: "/assets/dresscode-beige-v3.jpg",
   },
   {
     id: "brown",
     name: "Nâu",
     hex: "#B49A85",
-    imgSrc: "/assets/dresscode-brown-v3.png",
+    imgSrc: "/assets/dresscode-brown-v3.jpg",
   },
 ];
 
@@ -70,6 +71,18 @@ export function DressCodeSection({
   setSelectedColorId: (id: DressColorId | null) => void;
 }) {
   const selectedColor = DRESS_COLORS.find((c) => c.id === selectedColorId) || null;
+
+  // Preload all dress code images to make color transitions instantaneous
+  useEffect(() => {
+    const imagesToPreload = [
+      "/assets/dresscode-theme-v3.jpg?v=8",
+      ...DRESS_COLORS.map((c) => `${c.imgSrc}?v=8`),
+    ];
+    imagesToPreload.forEach((src) => {
+      const img = new window.Image();
+      img.src = src;
+    });
+  }, []);
 
   // Split the note into invitation text and weather alert text
   let invitationText = note;
@@ -127,7 +140,7 @@ export function DressCodeSection({
                 className="absolute inset-0 w-full h-full"
               >
                 <Image
-                  src={selectedColor ? `${selectedColor.imgSrc}?v=8` : "/assets/dresscode-theme-v3.png?v=8"}
+                  src={selectedColor ? `${selectedColor.imgSrc}?v=8` : "/assets/dresscode-theme-v3.jpg?v=8"}
                   alt={selectedColor ? `Gợi ý phối đồ màu ${selectedColor.name}` : "Gợi ý phối đồ theo bảng màu pastel vườn xuân"}
                   fill
                   unoptimized
