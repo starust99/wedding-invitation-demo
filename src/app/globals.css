@@ -1112,10 +1112,12 @@ textarea {
 
 @media (max-width: 767px) {
   .save-date-hero-copy-block {
-    margin-top: -2.5rem !important;
+    margin-top: 0.75rem !important;
+    padding-inline: 1.2rem;
   }
   .save-date-copy-arch {
-    margin-top: -0.5rem !important;
+    margin-top: 0.5rem !important;
+    padding-inline: 0.6rem;
   }
 }
 
