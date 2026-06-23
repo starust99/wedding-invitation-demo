@@ -633,7 +633,7 @@ textarea {
 .save-date-hero-ornament-right {
   right: 4%;
   bottom: 1%;
-  width: clamp(12rem, 35%, 17rem);
+  width: clamp(10.2rem, 30%, 14.5rem);
   height: auto;
 }
 
@@ -648,7 +648,7 @@ textarea {
   .save-date-hero-ornament-right {
     right: 4%;
     bottom: 1%;
-    width: clamp(11rem, 33%, 15.5rem);
+    width: clamp(9.4rem, 28%, 13.2rem);
   }
 }
 
@@ -663,7 +663,7 @@ textarea {
   .save-date-hero-ornament-right {
     right: 1%;
     bottom: 1%;
-    width: clamp(9.5rem, 36%, 12.5rem);
+    width: clamp(8.1rem, 31%, 10.6rem);
   }
 }
 
