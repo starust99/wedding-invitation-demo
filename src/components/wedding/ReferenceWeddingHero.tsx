@@ -50,24 +50,6 @@ export function ReferenceWeddingHero({ config, summary }: ReferenceWeddingHeroPr
 
   return (
     <section id="home" className="save-date-hero save-date-hero-arch">
-      {/* Inline SVG definitions for the watercolor wavy mask */}
-      <svg width="1" height="1" className="absolute pointer-events-none" aria-hidden="true" style={{ position: "absolute", width: "1px", height: "1px", opacity: 0, overflow: "hidden" }}>
-        <defs>
-          <filter id="watercolor-rough-edge" filterUnits="objectBoundingBox">
-            <feTurbulence type="fractalNoise" baseFrequency="0.04" numOctaves="4" result="noise" />
-            <feDisplacementMap in="SourceGraphic" in2="noise" scale="0.03" xChannelSelector="R" yChannelSelector="G" />
-          </filter>
-
-          <mask id="watercolor-mask" maskContentUnits="objectBoundingBox">
-            <rect x="-0.1" y="-0.1" width="1.2" height="0.83" fill="white" />
-            <path
-              d="M -0.1 0.63 L 1.1 0.63 L 1.1 0.91 C 0.98 0.95, 0.92 0.86, 0.80 0.92 C 0.68 0.96, 0.56 0.88, 0.44 0.94 C 0.32 0.97, 0.20 0.90, 0.08 0.93 C -0.004 0.96, -0.04 0.88, -0.1 0.92 Z"
-              fill="white"
-              filter="url(#watercolor-rough-edge)"
-            />
-          </mask>
-        </defs>
-      </svg>
 
       <div
         className="save-date-name-logo-reveal"
@@ -95,21 +77,52 @@ export function ReferenceWeddingHero({ config, summary }: ReferenceWeddingHeroPr
             className={`hero-photo-fade ${ready && imageLoaded ? "is-visible" : ""}`}
             style={{ transitionDelay: "0.45s" }}
           >
+            {/* Invisible img for preloading and onload detection outside figure */}
+            <img
+              ref={imgRef}
+              src={heroCompositeSrc}
+              alt=""
+              style={{ display: "none", width: 0, height: 0, position: "absolute", opacity: 0, pointerEvents: "none" }}
+              onLoad={() => setImageLoaded(true)}
+            />
+
             <figure
               className="save-date-arch-figure save-date-arch-figure--composite"
               aria-label="Khung ảnh cưới"
             >
-              <img
-                ref={imgRef}
-                src={heroCompositeSrc}
-                alt={heroCompositeAlt}
-                className="save-date-arch-composite"
-                width={2000}
-                height={1333}
-                decoding="async"
-                fetchPriority="high"
-                onLoad={() => setImageLoaded(true)}
-              />
+              {/* SVG container which renders the masked image reliably across all browsers */}
+              <svg
+                viewBox="0 0 2000 1333"
+                width="100%"
+                height="auto"
+                className="save-date-arch-composite-svg"
+                style={{ display: "block", width: "100%", height: "auto" }}
+              >
+                <defs>
+                  <filter id="watercolor-rough-edge-svg" filterUnits="objectBoundingBox">
+                    <feTurbulence type="fractalNoise" baseFrequency="0.04" numOctaves="4" result="noise" />
+                    <feDisplacementMap in="SourceGraphic" in2="noise" scale="0.03" xChannelSelector="R" yChannelSelector="G" />
+                  </filter>
+
+                  <mask id="watercolor-mask-svg" maskContentUnits="objectBoundingBox">
+                    <rect x="-0.1" y="-0.1" width="1.2" height="0.83" fill="white" />
+                    <path
+                      d="M -0.1 0.63 L 1.1 0.63 L 1.1 0.91 C 0.98 0.95, 0.92 0.86, 0.80 0.92 C 0.68 0.96, 0.56 0.88, 0.44 0.94 C 0.32 0.97, 0.20 0.90, 0.08 0.93 C -0.004 0.96, -0.04 0.88, -0.1 0.92 Z"
+                      fill="white"
+                      filter="url(#watercolor-rough-edge-svg)"
+                    />
+                  </mask>
+                </defs>
+
+                <image
+                  href={heroCompositeSrc}
+                  x="0"
+                  y="0"
+                  width="2000"
+                  height="1333"
+                  mask="url(#watercolor-mask-svg)"
+                />
+              </svg>
             </figure>
           </div>
 

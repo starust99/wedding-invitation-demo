@@ -611,8 +611,6 @@ textarea {
   overflow: visible;
   background: transparent;
   line-height: 0;
-  -webkit-mask-image: url('#watercolor-mask');
-  mask-image: url('#watercolor-mask');
   transform-style: flat !important;
   perspective: none !important;
 }
