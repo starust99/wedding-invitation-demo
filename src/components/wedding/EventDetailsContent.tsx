@@ -400,7 +400,7 @@ export function EventDetailsContent({
         </motion.div>
 
         {/* Parents Info Block (Nhà Trai / Nhà Gái Side-by-Side) */}
-        <div className="relative w-full flex flex-row justify-between items-stretch z-10 mb-8 md:mb-10">
+        <div className="relative w-full flex flex-row justify-between items-stretch z-10 mt-4 sm:mt-5 mb-8 md:mb-10">
           {/* Left Column: Nhà Trai */}
           <motion.div variants={familyItemVariant} className="w-1/2 pr-3 sm:pr-4 flex flex-col items-center justify-start text-center">
             <h3 className="font-serif text-[1.02rem] sm:text-[1.08rem] md:text-[1.12rem] lg:text-[1.2rem] font-bold text-[#b4975a] tracking-[0.18em] uppercase">
@@ -456,20 +456,8 @@ export function EventDetailsContent({
         {/* Greeting & Names Block */}
         <div className="relative w-full flex flex-col items-center z-10 mt-1 md:mt-2">
           <motion.div variants={familyItemVariant} className="w-full text-center">
-            <p className="font-serif italic text-[#3f4642]/95 text-[1.02rem] sm:text-[1.08rem] md:text-[1.12rem] lg:text-[1.18rem] tracking-wide font-medium leading-relaxed flex items-center justify-center flex-wrap sm:flex-nowrap gap-y-1">
-              <svg viewBox="0 0 60 16" className="w-7 sm:w-8 h-3 sm:h-3.5 fill-[#b4975a]/75 stroke-[#b4975a]/75 select-none pointer-events-none inline-block align-middle mr-2.5 sm:mr-3" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                <path d="M 0 8 H 40" />
-                <path d="M 30 8 C 33 4, 38 4, 40 8 C 38 12, 33 12, 30 8 Z" />
-                <path d="M 40 8 C 43 5, 48 5, 50 8 C 48 11, 43 11, 40 8 Z" />
-                <path d="M 50 8 C 52 6, 56 6, 58 8 C 56 10, 52 10, 50 8 Z" />
-              </svg>
+            <p className="font-serif italic text-[#3f4642]/95 text-[1.02rem] sm:text-[1.08rem] md:text-[1.12rem] lg:text-[1.18rem] tracking-wide font-medium leading-relaxed">
               Trân trọng báo tin hôn lễ của hai con chúng tôi:
-              <svg viewBox="0 0 60 16" className="w-7 sm:w-8 h-3 sm:h-3.5 fill-[#b4975a]/75 stroke-[#b4975a]/75 select-none pointer-events-none scale-x-[-1] inline-block align-middle ml-2.5 sm:ml-3" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                <path d="M 0 8 H 40" />
-                <path d="M 30 8 C 33 4, 38 4, 40 8 C 38 12, 33 12, 30 8 Z" />
-                <path d="M 40 8 C 43 5, 48 5, 50 8 C 48 11, 43 11, 40 8 Z" />
-                <path d="M 50 8 C 52 6, 56 6, 58 8 C 56 10, 52 10, 50 8 Z" />
-              </svg>
             </p>
           </motion.div>
 
