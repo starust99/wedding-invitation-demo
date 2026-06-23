@@ -625,7 +625,7 @@ textarea {
 .save-date-hero-ornament-left {
   left: 4%;
   bottom: -3%;
-  width: clamp(13.8rem, 40%, 19.5rem);
+  width: clamp(12.6rem, 36.4%, 17.7rem);
   height: auto;
   filter: brightness(1.15);
 }
@@ -642,7 +642,7 @@ textarea {
   .save-date-hero-ornament-left {
     left: 4%;
     bottom: -3%;
-    width: clamp(12.65rem, 38%, 17.8rem);
+    width: clamp(11.5rem, 34.6%, 16.2rem);
     filter: brightness(1.15);
   }
   .save-date-hero-ornament-right {
@@ -657,7 +657,7 @@ textarea {
   .save-date-hero-ornament-left {
     left: 1%;
     bottom: -3%;
-    width: clamp(10.9rem, 41%, 14.4rem);
+    width: clamp(9.9rem, 37.3%, 13.1rem);
     filter: brightness(1.15);
   }
   .save-date-hero-ornament-right {
