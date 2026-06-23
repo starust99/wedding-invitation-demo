@@ -141,7 +141,7 @@ export function DressCodeSection({
               >
                 <Image
                   src={selectedColor ? `${selectedColor.imgSrc}?v=8` : "/assets/dresscode-theme-v3.jpg?v=8"}
-                  alt={selectedColor ? `Gợi ý phối đồ màu ${selectedColor.name}` : "Gợi ý phối đồ theo bảng màu pastel vườn xuân"}
+                  alt={selectedColor ? `Gợi ý phối đồ màu ${selectedColor.name}` : "Gợi ý phối đồ theo bảng màu vườn xuân"}
                   fill
                   unoptimized
                   className="object-cover"
@@ -195,11 +195,28 @@ export function DressCodeSection({
         </div>
 
         {/* Selected Color Name below Card */}
-        <div className="flex items-center justify-center gap-2 mt-4 text-[#7d7065] select-none">
+        <div className="flex items-center justify-center gap-2 mt-4 text-[#7d7065] select-none min-h-[1.75rem]">
           <span className="text-[#b4975a] text-[0.8rem] font-bold">✦</span>
-          <span className="font-serif text-[1.18rem] font-semibold tracking-wide text-[#3f4642]">
-            {selectedColor ? selectedColor.name : "Sắc màu Vườn Xuân"}
-          </span>
+          {selectedColor ? (
+            <span className="font-serif text-[1.18rem] font-semibold tracking-wide text-[#3f4642]">
+              {selectedColor.name}
+            </span>
+          ) : (
+            <motion.span
+              animate={{
+                opacity: [0.75, 1, 0.75],
+                scale: [0.99, 1.01, 0.99],
+              }}
+              transition={{
+                duration: 2,
+                repeat: Infinity,
+                ease: "easeInOut",
+              }}
+              className="font-serif text-[1.14rem] font-semibold tracking-wide text-[#b4975a]"
+            >
+              Chạm vào màu để xem gợi ý
+            </motion.span>
+          )}
           <span className="text-[#b4975a] text-[0.8rem] font-bold">✦</span>
         </div>
       </div>

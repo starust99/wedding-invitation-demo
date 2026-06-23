@@ -183,7 +183,7 @@ export const weddingConfig = {
     { time: "21:00", title: "Lời cảm ơn & chụp hình", description: "Gia đình gửi lời cảm ơn và chụp ảnh cùng khách mời." },
   ],
   dressCode: {
-    title: "Sắc pastel vườn xuân",
+    title: "Sắc màu vườn xuân",
     note: "Khách mời có thể chọn trang phục thanh lịch theo sắc hồng pastel, xanh dương pastel, trắng kem hoặc xanh lá tự nhiên. Nên ưu tiên chất liệu thoải mái vì buổi tiệc diễn ra ngoài trời.",
     colors: ["#FADCD9", "#D4E4F7", "#FEF8E7", "#B5D5A4", "#5C5247"],
   },
