@@ -51,7 +51,7 @@ export function ReferenceWeddingHero({ config, summary }: ReferenceWeddingHeroPr
   return (
     <section id="home" className="save-date-hero save-date-hero-arch">
       {/* Inline SVG definitions for the watercolor wavy mask */}
-      <svg width="0" height="0" className="absolute pointer-events-none" aria-hidden="true" style={{ position: "absolute", width: 0, height: 0 }}>
+      <svg width="1" height="1" className="absolute pointer-events-none" aria-hidden="true" style={{ position: "absolute", width: "1px", height: "1px", opacity: 0, overflow: "hidden" }}>
         <defs>
           <filter id="watercolor-rough-edge" filterUnits="objectBoundingBox">
             <feTurbulence type="fractalNoise" baseFrequency="0.04" numOctaves="4" result="noise" />
