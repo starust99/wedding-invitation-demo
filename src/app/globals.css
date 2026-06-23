@@ -1141,9 +1141,9 @@ textarea {
   position: relative;
   width: min(100%, 78.8rem);
   aspect-ratio: 1821 / 395;
-  margin: 0 auto;
+  margin: 0.35rem auto;
   filter: brightness(0.72) saturate(1.35);
-  transform: scale(1.075);
+  transform: scale(1.225);
 }
 
 @media (max-width: 767px) {
