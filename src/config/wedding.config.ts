@@ -157,15 +157,15 @@ export const weddingConfig = {
   venue: {
     name: "Terracotta Hotel & Resort Đà Lạt",
     area: "Sảnh Quảng trường",
-    location: "Hồ Tuyền Lâm, Đà Lạt, Việt Nam",
-    address: "Sảnh Quảng Trường, Terracotta Hotel & Resort Đà Lạt, Hồ Tuyền Lâm, Đà Lạt",
+    location: "Đà Lạt, Việt Nam",
+    address: "Sảnh Quảng Trường, Terracotta Hotel & Resort Đà Lạt, Đà Lạt",
     mapUrl: "https://www.google.com/maps/search/?api=1&query=S%E1%BA%A3nh%20Qu%E1%BA%A3ng%20Tr%C6%B0%E1%BB%9Dng%20Terracotta%20Hotel%20%26%20Resort%20%C4%90%C3%A0%20L%E1%BA%A1t",
     note: "Không gian ngoài trời thoáng đãng, đủ trang trọng cho nghi thức và đủ ấm cúng cho một buổi tối thân tình.",
   },
   church: {
     name: "Nhà Thờ Giáo Xứ Tam Hải",
-    address: "220/60/28 Đ. số 1, Bình Chiểu, Thủ Đức, Hồ Chí Minh",
-    mapUrl: "https://maps.app.goo.gl/Ndo7fXMnptEt1LfF6",
+    address: "180 Đ. Tam Châu, Tam Bình, Hồ Chí Minh",
+    mapUrl: "https://www.google.com/maps/search/?api=1&query=Nh%C3%A0%20th%E1%BB%9D%20Gi%C3%A1o%20x%E1%BB%A9%20Tam%20H%E1%BA%A3i%20180%20Tam%20Ch%C3%A2u%20Tam%20B%C3%ACnh%20Th%E1%BB%A7%20%C4%90%E1%BB%A9c",
   },
   event: {
     dateLabel: "Thứ Bảy, 26.12.2026",

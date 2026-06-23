@@ -1,10 +1,10 @@
 "use client";
 
+import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
-import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
-import { ChevronDown, HeartHandshake, MapPin } from "lucide-react";
-import { LineReveal, WriteReveal, FadeUp, PopReveal, useRevealReady } from "@/components/ui/CinematicReveal";
+import { ChevronDown } from "lucide-react";
+import { LineReveal, useRevealReady, isIntroDone } from "@/components/ui/CinematicReveal";
 import type { WeddingHeroEditorConfig } from "@/lib/wedding/hero-types";
 
 type ReferenceWeddingHeroProps = {
@@ -23,152 +23,141 @@ export type ReferenceWeddingHeroSummary = {
   welcomeTime?: string;
 };
 
-const defaultHeroPhotoSrc = "/assets/wedding/hero/np-1-183a.jpg";
-const defaultHeroPhotoAlt = "Ảnh cưới Nhật và Phương";
+const heroCompositeSrc = "/assets/wedding/hero/hero-arch-composite.webp";
+const heroCompositeAlt = "Ảnh cưới Nhật và Phương trong khung thiệp";
 
-function compactDate(date: string) {
-  return date.replace(/^Thứ\s+\S+,\s*/i, "");
-}
-
-function heroPhotoObjectPosition(config: WeddingHeroEditorConfig) {
-  const asset = config.assets.find((item) => item.id === "gardenPhotoPlate");
-  return {
-    desktop: asset?.objectPosition?.desktop || "62% 36%",
-    mobile: asset?.objectPosition?.mobile || "50% 33%",
-  };
-}
-
-function getVietnamWeddingTimestamp(date: string, time: string) {
-  const dateMatch = date.match(/(\d{1,2})\.(\d{1,2})\.(\d{4})/);
-  const timeMatch = time.match(/(\d{1,2}):(\d{2})/);
-  if (!dateMatch) return null;
-
-  const day = Number(dateMatch[1]);
-  const month = Number(dateMatch[2]);
-  const year = Number(dateMatch[3]);
-  const hour = timeMatch ? Number(timeMatch[1]) : 17;
-  const minute = timeMatch ? Number(timeMatch[2]) : 30;
-
-  return Date.UTC(year, month - 1, day, hour - 7, minute, 0);
-}
-
-function getCountdownParts(targetTimestamp: number | null, now: number | null) {
-  if (!targetTimestamp || !now) {
-    return { days: "--", hours: "--", minutes: "--", seconds: "--" };
-  }
-
-  const remaining = Math.max(0, targetTimestamp - now);
-  const totalSeconds = Math.floor(remaining / 1000);
-  const days = Math.floor(totalSeconds / 86400);
-  const hours = Math.floor((totalSeconds % 86400) / 3600);
-  const minutes = Math.floor((totalSeconds % 3600) / 60);
-  const seconds = totalSeconds % 60;
-
-  return {
-    days: String(days),
-    hours: String(hours).padStart(2, "0"),
-    minutes: String(minutes).padStart(2, "0"),
-    seconds: String(seconds).padStart(2, "0"),
-  };
-}
-
-function CountdownRail({ targetTimestamp }: { targetTimestamp: number | null }) {
-  const [now, setNow] = useState(() => Date.now());
-  const countdown = getCountdownParts(targetTimestamp, now);
-  const countdownItems = [
-    { label: "Ngày", value: countdown.days },
-    { label: "Giờ", value: countdown.hours },
-    { label: "Phút", value: countdown.minutes },
-    { label: "Giây", value: countdown.seconds },
-  ];
-
-  useEffect(() => {
-    const timer = window.setInterval(() => setNow(Date.now()), 1000);
-    return () => window.clearInterval(timer);
-  }, []);
-
-  return (
-    <div className="save-date-countdown-grid">
-      {countdownItems.map((item) => (
-        <div className="save-date-countdown-item" key={item.label}>
-          <strong suppressHydrationWarning>{item.value}</strong>
-          <span>{item.label}</span>
-        </div>
-      ))}
-    </div>
-  );
+function stripRepeatedHeroInvitePrefix(text: string) {
+  return text.replace(/^trân trọng kính mời\s+/i, "");
 }
 
 export function ReferenceWeddingHero({ config, summary }: ReferenceWeddingHeroProps) {
-  const dateText = compactDate(summary?.dateLabel || config.content.date);
-  const countdownTime = summary?.welcomeTime || "17:30";
-  const invitationText = summary?.invitationLine || config.content.description;
-  const targetTimestamp = useMemo(() => getVietnamWeddingTimestamp(dateText, countdownTime), [dateText, countdownTime]);
-  const isReady = useRevealReady(true); // Photo is always in view at top of page
-  const heroPhotoAsset = config.assets.find((asset) => asset.id === "gardenPhotoPlate");
-  const heroPhotoSrc = heroPhotoAsset?.src || defaultHeroPhotoSrc;
-  const heroPhotoAlt = heroPhotoAsset?.alt || defaultHeroPhotoAlt;
-  const heroPhotoPosition = heroPhotoObjectPosition(config);
+  const ready = useRevealReady(true);
+  const [imageLoaded, setImageLoaded] = useState(false);
+  const imgRef = useRef<HTMLImageElement>(null);
+
+  useEffect(() => {
+    if (imgRef.current && imgRef.current.complete) {
+      setImageLoaded(true);
+    }
+  }, []);
+
+  const invitationText = stripRepeatedHeroInvitePrefix(
+    summary?.invitationLine || config.content.description,
+  );
+
+  const textHeaderDelay = 1.05;
+  const textBodyDelay = 1.2;
 
   return (
-    <section
-      id="home"
-      className="save-date-hero"
-    >
-      <div className="save-date-stack">
-        <motion.article
-          className="save-date-card save-date-photo-card"
-          aria-label="Khung ảnh cưới"
-          initial={{ opacity: 0, scale: 0.92, y: 30, filter: "blur(6px)" }}
-          whileInView={{ opacity: 1, scale: 1, y: 0, filter: "blur(0px)" }}
-          viewport={{ once: false, margin: "-10% 0px -10% 0px" }}
-          transition={{ duration: 1.8, ease: [0.22, 1, 0.36, 1], delay: 0.1 }}
+    <section id="home" className="save-date-hero save-date-hero-arch">
+      {/* Inline SVG definitions for the watercolor wavy mask */}
+      <svg width="0" height="0" className="absolute pointer-events-none" aria-hidden="true" style={{ position: "absolute", width: 0, height: 0 }}>
+        <defs>
+          <filter id="watercolor-rough-edge" filterUnits="objectBoundingBox">
+            <feTurbulence type="fractalNoise" baseFrequency="0.04" numOctaves="4" result="noise" />
+            <feDisplacementMap in="SourceGraphic" in2="noise" scale="0.03" xChannelSelector="R" yChannelSelector="G" />
+          </filter>
+
+          <mask id="watercolor-mask" maskContentUnits="objectBoundingBox">
+            <rect x="-0.1" y="-0.1" width="1.2" height="0.83" fill="white" />
+            <path
+              d="M -0.1 0.63 L 1.1 0.63 L 1.1 0.91 C 0.98 0.95, 0.92 0.86, 0.80 0.92 C 0.68 0.96, 0.56 0.88, 0.44 0.94 C 0.32 0.97, 0.20 0.90, 0.08 0.93 C -0.004 0.96, -0.04 0.88, -0.1 0.92 Z"
+              fill="white"
+              filter="url(#watercolor-rough-edge)"
+            />
+          </mask>
+        </defs>
+      </svg>
+
+      <div
+        className="save-date-name-logo-reveal"
+        role="img"
+        aria-label="Long Nhật † Anh Phương"
+      >
+        <div
+          className={`save-date-name-logo hero-logo-fade ${ready ? "is-visible" : ""}`}
+          style={{ transitionDelay: "0.15s" }}
+          aria-hidden="true"
         >
-          <div className="save-date-photo-frame">
+          <Image
+            src="/assets/hero-names-logo-v9-centered.png"
+            alt="Long Nhật † Anh Phương"
+            fill
+            priority
+            className="save-date-name-logo-img"
+          />
+        </div>
+      </div>
+
+      <div className="save-date-arch-shell">
+        <div className="save-date-arch-wrapper">
+          <div
+            className={`hero-photo-fade ${ready && imageLoaded ? "is-visible" : ""}`}
+            style={{ transitionDelay: "0.45s" }}
+          >
+            <figure
+              className="save-date-arch-figure save-date-arch-figure--composite"
+              aria-label="Khung ảnh cưới"
+            >
+              <img
+                ref={imgRef}
+                src={heroCompositeSrc}
+                alt={heroCompositeAlt}
+                className="save-date-arch-composite"
+                width={2000}
+                height={1333}
+                decoding="async"
+                fetchPriority="high"
+                onLoad={() => setImageLoaded(true)}
+              />
+            </figure>
+          </div>
+
+          {/* Left Ornament */}
+          <div
+            className={`save-date-hero-ornament save-date-hero-ornament-left hero-ornament-fade-left ${ready ? "is-visible" : ""}`}
+            style={{ transitionDelay: "0.7s" }}
+          >
             <Image
-              src={heroPhotoSrc}
-              alt={heroPhotoAlt}
-              fill
-              preload
-              sizes="(max-width: 639px) 96vw, (max-width: 1023px) 38rem, 38rem"
-              className="save-date-photo-image"
-              style={{
-                objectPosition: `var(--hero-photo-mobile-position, ${heroPhotoPosition.mobile})`,
-                ["--hero-photo-mobile-position" as string]: heroPhotoPosition.mobile,
-                ["--hero-photo-desktop-position" as string]: heroPhotoPosition.desktop,
-              }}
+              src="/assets/hero-corner-left-v2.png"
+              alt=""
+              width={250}
+              height={250}
+              className="object-contain pointer-events-none"
             />
           </div>
-        </motion.article>
 
-        <article className="save-date-card save-date-message-card">
-          <FadeUp delay={0.2}>
-            <div className="save-date-ornament" aria-hidden="true" />
-          </FadeUp>
-          <WriteReveal delay={0.4}>
-            <h1 className="save-date-title">{config.content.names}</h1>
-          </WriteReveal>
-          <LineReveal delay={0.6}>
-            <p className="save-date-copy">
-              {summary?.guestGreeting ? `${summary.guestGreeting}. ` : ""}
-              {invitationText}
-            </p>
-          </LineReveal>
-
-          <div className="save-date-actions">
-            <a href="#rsvp" className="save-date-watercolor-btn">
-              <span className="save-date-btn-label">
-                <HeartHandshake aria-hidden="true" size={18} />
-                <span>Gửi hồi đáp</span>
-              </span>
-            </a>
-            <a href="#details" className="save-date-watercolor-btn">
-              <span className="save-date-btn-label">
-                <MapPin aria-hidden="true" size={18} />
-                <span>{config.content.secondaryCta}</span>
-              </span>
-            </a>
+          {/* Right Ornament */}
+          <div
+            className={`save-date-hero-ornament save-date-hero-ornament-right hero-ornament-fade-right ${ready ? "is-visible" : ""}`}
+            style={{ transitionDelay: "0.85s" }}
+          >
+            <Image
+              src="/assets/hero-corner-right-v3.png"
+              alt=""
+              width={250}
+              height={250}
+              className="object-contain pointer-events-none"
+            />
           </div>
+        </div>
+
+        <article className="save-date-hero-copy-block">
+          <LineReveal delay={textHeaderDelay} className="w-full">
+            <div className="save-date-invite-heading-image" aria-label={summary?.guestGreeting || "Trân trọng thân mời"}>
+              <Image
+                src="/assets/hero-invite-heading-v5.png"
+                alt=""
+                fill
+                aria-hidden="true"
+                sizes="(max-width: 767px) 78vw, 24rem"
+                className="object-contain"
+              />
+            </div>
+          </LineReveal>
+          <LineReveal delay={textBodyDelay} className="w-full">
+            <p className="save-date-copy save-date-copy-arch">{invitationText}</p>
+          </LineReveal>
         </article>
       </div>
 

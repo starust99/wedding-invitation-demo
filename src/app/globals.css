@@ -1,4 +1,54 @@
+@import url('https://fonts.googleapis.com/css2?family=Parisienne&display=swap');
 @import "tailwindcss";
+
+@font-face {
+  font-family: 'Copperlove';
+  src: local('Copperlove'),
+       local('Copperlove by Resistenza'),
+       local('Copperlove-Regular'),
+       url('/assets/fonts/Copperlove.otf') format('opentype'),
+       url('/assets/fonts/Copperlove.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+.font-parisienne {
+  font-family: 'Parisienne', cursive !important;
+}
+
+.font-copperlove {
+  font-family: 'Copperlove', var(--font-dancing-script), cursive !important;
+}
+
+.luxury-wedding-stationery-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: 26px;
+  border: 1px solid rgba(180, 151, 90, 0.22);
+  background-color: rgba(253, 251, 247, 0.55);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: 
+    0 8px 30px -10px rgba(63, 70, 66, 0.05),
+    0 2px 8px -2px rgba(63, 70, 66, 0.02);
+}
+
+.luxury-wedding-stationery-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0.012;
+  pointer-events: none;
+  z-index: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+}
+
+.names-image-color {
+  filter: invert(38%) sepia(12%) saturate(980%) hue-rotate(345deg) brightness(90%) contrast(87%);
+}
 
 :root {
   --cream: #fef8e7;
@@ -206,7 +256,7 @@ video::-webkit-media-controls-panel {
 .invitation-watercolor-backdrop__wash {
   position: absolute;
   inset: 0;
-  background-image: url("/assets/bg-mobile.png");
+  background-image: url("/assets/bg-mobile.webp");
   background-position: center top;
   background-size: cover;
   background-repeat: no-repeat;
@@ -216,7 +266,7 @@ video::-webkit-media-controls-panel {
 
 @media (min-width: 768px) {
   .invitation-watercolor-backdrop__wash {
-    background-image: url("/assets/bg-desktop.png");
+    background-image: url("/assets/bg-desktop.webp");
   }
 }
 
@@ -270,7 +320,7 @@ video::-webkit-media-controls-panel {
       radial-gradient(circle at 12% 14%, rgba(242, 198, 207, 0.34), transparent 35%),
       radial-gradient(circle at 88% 80%, rgba(143, 170, 220, 0.32), transparent 40%),
       linear-gradient(180deg, rgba(253, 251, 247, 0.65), rgba(253, 251, 247, 0.45)),
-      url("/assets/bg-mobile.png");
+      url("/assets/bg-mobile.webp");
     background-position:
       12% 14%,
       88% 80%,
@@ -458,6 +508,15 @@ textarea {
   color: #3f4642;
 }
 
+.save-date-hero-arch {
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding-top: clamp(1.6rem, 4.2vw, 3rem);
+}
+
 .save-date-hero::before,
 .save-date-hero::after {
   content: "";
@@ -524,6 +583,600 @@ textarea {
   transform: translateY(-0.75rem);
 }
 
+
+
+.save-date-arch-figure--composite .save-date-arch-composite {
+  width: 100% !important;
+  height: auto !important;
+  max-width: 100%;
+  object-fit: contain;
+}
+
+
+.save-date-arch-wrapper {
+  position: relative;
+  width: min(92vw, 42rem);
+  max-width: 42rem;
+  margin: 0 auto;
+}
+
+
+
+/* Hero composite — single image; watercolor mask hides hard seam at arch foot */
+.save-date-arch-figure.save-date-arch-figure--composite {
+  position: relative;
+  margin: 0 auto;
+  width: 100%;
+  aspect-ratio: unset !important;
+  overflow: visible;
+  background: transparent;
+  line-height: 0;
+  -webkit-mask: url(#watercolor-mask);
+  mask: url(#watercolor-mask);
+  -webkit-mask-image: url(#watercolor-mask);
+  mask-image: url(#watercolor-mask);
+  transform-style: flat !important;
+  perspective: none !important;
+}
+
+.save-date-hero-ornament {
+  position: absolute;
+  pointer-events: none;
+  z-index: 12;
+}
+
+/* Default / Desktop View (min-width: 1024px) */
+.save-date-hero-ornament-left {
+  left: 4%;
+  bottom: -3%;
+  width: clamp(13.8rem, 40%, 19.5rem);
+  height: auto;
+  filter: brightness(1.15);
+}
+
+.save-date-hero-ornament-right {
+  right: 4%;
+  bottom: 1%;
+  width: clamp(12rem, 35%, 17rem);
+  height: auto;
+}
+
+/* Tablet View (min-width: 768px and max-width: 1023px) */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .save-date-hero-ornament-left {
+    left: 4%;
+    bottom: -3%;
+    width: clamp(12.65rem, 38%, 17.8rem);
+    filter: brightness(1.15);
+  }
+  .save-date-hero-ornament-right {
+    right: 4%;
+    bottom: 1%;
+    width: clamp(11rem, 33%, 15.5rem);
+  }
+}
+
+/* Mobile View (max-width: 767px) */
+@media (max-width: 767px) {
+  .save-date-hero-ornament-left {
+    left: 1%;
+    bottom: -3%;
+    width: clamp(10.9rem, 41%, 14.4rem);
+    filter: brightness(1.15);
+  }
+  .save-date-hero-ornament-right {
+    right: 1%;
+    bottom: 1%;
+    width: clamp(9.5rem, 36%, 12.5rem);
+  }
+}
+
+.save-date-hero-ornament img {
+  width: 100% !important;
+  height: auto !important;
+  display: block;
+}
+
+
+
+
+.save-date-arch-figure--composite .save-date-arch-composite,
+.save-date-arch-figure--composite img {
+  display: block !important;
+  width: 100% !important;
+  height: auto !important;
+  max-width: 100%;
+  object-fit: contain;
+  background: transparent;
+  filter: none !important;
+}
+
+.save-date-arch-figure--composite .save-date-arch-align,
+.save-date-arch-figure--composite .save-date-arch-overlay-container,
+.save-date-arch-figure--composite .save-date-arch-frame,
+.save-date-arch-figure--composite .save-date-arch-pop-layer {
+  display: none !important;
+}
+
+.save-date-hero-arch .save-date-arch-shell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+.save-date-arch-shell {
+  position: relative;
+  z-index: 4;
+  display: grid;
+  width: min(100%, 46rem);
+  justify-items: center;
+  gap: clamp(1.1rem, 2.4vw, 1.7rem);
+  padding: clamp(0.4rem, 1vw, 0.8rem) 0 1rem;
+}
+
+.save-date-name-logo-reveal {
+  display: block;
+  width: 100%;
+  overflow: visible;
+  padding: 0.5rem 0;
+}
+
+.save-date-name-logo {
+  position: relative;
+  width: min(92vw, 40rem);
+  aspect-ratio: 1584 / 662;
+  margin: 0 auto;
+}
+
+.save-date-name-logo-layer {
+  position: absolute;
+  inset: 0;
+  will-change: opacity, transform, filter;
+}
+
+.save-date-name-logo-img {
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: contain;
+}
+
+.save-date-name-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  gap: clamp(0.75rem, 2vw, 1.6rem);
+  width: min(100%, 38rem);
+  color: #4a5549;
+}
+
+.save-date-name-script {
+  font-family: 'Copperlove', var(--font-dancing-script), var(--font-cormorant-garamond), serif;
+  font-size: clamp(2.4rem, 6.2vw, 4.2rem);
+  font-weight: normal;
+  color: #4a5549;
+  text-align: center;
+  white-space: nowrap;
+  display: block;
+  line-height: 1.15;
+  letter-spacing: 0.01em;
+  padding: 0.4rem 0;
+  width: 100%;
+}
+
+.save-date-name-cross {
+  font-family: 'Cormorant Garamond', var(--font-cormorant-garamond), serif;
+  font-size: 0.72em;
+  font-weight: 300;
+  color: rgba(96, 103, 90, 0.88);
+  margin: 0 clamp(0.35rem, 1vw, 0.7rem);
+  vertical-align: middle;
+  position: relative;
+  top: -0.06em;
+}
+
+.save-date-name {
+  font-family: var(--font-serif);
+  font-size: clamp(1.85rem, 4vw, 3rem);
+  font-weight: 600;
+  line-height: 1.08;
+  text-wrap: balance;
+}
+
+.save-date-name-left {
+  text-align: right;
+}
+
+.save-date-name-right {
+  text-align: left;
+}
+
+.save-date-name-separator {
+  font-family: var(--font-serif);
+  font-size: clamp(2rem, 4.2vw, 3.2rem);
+  font-weight: 500;
+  color: rgba(96, 103, 90, 0.86);
+  line-height: 1;
+}
+
+.save-date-arch-figure {
+  position: relative;
+  overflow: visible;
+  width: min(100%, 42rem);
+  aspect-ratio: 1.3 / 1;
+  margin: 0;
+  transform-style: preserve-3d;
+  perspective: 1000px;
+}
+
+.save-date-arch-frame {
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  overflow: hidden;
+  border-radius: 50% 50% 1.15rem 1.15rem / 29.2% 29.2% 1.15rem 1.15rem;
+  background: #f3ede4;
+  box-shadow:
+    0 28px 80px rgba(63, 70, 66, 0.1),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.65);
+  z-index: 1;
+  transform: translateZ(1px);
+  transform-style: preserve-3d;
+}
+
+.save-date-arch-image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+  object-fit: cover;
+  object-position: var(--hero-photo-mobile-position, 50% 34%);
+  transform: scale(1.02);
+  transform-origin: center center;
+  filter: saturate(1.04) brightness(1.03) contrast(1.02);
+}
+
+@media (min-width: 768px) {
+  .save-date-arch-image {
+    object-position: var(--hero-photo-desktop-position, 50% 36%);
+  }
+}
+
+
+.save-date-arch-frame .save-date-arch-image.save-date-photo-image {
+  object-fit: cover !important;
+  object-position: var(--hero-photo-mobile-position, 50% 28%) !important;
+  transform: none !important;
+  filter: saturate(1.04) brightness(1.03) contrast(1.02) !important;
+  width: 100% !important;
+  height: 100% !important;
+  left: 0 !important;
+  right: 0 !important;
+}
+
+@media (min-width: 768px) {
+  .save-date-arch-frame .save-date-arch-image.save-date-photo-image {
+    object-position: var(--hero-photo-desktop-position, 50% 30%) !important;
+  }
+}
+
+/* pop controlled by --hair-pop */
+
+
+/* --- Arch: photo clipped IN arch, frame mid, hair PNG top (aligned) --- */
+.save-date-arch-figure--hair-pop {
+  overflow: visible;
+}
+
+/* Vùng căn chỉnh: ảnh trong arch + cutout cùng transform (không lệch) */
+.save-date-arch-figure--hair-pop .save-date-arch-align {
+  position: absolute;
+  /* khớp cửa sổ ảnh bên trong file khung PNG */
+  top: 9.5%;
+  right: 11%;
+  bottom: 11%;
+  left: 11%;
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* Ảnh CHỈ hiện trong hình arch — không còn mép chữ nhật */
+.save-date-arch-figure--hair-pop .save-date-arch-photo-clip {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: 50% 50% 1.15rem 1.15rem / 29.2% 29.2% 1.15rem 1.15rem;
+  clip-path: inset(0 round 50% 50% 1.15rem 1.15rem / 29.2% 29.2% 1.15rem 1.15rem);
+  -webkit-clip-path: inset(0 round 50% 50% 1.15rem 1.15rem / 29.2% 29.2% 1.15rem 1.15rem);
+  background: #f3ede4;
+  isolation: isolate;
+}
+
+.save-date-arch-figure--hair-pop .save-date-arch-align-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+  object-position: var(--hero-photo-mobile-position, center 44%);
+  transform: scale(1.06);
+  transform-origin: center center;
+}
+
+.save-date-arch-figure--hair-pop .save-date-arch-base-img {
+  filter: saturate(1.04) brightness(1.03) contrast(1.02);
+}
+
+/* Viền vàng + hoa: sau ảnh trong arch, trước tóc pop */
+.save-date-arch-figure--hair-pop .save-date-arch-overlay-container {
+  z-index: 2 !important;
+}
+
+/* Cutout PNG: cùng vị trí/scale với ảnh gốc; mask chỉ lộ tóc vượt arch */
+.save-date-arch-figure--hair-pop .save-date-couple-pop {
+  z-index: 3;
+  object-fit: cover;
+  filter: drop-shadow(0 12px 16px rgba(70, 50, 35, 0.1));
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    #000 0%,
+    #000 34%,
+    transparent 50%,
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    to bottom,
+    #000 0%,
+    #000 34%,
+    transparent 50%,
+    transparent 100%
+  );
+}
+
+
+.save-date-arch-figure--hair-pop .save-date-arch-photo-clip {
+  border-radius: 50% 50% 1.15rem 1.15rem / 29.2% 29.2% 1.15rem 1.15rem;
+  clip-path: inset(0 round 50% 50% 1.15rem 1.15rem / 29.2% 29.2% 1.15rem 1.15rem);
+  -webkit-clip-path: inset(0 round 50% 50% 1.15rem 1.15rem / 29.2% 29.2% 1.15rem 1.15rem);
+}
+
+/* Không áp rule khung chữ nhật cũ lên hero hair-pop */
+.save-date-arch-figure--hair-pop .save-date-arch-frame {
+  display: none !important;
+}
+
+.save-date-arch-figure--hair-pop .save-date-arch-align {
+  overflow: visible;
+}
+
+.save-date-arch-figure--hair-pop .save-date-couple-pop {
+  object-fit: cover;
+}
+
+.save-date-arch-figure--hair-pop .save-date-arch-pop-layer {
+  display: block !important;
+}
+
+@media (min-width: 768px) {
+  .save-date-arch-figure--hair-pop .save-date-arch-align-img {
+    object-position: var(--hero-photo-desktop-position, center 44%);
+  }
+}
+
+@media (max-width: 600px) {
+  .save-date-arch-figure--hair-pop .save-date-arch-align {
+    top: 10%;
+    right: 9%;
+    bottom: 10%;
+    left: 9%;
+  }
+
+  .save-date-arch-figure--hair-pop .save-date-arch-align-img {
+    transform: scale(1.05);
+  }
+
+  .save-date-arch-figure--hair-pop .save-date-couple-pop {
+    filter: drop-shadow(0 8px 12px rgba(70, 50, 35, 0.08));
+  }
+}
+
+/* Hide pop when not using hair-pop mode */
+.save-date-arch-figure:not(.save-date-arch-figure--hair-pop) .save-date-arch-pop-layer {
+  display: none !important;
+}
+
+.save-date-arch-overlay-container {
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  pointer-events: none;
+  z-index: 11;
+  transform: translateZ(2px);
+  transform-style: preserve-3d;
+}
+
+.save-date-arch-overlay-image {
+  position: absolute !important;
+  top: -2.72% !important;
+  left: -10.74% !important;
+  right: -11.17% !important;
+  bottom: -4.28% !important;
+  width: 121.91% !important;
+  height: 107% !important;
+  max-width: none !important;
+  max-height: none !important;
+  border-radius: inherit;
+  object-fit: fill !important;
+  pointer-events: none;
+  z-index: 10;
+}
+
+
+
+
+
+.save-date-arch-figure {
+  overflow: visible !important;
+  margin-bottom: 0.25rem;
+}
+
+.save-date-arch-rise {
+  display: none !important;
+  position: absolute !important;
+  inset: -14% -4% 52% -4% !important;
+  z-index: 22;
+  pointer-events: none;
+  overflow: visible;
+  -webkit-mask-image: linear-gradient(
+    180deg,
+    #000 0%,
+    #000 55%,
+    rgba(0, 0, 0, 0.6) 72%,
+    transparent 88%
+  );
+  mask-image: linear-gradient(
+    180deg,
+    #000 0%,
+    #000 55%,
+    rgba(0, 0, 0, 0.6) 72%,
+    transparent 88%
+  );
+}
+
+.save-date-arch-figure--hair-pop .save-date-arch-rise { display: none !important; }
+
+.save-date-arch-figure--hair-pop .save-date-arch-overlay-container {
+  z-index: 14 !important;
+}
+
+.save-date-arch-rise-image {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: var(--hero-photo-mobile-position, 50% 38%);
+  transform: scale(1.14) translateY(-7%) !important;
+  transform-origin: center 22%;
+  filter: drop-shadow(0 8px 18px rgba(47, 58, 53, 0.2));
+}
+
+@media (min-width: 768px) {
+  .save-date-arch-rise-image {
+    object-position: var(--hero-photo-desktop-position, 50% 40%);
+    transform: scale(1.16) translateY(-8%) !important;
+  }
+}
+
+
+.save-date-arch-frame--cutout {
+  background: linear-gradient(180deg, #f8f4ef 0%, #efe8dc 100%);
+}
+
+.save-date-arch-image--cutout {
+  object-fit: contain !important;
+  object-position: 50% 88% !important;
+  transform: scale(1.08) translateY(4%) !important;
+  filter: none;
+}
+
+@media (min-width: 768px) {
+  .save-date-arch-image--cutout {
+    object-position: 50% 90% !important;
+    transform: scale(1.1) translateY(3%) !important;
+  }
+}
+
+.save-date-arch-figure--cutout .save-date-arch-overlay-image {
+  opacity: 0.98;
+}
+
+.save-date-arch-overlay-container {
+  z-index: 14 !important;
+}
+
+.save-date-hero-copy-block {
+  position: relative;
+  z-index: 5;
+  margin-top: -3.5rem;
+  padding-top: 0.25rem;
+}
+
+@media (max-width: 767px) {
+  .save-date-hero-copy-block {
+    margin-top: -2.5rem !important;
+  }
+  .save-date-copy-arch {
+    margin-top: -0.5rem !important;
+  }
+}
+
+.save-date-hero-copy-block {
+  display: grid;
+  justify-items: center;
+  justify-self: center;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  gap: 0;
+  width: min(100%, 36rem);
+  text-align: center;
+}
+
+.save-date-invite-kicker {
+  margin: 0;
+  color: rgba(120, 94, 67, 0.86);
+  font-family: var(--font-serif);
+  font-size: clamp(1.12rem, 2.1vw, 1.34rem);
+  font-weight: 600;
+  line-height: 1.5;
+}
+
+.save-date-invite-heading-image {
+  position: relative;
+  width: min(100%, 78.8rem);
+  aspect-ratio: 1821 / 395;
+  margin: 0 auto;
+  filter: brightness(0.72) saturate(1.35);
+  transform: scale(1.075);
+}
+
+@media (max-width: 767px) {
+  .save-date-invite-heading-image {
+    width: 100%;
+  }
+}
+
+.save-date-copy-arch {
+  max-width: 31rem;
+  margin-top: -0.25rem;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  color: rgba(72, 84, 72, 0.72);
+  font-size: clamp(1rem, 1.8vw, 1.14rem);
+  line-height: 1.78;
+}
+
+.save-date-date-line {
+  margin: 0.85rem 0 0;
+  color: rgba(86, 94, 84, 0.6);
+  font-size: 0.92rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.save-date-actions-arch {
+  margin-top: 1.25rem;
+}
+
   .save-date-card {
     position: relative;
     overflow: hidden;
@@ -570,7 +1223,7 @@ textarea {
   inset: 0;
   z-index: 0;
   object-fit: cover;
-  object-position: var(--hero-photo-desktop-position, 62% 36%);
+  object-position: var(--hero-photo-desktop-position, 65% 36%);
   filter: saturate(0.92) contrast(0.96) brightness(1.04);
   transform: scale(1);
   border-radius: inherit;
@@ -736,7 +1389,7 @@ textarea {
     inset 0 2px 5px rgba(255, 255, 255, 0.9) !important;
   backdrop-filter: blur(14px) saturate(140%) !important;
   -webkit-backdrop-filter: blur(14px) saturate(140%) !important;
-  aspect-ratio: 240 / 50;
+  aspect-ratio: 185 / 50;
   transition: transform 300ms ease, box-shadow 300ms ease;
   overflow: hidden;
 }
@@ -774,6 +1427,13 @@ textarea {
   color: #3a423e;
   font-weight: 700;
   letter-spacing: 0.02em;
+  font-size: 0.98rem;
+}
+
+@media (min-width: 640px) {
+  .save-date-btn-label {
+    font-size: 1.05rem;
+  }
 }
 
 .save-date-watercolor-btn:hover {
@@ -874,6 +1534,9 @@ textarea {
   transform: translateX(-50%);
   z-index: 5;
   color: rgba(63, 70, 66, 0.75);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .details-venue-layout {
@@ -931,7 +1594,7 @@ textarea {
 
 .details-venue-board {
   display: grid;
-  grid-template-columns: 1.1fr 2.1fr;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 2.35fr);
   grid-template-areas:
     "church banquet";
   gap: clamp(1rem, 2.2vw, 1.55rem);
@@ -1121,6 +1784,10 @@ textarea {
 
 .details-map-title {
   white-space: pre-line;
+  font-size: 1.25rem;
+  font-weight: 700;
+  line-height: 1.4;
+  color: #3f4642;
 }
 
 .details-map-schedule {
@@ -1139,9 +1806,9 @@ textarea {
   position: relative;
   overflow: hidden;
   aspect-ratio: 1448 / 1086;
-  border-radius: 2rem;
-  -webkit-mask-image: radial-gradient(ellipse 96% 93% at 50% 50%, black 50%, transparent 100%);
-  mask-image: radial-gradient(ellipse 96% 93% at 50% 50%, black 50%, transparent 100%);
+  border-radius: 1.8rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+  background-color: rgba(255, 255, 255, 0.5);
 }
 
 .details-map-image {
@@ -1283,10 +1950,7 @@ textarea {
 
 @media (max-width: 1023px) {
   .details-venue-board {
-    grid-template-columns: 1fr;
-    grid-template-areas:
-      "church"
-      "banquet";
+    display: none;
   }
 
   .details-map-card, .details-church-card {
@@ -1311,10 +1975,7 @@ textarea {
   }
 
   .details-venue-board {
-    grid-template-columns: 1fr;
-    grid-template-areas:
-      "church"
-      "banquet";
+    display: none;
   }
 
   .details-dress-card {
@@ -1326,7 +1987,7 @@ textarea {
   }
 
   .details-map-canvas {
-    aspect-ratio: 1 / 0.92;
+    aspect-ratio: auto;
   }
 
   .details-map-caption {
@@ -1392,13 +2053,12 @@ textarea {
   overflow: visible;
 }
 
-.timeline-garden-path-scene::before {
-  content: "";
+.timeline-garden-path-image {
   position: absolute;
   inset: -2.2rem 8% -2.4rem;
   z-index: 1;
   pointer-events: none;
-  background-image: url("/assets/timeline-path-mobile.png");
+  background-image: url("/assets/timeline-garden-path-mobile.png");
   background-position: center;
   background-repeat: no-repeat;
   background-size: 100% 100%;
@@ -1469,13 +2129,11 @@ textarea {
   overflow: hidden;
   display: grid;
   justify-items: center;
-  gap: 0.65rem;
-  border: 1px solid rgba(255, 255, 255, 0.68);
+  gap: 0.55rem;
+  border: 1px solid rgba(180, 151, 90, 0.25);
   border-radius: 1.12rem;
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.72), rgba(255, 255, 255, 0.42)),
-    linear-gradient(135deg, rgba(247, 202, 201, 0.11), rgba(146, 168, 209, 0.1));
-  box-shadow: 0 18px 50px rgba(63, 70, 66, 0.1);
+  background: rgba(253, 251, 247, 0.95);
+  box-shadow: 0 12px 36px rgba(63, 70, 66, 0.08);
   padding: 0.95rem;
   backdrop-filter: blur(24px) saturate(140%);
   -webkit-backdrop-filter: blur(24px) saturate(140%);
@@ -1489,20 +2147,20 @@ textarea {
 
 .timeline-garden-time {
   margin: 0;
-  color: rgba(143, 170, 220, 0.72);
+  color: #8d713a;
   font-family: var(--font-serif);
   font-size: 2.2rem;
-  font-weight: 600;
+  font-weight: 700;
   line-height: 0.95;
 }
 
 .timeline-garden-card h3 {
   margin: 0;
-  color: #3f4642;
+  color: #2f3532;
   font-family: var(--font-serif);
   font-size: var(--wedding-type-card-title);
   font-weight: 600;
-  line-height: 1.05;
+  line-height: 1.15;
 }
 
 @media (min-width: 1024px) {
@@ -1521,9 +2179,9 @@ textarea {
     min-height: 62rem;
   }
 
-  .timeline-garden-path-scene::before {
+  .timeline-garden-path-image {
     inset: -5.4rem 13% -5.2rem;
-    background-image: url("/assets/timeline-path-desktop.png");
+    background-image: url("/assets/timeline-garden-path-desktop.webp");
     opacity: 0.58;
   }
 
@@ -1574,9 +2232,9 @@ textarea {
     padding-top: 2rem;
   }
 
-  .timeline-garden-path-scene::before {
+  .timeline-garden-path-image {
     inset: -3.6rem 18% -3.4rem;
-    background-image: url("/assets/timeline-path-desktop.png");
+    background-image: url("/assets/timeline-garden-path-desktop.webp");
     opacity: 0.52;
   }
 
@@ -1618,9 +2276,9 @@ textarea {
     padding: 1.25rem 0 0;
   }
 
-  .timeline-garden-path-scene::before {
-    inset: -2.4rem -5% -2.2rem;
-    background-image: url("/assets/timeline-path-desktop.png");
+  .timeline-garden-path-image {
+    inset: 0.6rem -5% -2.2rem;
+    background-image: url("/assets/timeline-garden-path-desktop.webp");
     opacity: 0.55;
   }
 
@@ -2729,6 +3387,10 @@ textarea {
     padding-inline: 0.85rem;
   }
 
+  .save-date-hero-arch {
+    padding-top: 1.2rem;
+  }
+
   .save-date-stack {
     width: min(100%, 40rem);
   }
@@ -2763,6 +3425,52 @@ textarea {
   .save-date-hero {
     align-items: start;
     padding: 0.9rem 0.75rem 4.1rem;
+  }
+
+.save-date-hero-arch {
+    padding-top: 0.8rem;
+    align-items: center;
+  }
+
+  .save-date-name-logo {
+    width: 82vw;
+    max-width: none;
+  }
+
+  .save-date-arch-shell {
+    width: min(100%, 24rem);
+    gap: 1rem;
+  }
+
+  .save-date-name-row {
+    width: 100%;
+    gap: 0.65rem;
+  }
+
+  .save-date-name {
+    font-size: clamp(1.34rem, 7vw, 1.8rem);
+  }
+
+  .save-date-name-separator {
+    font-size: 1.85rem;
+  }
+
+  .save-date-arch-frame {
+    box-shadow:
+      0 20px 56px rgba(63, 70, 66, 0.1),
+      0 0 0 0.3rem rgba(255, 255, 255, 0.38);
+  }
+
+
+  .save-date-copy-arch {
+    margin-top: 0.6rem;
+    font-size: 0.98rem;
+    line-height: 1.68;
+  }
+
+  .save-date-date-line {
+    margin-top: 0.7rem;
+    font-size: 0.82rem;
   }
 
   .save-date-stack {
@@ -2802,7 +3510,7 @@ textarea {
   }
 
   .save-date-photo-image {
-    object-position: var(--hero-photo-mobile-position, 50% 33%);
+    object-position: var(--hero-photo-mobile-position, 62% 33%);
   }
 
   .save-date-title {
@@ -3252,4 +3960,129 @@ textarea {
   -webkit-backface-visibility: hidden;
   backface-visibility: hidden;
   will-change: transform;
+}
+
+/* CSS-based hardware-accelerated transitions for Hero Section */
+.hero-logo-fade {
+  opacity: 0;
+  transform: translateY(12px) scale(0.98);
+  transition: opacity 1.2s cubic-bezier(0.34, 1.56, 0.64, 1), transform 1.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+  will-change: opacity, transform;
+}
+.hero-logo-fade.is-visible {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+.hero-photo-fade {
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 1.5s cubic-bezier(0.25, 1, 0.5, 1), transform 1.5s cubic-bezier(0.25, 1, 0.5, 1);
+  will-change: opacity, transform;
+}
+.hero-photo-fade.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.hero-ornament-fade-left {
+  opacity: 0;
+  transform: scale(0.7) rotate(-8deg);
+  transition: opacity 1.2s cubic-bezier(0.34, 1.56, 0.64, 1), transform 1.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+  will-change: opacity, transform;
+}
+.hero-ornament-fade-left.is-visible {
+  opacity: 1;
+  transform: scale(1) rotate(0deg);
+}
+
+.hero-ornament-fade-right {
+  opacity: 0;
+  transform: scale(0.7) rotate(8deg);
+  transition: opacity 1.2s cubic-bezier(0.34, 1.56, 0.64, 1), transform 1.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+  will-change: opacity, transform;
+}
+.hero-ornament-fade-right.is-visible {
+  opacity: 1;
+  transform: scale(1) rotate(0deg);
+}
+
+.hero-text-fade {
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 1.2s cubic-bezier(0.25, 1, 0.5, 1), transform 1.2s cubic-bezier(0.25, 1, 0.5, 1);
+  will-change: opacity, transform;
+}
+.hero-text-fade.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Instant splash skip styles to prevent hydration flash */
+html.splash-skipped [role="dialog"][aria-label="Mở thiệp cưới"] {
+  display: none !important;
+}
+html.splash-skipped body {
+  overflow: auto !important;
+}
+
+/* Watercolor illustration blending styles */
+.watercolor-blend-container {
+  position: relative !important;
+  overflow: hidden !important;
+  border-radius: 1.8rem !important;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+.watercolor-blend-container::after {
+  content: "" !important;
+  position: absolute !important;
+  inset: -1px !important;
+  border-radius: 1.8rem !important;
+  box-shadow: none !important;
+  pointer-events: none !important;
+  z-index: 10 !important;
+}
+
+.watercolor-blend-container img {
+  mix-blend-mode: normal !important;
+  filter: contrast(1.0) saturate(1.0) !important;
+  border-radius: 1.8rem !important;
+  transform: scale(1.20) !important;
+  transform-origin: center center !important;
+}
+
+.watercolor-blend-container img.church-image-illustration {
+  transform: scale(1.20) translateX(-2.0%) !important;
+}
+
+/* Premium Gold Foil Text Effect */
+@keyframes goldShimmer {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.gold-foil-text {
+  color: #3f4642 !important;
+  background: none !important;
+  -webkit-background-clip: initial !important;
+  -webkit-text-fill-color: initial !important;
+  background-clip: initial !important;
+  -webkit-text-stroke: none !important;
+  filter: none !important;
+  animation: none !important;
+}
+
+.letterpress-text {
+  color: #3f4642 !important;
+  text-shadow: none !important;
 }

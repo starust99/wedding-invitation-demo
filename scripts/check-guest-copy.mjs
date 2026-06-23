@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
 import { createRequire } from "node:module";
-import { rmSync } from "node:fs";
+import { readFileSync, rmSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -313,7 +313,10 @@ const cases = [
 
 for (const item of cases) {
   const copy = buildInvitationCopy(item.input);
+  assert.equal(copy.insideInviteLine, `TRÂN TRỌNG & THÂN MỜI\n${copy.heroInvitationLine}`, `${item.name}: insideInviteLine follows invite heading + personalized line`);
+  assert(copy.heroInvitationLine.startsWith(copy.guestLabel), `${item.name}: heroInvitationLine starts with the display salutation`);
   for (const [field, expected] of item.includes ?? []) {
+    if (field === "insideInviteLine") continue;
     assert.equal(copy[field], expected, `${item.name}: ${field}`);
   }
   for (const [field, forbidden] of item.excludes ?? []) {
@@ -321,4 +324,126 @@ for (const item of cases) {
   }
 }
 
-console.log(`Checked ${cases.length} guest invitation copy cases.`);
+const parentElderInviteOwnerCases = [
+  ["Ông bà", "ông bà", "Ông bà"],
+  ["Bố mẹ", "bố mẹ", "Bố mẹ"],
+  ["Ba mẹ", "ba mẹ", "Ba mẹ"],
+  ["Bố", "bố", "Bố"],
+  ["Mẹ", "mẹ", "Mẹ"],
+  ["Bác", "bác", "Bác Tiến"],
+  ["Vợ chồng bác", "vợ chồng bác", "Vợ chồng Bác Tiến"],
+  ["Gia đình bác", "bác", "Gia đình Bác Tiến"],
+  ["Cô", "cô", "Cô Lan"],
+  ["Gia đình cô", "cô", "Gia đình Cô Lan"],
+  ["Chú", "chú", "Chú Sáu"],
+  ["Gia đình chú", "chú", "Gia đình Chú Sáu"],
+  ["Cô chú", "vợ chồng cô chú", "Cô Chú Sáu"],
+  ["Gia đình cô chú", "cô", "Gia đình Cô Chú Sáu"],
+  ["Dượng", "dượng", "Dượng Minh"],
+  ["Cô dượng", "vợ chồng cô dượng", "Cô Dượng Minh"],
+  ["Gia đình cô dượng", "cô dượng", "Gia đình Cô Dượng Minh"],
+  ["Thím", "thím", "Thím Hoa"],
+  ["Gia đình thím", "thím", "Gia đình Thím Hoa"],
+  ["Gia đình chú thím", "chú", "Gia đình Chú Thím Hoa"],
+  ["Dì", "dì", "Dì Nên"],
+  ["Gia đình dì", "dì", "Gia đình Dì Sáu"],
+  ["Cậu", "cậu", "Cậu Tư"],
+  ["Gia đình cậu", "cậu", "Gia đình Cậu Tư"],
+  ["Cậu mợ", "vợ chồng cậu mợ", "Cậu Mợ Tư"],
+  ["Gia đình cậu mợ", "cậu", "Gia đình Cậu Mợ Tư"],
+  ["Mợ", "mợ", "Mợ Tư"],
+  ["Gia đình mợ", "mợ", "Gia đình Mợ Tư"],
+  ["Bà", "bà", "Bà Lan"],
+];
+
+for (const [label, hostRelationship, guestName] of parentElderInviteOwnerCases) {
+  const copy = buildInvitationCopy({
+    ...base,
+    guestName,
+    invitationName: guestName,
+    hostRelationship,
+    relationship: `${hostRelationship} của cô dâu/chú rể`,
+    invitedBy: "parents",
+    hostPronoun: "gia đình chúng con",
+    coupleReference: "hai cháu",
+    householdMode: label.toLowerCase().includes("gia đình") ? "family" : "single",
+    plusOnePolicy: label.toLowerCase().includes("gia đình") ? "family" : "none",
+  });
+  assert.equal(
+    copy.heroInvitationLine,
+    `${guestName} đến dự Thánh Lễ Hôn Phối & tiệc cưới của hai cháu Nhật & Phương.`,
+    `parent elder invite owner: ${label}`,
+  );
+}
+
+const parentPeerInviteOwnerCases = [
+  ["Bạn Nghĩa", "bạn", "single", "none"],
+  ["Hai bạn Tùng & Hương", "bạn", "couple", "spouse"],
+  ["Vợ chồng bạn Minh", "vợ chồng bạn", "couple", "spouse"],
+  ["Gia đình Thảo & Vũ", "bạn", "family", "family"],
+  ["Gia đình Bạn Minh", "bạn", "family", "family"],
+  ["Anh Dũng", "anh", "single", "none"],
+  ["Chị Chi", "chị", "single", "none"],
+  ["Gia đình Anh Chị Hiền & Hồng", "anh chị", "family", "family"],
+  ["Em Linh", "em", "single", "none"],
+];
+
+for (const [guestName, hostRelationship, householdMode, plusOnePolicy] of parentPeerInviteOwnerCases) {
+  const copy = buildInvitationCopy({
+    ...base,
+    guestName,
+    invitationName: guestName,
+    hostRelationship,
+    relationship: `${hostRelationship} của cô dâu/chú rể`,
+    invitedBy: "parents",
+    hostPronoun: "gia đình chúng tôi",
+    coupleReference: "hai cháu",
+    householdMode,
+    plusOnePolicy,
+  });
+  assert.equal(
+    copy.heroInvitationLine,
+    `${guestName} đến dự Thánh Lễ Hôn Phối & tiệc cưới của con chúng tôi.`,
+    `parent peer/lower invite owner: ${guestName}`,
+  );
+}
+
+const parentYoungerReferenceCases = [
+  ["Cháu Nam", "cháu", "hai em"],
+  ["Cháu An", "cháu", "hai anh chị"],
+  ["Vợ chồng cháu Nam", "vợ chồng cháu", "hai em"],
+  ["Vợ chồng cháu An", "vợ chồng cháu", "hai anh chị"],
+  ["Gia đình cháu Nam", "cháu", "hai em"],
+  ["Gia đình cháu An", "cháu", "hai anh chị"],
+];
+
+for (const [guestName, hostRelationship, coupleReference] of parentYoungerReferenceCases) {
+  const copy = buildInvitationCopy({
+    ...base,
+    guestName,
+    invitationName: guestName,
+    hostRelationship,
+    relationship: `${hostRelationship} của cô dâu/chú rể`,
+    invitedBy: "parents",
+    hostPronoun: "cô chú",
+    coupleReference,
+    householdMode: guestName.toLowerCase().includes("gia đình") ? "family" : guestName.toLowerCase().includes("vợ chồng") ? "couple" : "single",
+    plusOnePolicy: guestName.toLowerCase().includes("gia đình") ? "family" : guestName.toLowerCase().includes("vợ chồng") ? "spouse" : "none",
+  });
+  assert.equal(
+    copy.heroInvitationLine,
+    `${guestName} đến dự Thánh Lễ Hôn Phối & tiệc cưới của ${coupleReference} Nhật & Phương.`,
+    `parent younger invite owner: ${guestName}`,
+  );
+}
+
+const spreadsheetSource = readFileSync(join(rootDir, "src/lib/invite-spreadsheet.ts"), "utf8");
+const spreadsheetParentElderKeywords = ["ông", "bà", "bố", "mẹ", "cụ", "bác", "cô", "chú", "dì", "dượng", "cậu", "mợ", "thím"];
+for (const keyword of spreadsheetParentElderKeywords) {
+  assert(spreadsheetSource.includes(`excelText("${keyword}")`), `Excel invite formula must classify parent elder keyword: ${keyword}`);
+}
+assert(spreadsheetSource.includes("&CHAR(10)&"), "Excel invite formula must keep heading and invitation line on two lines");
+assert(spreadsheetSource.includes('excelText("con chúng tôi")'), "Excel invite formula must keep parent peer wording");
+assert(spreadsheetSource.includes('excelText("hai cháu ")'), "Excel invite formula must keep parent elder wording");
+
+console.log(`Checked ${cases.length} guest invitation copy cases and ${parentElderInviteOwnerCases.length + parentPeerInviteOwnerCases.length + parentYoungerReferenceCases.length} invite-owner matrix cases.`);

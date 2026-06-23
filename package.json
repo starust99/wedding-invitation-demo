@@ -8,7 +8,9 @@
     "start": "next start",
     "lint": "eslint",
     "check:guest-copy": "node scripts/check-guest-copy.mjs",
-    "capture:browser": "node scripts/capture-browser-shots.mjs"
+    "capture:browser": "node scripts/capture-browser-shots.mjs",
+    "gitnexus:index": "gitnexus analyze --index-only",
+    "gitnexus:index:force": "gitnexus analyze --index-only --force"
   },
   "dependencies": {
     "@gsap/react": "^2.1.2",
@@ -35,6 +37,7 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.2.4",
+    "gitnexus": "^1.6.5",
     "playwright": "^1.59.1",
     "tailwindcss": "^4",
     "typescript": "^5"

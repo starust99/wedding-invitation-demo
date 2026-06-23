@@ -453,6 +453,7 @@ export function InviteAdminPanel() {
 
   async function regenerateToken() {
     if (!selectedInvitee) return;
+    if (!window.confirm("Token cũ sẽ ngừng hoạt động ngay. Bạn có chắc muốn tạo token mới cho khách này?")) return;
     setBusy(true);
     setMessage("");
     setError("");

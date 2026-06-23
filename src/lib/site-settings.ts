@@ -41,7 +41,7 @@ type SettingsInput = Partial<Omit<SiteSettings, "content">> & {
 
 export const draftStorageKey = "wedding-demo-draft-settings";
 export const publishedStorageKey = "wedding-demo-published-settings";
-export const settingsSchemaVersion = 10;
+export const settingsSchemaVersion = 12;
 
 export const defaultSettings: SiteSettings = {
   schemaVersion: settingsSchemaVersion,
@@ -291,6 +291,39 @@ export function normalizeSettings(settings: SettingsInput | null): SiteSettings 
     }
   }
 
+  // Migration v12: Update dressCodeText and dressCode.note to gọt chữ version
+  if ((settings.schemaVersion ?? 0) < 12) {
+    const isOldDressCodeText = (text: string) => 
+      !text || 
+      text.includes("Thương mời quý khách diện trang phục theo bảng màu") || 
+      text.includes("Giữ ấm là ưu tiên hàng đầu");
+
+    const newDressCodeText = "Thương mời quý khách diện trang phục tươi sáng theo bảng màu bên dưới (vui lòng hạn chế các tông màu tối).\n\nLưu ý thời tiết: Đà Lạt vào đông rất lạnh, quý khách hãy ưu tiên trang phục và phụ kiện đủ ấm cho bữa tiệc ngoài trời nhé!";
+
+    if (isOldDressCodeText(content.eventDetailsConfig?.content?.dressCodeText)) {
+      content = {
+        ...content,
+        eventDetailsConfig: {
+          ...content.eventDetailsConfig,
+          content: {
+            ...content.eventDetailsConfig?.content,
+            dressCodeText: newDressCodeText,
+          },
+        },
+      };
+    }
+
+    if (isOldDressCodeText(content.dressCode?.note)) {
+      content = {
+        ...content,
+        dressCode: {
+          ...content.dressCode,
+          note: newDressCodeText,
+        },
+      };
+    }
+  }
+
   return {
     ...settings,
     schemaVersion: settingsSchemaVersion,
@@ -317,7 +350,8 @@ export function readSettings(key: string): SiteSettings | null {
   try {
     const raw = window.localStorage.getItem(key);
     if (!raw) return null;
-    return normalizeSettings(JSON.parse(raw) as SettingsInput);
+    const parsed = JSON.parse(raw) as SettingsInput;
+    return normalizeSettings(parsed);
   } catch {
     return null;
   }

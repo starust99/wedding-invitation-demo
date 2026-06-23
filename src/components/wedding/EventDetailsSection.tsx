@@ -36,6 +36,7 @@ export type EventDetailsPublicData = {
   dressCodeNote?: string;
   dressCodeColors?: string[];
   dressCodeImageSrc?: string;
+  timeline?: { time: string; title: string; description: string }[];
 };
 
 function SafeGuides({ viewport }: { viewport: EventDetailsViewportMode }) {

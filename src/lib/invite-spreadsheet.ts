@@ -202,7 +202,7 @@ const legacyFallbackRowValues: LegacyRowValues = {
   audienceTagsText: "bạn bè;đồng nghiệp",
 };
 
-const spreadsheetInsideInviteVerb = " trân trọng & thân mời ";
+const spreadsheetInsideInviteHeading = "TRÂN TRỌNG & THÂN MỜI";
 
 const headerNotes: Partial<Record<TemplateColumnKey, string>> = {
   salutationCluster: "Chọn cụm danh xưng chuẩn. Ví dụ: Anh, Hai bạn, Vợ chồng bác, Gia đình dì, Gia đình, Gia đình anh chị, Gia đình anh, Gia đình chị, Cô chú.",
@@ -331,18 +331,35 @@ function cleanRedundantPrefix(salutationCluster: string, guestNameCore: string):
   return name;
 }
 
+function titleRelationshipWords(value: string) {
+  return value
+    .split(/\s+/)
+    .map((word) => (word ? word.charAt(0).toUpperCase() + word.slice(1) : word))
+    .join(" ");
+}
+
+function displayPrefixForSalutation(salutation: Pick<SalutationDefinition, "label" | "displayPrefix">) {
+  const prefix = clean(salutation.displayPrefix) || clean(salutation.label);
+  const normalized = normalizeText(prefix);
+  if (normalized === "hai ban") return "Hai bạn";
+  if (normalized.startsWith("gia dinh ")) {
+    return `Gia đình ${titleRelationshipWords(prefix.replace(/^gia đình\s+/i, ""))}`;
+  }
+  if (normalized === "gia dinh") return "Gia đình";
+  if (normalized.startsWith("vo chong ")) {
+    return `Vợ chồng ${titleRelationshipWords(prefix.replace(/^vợ chồng\s+/i, ""))}`;
+  }
+  return titleRelationshipWords(prefix);
+}
+
 function buildDisplayGuestName(salutationCluster: string, guestNameCore: string) {
   const cluster = clean(salutationCluster);
   const rawName = clean(guestNameCore);
   if (!cluster) return rawName;
   if (!rawName) return cluster;
   const cleanedName = cleanRedundantPrefix(salutationCluster, rawName);
-  const normalizedCluster = normalizeText(cluster) === "hai ban"
-    ? "Hai bạn"
-    : cluster
-      .split(/\s+/)
-      .map((word) => (word ? word.charAt(0).toUpperCase() + word.slice(1) : word))
-      .join(" ");
+  const salutation = findSalutationDefinition(cluster);
+  const normalizedCluster = salutation ? displayPrefixForSalutation(salutation) : titleRelationshipWords(cluster);
   return `${normalizedCluster} ${cleanedName}`.replace(/\s+/g, " ").trim();
 }
 
@@ -494,7 +511,7 @@ function previewFromLegacyValues(
 
   return {
     envelopeLine: preview.envelopeLine,
-    insideInviteLine: formatSpreadsheetInsideInviteLine(preview.insideInviteLine),
+    insideInviteLine: preview.insideInviteLine,
     invitationHostSubject: preview.invitationHostSubject,
     validationLine: flags?.missingDropdown
       ? "Thiếu lựa chọn dropdown"
@@ -502,15 +519,6 @@ function previewFromLegacyValues(
         ? "Thiếu tên khách"
         : "OK - sẵn sàng upload",
   };
-}
-
-function formatSpreadsheetInsideInviteLine(line: string) {
-  if (!line) return line;
-  return line
-    .replace(/\s+trân trọng kính mời\s+/gi, spreadsheetInsideInviteVerb)
-    .replace(/\s+mời\s+/i, spreadsheetInsideInviteVerb)
-    .replace(/\s+/g, " ")
-    .trim();
 }
 
 function helperGuestNameFormula(rowIndex: number) {
@@ -772,30 +780,16 @@ function insideInviteFormula(rowIndex: number, options: ReturnType<typeof resolv
   const invitedByCell = `$J${rowIndex}`;
   const hostPronounCell = `$K${rowIndex}`;
   const coupleReferenceCell = `$L${rowIndex}`;
-  const householdCell = `$N${rowIndex}`;
+  const coupleName = excelText(options.coupleDisplayName);
+  const isParentsHost = `${invitedByCell}=${excelText(invitedByLabels.parents)}`;
+  const isParentElder = `OR(ISNUMBER(SEARCH(${excelText("ông")},LOWER(${hostRelationshipCell}))),ISNUMBER(SEARCH(${excelText("ong")},LOWER(${hostRelationshipCell}))),ISNUMBER(SEARCH(${excelText("bà")},LOWER(${hostRelationshipCell}))),ISNUMBER(SEARCH(${excelText("ba")},LOWER(${hostRelationshipCell}))),ISNUMBER(SEARCH(${excelText("bố")},LOWER(${hostRelationshipCell}))),ISNUMBER(SEARCH(${excelText("bo")},LOWER(${hostRelationshipCell}))),ISNUMBER(SEARCH(${excelText("mẹ")},LOWER(${hostRelationshipCell}))),ISNUMBER(SEARCH(${excelText("me")},LOWER(${hostRelationshipCell}))),ISNUMBER(SEARCH(${excelText("cụ")},LOWER(${hostRelationshipCell}))),ISNUMBER(SEARCH(${excelText("cu")},LOWER(${hostRelationshipCell}))),ISNUMBER(SEARCH(${excelText("bác")},LOWER(${hostRelationshipCell}))),ISNUMBER(SEARCH(${excelText("bac")},LOWER(${hostRelationshipCell}))),ISNUMBER(SEARCH(${excelText("cô")},LOWER(${hostRelationshipCell}))),ISNUMBER(SEARCH(${excelText("co")},LOWER(${hostRelationshipCell}))),ISNUMBER(SEARCH(${excelText("chú")},LOWER(${hostRelationshipCell}))),ISNUMBER(SEARCH(${excelText("chu")},LOWER(${hostRelationshipCell}))),ISNUMBER(SEARCH(${excelText("dì")},LOWER(${hostRelationshipCell}))),ISNUMBER(SEARCH(${excelText("di")},LOWER(${hostRelationshipCell}))),ISNUMBER(SEARCH(${excelText("dượng")},LOWER(${hostRelationshipCell}))),ISNUMBER(SEARCH(${excelText("duong")},LOWER(${hostRelationshipCell}))),ISNUMBER(SEARCH(${excelText("cậu")},LOWER(${hostRelationshipCell}))),ISNUMBER(SEARCH(${excelText("cau")},LOWER(${hostRelationshipCell}))),ISNUMBER(SEARCH(${excelText("mợ")},LOWER(${hostRelationshipCell}))),ISNUMBER(SEARCH(${excelText("mo")},LOWER(${hostRelationshipCell}))),ISNUMBER(SEARCH(${excelText("thím")},LOWER(${hostRelationshipCell}))),ISNUMBER(SEARCH(${excelText("thim")},LOWER(${hostRelationshipCell}))))`;
+  const isChau = `OR(ISNUMBER(SEARCH(${excelText("cháu")},LOWER(${hostRelationshipCell}))),ISNUMBER(SEARCH(${excelText("chau")},LOWER(${hostRelationshipCell}))))`;
+  const normalizedHostPronoun = `IF(LEFT(LOWER(${hostPronounCell}),4)=${excelText("tụi ")},${excelText("chúng ")}&MID(${hostPronounCell},5,200),${hostPronounCell})`;
+  const parentsInviteOwner = `IF(${isParentElder},${excelText("hai cháu ")}&${coupleName},IF(${isChau},${coupleReferenceCell}&${excelText(" ")}&${coupleName},${excelText("con chúng tôi")}))`;
+  const inviteOwner = `IF(${isParentsHost},${parentsInviteOwner},${normalizedHostPronoun})`;
+  const inviteLine = `${guestCell}&${excelText(" đến dự Thánh Lễ Hôn Phối & tiệc cưới của ")}&${inviteOwner}&${excelText(".")}`;
 
-  const isFamilyCell = `OR(${householdCell}=${excelText(householdModeLabels.family)},ISNUMBER(SEARCH(${excelText("gia đình")},LOWER(${guestCell}))),ISNUMBER(SEARCH(${excelText("cả nhà")},LOWER(${guestCell}))))`;
-
-  const isChauCell = `OR(ISNUMBER(SEARCH(${excelText("cháu")},LOWER(${hostRelationshipCell}))),ISNUMBER(SEARCH(${excelText("chau")},LOWER(${hostRelationshipCell}))))`;
-
-  const invitationHostSubject = `$P${rowIndex}`;
-
-  const nameAlreadyIncludesFamily = `OR(ISNUMBER(SEARCH(${excelText("gia đình")},LOWER(${guestCell}))),ISNUMBER(SEARCH(${excelText("cả nhà")},LOWER(${guestCell}))))`;
-  const familyScopeExpression = `IF(${nameAlreadyIncludesFamily},"",IF(${householdCell}=${excelText(householdModeLabels.family)},${excelText(" và gia đình")},""))`;
-
-  const recipientExpression = recipientLineExpression(rowIndex, familyScopeExpression);
-  const finalRecipient = `IF(${isChauCell},${excelText("các cháu")},IF(${isFamilyCell},${excelText("gia đình")},${recipientExpression}))`;
-
-  const coupleInviteRecipientExpressionValue = coupleInviteRecipientExpression(rowIndex);
-  const coupleInviteRecipient = `IF(${isChauCell},${excelText("các cháu")},${coupleInviteRecipientExpressionValue})`;
-  const coupleInviteOwner = `IF(${invitedByCell}=${excelText(invitedByLabels.parents)},${coupleReferenceCell}&${excelText(` ${options.coupleDisplayName}`)},${hostPronounCell})`;
-  const isWarm = `OR(${equalsAny(hostRelationshipCell, ["bạn", "bạn thân", "đồng nghiệp", "em", "cháu"])})`;
-
-  const inviteVerb = excelText(spreadsheetInsideInviteVerb);
-  const coupleInviteLine = `${invitationHostSubject}&${inviteVerb}&${coupleInviteRecipient}&${excelText(" đến chung vui trong ngày cưới của ")}&${coupleInviteOwner}&${excelText(".")}`;
-  const normalInviteLine = `IF(${invitedByCell}=${excelText(invitedByLabels.parents)},${invitationHostSubject}&${inviteVerb}&${finalRecipient}&${excelText(" đến chung vui trong ngày cưới của ")}&${coupleReferenceCell}&${excelText(` ${options.coupleDisplayName}.`)},IF(${isWarm},${invitationHostSubject}&${inviteVerb}&${finalRecipient}&${excelText(" đến chung vui cùng ")}&${hostPronounCell}&${excelText(".")},${invitationHostSubject}&${inviteVerb}&${finalRecipient}&${excelText(" đến chung vui cùng ")}&${hostPronounCell}&${excelText(".")}))`;
-
-  return `IF(${guestCell}="","",IF(${householdCell}=${excelText(householdModeLabels.couple)},${coupleInviteLine},${normalInviteLine}))`;
+  return `IF(${guestCell}="","",${excelText(spreadsheetInsideInviteHeading)}&CHAR(10)&${inviteLine})`;
 }
 
 function validationFormula(rowIndex: number) {
@@ -1114,7 +1108,7 @@ function buildGuideSheet(workbook: ExcelJS.Workbook, options: ReturnType<typeof 
     worksheet.getCell(targetRow, termLookupStartColumn + 5).value = item.coupleHostPronoun;
     worksheet.getCell(targetRow, termLookupStartColumn + 6).value = item.parentsHostPronoun;
     worksheet.getCell(targetRow, termLookupStartColumn + 7).value = item.parentsCoupleReference ?? resolveParentsCoupleReference(item.hostRelationship);
-    worksheet.getCell(targetRow, termLookupStartColumn + 8).value = item.displayPrefix ?? item.label;
+    worksheet.getCell(targetRow, termLookupStartColumn + 8).value = displayPrefixForSalutation(item);
   });
 
   const groupHeaders = ["Nhóm khách", "Nhóm xem album"];
@@ -1304,6 +1298,7 @@ export async function parseInviteWorkbook(buffer: ArrayBuffer, existingInvitees:
     householdMode: findKeyByHeader(headers, ["Mời đi cùng", "household_mode", "householdMode"]),
     guestGroup: findKeyByHeader(headers, ["Nhóm khách", "Nhóm khách mời", "guest_group", "guestGroup"]),
     audienceTags: findKeyByHeader(headers, ["Nhóm xem album", "audience_tags", "audienceTags"]),
+    token: findKeyByHeader(headers, ["token", "Mã link riêng", "ma link rieng"]),
   };
 
   const isSimplifiedWorkbook = Boolean(indexes.salutationCluster && indexes.guestNameCore && indexes.guestGroup && indexes.inviteOwner);
@@ -1330,15 +1325,30 @@ export async function parseInviteWorkbook(buffer: ArrayBuffer, existingInvitees:
       if (!simplifiedValues.salutationCluster && !simplifiedValues.guestNameCore && !simplifiedValues.guestGroup && !simplifiedValues.inviteOwner) return;
 
       const inferred = inferTemplateValues(simplifiedValues);
+      if (!findSalutationDefinition(simplifiedValues.salutationCluster)) {
+        errors.push(`Dòng ${rowIndex}: cụm danh xưng không hợp lệ.`);
+        return;
+      }
+      if (!findGuestGroupDefinition(simplifiedValues.guestGroup)) {
+        errors.push(`Dòng ${rowIndex}: nhóm khách không hợp lệ.`);
+        return;
+      }
+      if (!findInviteOwnerDefinition(simplifiedValues.inviteOwner)) {
+        errors.push(`Dòng ${rowIndex}: người mời là không hợp lệ.`);
+        return;
+      }
       if (!simplifiedValues.salutationCluster || !simplifiedValues.guestGroup || !simplifiedValues.inviteOwner) {
         errors.push(`Dòng ${rowIndex}: thiếu lựa chọn dropdown.`);
+        return;
       }
       if (inferred.needsName && !clean(simplifiedValues.guestNameCore)) {
         errors.push(`Dòng ${rowIndex}: thiếu tên khách.`);
+        return;
       }
 
       const preview = rowPreview(simplifiedValues, options);
       const tokenPool = new Set([...existingTokens, ...usedTokens]);
+      const existingToken = indexes.token ? clean(read(indexes.token)) : "";
       const invitee = createInvitee({
         inviteUnit: deriveInviteUnit(inferred.householdMode),
         displayLabel: inferred.guestName,
@@ -1361,7 +1371,7 @@ export async function parseInviteWorkbook(buffer: ArrayBuffer, existingInvitees:
         phone: "",
         email: "",
         notes: "",
-      }, tokenPool);
+      }, tokenPool, existingToken || undefined);
 
       usedTokens.add(invitee.token);
       invitees.push(invitee);
@@ -1409,6 +1419,7 @@ export async function parseInviteWorkbook(buffer: ArrayBuffer, existingInvitees:
     };
     const preview = previewFromLegacyValues(rowValues, options, { missingDropdown: missingDropdowns || audienceTags.length === 0 });
     const tokenPool = new Set([...existingTokens, ...usedTokens]);
+    const existingToken = indexes.token ? clean(read(indexes.token)) : "";
     const invitee = createInvitee({
       inviteUnit: deriveInviteUnit(householdMode),
       displayLabel: guestName,
@@ -1431,7 +1442,7 @@ export async function parseInviteWorkbook(buffer: ArrayBuffer, existingInvitees:
       phone: "",
       email: "",
       notes: "",
-    }, tokenPool);
+    }, tokenPool, existingToken || undefined);
 
     usedTokens.add(invitee.token);
     invitees.push(invitee);

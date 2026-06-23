@@ -1,9 +1,21 @@
 "use client";
 
 import { motion, useInView } from "framer-motion";
-import { useRef, useSyncExternalStore } from "react";
+import { useRef, useSyncExternalStore, useState, useEffect } from "react";
 
-let isIntroDone = false;
+export let isIntroDone = false;
+if (typeof window !== "undefined") {
+  try {
+    const shouldForce = new URLSearchParams(window.location.search).get("intro") === "1";
+    const keys = Object.keys(window.localStorage);
+    const hasSeen = keys.some(key => key.startsWith("wedding-splash:") && window.localStorage.getItem(key) === "1");
+    if (hasSeen && !shouldForce) {
+      isIntroDone = true;
+    }
+  } catch (e) {
+    // Fail-safe for private browsing modes or locked sessionStorage
+  }
+}
 const introDoneListeners = new Set<() => void>();
 
 function notifyIntroDone() {
@@ -28,14 +40,57 @@ function getIntroDoneSnapshot() {
 }
 
 export function useRevealReady(isInView: boolean) {
+  const [mounted, setMounted] = useState(false);
+  const [delayedReady, setDelayedReady] = useState(false);
   const introDone = useSyncExternalStore(subscribeIntroDone, getIntroDoneSnapshot, () => false);
-  return introDone && isInView;
+
+  // Track if the intro was already completed on mount (e.g. splash skipped)
+  const [wasIntroDoneOnMount] = useState(() => isIntroDone);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const isActuallyReady = (introDone || isIntroDone) && isInView;
+
+  useEffect(() => {
+    if (isActuallyReady && mounted) {
+      // Add a safe 850ms delay to allow the Splash envelope to fade out (first load) or prevent layout lag (reload)
+      const delayTime = 850;
+      const timer = setTimeout(() => {
+        setDelayedReady(true);
+      }, delayTime);
+      return () => clearTimeout(timer);
+    } else {
+      setDelayedReady(false);
+    }
+  }, [isActuallyReady, mounted]);
+
+  if (!mounted) return false;
+  return delayedReady;
 }
 
 export function LineReveal({ children, delay = 0, className = "" }: { children: React.ReactNode; delay?: number; className?: string }) {
   const ref = useRef(null);
-  const isInView = useInView(ref, { once: false, margin: "-10% 0px -10% 0px" });
-  const ready = useRevealReady(isInView);
+  const ready = useRevealReady(true);
+  const [isSkipped, setIsSkipped] = useState(false);
+
+  useEffect(() => {
+    setIsSkipped(isIntroDone);
+  }, []);
+
+  if (isSkipped) {
+    return (
+      <div ref={ref} className={className}>
+        <div
+          className={`hero-text-fade ${ready ? "is-visible" : ""}`}
+          style={{ transitionDelay: `${delay}s` }}
+        >
+          {children}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div ref={ref} className={className}>
@@ -52,7 +107,7 @@ export function LineReveal({ children, delay = 0, className = "" }: { children: 
 
 export function WriteReveal({ children, delay = 0, className = "" }: { children: React.ReactNode; delay?: number; className?: string }) {
   const ref = useRef(null);
-  const isInView = useInView(ref, { once: false, margin: "-10% 0px -10% 0px" });
+  const isInView = useInView(ref, { once: true, margin: "0px 0px -8% 0px" });
   const ready = useRevealReady(isInView);
 
   return (
@@ -70,7 +125,7 @@ export function WriteReveal({ children, delay = 0, className = "" }: { children:
 
 export function FadeUp({ children, delay = 0, className = "" }: { children: React.ReactNode; delay?: number; className?: string }) {
   const ref = useRef(null);
-  const isInView = useInView(ref, { once: false, margin: "-10% 0px -10% 0px" });
+  const isInView = useInView(ref, { once: true, margin: "0px 0px -8% 0px" });
   const ready = useRevealReady(isInView);
 
   return (
@@ -88,7 +143,7 @@ export function FadeUp({ children, delay = 0, className = "" }: { children: Reac
 
 export function PopReveal({ children, delay = 0, className = "" }: { children: React.ReactNode; delay?: number; className?: string }) {
   const ref = useRef(null);
-  const isInView = useInView(ref, { once: false, margin: "-10% 0px -10% 0px" });
+  const isInView = useInView(ref, { once: true, margin: "0px 0px -8% 0px" });
   const ready = useRevealReady(isInView);
 
   return (

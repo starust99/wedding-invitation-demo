@@ -65,7 +65,7 @@ export function ThankYouSection({
           whileInView={{ opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }}
           viewport={{ once: false, margin: "-10% 0px -10% 0px" }}
           transition={{ duration: 0.8, ease: [0.25, 0.1, 0.25, 1] }}
-          className="glass-panel relative w-full max-w-6xl overflow-hidden rounded-[2.8rem] px-5 py-7 sm:px-8 sm:py-8 lg:px-10 lg:py-10"
+          className="glass-panel relative w-full max-w-4xl overflow-hidden rounded-[2.8rem] px-5 py-7 sm:px-8 sm:py-8 lg:px-10 lg:py-10"
         >
 
 
@@ -94,11 +94,11 @@ export function ThankYouSection({
                   </p>
                   <div className="flex flex-wrap items-center justify-center gap-3">
                     {isPostWedding && galleryLink ? (
-                      <a
+                       <a
                         href={galleryLink}
                         target="_blank"
                         rel="noreferrer"
-                        className="inline-flex h-[3.8rem] sm:h-[4.5rem] lg:h-[5rem] text-[0.92rem] sm:text-lg items-center justify-center transition hover:-translate-y-0.5 save-date-watercolor-btn"
+                        className="inline-flex h-[3.8rem] sm:h-[4.5rem] lg:h-[5rem] text-[1.02rem] sm:text-lg items-center justify-center transition hover:-translate-y-0.5 save-date-watercolor-btn"
                       >
                         <span className="save-date-btn-label">
                           <ImageIcon aria-hidden="true" size={16} className="sm:w-[18px] sm:h-[18px]" />
@@ -109,7 +109,7 @@ export function ThankYouSection({
                       <button
                         type="button"
                         onClick={() => navigateWithTransition(rsvpHref)}
-                        className="inline-flex h-[3.8rem] sm:h-[4.5rem] lg:h-[5rem] text-[0.92rem] sm:text-lg items-center justify-center transition hover:-translate-y-0.5 save-date-watercolor-btn"
+                        className="inline-flex h-[3.8rem] sm:h-[4.5rem] lg:h-[5rem] text-[1.02rem] sm:text-lg items-center justify-center transition hover:-translate-y-0.5 save-date-watercolor-btn"
                       >
                         <span className="save-date-btn-label">
                           <HeartHandshake aria-hidden="true" size={16} className="sm:w-[18px] sm:h-[18px]" />
@@ -123,7 +123,7 @@ export function ThankYouSection({
                         href={config.church?.mapUrl || config.venue.mapUrl}
                         target="_blank"
                         rel="noreferrer"
-                        className="inline-flex h-[3.8rem] sm:h-[4.5rem] lg:h-[5rem] text-[0.92rem] sm:text-lg items-center justify-center transition hover:-translate-y-0.5 save-date-watercolor-btn"
+                        className="inline-flex h-[3.8rem] sm:h-[4.5rem] lg:h-[5rem] text-[1.02rem] sm:text-lg items-center justify-center transition hover:-translate-y-0.5 save-date-watercolor-btn"
                       >
                         <span className="save-date-btn-label">
                         <MapPin aria-hidden="true" size={16} className="sm:w-[18px] sm:h-[18px]" />
@@ -138,7 +138,7 @@ export function ThankYouSection({
                         href={config.venue.mapUrl}
                         target="_blank"
                         rel="noreferrer"
-                        className="inline-flex h-[3.8rem] sm:h-[4.5rem] lg:h-[5rem] text-[0.92rem] sm:text-lg items-center justify-center transition hover:-translate-y-0.5 save-date-watercolor-btn"
+                        className="inline-flex h-[3.8rem] sm:h-[4.5rem] lg:h-[5rem] text-[1.02rem] sm:text-lg items-center justify-center transition hover:-translate-y-0.5 save-date-watercolor-btn"
                       >
                         <span className="save-date-btn-label">
                         <MapPin aria-hidden="true" size={16} className="sm:w-[18px] sm:h-[18px]" />

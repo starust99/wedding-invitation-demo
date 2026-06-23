@@ -15,6 +15,11 @@ export type GuestIdentity = {
 };
 
 const guestStorageKey = "wedding-demo-guest-identity";
+const guestIdentityByTokenPrefix = "wedding-identity-";
+
+function identityStorageKeyForToken(token: string) {
+  return `${guestIdentityByTokenPrefix}${token}`;
+}
 
 function clean(value: string | null) {
   return value?.trim() || undefined;
@@ -79,15 +84,53 @@ export function writeStoredGuestIdentity(identity: GuestIdentity) {
   window.localStorage.setItem(guestStorageKey, JSON.stringify(identity));
 }
 
-export function resolveGuestIdentity(search: string): GuestIdentity {
+export function readStoredGuestIdentityForToken(token: string): GuestIdentity {
+  if (typeof window === "undefined" || !token) return {};
+
+  try {
+    const raw = window.localStorage.getItem(identityStorageKeyForToken(token));
+    return raw ? JSON.parse(raw) as GuestIdentity : {};
+  } catch {
+    return {};
+  }
+}
+
+export function writeStoredGuestIdentityForToken(token: string, identity: GuestIdentity) {
+  if (typeof window === "undefined" || !token) return;
+  window.localStorage.setItem(identityStorageKeyForToken(token), JSON.stringify(identity));
+}
+
+export function findAnyStoredInviteToken(): string | undefined {
+  if (typeof window === "undefined") return undefined;
+
+  for (let index = 0; index < window.localStorage.length; index += 1) {
+    const key = window.localStorage.key(index);
+    if (!key?.startsWith(guestIdentityByTokenPrefix)) continue;
+    return key.slice(guestIdentityByTokenPrefix.length);
+  }
+
+  return undefined;
+}
+
+export function resolveGuestIdentity(search: string, options?: { token?: string; inviteeIdentity?: GuestIdentity }): GuestIdentity {
+  const params = new URLSearchParams(search.startsWith("?") ? search : `?${search}`);
+  const tokenFromSearch = clean(params.get("invite") ?? params.get("token"));
+  const token = clean(options?.token ?? null) || tokenFromSearch;
+
   const fromSearch = readGuestIdentityFromSearch(search);
-  const stored = readStoredGuestIdentity();
+  const storedForToken = token ? readStoredGuestIdentityForToken(token) : {};
+  const legacyStored = readStoredGuestIdentity();
+
   const identity = {
-    ...stored,
+    ...legacyStored,
+    ...storedForToken,
     ...Object.fromEntries(Object.entries(fromSearch).filter(([, value]) => Boolean(value))),
+    ...(options?.inviteeIdentity ?? {}),
   } as GuestIdentity;
 
-  if (identity.name || identity.honorific || identity.group) {
+  if (token && (identity.name || identity.displayLabel || identity.invitationName)) {
+    writeStoredGuestIdentityForToken(token, identity);
+  } else if (!token && (identity.name || identity.honorific || identity.group)) {
     writeStoredGuestIdentity(identity);
   }
 
@@ -213,6 +256,13 @@ export type InvitationCopy = {
   kinshipPronoun: string;
   dressCodeLine: string;
 };
+
+const personalInviteHeading = "TRÂN TRỌNG & THÂN MỜI";
+const parentHostElderInviteOwnerKeywords = [
+  "ông", "ong", "bà", "ba", "bố", "bo", "mẹ", "me", "cụ", "cu",
+  "bác", "bac", "cô", "co", "chú", "chu", "dì", "di", "dượng", "duong",
+  "cậu", "cau", "mợ", "mo", "thím", "thim",
+];
 
 type GuestAudience = "grand_elder" | "elder" | "senior" | "peer" | "junior" | "formal" | "neutral";
 
@@ -777,6 +827,8 @@ export function buildInvitationCopy(input?: InvitationCopyInput): InvitationCopy
     ? "các cháu"
     : isFamily
     ? "gia đình"
+    : recipientPronoun === "quý khách"
+    ? "quý khách"
     : resolveKinshipPronoun(input, tone, guestLabel).toLowerCase();
 
   const cleanHostPronoun = hostPronoun.replace(/^gia (đình|dinh)\s+/i, "");
@@ -800,25 +852,21 @@ export function buildInvitationCopy(input?: InvitationCopyInput): InvitationCopy
     ? familyHostSubject
     : sentenceCase(cleanHostPronoun);
 
-  const insideInviteLine = isCoupleInvite(input) || isOpenCompanionInvite(input) || tone === "parents_host"
-    ? `${invitationHostSubject} trân trọng kính mời ${kinshipPronoun} đến chung vui trong ngày cưới của ${coupleInviteOwner}.`
-    : tone === "neutral"
-    ? `${invitationHostSubject} trân trọng kính mời ${kinshipPronoun} đến chung vui trong ngày cưới của ${coupleDisplayName}.`
-    : isWarmPeer
-      ? `${invitationHostSubject} mời ${kinshipPronoun} đến chung vui trong ngày cưới.`
-      : `${invitationHostSubject} trân trọng kính mời ${kinshipPronoun} đến chung vui trong ngày cưới.`;
-
-  const heroInvitationLine = isCoupleInvite(input) || isOpenCompanionInvite(input)
-    ? `Kính mời ${kinshipPronoun} đến chung vui trong ngày cưới của ${coupleInviteOwner}.`
-    : tone === "parents_host"
-      ? `${invitationHostSubject} trân trọng kính mời ${kinshipPronoun} đến chung vui trong ngày cưới của hai cháu ${coupleDisplayName}.`
-      : tone === "neutral"
-        ? `${invitationHostSubject} trân trọng kính mời ${kinshipPronoun} đến chung vui trong ngày cưới của ${coupleDisplayName}.`
-        : tone === "elder"
-          ? `${invitationHostSubject} trân trọng kính mời ${kinshipPronoun} đến chung vui trong ngày cưới và chứng kiến ngày vui trọng đại của hai chúng con.`
-          : tone === "senior"
-            ? `${invitationHostSubject} trân trọng kính mời ${kinshipPronoun} đến chung vui trong ngày cưới và cùng chúng em lưu giữ những khoảnh khắc hạnh phúc nhất.`
-            : `${hostSubject} rất mong được đón ${kinshipPronoun} đến chung vui trong ngày cưới, đánh dấu cột mốc hai đứa chính thức về chung một nhà.`;
+  const normalizeInviteOwnerPronoun = (value: string): string => value.replace(/^tụi\s+/i, "chúng ");
+  const parentInviteOwner = (() => {
+    const parentRelationshipText = `${relationshipText} ${guestLabel}`;
+    if (includesAny(parentRelationshipText, parentHostElderInviteOwnerKeywords)) {
+      return `hai cháu ${coupleDisplayName}`;
+    }
+    if (isChauRelation) {
+      return `${coupleReference} ${coupleDisplayName}`;
+    }
+    return "con chúng tôi";
+  })();
+  const personalInviteOwner = isParentsHost ? parentInviteOwner : normalizeInviteOwnerPronoun(hostPronoun);
+  const personalInviteLine = `${guestLabel} đến dự Thánh Lễ Hôn Phối & tiệc cưới của ${personalInviteOwner}.`;
+  const insideInviteLine = `${personalInviteHeading}\n${personalInviteLine}`;
+  const heroInvitationLine = personalInviteLine;
   const rsvpLead = tone === "parents_host"
     ? `${hostSubject} mong nhận được lời hồi đáp để chuẩn bị đón tiếp chu đáo`
     : tone === "elder"
@@ -865,6 +913,6 @@ export function buildInvitationCopy(input?: InvitationCopyInput): InvitationCopy
     closingLine: `Sự hiện diện của ${presenceSubject} là niềm vinh hạnh và lời chúc phúc trọn vẹn nhất.`,
     signaturePrefix: tone === "elder" ? "Thương kính" : tone === "peer" || tone === "junior" ? "Thân mến" : "Trân trọng",
     kinshipPronoun,
-    dressCodeLine: `Vì Đà Lạt vào đông rất lạnh, xin lưu ý ${kinshipPronoun} mặc thật ấm.\n\nTông màu trang phục gợi ý: hồng phấn, xanh da trời, kem hoặc xanh lá dịu để khung hình thêm phần hài hòa.`,
+    dressCodeLine: `Thương mời ${kinshipPronoun} diện trang phục tươi sáng theo bảng màu bên dưới (vui lòng hạn chế các tông màu tối).\n\nLưu ý thời tiết: Đà Lạt vào đông rất lạnh, ${kinshipPronoun} hãy ưu tiên trang phục và phụ kiện đủ ấm cho bữa tiệc ngoài trời nhé!`,
   };
 }

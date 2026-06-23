@@ -9,7 +9,8 @@ import { ThankYouSection } from "@/components/ThankYouSection";
 import { TimelineSection } from "@/components/TimelineSection";
 import { WeddingDetailsSection } from "@/components/WeddingDetailsSection";
 import { WeddingSplashIntro } from "@/components/WeddingSplashIntro";
-import type { GuestIdentity } from "@/lib/guest-personalization";
+import { resolveGuestIdentity, type GuestIdentity } from "@/lib/guest-personalization";
+import { InviteAccessGate } from "@/components/InviteAccessGate";
 import { readLocalInvitees, type Invitee } from "@/lib/invites";
 import { applyTheme } from "@/lib/site-settings";
 import { usePublishedSettings } from "@/lib/use-published-settings";
@@ -44,23 +45,36 @@ export function InviteTokenPage({ token }: { token: string }) {
   const config = applyTheme(publishedSettings.content, publishedSettings.themeKey);
   const [payload, setPayload] = useState<InvitePayload>({ backend: "local" });
   const [loading, setLoading] = useState(true);
+  const [fetchStatus, setFetchStatus] = useState<"idle" | "ok" | "not-found">("idle");
 
   useEffect(() => {
     let cancelled = false;
 
     async function loadInvite() {
       setLoading(true);
+      setFetchStatus("idle");
 
       const localInvitee = readLocalInvitees().find((item) => item.token === token);
       if (!cancelled) {
         setPayload(localInvitee ? { backend: "local", invitee: localInvitee } : { backend: "local" });
+        if (localInvitee) {
+          setFetchStatus("ok");
+        }
       }
 
       try {
         const response = await fetch(`/api/invites/${encodeURIComponent(token)}`);
-        if (response.ok) {
+        if (response.status === 404) {
+          if (!cancelled) {
+            setFetchStatus("not-found");
+            if (!localInvitee) {
+              setPayload({ backend: "local" });
+            }
+          }
+        } else if (response.ok) {
           const data = await response.json() as InvitePayload;
           if (!cancelled) {
+            setFetchStatus("ok");
             const mergedInvitee = data.invitee && localInvitee?.rsvp && !data.invitee.rsvp
               ? {
                   ...data.invitee,
@@ -73,9 +87,23 @@ export function InviteTokenPage({ token }: { token: string }) {
               invitee: mergedInvitee,
             });
           }
+        } else if (!cancelled) {
+          if (localInvitee) {
+            setFetchStatus("ok");
+          } else {
+            setFetchStatus("not-found");
+            setPayload({ backend: "local" });
+          }
         }
       } catch {
-        // Local fallback keeps token page usable offline.
+        if (!cancelled) {
+          if (localInvitee) {
+            setFetchStatus("ok");
+          } else {
+            setFetchStatus("not-found");
+            setPayload({ backend: "local" });
+          }
+        }
       } finally {
         if (!cancelled) {
           setLoading(false);
@@ -103,7 +131,11 @@ export function InviteTokenPage({ token }: { token: string }) {
   }, [token]);
 
   const invitee = payload.invitee;
-  const guestIdentity = useMemo(() => toGuestIdentity(invitee), [invitee]);
+  const inviteeIdentity = useMemo(() => toGuestIdentity(invitee), [invitee]);
+  const guestIdentity = useMemo(
+    () => resolveGuestIdentity(typeof window !== "undefined" ? window.location.search : "", { token, inviteeIdentity }),
+    [token, inviteeIdentity],
+  );
   const rsvpHref = `/rsvp?invite=${encodeURIComponent(token)}`;
   const shouldShowThankYou = Boolean(invitee?.rsvp);
 
@@ -118,6 +150,10 @@ export function InviteTokenPage({ token }: { token: string }) {
       window.clearTimeout(scrollTimer);
     };
   }, [shouldShowThankYou]);
+
+  if (!loading && !invitee && fetchStatus === "not-found") {
+    return <InviteAccessGate variant="invalid-token" />;
+  }
 
   return (
     <main data-od-id="token-wedding-invitation" className="public-invitation-page min-h-screen overflow-x-hidden bg-transparent text-[#252934]">

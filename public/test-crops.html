@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Crop Test</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .outfit-crop {
+      position: relative;
+      width: 100%;
+      height: 9rem;
+      border-radius: 0.75rem;
+      overflow: hidden;
+      border: 1px solid rgba(180, 151, 90, 0.15);
+      background-color: rgba(255, 255, 255, 0.4);
+      box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06);
+    }
+    .outfit-image {
+      position: absolute;
+      height: 100%;
+      width: 100%;
+      inset: 0px;
+      object-fit: cover;
+      transform: scale(2.4);
+      transform-origin: center center;
+    }
+  </style>
+</head>
+<body class="bg-gray-100 p-8">
+  <h1 class="text-2xl font-bold mb-6">Dress Code Crops Verification Grid</h1>
+  
+  <!-- Grid container -->
+  <div class="grid grid-cols-7 gap-4 max-w-6xl">
+    <!-- Row headers -->
+    <div class="col-span-7 font-semibold text-lg border-b pb-2">Women Outfits</div>
+    
+    <!-- Women crops -->
+    <div class="flex flex-col items-center">
+      <span class="text-xs font-bold mb-1">Pink (10% 25%)</span>
+      <div class="outfit-crop">
+        <img class="outfit-image" src="/assets/dresscode-theme-v2.jpg" style="object-position: 10% 25%;">
+      </div>
+    </div>
+
+    <div class="flex flex-col items-center">
+      <span class="text-xs font-bold mb-1">Blue (38% 28%)</span>
+      <div class="outfit-crop">
+        <img class="outfit-image" src="/assets/dresscode-theme-v2.jpg" style="object-position: 38% 28%;">
+      </div>
+    </div>
+
+    <div class="flex flex-col items-center">
+      <span class="text-xs font-bold mb-1">Yellow (52% 20%)</span>
+      <div class="outfit-crop">
+        <img class="outfit-image" src="/assets/dresscode-theme-v2.jpg" style="object-position: 52% 20%;">
+      </div>
+    </div>
+
+    <div class="flex flex-col items-center">
+      <span class="text-xs font-bold mb-1">Green (65% 23%)</span>
+      <div class="outfit-crop">
+        <img class="outfit-image" src="/assets/dresscode-theme-v2.jpg" style="object-position: 65% 23%;">
+      </div>
+    </div>
+
+    <div class="flex flex-col items-center">
+      <span class="text-xs font-bold mb-1">Cream (76% 12%)</span>
+      <div class="outfit-crop">
+        <img class="outfit-image" src="/assets/dresscode-theme-v2.jpg" style="object-position: 76% 12%;">
+      </div>
+    </div>
+
+    <div class="flex flex-col items-center">
+      <span class="text-xs font-bold mb-1">Beige (10% 25%)</span>
+      <div class="outfit-crop">
+        <img class="outfit-image" src="/assets/dresscode-theme-v2.jpg" style="object-position: 10% 25%;">
+      </div>
+    </div>
+
+    <div class="flex flex-col items-center">
+      <span class="text-xs font-bold mb-1">Brown (10% 30%)</span>
+      <div class="outfit-crop">
+        <img class="outfit-image" src="/assets/dresscode-theme-v2.jpg" style="object-position: 10% 30%;">
+      </div>
+    </div>
+
+    <!-- Men Section -->
+    <div class="col-span-7 font-semibold text-lg border-b pt-6 pb-2">Men Outfits</div>
+
+    <div class="flex flex-col items-center">
+      <span class="text-xs font-bold mb-1">Pink (65% 82%)</span>
+      <div class="outfit-crop">
+        <img class="outfit-image" src="/assets/dresscode-theme-v2.jpg" style="object-position: 65% 82%;">
+      </div>
+    </div>
+
+    <div class="flex flex-col items-center">
+      <span class="text-xs font-bold mb-1">Blue (76% 70%)</span>
+      <div class="outfit-crop">
+        <img class="outfit-image" src="/assets/dresscode-theme-v2.jpg" style="object-position: 76% 70%;">
+      </div>
+    </div>
+
+    <div class="flex flex-col items-center">
+      <span class="text-xs font-bold mb-1">Yellow (52% 70%)</span>
+      <div class="outfit-crop">
+        <img class="outfit-image" src="/assets/dresscode-theme-v2.jpg" style="style" style="object-position: 52% 70%;">
+      </div>
+    </div>
+
+    <div class="flex flex-col items-center">
+      <span class="text-xs font-bold mb-1">Green (10% 82%)</span>
+      <div class="outfit-crop">
+        <img class="outfit-image" src="/assets/dresscode-theme-v2.jpg" style="object-position: 10% 82%;">
+      </div>
+    </div>
+
+    <div class="flex flex-col items-center">
+      <span class="text-xs font-bold mb-1">Cream (25% 80%)</span>
+      <div class="outfit-crop">
+        <img class="outfit-image" src="/assets/dresscode-theme-v2.jpg" style="object-position: 25% 80%;">
+      </div>
+    </div>
+
+    <div class="flex flex-col items-center">
+      <span class="text-xs font-bold mb-1">Beige (10% 70%)</span>
+      <div class="outfit-crop">
+        <img class="outfit-image" src="/assets/dresscode-theme-v2.jpg" style="object-position: 10% 70%;">
+      </div>
+    </div>
+
+    <div class="flex flex-col items-center">
+      <span class="text-xs font-bold mb-1">Brown (92% 82%)</span>
+      <div class="outfit-crop">
+        <img class="outfit-image" src="/assets/dresscode-theme-v2.jpg" style="object-position: 92% 82%;">
+      </div>
+    </div>
+  </div>
+</body>
+</html>

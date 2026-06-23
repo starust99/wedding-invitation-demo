@@ -9,10 +9,14 @@ import type { EventDetailsViewportMode } from "@/lib/wedding/event-details-types
 
 export function WeddingDetailsSection({ config, guestIdentity }: { config: WeddingConfig; guestIdentity?: GuestIdentity }) {
   const [viewport, setViewport] = useState<EventDetailsViewportMode>("desktop");
-  const inviteCopy = buildInvitationCopy(guestIdentity);
+  const inviteCopy = buildInvitationCopy({
+    ...guestIdentity,
+    coupleDisplayName: config.couple.displayName,
+    venueDisplayName: config.venue.name,
+  });
 
   useEffect(() => {
-    const mediaQuery = window.matchMedia("(max-width: 767px)");
+    const mediaQuery = window.matchMedia("(max-width: 1023px)");
     const syncViewport = () => setViewport(mediaQuery.matches ? "mobile" : "desktop");
 
     syncViewport();
@@ -30,10 +34,12 @@ export function WeddingDetailsSection({ config, guestIdentity }: { config: Weddi
         dateLabel: config.event.dateLabel,
         welcomeTime: config.event.welcomeTime,
         venueName: config.venue.name,
-        venueArea: "Sảnh Quảng Trường",
-        dressCodeTitle: "Trang phục chủ đề",
+        venueArea: "Quảng trường Terrace Montagne",
+        dressCodeTitle: config.dressCode.title || "Sắc pastel vườn xuân",
         dressCodeNote: inviteCopy.dressCodeLine,
-        dressCodeImageSrc: "/assets/dresscode-theme.jpg",
+        dressCodeImageSrc: "/assets/dresscode-theme-v2.jpg",
+        dressCodeColors: config.dressCode.colors,
+        timeline: config.timeline,
       }}
     />
   );

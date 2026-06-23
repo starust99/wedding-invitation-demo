@@ -78,18 +78,14 @@ export default function Home() {
       <WeddingDetailsSection config={config} guestIdentity={guestIdentity} />
       <TimelineSection config={config} />
       <GallerySection config={config} />
-      {!hasRsvp ? (
-        <RsvpSection config={config} guestIdentity={guestIdentity} />
-      ) : null}
-      {hasRsvp && activeRsvp ? (
-        <ThankYouSection
-          config={config}
-          guestIdentity={guestIdentity}
-          rsvpAttending={activeRsvp.attending}
-          rsvpAttendingCeremony={activeRsvp.attendingCeremony}
-          rsvpAttendingBanquet={activeRsvp.attendingBanquet}
-        />
-      ) : null}
+      <RsvpSection config={config} guestIdentity={guestIdentity} />
+      <ThankYouSection
+        config={config}
+        guestIdentity={guestIdentity}
+        rsvpAttending={activeRsvp?.attending || "yes"}
+        rsvpAttendingCeremony={activeRsvp?.attendingCeremony ?? true}
+        rsvpAttendingBanquet={activeRsvp?.attendingBanquet ?? true}
+      />
     </main>
   );
 }

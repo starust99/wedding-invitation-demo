@@ -28,6 +28,8 @@ import {
 import { buildInvitationCopy, resolveGuestIdentity, type GuestIdentity, type InvitationCopy } from "@/lib/guest-personalization";
 import { getInviteStatusFromRsvp, readLocalInvitees, upsertLocalInvitees, type Invitee } from "@/lib/invites";
 import { usePageTransition } from "@/components/PageTransitionEffect";
+import { InviteAccessGate } from "@/components/InviteAccessGate";
+import { findAnyStoredInviteToken } from "@/lib/guest-personalization";
 
 const lodgingGuestSchema = z
   .object({
@@ -103,6 +105,8 @@ const regretBanquetSteps: { key: StepKey; title: string; eyebrow: string }[] = [
   { key: "attendance", title: "Lời hồi đáp", eyebrow: "01" },
   { key: "review", title: "Xem lại và gửi", eyebrow: "02" },
 ] as const;
+
+const RSVP_GUEST_EDIT_DEADLINE = new Date("2026-09-26T00:00:00+07:00");
 
 const inputClass =
   "min-h-13 w-full rounded-2xl border border-serenity/22 bg-white/75 px-4 text-base text-center text-[#252934] outline-none transition placeholder:text-[#252934]/36 focus:border-serenity focus:bg-white/86 focus:ring-4 focus:ring-serenity/18";
@@ -274,6 +278,9 @@ export default function RSVPPage() {
   const [inviteToken, setInviteToken] = useState("");
   const [submitError, setSubmitError] = useState("");
   const [isHydratingGuest, setIsHydratingGuest] = useState(true);
+  const [tokenGateChecked, setTokenGateChecked] = useState(false);
+  const [missingInviteToken, setMissingInviteToken] = useState(false);
+  const [guestRsvpLocked, setGuestRsvpLocked] = useState(false);
   const { navigateWithTransition } = usePageTransition();
   const {
     control,
@@ -322,11 +329,7 @@ export default function RSVPPage() {
   const shouldUseComputedInsideInviteLine = storedInsideInviteLine.includes("vợ/chồng")
     || (inviteCopy.insideInviteLine.includes("hai em") && storedInsideInviteLine.includes("hai cháu"))
     || staleHostSubjects.some((subject) => storedInsideInviteLine.includes(`${subject} trân trọng kính mời`));
-  const displayedInsideInviteLine = isHydratingGuest
-    ? "Đang tải lời mời..."
-    : shouldUseComputedInsideInviteLine
-      ? inviteCopy.insideInviteLine
-      : storedInsideInviteLine || inviteCopy.insideInviteLine;
+  const displayedInsideInviteLine = isHydratingGuest ? "Đang tải lời mời..." : inviteCopy.insideInviteLine;
   const displayedClosingLine = isHydratingGuest ? "Thông tin riêng của khách mời sẽ hiện trong giây lát." : inviteCopy.closingLine;
   const rsvpRecipientLabel = isHydratingGuest ? "khách mời" : inlineRecipientLabel(inviteCopy.shortRecipientLabel);
   const lodgingGuests = normalizeLodgingGuests((watchedLodgingGuests ?? []) as Array<Partial<LodgingGuestForm> | undefined>);
@@ -386,7 +389,21 @@ export default function RSVPPage() {
 
     async function hydrateGuest() {
       const params = new URLSearchParams(window.location.search);
-      const token = params.get("invite") ?? params.get("token") ?? "";
+      let token = params.get("invite") ?? params.get("token") ?? "";
+
+      if (!token) {
+        const restored = findAnyStoredInviteToken();
+        if (restored) {
+          token = restored;
+          const next = new URL(window.location.href);
+          next.searchParams.set("invite", restored);
+          window.history.replaceState({}, "", next.toString());
+        }
+      }
+
+      setTokenGateChecked(true);
+      setMissingInviteToken(!token);
+      setGuestRsvpLocked(Date.now() >= RSVP_GUEST_EDIT_DEADLINE.getTime());
 
       if (token) {
         setInviteToken(token);
@@ -620,6 +637,10 @@ export default function RSVPPage() {
     }
   };
 
+  if (missingInviteToken && tokenGateChecked) {
+    return <InviteAccessGate variant="rsvp-missing-token" />;
+  }
+
   return (
     <main className="public-invitation-page rsvp-page cinematic-stage relative min-h-screen bg-transparent px-5 py-6 text-center text-[#252934] sm:py-10">
       <div aria-hidden="true" className="aurora-wash -z-10 opacity-60" />
@@ -633,6 +654,11 @@ export default function RSVPPage() {
           <ArrowLeft className="h-4 w-4" /> Về trang thiệp
         </button>
 
+        {guestRsvpLocked ? (
+          <p className="mt-4 rounded-2xl border border-serenity/22 bg-white/70 px-4 py-3 text-sm font-semibold text-[#252934]/72">
+            Đã hết hạn chỉnh sửa lời hồi đáp (sau 26/09/2026, 00:00 giờ Việt Nam). Vui lòng liên hệ gia đình nếu cần thay đổi.
+          </p>
+        ) : null}
         <section className="glass-panel mt-6 w-full overflow-hidden rounded-[2rem] text-center">
           {isSubmitted ? (
             <motion.div
@@ -735,7 +761,7 @@ export default function RSVPPage() {
             </aside>
 
             <form
-              onSubmit={handleSubmit(onSubmit, (errors) => {
+              onSubmit={guestRsvpLocked ? (event) => event.preventDefault() : handleSubmit(onSubmit, (errors) => {
                 setSubmitError("Có vài mục cần bổ sung. Vui lòng kiểm tra lại phần được đánh dấu.");
                 goToStepByKey(resolveStepFromErrors(errors, attending, attendingBanquet));
               })}
@@ -1101,7 +1127,7 @@ export default function RSVPPage() {
                   ) : (
                     <motion.button
                       type="submit"
-                      disabled={isSubmitting}
+                      disabled={isSubmitting || guestRsvpLocked}
                       className="light-sweep wedding-type-button inline-flex min-h-12 items-center justify-center rounded-full bg-rose-quartz px-7 text-[#252934] shadow-[0_16px_48px_rgba(146,168,209,0.22)] ring-1 ring-rose-quartz/70 disabled:opacity-60"
                       whileHover={{ scale: 1.04 }}
                       whileTap={{ scale: 0.96 }}

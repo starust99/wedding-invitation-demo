@@ -73,6 +73,19 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="vi" data-scroll-behavior="smooth" className={fontVariables}>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              try {
+                if (localStorage.getItem('wedding-splash:home') === '1' && !window.location.search.includes('intro=1')) {
+                  document.documentElement.classList.add('splash-skipped');
+                }
+              } catch (e) {}
+            `
+          }}
+        />
+      </head>
       <body>
         <InvitationWatercolorBackdrop />
         <PageTransitionEffect>{children}</PageTransitionEffect>

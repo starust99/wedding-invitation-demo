@@ -592,7 +592,7 @@ function parseCsv(text: string) {
   });
 }
 
-export function createInvitee(input: InviteeInput, existingTokens = new Set<string>()): Invitee {
+export function createInvitee(input: InviteeInput, existingTokens = new Set<string>(), preferredToken?: string): Invitee {
   const now = new Date().toISOString();
   const displayLabel = clean(input.displayLabel) || clean(input.guestName) || "Khách mời";
   const guestName = clean(input.guestName) || displayLabel;
@@ -620,10 +620,13 @@ export function createInvitee(input: InviteeInput, existingTokens = new Set<stri
     householdMode,
     plusOnePolicy,
   });
+  const cleanedPreferred = normalizeInviteToken(clean(preferredToken));
   const cleanedToken = normalizeInviteToken(clean(input.token));
-  const token = cleanedToken && !existingTokens.has(cleanedToken)
-    ? cleanedToken
-    : generateInviteToken(displayLabel, existingTokens);
+  const token = cleanedPreferred && !existingTokens.has(cleanedPreferred)
+    ? cleanedPreferred
+    : cleanedToken && !existingTokens.has(cleanedToken)
+      ? cleanedToken
+      : generateInviteToken(displayLabel, existingTokens);
   existingTokens.add(token);
   const insideInviteLine = clean(input.insideInviteLine);
   const legacyInsideLine = `Trân trọng kính mời: ${displayLabel}`;

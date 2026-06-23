@@ -11,13 +11,18 @@ type InviteLinksPayload = {
 };
 
 function resolveOrigin(request: Request, origin: unknown) {
+  const productionOrigin = process.env.NEXT_PUBLIC_SITE_URL?.trim().replace(/\/$/, "");
+  if (process.env.NODE_ENV === "production" && productionOrigin) {
+    return productionOrigin;
+  }
+
   if (typeof origin === "string" && origin.trim()) {
     return origin.trim().replace(/\/$/, "");
   }
 
   const forwardedProto = request.headers.get("x-forwarded-proto") || "http";
   const forwardedHost = request.headers.get("x-forwarded-host") || request.headers.get("host") || "";
-  return forwardedHost ? `${forwardedProto}://${forwardedHost}` : "";
+  return forwardedHost ? `${forwardedProto}://${forwardedHost}` : productionOrigin || "";
 }
 
 export async function POST(request: Request) {

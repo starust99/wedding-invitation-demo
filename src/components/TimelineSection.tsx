@@ -39,7 +39,7 @@ export function TimelineSection({ config }: { config: WeddingConfig }) {
   const nodes = config.timeline.map(buildTimelineNode);
 
   return (
-    <section id="timeline" className="timeline-garden-section cinematic-stage relative overflow-hidden px-5 py-24 text-ink sm:px-8 lg:py-32">
+    <section id="timeline" className="hidden md:block timeline-garden-section cinematic-stage relative overflow-hidden px-5 py-24 text-ink sm:px-8 lg:py-32">
       <SectionMediaLayers config={config} section="timeline" className="timeline-garden-media opacity-[0.08]" />
       <div aria-hidden="true" className="paper-grain-luxury timeline-garden-grain opacity-15" />
 
@@ -56,7 +56,18 @@ export function TimelineSection({ config }: { config: WeddingConfig }) {
         </div>
 
         <div className="timeline-garden-path-scene relative">
+          {/* Winding road */}
+          <div
+            className="timeline-garden-path-image opacity-[0.58]"
+          >
+            <div
+              aria-hidden="true"
+              className="absolute inset-0"
+              style={{ backgroundImage: "url('/assets/timeline-garden-path-desktop.webp')", backgroundPosition: "center", backgroundRepeat: "no-repeat", backgroundSize: "100% 100%" }}
+            />
+          </div>
           <ol className="timeline-garden-list relative z-10">
+
             {nodes.map((node) => (
               <motion.li
                 key={`${node.time}-${node.title}`}

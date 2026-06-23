@@ -460,14 +460,14 @@ export const heroSlotDefinitions: HeroSlotDefinition[] = [
     id: "gardenPhotoPlate",
     label: "Ảnh chân dung kỷ niệm",
     role: "content",
-    src: "",
+    src: "/assets/wedding/hero/np-1-183a.jpg",
     alt: "",
     required: false,
     lockAspectRatio: true,
     hasTransparency: false,
     objectPosition: {
-      desktop: "62% 36%",
-      mobile: "50% 33%",
+      desktop: "50% 44%",
+      mobile: "50% 44%",
     },
     defaultAspectRatio: 2 / 3,
     recommendedRatio: "2:3 hoặc 3:4",
@@ -599,6 +599,29 @@ function normalizeBlendMode(value: HeroBlendMode | undefined, fallback: HeroBlen
 }
 
 function normalizeAsset(asset: Partial<HeroAssetConfig> | undefined, fallback: HeroAssetConfig): HeroAssetConfig {
+  let objectPosition = asset?.objectPosition ?? fallback.objectPosition;
+  const srcLower = asset?.src?.toLowerCase() || fallback.src?.toLowerCase() || "";
+  const isCouplePhoto = !asset?.src || srcLower.includes("np-1-183a") || srcLower.includes("1_183a") || srcLower.includes("n&p") || srcLower.includes("couple-cutout");
+
+  // Auto-migrate old bad defaults to the new golden ratios
+  if (fallback.id === "gardenPhotoPlate" && objectPosition) {
+    if (isCouplePhoto) {
+      objectPosition = {
+        desktop: "50% 44%",
+        mobile: "50% 44%",
+      };
+    } else {
+      const desktopPos = objectPosition.desktop;
+      const mobilePos = objectPosition.mobile;
+      const migratedDesktop = (desktopPos === "62% 36%" || desktopPos === "62% 42%" || desktopPos === "48% 42%" || desktopPos === "45% 42%") ? "65% 56%" : desktopPos;
+      const migratedMobile = (mobilePos === "50% 33%" || mobilePos === "50% 40%" || mobilePos === "55% 40%" || mobilePos === "48% 40%" || mobilePos === "45% 40%") ? "62% 53%" : mobilePos;
+      objectPosition = {
+        desktop: migratedDesktop,
+        mobile: migratedMobile,
+      };
+    }
+  }
+
   return {
     id: fallback.id,
     label: asset?.label || fallback.label,
@@ -608,7 +631,7 @@ function normalizeAsset(asset: Partial<HeroAssetConfig> | undefined, fallback: H
     required: asset?.required ?? fallback.required,
     lockAspectRatio: asset?.lockAspectRatio ?? fallback.lockAspectRatio,
     hasTransparency: asset?.hasTransparency ?? fallback.hasTransparency,
-    objectPosition: asset?.objectPosition ?? fallback.objectPosition,
+    objectPosition,
     desktop: normalizePlacement(asset?.desktop, fallback.desktop),
     mobile: normalizePlacement(asset?.mobile, fallback.mobile),
   };

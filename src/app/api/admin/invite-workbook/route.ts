@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { hasAdminSession } from "@/lib/admin-auth";
 import { parseInviteWorkbook } from "@/lib/invite-spreadsheet";
+import { buildInvitationCopy } from "@/lib/guest-personalization";
 
 export const runtime = "nodejs";
 
@@ -24,5 +25,18 @@ export async function POST(request: Request) {
   const parsed = await parseInviteWorkbook(await file.arrayBuffer(), [], {
     coupleDisplayName: typeof coupleDisplayName === "string" ? coupleDisplayName : undefined,
   });
-  return NextResponse.json(parsed);
+
+  const warnings: string[] = [];
+  for (const invitee of parsed.invitees) {
+    const runtime = buildInvitationCopy({
+      ...invitee,
+      coupleDisplayName: typeof coupleDisplayName === "string" ? coupleDisplayName : undefined,
+    });
+    const stored = invitee.insideInviteLine?.trim();
+    if (stored && stored !== runtime.insideInviteLine) {
+      warnings.push(`${invitee.displayLabel || invitee.guestName}: lời mời preview Excel khác runtime.`);
+    }
+  }
+
+  return NextResponse.json({ ...parsed, warnings });
 }

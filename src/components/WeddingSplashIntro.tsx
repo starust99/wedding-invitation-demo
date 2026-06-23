@@ -1,13 +1,10 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import { Sparkles, X } from "lucide-react";
-import Image from "next/image";
-import { buildInvitationCopy, type GuestIdentity } from "@/lib/guest-personalization";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import type { GuestIdentity } from "@/lib/guest-personalization";
 import type { WeddingConfig } from "@/lib/site-settings";
 import { CanvasVideo } from "./CanvasVideo";
-import { FirefliesOverlay } from "./wedding/FirefliesOverlay";
 
 type SplashStatus = "checking" | "closed" | "opening" | "hidden";
 
@@ -18,13 +15,13 @@ function readForceIntro() {
 
 function markSplashSeen(key: string) {
   try {
-    window.sessionStorage.setItem(key, "1");
+    window.localStorage.setItem(key, "1");
   } catch {}
 }
 
 function hasSeenSplash(key: string) {
   try {
-    return window.sessionStorage.getItem(key) === "1";
+    return window.localStorage.getItem(key) === "1";
   } catch {
     return false;
   }
@@ -32,8 +29,8 @@ function hasSeenSplash(key: string) {
 
 
 export function WeddingSplashIntro({
-  config,
-  guestIdentity,
+  config: _config,
+  guestIdentity: _guestIdentity,
   storageKey = "public",
   ready = true,
 }: {
@@ -42,8 +39,7 @@ export function WeddingSplashIntro({
   storageKey?: string;
   ready?: boolean;
 }) {
-  const reduceMotion = useReducedMotion();
-  const [status, setStatus] = useState<SplashStatus>("checking");
+const [status, setStatus] = useState<SplashStatus>("checking");
   const [isImmediateClose, setIsImmediateClose] = useState(false);
   const [viewport, setViewport] = useState<"desktop" | "mobile" | null>(null);
 
@@ -56,11 +52,6 @@ export function WeddingSplashIntro({
   }, []);
   const closeTimer = useRef<number | null>(null);
   const sessionKey = `wedding-splash:${storageKey}`;
-  const inviteCopy = useMemo(() => buildInvitationCopy({
-    ...guestIdentity,
-    coupleDisplayName: config.couple.displayName,
-    venueDisplayName: config.venue.name,
-  }), [config.couple.displayName, config.venue.name, guestIdentity]);
   const isVisible = status !== "hidden";
 
   useEffect(() => {
@@ -81,10 +72,8 @@ export function WeddingSplashIntro({
   const closeIntro = useCallback(() => {
     markSplashSeen(sessionKey);
     setStatus("hidden");
-    // Wait for the exit animation (1.2s) to finish before triggering page animations
-    window.setTimeout(() => {
-      window.dispatchEvent(new Event("introFinished"));
-    }, 1200);
+    // Dispatch immediately so Hero animations run concurrently with the exit transition
+    window.dispatchEvent(new Event("introFinished"));
   }, [sessionKey]);
 
   const openIntro = useCallback(() => {
@@ -155,11 +144,6 @@ export function WeddingSplashIntro({
               >
                 {/* Invisible click target covering the wax seal */}
                 <div className="w-28 h-28 sm:w-36 sm:h-36 rounded-full" />
-                {inviteCopy.heroGreeting ? (
-                  <p className="mb-3 text-center text-[0.72rem] font-medium uppercase tracking-[0.22em] text-[#8C7355]/88">
-                    {inviteCopy.heroGreeting}
-                  </p>
-                ) : null}
                 <p className="mt-5 whitespace-nowrap text-[0.65rem] font-medium uppercase tracking-[0.25em] text-[#8C7355] bg-white/60 px-4 py-1.5 rounded-full backdrop-blur-md shadow-sm">
                   Chạm để mở
                 </p>
