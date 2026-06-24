@@ -47,9 +47,11 @@ export function TimelineSection({ config }: { config: WeddingConfig }) {
         <div
           className="timeline-garden-intro grid justify-items-center gap-5 text-center"
         >
-          <p className="section-kicker-dark wedding-type-kicker">{config.sections.timeline.eyebrow}</p>
+          <h3 className="font-serif text-[1.12rem] sm:text-[1.25rem] md:text-[1.38rem] font-bold gold-foil-text uppercase leading-tight mt-0.5 mb-1.5">
+            {config.sections.timeline.eyebrow}
+          </h3>
           {config.sections.itinerary.description && (
-            <p className="wedding-type-body mx-auto max-w-2xl text-center text-ink/62">
+            <p className="wedding-type-body font-serif mx-auto max-w-2xl text-center text-ink/62">
               {config.sections.itinerary.description}
             </p>
           )}
@@ -87,7 +89,7 @@ export function TimelineSection({ config }: { config: WeddingConfig }) {
               >
                 <div className="timeline-garden-card">
                   <p className="timeline-garden-time">{node.time}</p>
-                  <h3>{node.title}</h3>
+                  <h3 className="font-serif">{node.title}</h3>
                 </div>
               </motion.li>
             ))}

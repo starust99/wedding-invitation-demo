@@ -2,14 +2,14 @@
 
 import type { CSSProperties } from "react";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import Image from "next/image";
+
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence, Variants } from "framer-motion";
 import { SectionMediaLayers } from "@/components/SectionMediaLayers";
 import { galleryMosaicSlotCount, galleryMosaicSlots, getGalleryTileSizes } from "@/config/gallery-mosaic";
 import { cleanBundledPublicAssetSrc } from "@/lib/asset-cleanup";
-import type { WeddingConfig } from "@/lib/site-settings";
+import { defaultSettings, type WeddingConfig } from "@/lib/site-settings";
 
 const galleryBlurSvg = `
 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="12" viewBox="0 0 16 12">
@@ -69,7 +69,12 @@ export function GallerySection({ config }: { config: WeddingConfig }) {
   const lightboxHost = typeof document === "undefined" ? null : document.body;
 
   const images = useMemo(
-    () => Array.from({ length: galleryMosaicSlotCount }, (_, index) => cleanBundledPublicAssetSrc(config.gallery[index]) || ""),
+    () =>
+      Array.from({ length: galleryMosaicSlotCount }, (_, index) => {
+        const src = cleanBundledPublicAssetSrc(config.gallery[index]);
+        if (src) return src;
+        return defaultSettings.content.gallery[index] || "";
+      }),
     [config.gallery],
   );
   const availableImageIndexes = useMemo(
@@ -185,15 +190,12 @@ export function GallerySection({ config }: { config: WeddingConfig }) {
             exit={{ opacity: 0, scale: 0.95, y: 10, transition: { duration: 0.2 } }}
             transition={{ type: "spring", stiffness: 260, damping: 25 }}
           >
-            <Image
+            <img
               src={activeImage}
               alt={activeAlt}
-              fill
-              sizes="(max-width: 767px) 96vw, 86vw"
-              className="gallery-lightbox-image"
-              placeholder="blur"
-              blurDataURL={galleryBlurDataUrl}
-              priority={true}
+              className="gallery-lightbox-image absolute inset-0 w-full h-full object-cover"
+              style={{ objectPosition: selectedImageIndex !== null ? positions[selectedImageIndex] : "center center" } as CSSProperties}
+              draggable={false}
             />
           </motion.figure>
         </motion.div>
@@ -214,11 +216,11 @@ export function GallerySection({ config }: { config: WeddingConfig }) {
           viewport={{ once: false, margin: "-10% 0px -10% 0px" }}
           variants={galleryIntroVariant}
         >
-          <div className="grid justify-items-center gap-5 text-center">
-            <p className="section-kicker-dark wedding-type-kicker">{section.eyebrow}</p>
-          </div>
+            <h3 className="font-serif text-[1.12rem] sm:text-[1.25rem] md:text-[1.38rem] font-bold gold-foil-text uppercase leading-tight mt-0.5 mb-1.5">
+              {section.eyebrow}
+            </h3>
           {section.description && (
-            <p className="wedding-type-body mx-auto max-w-2xl text-center text-ink/62">
+            <p className="wedding-type-body font-serif mx-auto max-w-2xl text-center text-ink/62">
               {section.description}
             </p>
           )}
@@ -254,16 +256,13 @@ export function GallerySection({ config }: { config: WeddingConfig }) {
                   disabled={!hasImage}
                 >
                   {hasImage ? (
-                    <Image
+                    <img
                       src={tile.src}
                       alt={`${section.imageAltPrefix} ${index + 1}`}
-                      className="gallery-mosaic-image"
-                      style={{ objectPosition: tile.objectPosition }}
-                      fill
-                      sizes={getGalleryTileSizes(index)}
+                      className="gallery-mosaic-image absolute inset-0 w-full h-full object-cover"
+                      style={{ objectPosition: tile.objectPosition } as CSSProperties}
                       loading="lazy"
-                      placeholder="blur"
-                      blurDataURL={galleryBlurDataUrl}
+                      draggable={false}
                     />
                   ) : (
                     <div

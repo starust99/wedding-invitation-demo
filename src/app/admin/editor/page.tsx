@@ -25,6 +25,7 @@ import {
   writeSettings,
   type SiteSettings,
   type WeddingConfig,
+  defaultSettings,
 } from "@/lib/site-settings";
 
 type ImagePosition = {
@@ -49,11 +50,11 @@ const softButton =
   "inline-flex min-h-11 items-center justify-center gap-2 rounded-full border border-[#2F3A35]/12 bg-[#fffdf8]/70 px-5 text-xs font-black uppercase tracking-[0.16em] text-[#2F3A35] shadow-[0_14px_40px_rgba(47,58,53,0.07)] backdrop-blur-xl transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-45 disabled:hover:translate-y-0";
 
 const adminSlotClasses = [
-  "col-span-2 aspect-[4/3] lg:aspect-auto lg:[grid-column:1/span_4] lg:[grid-row:1/span_2]",
-  "col-span-1 aspect-[3/4] lg:aspect-auto lg:[grid-column:5/span_3] lg:[grid-row:1/span_6]",
-  "col-span-1 aspect-[5/3] lg:aspect-auto lg:[grid-column:8/span_5] lg:[grid-row:1/span_2]",
-  "col-span-2 aspect-[3/4] lg:aspect-auto lg:[grid-column:1/span_4] lg:[grid-row:3/span_4]",
-  "col-span-2 aspect-[4/3] lg:aspect-auto lg:[grid-column:8/span_5] lg:[grid-row:3/span_4]",
+  "col-span-2 aspect-[4/3] lg:aspect-auto lg:col-[1/span_4] lg:row-[1/span_2]",
+  "col-span-1 aspect-[3/4] lg:aspect-auto lg:col-[5/span_3] lg:row-[1/span_6]",
+  "col-span-1 aspect-[5/3] lg:aspect-auto lg:col-[8/span_5] lg:row-[1/span_2]",
+  "col-span-2 aspect-[3/4] lg:aspect-auto lg:col-[1/span_4] lg:row-[3/span_4]",
+  "col-span-2 aspect-[4/3] lg:aspect-auto lg:col-[8/span_5] lg:row-[3/span_4]",
 ];
 
 function clampPercent(value: number) {
@@ -145,7 +146,11 @@ function normalizeGallerySettings(settings: SiteSettings) {
 function getGallerySources(settings: SiteSettings | null) {
   return Array.from(
     { length: galleryMosaicSlotCount },
-    (_, index) => cleanBundledPublicAssetSrc(settings?.content.gallery[index]) || "",
+    (_, index) => {
+      const src = cleanBundledPublicAssetSrc(settings?.content.gallery[index]);
+      if (src) return src;
+      return defaultSettings.content.gallery[index] || "";
+    },
   );
 }
 

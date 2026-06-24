@@ -72,13 +72,15 @@ export function ThankYouSection({
           <div className="relative z-10 grid min-h-[24rem] place-items-start py-4 text-center sm:min-h-[30rem] sm:place-items-center sm:py-8 lg:min-h-[34rem]">
             <div className="flex w-full max-w-2xl flex-col items-center justify-between gap-8 text-center sm:gap-10">
               <div>
-                <p className="section-kicker-dark wedding-type-kicker">Phản hồi đã được ghi nhận</p>
+                <h3 className="font-serif text-[1.12rem] sm:text-[1.25rem] md:text-[1.38rem] font-bold gold-foil-text uppercase leading-tight mt-0.5 mb-1.5">
+                  Phản hồi đã được ghi nhận
+                </h3>
                 <div className="mt-6 flex items-center justify-center gap-3">
                   <span className="h-px w-16 bg-[rgba(212,175,55,0.46)] sm:w-20" />
                   <span className="h-2 w-2 rounded-full border border-[rgba(212,175,55,0.48)] bg-white/76" />
                   <span className="h-px w-16 bg-[rgba(212,175,55,0.46)] sm:w-20" />
                 </div>
-                <p suppressHydrationWarning className="wedding-type-body mx-auto mt-6 max-w-xl text-ink/66">
+                <p suppressHydrationWarning className="wedding-type-body font-sans mx-auto mt-6 max-w-xl text-ink/66">
                   {thankYouMessage}
                 </p>
               </div>
@@ -89,7 +91,7 @@ export function ThankYouSection({
                 </p>
 
                 <div className="mx-auto mt-10 max-w-lg">
-                  <p suppressHydrationWarning className="mb-6 text-[0.95rem] text-ink/56 italic leading-relaxed">
+                  <p suppressHydrationWarning className="mb-6 text-[0.95rem] font-sans text-ink/56 italic leading-relaxed">
                     {instructionMessage}
                   </p>
                   <div className="flex flex-wrap items-center justify-center gap-3">
@@ -100,7 +102,7 @@ export function ThankYouSection({
                         rel="noreferrer"
                         className="inline-flex h-[3.8rem] sm:h-[4.5rem] lg:h-[5rem] text-[1.02rem] sm:text-lg items-center justify-center transition hover:-translate-y-0.5 save-date-watercolor-btn"
                       >
-                        <span className="save-date-btn-label">
+                        <span className="save-date-btn-label font-sans">
                           <ImageIcon aria-hidden="true" size={16} className="sm:w-[18px] sm:h-[18px]" />
                           <span>Xem ảnh tiệc cưới</span>
                         </span>
@@ -111,7 +113,7 @@ export function ThankYouSection({
                         onClick={() => navigateWithTransition(rsvpHref)}
                         className="inline-flex h-[3.8rem] sm:h-[4.5rem] lg:h-[5rem] text-[1.02rem] sm:text-lg items-center justify-center transition hover:-translate-y-0.5 save-date-watercolor-btn"
                       >
-                        <span className="save-date-btn-label">
+                        <span className="save-date-btn-label font-sans">
                           <HeartHandshake aria-hidden="true" size={16} className="sm:w-[18px] sm:h-[18px]" />
                           <span>Chỉnh sửa hồi đáp</span>
                         </span>
@@ -125,7 +127,7 @@ export function ThankYouSection({
                         rel="noreferrer"
                         className="inline-flex h-[3.8rem] sm:h-[4.5rem] lg:h-[5rem] text-[1.02rem] sm:text-lg items-center justify-center transition hover:-translate-y-0.5 save-date-watercolor-btn"
                       >
-                        <span className="save-date-btn-label">
+                        <span className="save-date-btn-label font-sans">
                         <MapPin aria-hidden="true" size={16} className="sm:w-[18px] sm:h-[18px]" />
                         <span>Đến Nhà thờ</span>
                       </span>
@@ -140,7 +142,7 @@ export function ThankYouSection({
                         rel="noreferrer"
                         className="inline-flex h-[3.8rem] sm:h-[4.5rem] lg:h-[5rem] text-[1.02rem] sm:text-lg items-center justify-center transition hover:-translate-y-0.5 save-date-watercolor-btn"
                       >
-                        <span className="save-date-btn-label">
+                        <span className="save-date-btn-label font-sans">
                         <MapPin aria-hidden="true" size={16} className="sm:w-[18px] sm:h-[18px]" />
                         <span>{isBanquetOnly || isBoth ? "Đến Tiệc mừng" : "Chỉ đường"}</span>
                       </span>

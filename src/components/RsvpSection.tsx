@@ -38,22 +38,24 @@ export function RsvpSection({
           <div aria-hidden="true" className="absolute inset-x-8 bottom-5 h-px bg-[linear-gradient(90deg,transparent,rgba(212,175,55,0.3),transparent)] sm:inset-x-16 sm:bottom-7 lg:bottom-8" />
 
           <div className="relative z-10 mx-auto flex max-w-2xl flex-col items-center text-center">
-            <p className="section-kicker-dark wedding-type-kicker">{config.sections.cta.eyebrow}</p>
+            <h3 className="font-serif text-[1.12rem] sm:text-[1.25rem] md:text-[1.38rem] font-bold gold-foil-text uppercase leading-tight mt-0.5 mb-1.5">
+              {config.sections.cta.eyebrow}
+            </h3>
             <div className="mt-6 flex items-center gap-3">
               <span className="h-px w-16 bg-[rgba(212,175,55,0.5)] sm:w-20" />
               <span className="h-2 w-2 rounded-full border border-[rgba(212,175,55,0.5)] bg-white/78" />
               <span className="h-px w-16 bg-[rgba(212,175,55,0.5)] sm:w-20" />
             </div>
-            <p suppressHydrationWarning className="wedding-type-meta mt-6 max-w-xl text-ink/62">
+            <p suppressHydrationWarning className="wedding-type-meta font-sans mt-6 max-w-xl text-ink/62">
               {inviteCopy.greeting},
             </p>
-            <p className="wedding-type-body mt-4 max-w-2xl text-ink/68">
+            <p className="wedding-type-body font-sans mt-4 max-w-2xl text-ink/68">
               {inviteCopy.hostSubject} rất trân trọng sự hiện diện của {inviteCopy.shortRecipientLabel} trong ngày vui này. Vui lòng dành ít phút xác nhận để {inviteCopy.hostPronoun} chuẩn bị đón tiếp chu đáo, đủ thông tin và thoải mái nhất cho {inviteCopy.shortRecipientLabel}.
             </p>
-            <p suppressHydrationWarning className="wedding-type-body mt-2 max-w-xl text-ink/68">
+            <p suppressHydrationWarning className="wedding-type-body font-sans mt-2 max-w-xl text-ink/68">
               {inviteCopy.rsvpLead} trước ngày {config.rsvp.deadline}.
             </p>
-            <p className="wedding-type-body mt-4 max-w-xl text-ink/56">
+            <p className="wedding-type-body font-sans mt-4 max-w-xl text-ink/56">
               Biểu mẫu hồi đáp được tách riêng để {inviteCopy.shortRecipientLabel} dễ điền từng bước, xem lại trước khi gửi và có thể chỉnh sửa lại sau nếu kế hoạch thay đổi.
             </p>
 
@@ -62,7 +64,7 @@ export function RsvpSection({
                 onClick={() => navigateWithTransition(rsvpHref)}
                 className="mt-8 inline-flex h-[4.2rem] items-center justify-center transition hover:-translate-y-0.5 save-date-watercolor-btn"
               >
-                <span className="save-date-btn-label">
+                <span className="save-date-btn-label font-sans">
                   <HeartHandshake aria-hidden="true" size={18} />
                   <span>Gửi hồi đáp</span>
                 </span>

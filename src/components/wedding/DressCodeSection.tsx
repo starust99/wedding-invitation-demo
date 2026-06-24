@@ -121,7 +121,7 @@ export function DressCodeSection({
           {title}
         </span>
 
-        <p className="font-serif text-[#4e443c]/90 font-normal text-[0.95rem] sm:text-[1rem] md:text-[1.05rem] leading-relaxed max-w-[28rem] mx-auto">
+        <p className="font-sans text-[#4e443c]/90 font-normal text-[0.92rem] sm:text-[0.98rem] md:text-[1.02rem] leading-relaxed max-w-[28rem] mx-auto">
           {invitationText}
         </p>
       </div>
@@ -198,7 +198,7 @@ export function DressCodeSection({
         <div className="flex items-center justify-center gap-2 mt-4 text-[#7d7065] select-none min-h-[1.75rem]">
           <span className="text-[#b4975a] text-[0.8rem] font-bold">✦</span>
           {selectedColor ? (
-            <span className="font-serif text-[1.18rem] font-semibold tracking-wide text-[#3f4642]">
+            <span className="font-sans text-[1.02rem] font-medium tracking-wide text-[#3f4642]">
               {selectedColor.name}
             </span>
           ) : (
@@ -212,7 +212,7 @@ export function DressCodeSection({
                 repeat: Infinity,
                 ease: "easeInOut",
               }}
-              className="font-serif text-[1.14rem] font-semibold tracking-wide text-[#b4975a]"
+              className="font-sans text-[0.98rem] font-medium tracking-wide text-[#b4975a]"
             >
               Chạm vào màu để xem gợi ý
             </motion.span>
@@ -224,7 +224,7 @@ export function DressCodeSection({
       {/* Weather Alert */}
       {weatherAlertText && (
         <div className="flex mt-4 p-4.5 rounded-[1.2rem] bg-[#b4975a]/5 border border-[#b4975a]/12 text-center w-full max-w-[24rem] sm:max-w-[26rem] md:max-w-[27rem] mx-auto">
-          <p className="font-serif text-[#6e5949] text-[0.88rem] leading-relaxed font-normal">
+          <p className="font-sans text-[#6e5949] text-[0.85rem] leading-relaxed font-normal">
             {weatherAlertText}
           </p>
         </div>

@@ -670,9 +670,9 @@ export function EventDetailsContent({
           variants={cardVariant}
           className="flex md:hidden flex-col gap-3 px-1 w-full pt-8 pb-4 relative z-10"
         >
-          <h5 className="section-kicker-dark wedding-type-kicker font-serif text-[0.95rem] font-bold text-center mb-5 !text-[#3f4642]/85">
+          <h3 className="font-serif text-[1.12rem] font-bold gold-foil-text uppercase text-center mb-5 leading-tight">
             Lịch Trình Tiệc Cưới
-          </h5>
+          </h3>
           
           <div className="timeline-garden-path-scene w-full min-h-[28rem] overflow-visible relative">
             {/* Winding road */}
