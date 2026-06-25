@@ -88,10 +88,16 @@ export function DressCodeSection({
   let invitationText = note;
   let weatherAlertText = "";
 
-  const weatherIndex = note.indexOf("Lưu ý thời tiết");
+  const weatherIndex = note.indexOf("Lưu ý:");
   if (weatherIndex !== -1) {
     invitationText = note.substring(0, weatherIndex).trim();
     weatherAlertText = note.substring(weatherIndex).trim();
+  } else {
+    const legacyIndex = note.indexOf("Lưu ý thời tiết");
+    if (legacyIndex !== -1) {
+      invitationText = note.substring(0, legacyIndex).trim();
+      weatherAlertText = note.substring(legacyIndex).trim();
+    }
   }
 
   return (
