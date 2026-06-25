@@ -402,7 +402,7 @@ export function EventDetailsContent({
         {/* Parents Info Block (Nhà Trai / Nhà Gái Side-by-Side) */}
         <div className="relative w-full flex flex-row justify-between items-stretch z-10 mt-4 sm:mt-5 mb-8 md:mb-10">
           {/* Left Column: Nhà Trai */}
-          <motion.div variants={familyItemVariant} className="w-1/2 pr-3 sm:pr-4 flex flex-col items-center justify-start text-center">
+          <motion.div variants={familyItemVariant} className="w-1/2 pr-1.5 sm:pr-4 flex flex-col items-center justify-start text-center">
             <h3 className="font-serif text-[1.02rem] sm:text-[1.08rem] md:text-[1.12rem] lg:text-[1.2rem] font-bold text-[#b4975a] tracking-[0.18em] uppercase">
               Nhà Trai
             </h3>
@@ -415,12 +415,12 @@ export function EventDetailsContent({
 
             <div className="flex flex-col gap-2.5 md:gap-3 text-[#3f4642]/90 font-serif text-[0.95rem] sm:text-[1rem] md:text-[1.05rem] lg:text-[1.12rem] w-full mt-1.5">
               <p className="leading-relaxed">
-                <span className="text-[#7d7065] font-serif font-bold text-[0.92rem] sm:text-[0.95rem] md:text-[0.98rem] tracking-wider uppercase block mb-0.5 md:mb-1">Ông</span>
-                <span className="font-semibold block text-[1.1rem] sm:text-[1.15rem] md:text-[1.21rem] lg:text-[1.29rem]">Trần Trọng Sơn</span>
+                <span className="text-[#7d7065] font-serif font-bold text-[0.76rem] [@media(min-width:375px)]:text-[0.82rem] [@media(min-width:412px)]:text-[0.88rem] sm:text-[0.95rem] md:text-[0.98rem] tracking-wider uppercase block mb-0.5 md:mb-1">Ông</span>
+                <span className="font-semibold block text-[0.82rem] [@media(min-width:375px)]:text-[0.88rem] [@media(min-width:412px)]:text-[0.98rem] sm:text-[1.15rem] md:text-[1.21rem] lg:text-[1.29rem] whitespace-nowrap">Trần Trọng Sơn</span>
               </p>
               <p className="leading-relaxed">
-                <span className="text-[#7d7065] font-serif font-bold text-[0.92rem] sm:text-[0.95rem] md:text-[0.98rem] tracking-wider uppercase block mb-0.5 md:mb-1">Bà</span>
-                <span className="font-semibold block text-[1.1rem] sm:text-[1.15rem] md:text-[1.21rem] lg:text-[1.29rem]">Nguyễn Thị Minh Duyên</span>
+                <span className="text-[#7d7065] font-serif font-bold text-[0.76rem] [@media(min-width:375px)]:text-[0.82rem] [@media(min-width:412px)]:text-[0.88rem] sm:text-[0.95rem] md:text-[0.98rem] tracking-wider uppercase block mb-0.5 md:mb-1">Bà</span>
+                <span className="font-semibold block text-[0.82rem] [@media(min-width:375px)]:text-[0.88rem] [@media(min-width:412px)]:text-[0.98rem] sm:text-[1.15rem] md:text-[1.21rem] lg:text-[1.29rem] whitespace-nowrap">Nguyễn Thị Minh Duyên</span>
               </p>
             </div>
           </motion.div>
@@ -429,7 +429,7 @@ export function EventDetailsContent({
           <div className="absolute left-1/2 -translate-x-1/2 top-4 bottom-2 w-[0.5px] bg-gradient-to-b from-transparent via-[#b4975a]/40 to-transparent select-none pointer-events-none z-20" />
 
           {/* Right Column: Nhà Gái */}
-          <motion.div variants={familyItemVariant} className="w-1/2 pl-3 sm:pl-4 flex flex-col items-center justify-start text-center">
+          <motion.div variants={familyItemVariant} className="w-1/2 pl-1.5 sm:pl-4 flex flex-col items-center justify-start text-center">
             <h3 className="font-serif text-[1.02rem] sm:text-[1.08rem] md:text-[1.12rem] lg:text-[1.2rem] font-bold text-[#b4975a] tracking-[0.18em] uppercase">
               Nhà Gái
             </h3>
@@ -442,12 +442,12 @@ export function EventDetailsContent({
 
             <div className="flex flex-col gap-2.5 md:gap-3 text-[#3f4642]/90 font-serif text-[0.95rem] sm:text-[1rem] md:text-[1.05rem] lg:text-[1.12rem] w-full mt-1.5">
               <p className="leading-relaxed">
-                <span className="text-[#7d7065] font-serif font-bold text-[0.92rem] sm:text-[0.95rem] md:text-[0.98rem] tracking-wider uppercase block mb-0.5 md:mb-1">Ông Felicite</span>
-                <span className="font-semibold block text-[1.1rem] sm:text-[1.15rem] md:text-[1.21rem] lg:text-[1.29rem]">Nguyễn Đức Tài</span>
+                <span className="text-[#7d7065] font-serif font-bold text-[0.76rem] [@media(min-width:375px)]:text-[0.82rem] [@media(min-width:412px)]:text-[0.88rem] sm:text-[0.95rem] md:text-[0.98rem] tracking-wider uppercase block mb-0.5 md:mb-1">Ông Felicite</span>
+                <span className="font-semibold block text-[0.82rem] [@media(min-width:375px)]:text-[0.88rem] [@media(min-width:412px)]:text-[0.98rem] sm:text-[1.15rem] md:text-[1.21rem] lg:text-[1.29rem] whitespace-nowrap">Nguyễn Đức Tài</span>
               </p>
               <p className="leading-relaxed">
-                <span className="text-[#7d7065] font-serif font-bold text-[0.92rem] sm:text-[0.95rem] md:text-[0.98rem] tracking-wider uppercase block mb-0.5 md:mb-1">Bà Teresa</span>
-                <span className="font-semibold block text-[1.1rem] sm:text-[1.15rem] md:text-[1.21rem] lg:text-[1.29rem]">Phan Thị Thu Hiền</span>
+                <span className="text-[#7d7065] font-serif font-bold text-[0.76rem] [@media(min-width:375px)]:text-[0.82rem] [@media(min-width:412px)]:text-[0.88rem] sm:text-[0.95rem] md:text-[0.98rem] tracking-wider uppercase block mb-0.5 md:mb-1">Bà Teresa</span>
+                <span className="font-semibold block text-[0.82rem] [@media(min-width:375px)]:text-[0.88rem] [@media(min-width:412px)]:text-[0.98rem] sm:text-[1.15rem] md:text-[1.21rem] lg:text-[1.29rem] whitespace-nowrap">Phan Thị Thu Hiền</span>
               </p>
             </div>
           </motion.div>
