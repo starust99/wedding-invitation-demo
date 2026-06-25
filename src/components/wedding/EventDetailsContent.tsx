@@ -582,10 +582,10 @@ export function EventDetailsContent({
 
           {/* Time Display */}
           <span className="font-sans text-[0.82rem] md:text-[0.88rem] tracking-[0.18em] font-bold text-[#7d7065] uppercase mb-1">
-            Khai Tiệc
+            Đón Khách
           </span>
           <div className="font-serif text-[2.35rem] md:text-[2.7rem] font-light text-[#3f4642] tracking-wider leading-none mb-3">
-            18:00
+            17:30
           </div>
 
           {/* Location */}
