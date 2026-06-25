@@ -41,7 +41,7 @@ type SettingsInput = Partial<Omit<SiteSettings, "content">> & {
 
 export const draftStorageKey = "wedding-demo-draft-settings";
 export const publishedStorageKey = "wedding-demo-published-settings";
-export const settingsSchemaVersion = 15;
+export const settingsSchemaVersion = 16;
 
 export const defaultSettings: SiteSettings = {
   schemaVersion: settingsSchemaVersion,
@@ -298,7 +298,7 @@ export function normalizeSettings(settings: SettingsInput | null): SiteSettings 
       text.includes("Thương mời quý khách diện trang phục theo bảng màu") || 
       text.includes("Giữ ấm là ưu tiên hàng đầu");
 
-    const newDressCodeText = "Để cùng tạo nên những khung hình đẹp và hài hòa cho đêm tiệc, Quý khách có thể tham khảo các ý tưởng phối đồ dựa theo bảng màu dưới đây:\n\nLưu ý thời tiết: Đà Lạt vào đông rất lạnh, quý khách hãy ưu tiên trang phục và phụ kiện đủ ấm cho bữa tiệc ngoài trời nhé!";
+    const newDressCodeText = "Để cùng tạo nên những khung hình đẹp và hài hòa cho đêm tiệc, Quý khách có thể tham khảo các ý tưởng phối đồ dựa theo bảng màu dưới đây:\n\nLưu ý: Tiệc được tổ chức ngoài trời trong không khí se lạnh của mùa đông Đà Lạt, quý khách hãy ưu tiên trang phục và phụ kiện đủ ấm để tận hưởng trọn vẹn buổi tiệc.";
 
     if (isOldDressCodeText(content.eventDetailsConfig?.content?.dressCodeText)) {
       content = {
@@ -373,6 +373,40 @@ export function normalizeSettings(settings: SettingsInput | null): SiteSettings 
   if ((settings.schemaVersion ?? 0) < 15) {
     const oldSegment = "Thương mời quý khách diện trang phục tươi sáng theo bảng màu bên dưới\n(xin tránh mặc các tông màu tối).";
     const newSegment = "Để cùng tạo nên những khung hình đẹp và hài hòa cho đêm tiệc, Quý khách có thể tham khảo các ý tưởng phối đồ dựa theo bảng màu dưới đây:";
+
+    const replaceText = (str: string) => {
+      if (!str) return "";
+      return str.replace(oldSegment, newSegment);
+    };
+
+    if (content.eventDetailsConfig?.content?.dressCodeText) {
+      content = {
+        ...content,
+        eventDetailsConfig: {
+          ...content.eventDetailsConfig,
+          content: {
+            ...content.eventDetailsConfig.content,
+            dressCodeText: replaceText(content.eventDetailsConfig.content.dressCodeText),
+          },
+        },
+      };
+    }
+
+    if (content.dressCode?.note) {
+      content = {
+        ...content,
+        dressCode: {
+          ...content.dressCode,
+          note: replaceText(content.dressCode.note),
+        },
+      };
+    }
+  }
+
+  // Migration v16: Replace the weather note text with the new wording
+  if ((settings.schemaVersion ?? 0) < 16) {
+    const oldSegment = "Lưu ý thời tiết: Đà Lạt vào đông rất lạnh, quý khách hãy ưu tiên trang phục và phụ kiện đủ ấm cho bữa tiệc ngoài trời nhé!";
+    const newSegment = "Lưu ý: Tiệc được tổ chức ngoài trời trong không khí se lạnh của mùa đông Đà Lạt, quý khách hãy ưu tiên trang phục và phụ kiện đủ ấm để tận hưởng trọn vẹn buổi tiệc.";
 
     const replaceText = (str: string) => {
       if (!str) return "";
