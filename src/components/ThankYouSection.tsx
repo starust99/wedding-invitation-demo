@@ -49,10 +49,6 @@ export function ThankYouSection({
     thankYouMessage = `${inviteCopy.thankYouLine} Hẹn gặp ${inviteCopy.shortRecipientLabel} tại ${config.venue.name} trong một buổi tối thật ấm áp.`;
   }
 
-  const instructionMessage = rsvpAttending === "no"
-    ? `${inviteCopy.shortRecipientLabel} có thể giữ lại link này như một lời nhắn riêng từ ${inviteCopy.hostPronoun}. Nếu cần cập nhật lại phản hồi, vẫn có thể bấm nút bên dưới trước hạn chốt.`
-    : `${inviteCopy.shortRecipientLabel} vui lòng giữ lại link này để xem lại thông tin thiệp, chỉ đường và cập nhật sau này. Nếu kế hoạch thay đổi, có thể điều chỉnh lại hồi đáp bằng nút bên dưới trước ngày ${config.rsvp.deadline}.`;
-
   return (
     <section id="thank-you" className="cinematic-stage editorial-band relative overflow-hidden px-5 py-24 text-center text-ink sm:px-8 sm:py-28 lg:py-32">
       <SectionMediaLayers config={config} section="cta" className="opacity-[0.1]" />
@@ -91,9 +87,6 @@ export function ThankYouSection({
                 </p>
 
                 <div className="mx-auto mt-10 max-w-lg">
-                  <p suppressHydrationWarning className="mb-6 text-[0.95rem] font-sans text-ink/56 italic leading-relaxed">
-                    {instructionMessage}
-                  </p>
                   <div className="flex flex-wrap items-center justify-center gap-3">
                     {isPostWedding && galleryLink ? (
                        <a
