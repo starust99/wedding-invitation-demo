@@ -46,17 +46,17 @@ export function RsvpSection({
               <span className="h-2 w-2 rounded-full border border-[rgba(212,175,55,0.5)] bg-white/78" />
               <span className="h-px w-16 bg-[rgba(212,175,55,0.5)] sm:w-20" />
             </div>
-            <p suppressHydrationWarning className="wedding-type-meta font-sans mt-6 max-w-xl text-ink/62">
-              {inviteCopy.greeting},
+            <p suppressHydrationWarning className="wedding-type-meta font-sans mt-6 max-w-xl text-ink/62 uppercase tracking-wider">
+              {inviteCopy.greeting.toUpperCase()},
             </p>
             <p className="wedding-type-body font-sans mt-4 max-w-2xl text-ink/68">
-              {inviteCopy.hostSubject} rất trân trọng sự hiện diện của {inviteCopy.shortRecipientLabel} trong ngày vui này. Vui lòng dành ít phút xác nhận để {inviteCopy.hostPronoun} chuẩn bị đón tiếp chu đáo, đủ thông tin và thoải mái nhất cho {inviteCopy.shortRecipientLabel}.
+              Sự hiện diện của {inviteCopy.presenceSubject === "quý khách" ? "Quý khách" : inviteCopy.presenceSubject.charAt(0).toUpperCase() + inviteCopy.presenceSubject.slice(1)} để cùng chia sẻ những khoảnh khắc ý nghĩa là niềm vinh hạnh lớn của hai gia đình trong ngày vui sắp tới. Để khâu tổ chức và công tác tiếp đón được chuẩn bị chu đáo nhất, {inviteCopy.kinshipPronoun === "quý khách" ? "Quý khách" : inviteCopy.kinshipPronoun.charAt(0).toUpperCase() + inviteCopy.kinshipPronoun.slice(1)} vui lòng xác nhận thông tin tham dự qua biểu mẫu dưới đây trước ngày {config.rsvp.deadline}.
             </p>
-            <p suppressHydrationWarning className="wedding-type-body font-sans mt-2 max-w-xl text-ink/68">
-              {inviteCopy.rsvpLead} trước ngày {config.rsvp.deadline}.
+            <p className="wedding-type-body font-sans mt-4 max-w-xl text-ink/68">
+              Xin bấm nút "Gửi hồi đáp" để điền thông tin.
             </p>
-            <p className="wedding-type-body font-sans mt-4 max-w-xl text-ink/56">
-              Biểu mẫu hồi đáp được tách riêng để {inviteCopy.shortRecipientLabel} dễ điền từng bước, xem lại trước khi gửi và có thể chỉnh sửa lại sau nếu kế hoạch thay đổi.
+            <p className="wedding-type-body font-sans mt-2 max-w-xl text-ink/68">
+              Xin trân trọng cảm ơn.
             </p>
 
               <button

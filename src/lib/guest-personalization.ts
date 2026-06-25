@@ -255,6 +255,7 @@ export type InvitationCopy = {
   signaturePrefix: string;
   kinshipPronoun: string;
   dressCodeLine: string;
+  presenceSubject: string;
 };
 
 const personalInviteHeading = "TRÂN TRỌNG & THÂN MỜI";
@@ -915,5 +916,6 @@ export function buildInvitationCopy(input?: InvitationCopyInput): InvitationCopy
     signaturePrefix: tone === "elder" ? "Thương kính" : tone === "peer" || tone === "junior" ? "Thân mến" : "Trân trọng",
     kinshipPronoun,
     dressCodeLine: `Để cùng tạo nên những khung hình đẹp và hài hòa cho đêm tiệc, ${sentenceCase(kinshipPronoun)} có thể tham khảo các ý tưởng phối đồ dựa theo bảng màu dưới đây:\n\nLưu ý: Tiệc được tổ chức ngoài trời trong không khí se lạnh của mùa đông Đà Lạt, ${kinshipPronoun} hãy ưu tiên trang phục và phụ kiện đủ ấm để tận hưởng trọn vẹn buổi tiệc.`,
+    presenceSubject,
   };
 }
