@@ -37,8 +37,7 @@ const imageAccept = "image/*,.jpg,.jpeg,.jfif,.png,.webp,.gif,.svg,.avif,.bmp,.i
 const defaultObjectPosition = "50% 50%";
 const localUploadMessage = "Đã lưu file vào public/uploads trên máy local. Nhấn Publish để public page nhận ảnh mới.";
 const cloudinaryUploadMessage = "Đã upload ảnh lên Cloudinary CDN. Nhấn Publish để public page nhận ảnh mới.";
-const defaultHeroSectionImage = "/assets/wedding/hero/np-1-183a.jpg";
-const heroPhotoAssetId = "gardenPhotoPlate";
+
 
 const shellClass =
   "rounded-[2rem] border border-[#2F3A35]/12 bg-[#fffdf8]/68 shadow-[0_26px_90px_rgba(47,58,53,0.12)] backdrop-blur-2xl";
@@ -161,13 +160,7 @@ function getGalleryPositions(settings: SiteSettings | null) {
   );
 }
 
-function getHeroPhotoAsset(settings: SiteSettings | null) {
-  return settings?.content.heroEditorConfig.assets.find((asset) => asset.id === heroPhotoAssetId) ?? null;
-}
 
-function getHeroObjectPosition(position?: string) {
-  return parseObjectPosition(position || defaultObjectPosition);
-}
 
 export default function AdminEditorPage() {
   const [settings, setSettings] = useState<SiteSettings | null>(null);
@@ -175,14 +168,12 @@ export default function AdminEditorPage() {
   const [activeIndex, setActiveIndex] = useState(0);
   const [draggingIndex, setDraggingIndex] = useState<number | null>(null);
   const [uploadingIndex, setUploadingIndex] = useState<number | null>(null);
-  const [uploadingHero, setUploadingHero] = useState(false);
   const [saving, setSaving] = useState(false);
   const [publishing, setPublishing] = useState(false);
   const [dirty, setDirty] = useState(false);
   const [notice, setNotice] = useState("");
   const [error, setError] = useState("");
   const fileInputRef = useRef<HTMLInputElement | null>(null);
-  const heroFileInputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
     async function loadSettings() {
@@ -218,13 +209,6 @@ export default function AdminEditorPage() {
   const selectedPositionValue = galleryPositions[activeIndex] || defaultObjectPosition;
   const selectedPosition = parseObjectPosition(selectedPositionValue);
   const isUploadingSelected = uploadingIndex === activeIndex;
-  const heroPhotoAsset = useMemo(() => getHeroPhotoAsset(settings), [settings]);
-  const heroPhotoSrc = heroPhotoAsset?.src || defaultHeroSectionImage;
-  const heroPhotoAlt = heroPhotoAsset?.alt || "Ảnh cưới Nhật và Phương";
-  const heroDesktopPositionValue = heroPhotoAsset?.objectPosition?.desktop || "62% 36%";
-  const heroMobilePositionValue = heroPhotoAsset?.objectPosition?.mobile || "50% 33%";
-  const heroDesktopPosition = getHeroObjectPosition(heroDesktopPositionValue);
-  const heroMobilePosition = getHeroObjectPosition(heroMobilePositionValue);
 
   function markDirty() {
     setDirty(true);
@@ -261,53 +245,7 @@ export default function AdminEditorPage() {
     updateGalleryPosition(activeIndex, formatObjectPosition({ ...selectedPosition, ...patch }));
   }
 
-  function updateHeroPhoto(value: string) {
-    markDirty();
-    setSettings((current) => {
-      if (!current) return current;
-      const next = normalizeGallerySettings(current);
-      next.content.heroEditorConfig.assets = next.content.heroEditorConfig.assets.map((asset) => (
-        asset.id === heroPhotoAssetId
-          ? {
-              ...asset,
-              src: cleanBundledPublicAssetSrc(value.trim()),
-              alt: asset.alt || "Ảnh cưới Nhật và Phương",
-              objectPosition: asset.objectPosition ?? {
-                desktop: "62% 36%",
-                mobile: "50% 33%",
-              },
-            }
-          : asset
-      ));
-      return next;
-    });
-  }
 
-  function updateHeroPhotoPosition(viewport: "desktop" | "mobile", value: string) {
-    markDirty();
-    setSettings((current) => {
-      if (!current) return current;
-      const next = normalizeGallerySettings(current);
-      next.content.heroEditorConfig.assets = next.content.heroEditorConfig.assets.map((asset) => (
-        asset.id === heroPhotoAssetId
-          ? {
-              ...asset,
-              objectPosition: {
-                desktop: asset.objectPosition?.desktop || "62% 36%",
-                mobile: asset.objectPosition?.mobile || "50% 33%",
-                [viewport]: value,
-              },
-            }
-          : asset
-      ));
-      return next;
-    });
-  }
-
-  function clearHeroPhoto() {
-    updateHeroPhoto("");
-    setNotice("Đã trả ảnh hero về ảnh mặc định hiện tại của website.");
-  }
 
   function updateChurchInfo(field: "churchDate" | "churchTime" | "churchLocation", value: string) {
     markDirty();
@@ -370,52 +308,7 @@ export default function AdminEditorPage() {
     }
   }
 
-  async function uploadHeroImage(file: File | undefined) {
-    if (!file || !settings) return;
 
-    setUploadingHero(true);
-    setError("");
-    setNotice("");
-
-    try {
-      const prepared = await prepareImageFileForUpload(file, "hero-main-photo");
-      const compressionMessage = prepared.compressed
-        ? `Đã nén từ ${formatFileSize(prepared.originalBytes)} xuống ${formatFileSize(prepared.outputBytes)}. `
-        : "";
-
-      const formData = new FormData();
-      formData.append("file", prepared.file);
-      formData.append("section", "hero-main-photo");
-      if (settings.assetBucket) formData.append("bucket", settings.assetBucket);
-
-      const response = await fetch("/api/admin/assets", { method: "POST", body: formData });
-
-      if (response.status === 401) {
-        window.location.href = "/admin/login";
-        return;
-      }
-
-      const result = await response.json().catch(() => null) as { asset?: { src: string; provider?: string }; error?: string } | null;
-      if (!response.ok || !result?.asset?.src) {
-        throw new Error(result?.error || "Upload ảnh hero thất bại.");
-      }
-
-      updateHeroPhoto(result.asset.src);
-
-      if (result.asset.provider === "cloudinary") {
-        setNotice(`${compressionMessage}${cloudinaryUploadMessage}`);
-      } else if (result.asset.src.startsWith("/uploads/")) {
-        setNotice(`${compressionMessage}${localUploadMessage}`);
-      } else {
-        setNotice(`${compressionMessage}Đã cập nhật ảnh hero. Nhấn Publish để website public nhận ảnh mới.`);
-      }
-    } catch (uploadError) {
-      setError(uploadError instanceof Error ? uploadError.message : "Không upload được ảnh hero.");
-    } finally {
-      setUploadingHero(false);
-      if (heroFileInputRef.current) heroFileInputRef.current.value = "";
-    }
-  }
 
   async function postSettings(nextSettings: SiteSettings, publish = false) {
     if (backend !== "supabase") return true;
@@ -505,13 +398,7 @@ export default function AdminEditorPage() {
         className="hidden"
         onChange={(event) => uploadGalleryImage(activeIndex, event.target.files?.[0])}
       />
-      <input
-        ref={heroFileInputRef}
-        type="file"
-        accept={imageAccept}
-        className="hidden"
-        onChange={(event) => uploadHeroImage(event.target.files?.[0])}
-      />
+
 
       <div className="mx-auto grid max-w-[92rem] gap-5">
         <header className={`${shellClass} sticky top-4 z-30`}>
@@ -556,124 +443,7 @@ export default function AdminEditorPage() {
         </header>
 
         <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_25rem]">
-          <div className={`${shellClass} grid gap-5 p-4 sm:p-5 lg:p-6 xl:col-span-2`}>
-            <div className="grid gap-5 lg:grid-cols-[minmax(0,1.15fr)_24rem] lg:items-start">
-              <div className="grid gap-4">
-                <div className="grid gap-2 text-left">
-                  <p className="text-[0.68rem] font-black uppercase tracking-[0.32em] text-[#2F3A35]/48">Hero section</p>
-                  <h2 className="font-serif text-[clamp(2rem,3vw,3rem)] leading-none">Ảnh chính ở đầu thiệp</h2>
-                  <p className="max-w-3xl text-sm font-semibold leading-6 text-[#2F3A35]/56">
-                    Ảnh này là khung ảnh lớn ở phần mở đầu website. Upload xong nhớ bấm Publish để khách mở link thấy ảnh mới.
-                  </p>
-                </div>
 
-                <div className="relative overflow-hidden rounded-[1.7rem] border border-[#2F3A35]/12 bg-[#fffdf8]/70">
-                  <div className="aspect-[16/9] sm:aspect-[2/1]">
-                    <img
-                      src={heroPhotoSrc}
-                      alt={heroPhotoAlt}
-                      className="h-full w-full object-cover"
-                      style={{ objectPosition: heroDesktopPositionValue }}
-                      draggable={false}
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <aside className="grid gap-4 rounded-[1.6rem] border border-[#2F3A35]/12 bg-[#fffdf8]/64 p-4">
-                <div className="grid gap-3">
-                  <button
-                    type="button"
-                    className={primaryButton}
-                    disabled={uploadingHero}
-                    onClick={() => heroFileInputRef.current?.click()}
-                  >
-                    {uploadingHero ? <Loader2 className="h-4 w-4 animate-spin" /> : <UploadCloud className="h-4 w-4" />}
-                    Upload ảnh hero
-                  </button>
-                  <button
-                    type="button"
-                    className={softButton}
-                    disabled={uploadingHero}
-                    onClick={clearHeroPhoto}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                    Dùng ảnh mặc định
-                  </button>
-                </div>
-
-                <label className="grid gap-2 text-center text-sm font-black text-[#2F3A35]/60">
-                  URL hoặc path ảnh hero
-                  <input
-                    className={fieldClass}
-                    value={heroPhotoAsset?.src || ""}
-                    placeholder="/uploads/hero-main-photo..."
-                    onChange={(event) => updateHeroPhoto(event.target.value)}
-                  />
-                </label>
-
-                <div className="grid gap-4 rounded-[1.55rem] border border-[#2F3A35]/12 bg-[#fffdf8]/54 p-4">
-                  <div className="grid justify-items-center gap-1">
-                    <p className="text-sm font-black">Canh crop ảnh hero</p>
-                    <p className="text-xs font-bold leading-5 text-[#2F3A35]/48">Desktop: {heroDesktopPositionValue}</p>
-                    <p className="text-xs font-bold leading-5 text-[#2F3A35]/48">Mobile: {heroMobilePositionValue}</p>
-                  </div>
-
-                  <label className="grid gap-2 text-xs font-black uppercase tracking-[0.16em] text-[#2F3A35]/52">
-                    Ngang desktop: {heroDesktopPosition.x}%
-                    <input
-                      type="range"
-                      min="0"
-                      max="100"
-                      value={heroDesktopPosition.x}
-                      onChange={(event) => updateHeroPhotoPosition("desktop", formatObjectPosition({ ...heroDesktopPosition, x: Number(event.target.value) }))}
-                      className="accent-[#8FAADC]"
-                    />
-                  </label>
-
-                  <label className="grid gap-2 text-xs font-black uppercase tracking-[0.16em] text-[#2F3A35]/52">
-                    Dọc desktop: {heroDesktopPosition.y}%
-                    <input
-                      type="range"
-                      min="0"
-                      max="100"
-                      value={heroDesktopPosition.y}
-                      onChange={(event) => updateHeroPhotoPosition("desktop", formatObjectPosition({ ...heroDesktopPosition, y: Number(event.target.value) }))}
-                      className="accent-[#F2C6CF]"
-                    />
-                  </label>
-
-                  <label className="grid gap-2 text-xs font-black uppercase tracking-[0.16em] text-[#2F3A35]/52">
-                    Ngang mobile: {heroMobilePosition.x}%
-                    <input
-                      type="range"
-                      min="0"
-                      max="100"
-                      value={heroMobilePosition.x}
-                      onChange={(event) => updateHeroPhotoPosition("mobile", formatObjectPosition({ ...heroMobilePosition, x: Number(event.target.value) }))}
-                      className="accent-[#8FAADC]"
-                    />
-                  </label>
-
-                  <label className="grid gap-2 text-xs font-black uppercase tracking-[0.16em] text-[#2F3A35]/52">
-                    Dọc mobile: {heroMobilePosition.y}%
-                    <input
-                      type="range"
-                      min="0"
-                      max="100"
-                      value={heroMobilePosition.y}
-                      onChange={(event) => updateHeroPhotoPosition("mobile", formatObjectPosition({ ...heroMobilePosition, y: Number(event.target.value) }))}
-                      className="accent-[#F2C6CF]"
-                    />
-                  </label>
-                </div>
-
-                <p className="text-xs font-semibold leading-5 text-[#2F3A35]/46">
-                  Khuyên dùng ảnh ngang sáng, rõ mặt, để khung đầu thiệp nhìn sang hơn. Nếu để trống, web sẽ quay về ảnh mặc định hiện tại.
-                </p>
-              </aside>
-            </div>
-          </div>
 
           <div className={`${shellClass} grid gap-5 p-4 sm:p-5 lg:p-6 xl:col-span-2`}>
             <div className="grid gap-2 text-left">
@@ -826,8 +596,8 @@ export default function AdminEditorPage() {
               URL hoặc path ảnh
               <input
                 className={fieldClass}
-                value={selectedSrc}
-                placeholder="/uploads/gallery/..."
+                value={settings?.content.gallery[activeIndex] || ""}
+                placeholder={defaultSettings.content.gallery[activeIndex] || "/uploads/gallery/..."}
                 onChange={(event) => updateGallerySlot(activeIndex, event.target.value)}
               />
             </label>

@@ -134,11 +134,11 @@ function parseChurchDate(churchDate?: string) {
 
 function DateDisplayStack({ dateParsed, lunarText }: { dateParsed: { day: string; month: string; year: string; weekday: string }; lunarText: string }) {
   return (
-    <div className="flex flex-col items-center w-full max-w-[22rem] md:max-w-[27rem] mx-auto mb-4 relative select-none">
+    <div className="flex flex-col items-center w-full max-w-[25rem] md:max-w-[31rem] mx-auto mb-4 relative select-none">
       {/* Symmetrical Absolute Positioning Layout with Symmetrical Frames */}
-      <div className="relative w-full h-[4.5rem] md:h-[5.2rem] flex items-center justify-center text-[#3f4642]">
+      <div className="relative w-full h-[5.2rem] md:h-[6rem] flex items-center justify-center text-[#3f4642]">
         {/* Left Column Frame: Weekday */}
-        <div className="absolute right-1/2 mr-[62px] md:mr-[82px] w-[7rem] md:w-[9.2rem] h-[3rem] md:h-[3.3rem] border-t border-b border-[#b4975a]/30 flex items-center justify-center text-center select-none">
+        <div className="absolute right-1/2 mr-[72px] md:mr-[95px] w-[8rem] md:w-[10.6rem] h-[3.4rem] md:h-[3.8rem] border-t border-b border-[#b4975a]/30 flex items-center justify-center text-center select-none">
           {/* Top-Left Corner Star */}
           <svg viewBox="0 0 24 24" className="absolute -top-[3.5px] -left-[3.5px] w-1.5 h-1.5 fill-[#b4975a]">
             <path d="M12 2Q12 12 22 12Q12 12 12 22Q12 12 2 12Q12 12 12 2" />
@@ -148,7 +148,7 @@ function DateDisplayStack({ dateParsed, lunarText }: { dateParsed: { day: string
             <path d="M12 2Q12 12 22 12Q12 12 12 22Q12 12 2 12Q12 12 12 2" />
           </svg>
           
-          <div className="font-sans text-[0.66rem] md:text-[0.78rem] tracking-[0.12em] font-bold text-[#7d7065] uppercase whitespace-nowrap">
+          <div className="font-sans text-[0.76rem] md:text-[0.9rem] tracking-[0.12em] font-bold text-[#7d7065] uppercase whitespace-nowrap">
             {dateParsed.weekday}
           </div>
         </div>
@@ -156,7 +156,7 @@ function DateDisplayStack({ dateParsed, lunarText }: { dateParsed: { day: string
         {/* Middle Column: Day & Vertical Dividers */}
         <div className="absolute left-1/2 -translate-x-1/2 flex items-center select-none">
           {/* Vertical Divider 1 */}
-          <div className="flex flex-col items-center justify-between h-[4.5rem] md:h-[5.2rem] py-1.5">
+          <div className="flex flex-col items-center justify-between h-[5.2rem] md:h-[6rem] py-1.5">
             <div className="w-[0.5px] flex-grow bg-[#b4975a]/35" />
             <svg viewBox="0 0 24 24" className="w-3 h-3 my-1.5 fill-[#b4975a]">
               <path d="M12 2Q12 12 22 12Q12 12 12 22Q12 12 2 12Q12 12 12 2" />
@@ -166,18 +166,18 @@ function DateDisplayStack({ dateParsed, lunarText }: { dateParsed: { day: string
 
           {/* Middle Column: Day */}
           {dateParsed.day.trim().length === 2 ? (
-            <div className="flex items-center justify-center font-serif text-[4.8rem] md:text-[5.4rem] font-light leading-none text-[#b4975a] select-none translate-y-[-0.05em] mx-3">
-              <span className="w-[2.2rem] md:w-[2.5rem] text-right">{dateParsed.day.trim()[0]}</span>
-              <span className="w-[2.2rem] md:w-[2.5rem] text-left">{dateParsed.day.trim()[1]}</span>
+            <div className="flex items-center justify-center font-serif text-[5.5rem] md:text-[6.2rem] font-light leading-none text-[#b4975a] select-none translate-y-[-0.05em] mx-3">
+              <span className="w-[2.5rem] md:w-[2.9rem] text-right">{dateParsed.day.trim()[0]}</span>
+              <span className="w-[2.5rem] md:w-[2.9rem] text-left">{dateParsed.day.trim()[1]}</span>
             </div>
           ) : (
-            <div className="font-serif text-[4.8rem] md:text-[5.4rem] font-light leading-none text-[#b4975a] text-center translate-y-[-0.05em] min-w-[4.4rem] md:min-w-[5rem] mx-3">
+            <div className="font-serif text-[5.5rem] md:text-[6.2rem] font-light leading-none text-[#b4975a] text-center translate-y-[-0.05em] min-w-[5rem] md:min-w-[5.8rem] mx-3">
               {dateParsed.day}
             </div>
           )}
 
           {/* Vertical Divider 2 */}
-          <div className="flex flex-col items-center justify-between h-[4.5rem] md:h-[5.2rem] py-1.5">
+          <div className="flex flex-col items-center justify-between h-[5.2rem] md:h-[6rem] py-1.5">
             <div className="w-[0.5px] flex-grow bg-[#b4975a]/35" />
             <svg viewBox="0 0 24 24" className="w-3 h-3 my-1.5 fill-[#b4975a]">
               <path d="M12 2Q12 12 22 12Q12 12 12 22Q12 12 2 12Q12 12 12 2" />
@@ -187,7 +187,7 @@ function DateDisplayStack({ dateParsed, lunarText }: { dateParsed: { day: string
         </div>
 
         {/* Right Column Frame: Month & Year */}
-        <div className="absolute left-1/2 ml-[62px] md:ml-[82px] w-[7rem] md:w-[9.2rem] h-[3rem] md:h-[3.3rem] border-t border-b border-[#b4975a]/30 flex items-center justify-center text-center select-none">
+        <div className="absolute left-1/2 ml-[72px] md:ml-[95px] w-[8rem] md:w-[10.6rem] h-[3.4rem] md:h-[3.8rem] border-t border-b border-[#b4975a]/30 flex items-center justify-center text-center select-none">
           {/* Top-Right Corner Star */}
           <svg viewBox="0 0 24 24" className="absolute -top-[3.5px] -right-[3.5px] w-1.5 h-1.5 fill-[#b4975a]">
             <path d="M12 2Q12 12 22 12Q12 12 12 22Q12 12 2 12Q12 12 12 2" />
@@ -197,14 +197,14 @@ function DateDisplayStack({ dateParsed, lunarText }: { dateParsed: { day: string
             <path d="M12 2Q12 12 22 12Q12 12 12 22Q12 12 2 12Q12 12 12 2" />
           </svg>
 
-          <div className="font-sans text-[0.66rem] md:text-[0.78rem] tracking-[0.06em] font-bold text-[#7d7065] uppercase whitespace-nowrap">
+          <div className="font-sans text-[0.76rem] md:text-[0.9rem] tracking-[0.06em] font-bold text-[#7d7065] uppercase whitespace-nowrap">
             THÁNG {dateParsed.month} • {dateParsed.year}
           </div>
         </div>
       </div>
 
       {/* Lunar Calendar Date */}
-      <div className="font-serif text-[#7d7065] text-[0.98rem] md:text-[1.12rem] italic tracking-wide mt-2 select-none">
+      <div className="font-serif text-[#7d7065] text-[1.18rem] md:text-[1.35rem] italic tracking-wide mt-2 select-none">
         <span className="text-[#b4975a] mr-2">✦</span>
         {lunarText}
         <span className="text-[#b4975a] ml-2">✦</span>
@@ -352,7 +352,7 @@ export function EventDetailsContent({
       ) : null}
 
       <motion.div 
-        className="mb-8 md:mb-12 w-full max-w-4xl mx-auto luxury-wedding-stationery-card px-6 py-8 sm:px-10 sm:py-10 md:px-12 md:py-12 text-center flex flex-col relative"
+        className="mb-8 md:mb-12 w-full max-w-4xl mx-auto luxury-wedding-stationery-card px-6 pt-10 pb-10 sm:px-10 sm:pt-14 sm:pb-14 md:px-12 md:pt-16 md:pb-16 text-center flex flex-col relative"
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true, margin: "-50px" }}
@@ -366,22 +366,22 @@ export function EventDetailsContent({
         <img 
           src="/assets/corner_ornament.png" 
           alt="corner ornament" 
-          className="absolute top-3 left-3 w-28 h-28 object-contain pointer-events-none select-none hidden sm:block z-20"
+          className="absolute top-0 left-0 sm:top-6 sm:left-6 w-[92px] h-[92px] sm:w-28 sm:h-28 object-contain pointer-events-none select-none block z-20"
         />
         <img 
           src="/assets/corner_ornament.png" 
           alt="corner ornament" 
-          className="absolute top-3 right-3 w-28 h-28 rotate-90 object-contain pointer-events-none select-none hidden sm:block z-20"
+          className="absolute top-0 right-0 sm:top-6 sm:right-6 w-[92px] h-[92px] sm:w-28 sm:h-28 rotate-90 object-contain pointer-events-none select-none block z-20"
         />
         <img 
           src="/assets/corner_ornament.png" 
           alt="corner ornament" 
-          className="absolute bottom-3 right-3 w-28 h-28 rotate-180 object-contain pointer-events-none select-none hidden sm:block z-20"
+          className="absolute bottom-0 right-0 sm:bottom-6 sm:right-6 w-[92px] h-[92px] sm:w-28 sm:h-28 rotate-180 object-contain pointer-events-none select-none block z-20"
         />
         <img 
           src="/assets/corner_ornament.png" 
           alt="corner ornament" 
-          className="absolute bottom-3 left-3 w-28 h-28 -rotate-90 object-contain pointer-events-none select-none hidden sm:block z-20"
+          className="absolute bottom-0 left-0 sm:bottom-6 sm:left-6 w-[92px] h-[92px] sm:w-28 sm:h-28 -rotate-90 object-contain pointer-events-none select-none block z-20"
         />
 
         {/* Tier 1: Title Header */}
@@ -415,12 +415,12 @@ export function EventDetailsContent({
 
             <div className="flex flex-col gap-2.5 md:gap-3 text-[#3f4642]/90 font-serif text-[0.95rem] sm:text-[1rem] md:text-[1.05rem] lg:text-[1.12rem] w-full mt-1.5">
               <p className="leading-relaxed">
-                <span className="text-[#7d7065] font-serif text-[0.82rem] sm:text-[0.85rem] md:text-[0.88rem] tracking-wider uppercase block mb-0.5 md:mb-1">Ông</span>
-                <span className="font-semibold block">Trần Trọng Sơn</span>
+                <span className="text-[#7d7065] font-serif font-bold text-[0.92rem] sm:text-[0.95rem] md:text-[0.98rem] tracking-wider uppercase block mb-0.5 md:mb-1">Ông</span>
+                <span className="font-semibold block text-[1.1rem] sm:text-[1.15rem] md:text-[1.21rem] lg:text-[1.29rem]">Trần Trọng Sơn</span>
               </p>
               <p className="leading-relaxed">
-                <span className="text-[#7d7065] font-serif text-[0.82rem] sm:text-[0.85rem] md:text-[0.88rem] tracking-wider uppercase block mb-0.5 md:mb-1">Bà</span>
-                <span className="font-semibold block">Nguyễn Thị Minh Duyên</span>
+                <span className="text-[#7d7065] font-serif font-bold text-[0.92rem] sm:text-[0.95rem] md:text-[0.98rem] tracking-wider uppercase block mb-0.5 md:mb-1">Bà</span>
+                <span className="font-semibold block text-[1.1rem] sm:text-[1.15rem] md:text-[1.21rem] lg:text-[1.29rem]">Nguyễn Thị Minh Duyên</span>
               </p>
             </div>
           </motion.div>
@@ -442,12 +442,12 @@ export function EventDetailsContent({
 
             <div className="flex flex-col gap-2.5 md:gap-3 text-[#3f4642]/90 font-serif text-[0.95rem] sm:text-[1rem] md:text-[1.05rem] lg:text-[1.12rem] w-full mt-1.5">
               <p className="leading-relaxed">
-                <span className="text-[#7d7065] font-serif text-[0.82rem] sm:text-[0.85rem] md:text-[0.88rem] tracking-wider uppercase block mb-0.5 md:mb-1">Ông Felicite</span>
-                <span className="font-semibold block">Nguyễn Đức Tài</span>
+                <span className="text-[#7d7065] font-serif font-bold text-[0.92rem] sm:text-[0.95rem] md:text-[0.98rem] tracking-wider uppercase block mb-0.5 md:mb-1">Ông Felicite</span>
+                <span className="font-semibold block text-[1.1rem] sm:text-[1.15rem] md:text-[1.21rem] lg:text-[1.29rem]">Nguyễn Đức Tài</span>
               </p>
               <p className="leading-relaxed">
-                <span className="text-[#7d7065] font-serif text-[0.82rem] sm:text-[0.85rem] md:text-[0.88rem] tracking-wider uppercase block mb-0.5 md:mb-1">Bà Teresa</span>
-                <span className="font-semibold block">Phan Thị Thu Hiền</span>
+                <span className="text-[#7d7065] font-serif font-bold text-[0.92rem] sm:text-[0.95rem] md:text-[0.98rem] tracking-wider uppercase block mb-0.5 md:mb-1">Bà Teresa</span>
+                <span className="font-semibold block text-[1.1rem] sm:text-[1.15rem] md:text-[1.21rem] lg:text-[1.29rem]">Phan Thị Thu Hiền</span>
               </p>
             </div>
           </motion.div>
@@ -456,7 +456,7 @@ export function EventDetailsContent({
         {/* Greeting & Names Block */}
         <div className="relative w-full flex flex-col items-center z-10 mt-1 md:mt-2">
           <motion.div variants={familyItemVariant} className="w-full text-center">
-            <p className="font-serif italic text-[#3f4642]/95 text-[1.02rem] sm:text-[1.08rem] md:text-[1.12rem] lg:text-[1.18rem] tracking-wide font-medium leading-relaxed">
+            <p className="font-serif italic text-[#3f4642]/95 text-[1.21rem] sm:text-[1.28rem] md:text-[1.33rem] lg:text-[1.4rem] tracking-wide font-medium leading-relaxed">
               Trân trọng báo tin hôn lễ của hai con chúng tôi:
             </p>
           </motion.div>
@@ -465,7 +465,7 @@ export function EventDetailsContent({
             <img 
               src="/assets/event-details-names-v4.png" 
               alt="Augustino Trần Long Nhật & Teresa Nguyễn Anh Phương" 
-              className="w-full max-w-[18rem] sm:max-w-[21rem] h-auto object-contain names-image-color"
+              className="w-full max-w-[15.5rem] sm:max-w-[21rem] h-auto object-contain names-image-color"
               draggable={false}
             />
           </motion.div>
@@ -483,29 +483,8 @@ export function EventDetailsContent({
         {/* Card 1: Thánh lễ Hôn phối */}
         <motion.div 
           variants={cardVariant}
-          className="w-full bg-[#fdfbf7]/55 backdrop-blur-[16px] rounded-[1.8rem] border border-[#b4975a]/22 shadow-[0_6px_20px_-6px_rgba(63,70,66,0.06)] p-6 pb-8 flex flex-col items-center text-center relative overflow-hidden"
+          className="w-full luxury-wedding-stationery-card px-6 pt-10 pb-10 sm:px-10 sm:pt-14 sm:pb-14 md:px-12 md:pt-16 md:pb-16 flex flex-col items-center text-center relative"
         >
-          {/* Corner Ornaments */}
-          <img 
-            src="/assets/corner_ornament.png" 
-            alt="corner ornament" 
-            className="absolute top-3 left-3 w-28 h-28 object-contain pointer-events-none select-none hidden sm:block z-20"
-          />
-          <img 
-            src="/assets/corner_ornament.png" 
-            alt="corner ornament" 
-            className="absolute top-3 right-3 w-28 h-28 rotate-90 object-contain pointer-events-none select-none hidden sm:block z-20"
-          />
-          <img 
-            src="/assets/corner_ornament.png" 
-            alt="corner ornament" 
-            className="absolute bottom-3 right-3 w-28 h-28 rotate-180 object-contain pointer-events-none select-none hidden sm:block z-20"
-          />
-          <img 
-            src="/assets/corner_ornament.png" 
-            alt="corner ornament" 
-            className="absolute bottom-3 left-3 w-28 h-28 -rotate-90 object-contain pointer-events-none select-none hidden sm:block z-20"
-          />
 
           {/* Main Title */}
           <h4 className="font-serif text-[1.2rem] sm:text-[1.35rem] font-bold tracking-[0.14em] md:tracking-[0.18em] uppercase text-[#3f4642] mt-1 mb-1.5 leading-tight">
@@ -517,7 +496,8 @@ export function EventDetailsContent({
             <img 
               src="/assets/divider_cards.png" 
               alt="decorative divider" 
-              className="w-[79.2%] sm:w-[112.8%] max-w-[29.3rem] h-auto opacity-95 select-none object-contain pointer-events-none"
+              className="w-[90%] sm:w-[95%] max-w-[33.7rem] h-auto opacity-95 select-none object-contain pointer-events-none"
+              style={{ filter: "brightness(0.85) saturate(1.3) contrast(1.05)" }}
             />
           </div>
 
@@ -563,10 +543,10 @@ export function EventDetailsContent({
             href="https://www.google.com/maps/search/?api=1&query=Nh%C3%A0%20th%E1%BB%9D%20Gi%C3%A1o%20x%E1%BB%A9%20Tam%20H%E1%BA%A3i%20180%20Tam%20Ch%C3%A2u%20Tam%20B%C3%ACnh%20Th%E1%BB%A7%20%C4%90%E1%BB%A9c" 
             target="_blank" 
             rel="noreferrer" 
-            className="w-full max-w-[13.5rem] md:max-w-[15.5rem] h-[3.4rem] md:h-[3.8rem] save-date-watercolor-btn mt-1"
+            className="w-full max-w-[11.1rem] md:max-w-[12.7rem] h-[2.8rem] md:h-[3.1rem] save-date-watercolor-btn mt-1"
           >
-            <span className="save-date-btn-label flex items-center justify-center gap-2 font-serif text-[0.88rem] md:text-[1rem] font-bold tracking-[0.2em] uppercase text-[#3f4642]">
-              <MapPin className="w-3.5 h-3.5 md:w-[1.12rem] md:h-[1.12rem]" />
+            <span className="save-date-btn-label flex items-center justify-center gap-1.5 font-sans text-[0.55rem] md:text-[0.61rem] font-bold tracking-[0.2em] text-[#3f4642]">
+              <MapPin className="w-3 h-3 md:w-[0.85rem] md:h-[0.85rem]" />
               <span>Chỉ đường</span>
             </span>
           </a>
@@ -575,29 +555,8 @@ export function EventDetailsContent({
         {/* Card 2: Tiệc Cưới Thân Mật (Unified Card) */}
         <motion.div 
           variants={cardVariant}
-          className="w-full bg-[#fdfbf7]/55 backdrop-blur-[16px] rounded-[1.8rem] border border-[#b4975a]/22 shadow-[0_6px_20px_-6px_rgba(63,70,66,0.06)] p-6 pb-8 flex flex-col items-center text-center relative overflow-hidden"
+          className="w-full luxury-wedding-stationery-card px-6 pt-10 pb-10 sm:px-10 sm:pt-14 sm:pb-14 md:px-12 md:pt-16 md:pb-16 flex flex-col items-center text-center relative"
         >
-          {/* Corner Ornaments */}
-          <img 
-            src="/assets/corner_ornament.png" 
-            alt="corner ornament" 
-            className="absolute top-3 left-3 w-28 h-28 object-contain pointer-events-none select-none hidden sm:block z-20"
-          />
-          <img 
-            src="/assets/corner_ornament.png" 
-            alt="corner ornament" 
-            className="absolute top-3 right-3 w-28 h-28 rotate-90 object-contain pointer-events-none select-none hidden sm:block z-20"
-          />
-          <img 
-            src="/assets/corner_ornament.png" 
-            alt="corner ornament" 
-            className="absolute bottom-3 right-3 w-28 h-28 rotate-180 object-contain pointer-events-none select-none hidden sm:block z-20"
-          />
-          <img 
-            src="/assets/corner_ornament.png" 
-            alt="corner ornament" 
-            className="absolute bottom-3 left-3 w-28 h-28 -rotate-90 object-contain pointer-events-none select-none hidden sm:block z-20"
-          />
 
           {/* Main Title */}
           <h4 className="font-serif text-[1.2rem] sm:text-[1.35rem] font-bold tracking-[0.14em] md:tracking-[0.18em] uppercase text-[#3f4642] mt-1 mb-1.5 leading-tight">
@@ -609,7 +568,8 @@ export function EventDetailsContent({
             <img 
               src="/assets/divider_cards.png" 
               alt="decorative divider" 
-              className="w-[79.2%] sm:w-[112.8%] max-w-[29.3rem] h-auto opacity-95 select-none object-contain pointer-events-none"
+              className="w-[90%] sm:w-[95%] max-w-[33.7rem] h-auto opacity-95 select-none object-contain pointer-events-none"
+              style={{ filter: "brightness(0.85) saturate(1.3) contrast(1.05)" }}
             />
           </div>
 
@@ -642,10 +602,10 @@ export function EventDetailsContent({
               href={mapUrl} 
               target="_blank" 
               rel="noreferrer" 
-              className="w-full max-w-[13.5rem] md:max-w-[15.5rem] h-[3.4rem] md:h-[3.8rem] save-date-watercolor-btn mt-1 mb-6"
+              className="w-full max-w-[11.1rem] md:max-w-[12.7rem] h-[2.8rem] md:h-[3.1rem] save-date-watercolor-btn mt-1 mb-6"
             >
-              <span className="save-date-btn-label flex items-center justify-center gap-2 font-serif text-[0.88rem] md:text-[1rem] font-bold tracking-[0.2em] uppercase text-[#3f4642]">
-                <MapPin className="w-3.5 h-3.5 md:w-[1.12rem] md:h-[1.12rem]" />
+              <span className="save-date-btn-label flex items-center justify-center gap-1.5 font-sans text-[0.55rem] md:text-[0.61rem] font-bold tracking-[0.2em] text-[#3f4642]">
+                <MapPin className="w-3 h-3 md:w-[0.85rem] md:h-[0.85rem]" />
                 <span>Chỉ đường</span>
               </span>
             </a>
@@ -671,7 +631,7 @@ export function EventDetailsContent({
           className="flex md:hidden flex-col gap-3 px-1 w-full pt-8 pb-4 relative z-10"
         >
           <h3 className="font-serif text-[1.12rem] font-bold gold-foil-text uppercase text-center mb-5 leading-tight">
-            Lịch Trình Tiệc Cưới
+            Lịch Trình Tiệc
           </h3>
           
           <div className="timeline-garden-path-scene w-full min-h-[28rem] overflow-visible relative">

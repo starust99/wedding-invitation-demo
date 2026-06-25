@@ -913,6 +913,6 @@ export function buildInvitationCopy(input?: InvitationCopyInput): InvitationCopy
     closingLine: `Sự hiện diện của ${presenceSubject} là niềm vinh hạnh và lời chúc phúc trọn vẹn nhất.`,
     signaturePrefix: tone === "elder" ? "Thương kính" : tone === "peer" || tone === "junior" ? "Thân mến" : "Trân trọng",
     kinshipPronoun,
-    dressCodeLine: `Thương mời ${kinshipPronoun} diện trang phục tươi sáng theo bảng màu bên dưới (vui lòng hạn chế các tông màu tối).\n\nLưu ý thời tiết: Đà Lạt vào đông rất lạnh, ${kinshipPronoun} hãy ưu tiên trang phục và phụ kiện đủ ấm cho bữa tiệc ngoài trời nhé!`,
+    dressCodeLine: `Thương mời ${kinshipPronoun} diện trang phục tươi sáng theo bảng màu bên dưới\n(xin tránh mặc các tông màu tối).\n\nLưu ý thời tiết: Đà Lạt vào đông rất lạnh, ${kinshipPronoun} hãy ưu tiên trang phục và phụ kiện đủ ấm cho bữa tiệc ngoài trời nhé!`,
   };
 }

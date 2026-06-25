@@ -117,11 +117,11 @@ export function DressCodeSection({
           TRANG PHỤC CHỦ ĐỀ
         </h3>
 
-        <span className="font-serif text-[0.8rem] sm:text-[0.85rem] md:text-[0.9rem] tracking-[0.15em] text-[#7d7065] font-semibold uppercase leading-none mb-3.5 block">
+        <span className="font-serif text-[0.8rem] sm:text-[0.85rem] md:text-[0.9rem] tracking-[0.15em] text-[#7d7065] font-bold uppercase leading-none mb-3.5 block">
           {title}
         </span>
 
-        <p className="font-sans text-[#4e443c]/90 font-normal text-[0.92rem] sm:text-[0.98rem] md:text-[1.02rem] leading-relaxed max-w-[28rem] mx-auto">
+        <p className="font-sans text-[#4e443c]/90 font-normal text-[0.92rem] sm:text-[0.98rem] md:text-[1.02rem] leading-relaxed max-w-[28rem] mx-auto whitespace-pre-line">
           {invitationText}
         </p>
       </div>

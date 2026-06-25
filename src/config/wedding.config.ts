@@ -69,7 +69,7 @@ export const weddingConfig = {
       eyebrow: "Lời mời từ gia đình",
     },
     itinerary: {
-      eyebrow: "Lịch trình Tiệc cưới",
+      eyebrow: "Lịch trình Tiệc",
       title: "Buổi tiệc tại Terracotta",
       description: "",
       cardEyebrow: "Ngày cưới",
@@ -84,7 +84,7 @@ export const weddingConfig = {
       ],
     },
     timeline: {
-      eyebrow: "Lịch trình Tiệc cưới",
+      eyebrow: "Lịch trình Tiệc",
       title: "Buổi tiệc tại Terracotta",
     },
     venue: {
@@ -220,7 +220,7 @@ export const weddingConfig = {
   gallery: [
     "https://res.cloudinary.com/dt1b5ua11/image/upload/c_limit,f_auto,q_auto,w_1800/v1/wedding-invitation-demo/gallery/2026-05-12-n-p-1_75a",
     "https://res.cloudinary.com/dt1b5ua11/image/upload/c_limit,f_auto,q_auto,w_1800/v1/wedding-invitation-demo/gallery/2026-05-12-n-p-1_230a-optimized",
-    "https://res.cloudinary.com/dt1b5ua11/image/upload/c_limit,f_auto,q_auto,w_1800/v1/wedding-invitation-demo/gallery/2026-05-12-n-p-2_71a-optimized",
+    "https://res.cloudinary.com/dt1b5ua11/image/upload/c_limit,f_auto,q_auto,w_1800/v1/wedding-invitation-demo/gallery/2026-05-12-n-p-2_299a-optimized",
     "https://res.cloudinary.com/dt1b5ua11/image/upload/c_limit,f_auto,q_auto,w_1800/v1/wedding-invitation-demo/gallery/2026-05-12-n-p-1_535a-optimized",
     "https://res.cloudinary.com/dt1b5ua11/image/upload/c_limit,f_auto,q_auto,w_1800/v1/wedding-invitation-demo/gallery/2026-05-12-n-p-2_199a-optimized",
   ],

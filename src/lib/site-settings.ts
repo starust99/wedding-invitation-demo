@@ -41,7 +41,7 @@ type SettingsInput = Partial<Omit<SiteSettings, "content">> & {
 
 export const draftStorageKey = "wedding-demo-draft-settings";
 export const publishedStorageKey = "wedding-demo-published-settings";
-export const settingsSchemaVersion = 12;
+export const settingsSchemaVersion = 14;
 
 export const defaultSettings: SiteSettings = {
   schemaVersion: settingsSchemaVersion,
@@ -234,7 +234,7 @@ export function normalizeSettings(settings: SettingsInput | null): SiteSettings 
           ...content.sections,
           timeline: {
             ...content.sections.timeline,
-            eyebrow: "Lịch trình Tiệc cưới",
+            eyebrow: "Lịch trình Tiệc",
           },
         },
       };
@@ -246,7 +246,7 @@ export function normalizeSettings(settings: SettingsInput | null): SiteSettings 
           ...content.sections,
           itinerary: {
             ...content.sections.itinerary,
-            eyebrow: "Lịch trình Tiệc cưới",
+            eyebrow: "Lịch trình Tiệc",
           },
         },
       };
@@ -298,7 +298,7 @@ export function normalizeSettings(settings: SettingsInput | null): SiteSettings 
       text.includes("Thương mời quý khách diện trang phục theo bảng màu") || 
       text.includes("Giữ ấm là ưu tiên hàng đầu");
 
-    const newDressCodeText = "Thương mời quý khách diện trang phục tươi sáng theo bảng màu bên dưới (vui lòng hạn chế các tông màu tối).\n\nLưu ý thời tiết: Đà Lạt vào đông rất lạnh, quý khách hãy ưu tiên trang phục và phụ kiện đủ ấm cho bữa tiệc ngoài trời nhé!";
+    const newDressCodeText = "Thương mời quý khách diện trang phục tươi sáng theo bảng màu bên dưới\n(xin tránh mặc các tông màu tối).\n\nLưu ý thời tiết: Đà Lạt vào đông rất lạnh, quý khách hãy ưu tiên trang phục và phụ kiện đủ ấm cho bữa tiệc ngoài trời nhé!";
 
     if (isOldDressCodeText(content.eventDetailsConfig?.content?.dressCodeText)) {
       content = {
@@ -319,6 +319,51 @@ export function normalizeSettings(settings: SettingsInput | null): SiteSettings 
         dressCode: {
           ...content.dressCode,
           note: newDressCodeText,
+        },
+      };
+    }
+  }
+
+  // Migration v13: Replace duplicate gallery image with evening valley scene
+  if ((settings.schemaVersion ?? 0) < 13) {
+    if (Array.isArray(content.gallery)) {
+      content.gallery = content.gallery.map((url) =>
+        url.includes("2026-05-12-n-p-2_71a-optimized")
+          ? url.replace("2026-05-12-n-p-2_71a-optimized", "2026-05-12-n-p-2_299a-optimized")
+          : url
+      );
+    }
+  }
+
+  // Migration v14: Update dressCodeText and dressCode.note to have a newline and (xin tránh mặc các tông màu tối)
+  if ((settings.schemaVersion ?? 0) < 14) {
+    const oldText = "(vui lòng hạn chế các tông màu tối)";
+    const newText = "\n(xin tránh mặc các tông màu tối)";
+
+    const replaceText = (str: string) => {
+      if (!str) return "";
+      return str.replace(oldText, newText);
+    };
+
+    if (content.eventDetailsConfig?.content?.dressCodeText) {
+      content = {
+        ...content,
+        eventDetailsConfig: {
+          ...content.eventDetailsConfig,
+          content: {
+            ...content.eventDetailsConfig.content,
+            dressCodeText: replaceText(content.eventDetailsConfig.content.dressCodeText),
+          },
+        },
+      };
+    }
+
+    if (content.dressCode?.note) {
+      content = {
+        ...content,
+        dressCode: {
+          ...content.dressCode,
+          note: replaceText(content.dressCode.note),
         },
       };
     }

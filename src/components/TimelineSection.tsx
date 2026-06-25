@@ -39,7 +39,7 @@ export function TimelineSection({ config }: { config: WeddingConfig }) {
   const nodes = config.timeline.map(buildTimelineNode);
 
   return (
-    <section id="timeline" className="hidden md:block timeline-garden-section cinematic-stage relative overflow-hidden px-5 py-24 text-ink sm:px-8 lg:py-32">
+    <section id="timeline" className="hidden md:block timeline-garden-section cinematic-stage relative overflow-hidden px-5 pt-14 pb-24 text-ink sm:px-8 lg:pt-16 lg:pb-32">
       <SectionMediaLayers config={config} section="timeline" className="timeline-garden-media opacity-[0.08]" />
       <div aria-hidden="true" className="paper-grain-luxury timeline-garden-grain opacity-15" />
 
