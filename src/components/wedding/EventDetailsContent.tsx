@@ -135,10 +135,10 @@ function parseChurchDate(churchDate?: string) {
 function DateDisplayStack({ dateParsed, lunarText }: { dateParsed: { day: string; month: string; year: string; weekday: string }; lunarText: string }) {
   return (
     <div className="flex flex-col items-center w-full max-w-[25rem] md:max-w-[31rem] mx-auto mb-4 relative select-none">
-      {/* Symmetrical Absolute Positioning Layout with Symmetrical Frames */}
-      <div className="relative w-full h-[5.2rem] md:h-[6rem] flex items-center justify-center text-[#3f4642]">
+      {/* Symmetrical Flex Layout with Symmetrical Frames */}
+      <div className="w-full h-[5.2rem] md:h-[6rem] flex items-center justify-center text-[#3f4642]">
         {/* Left Column Frame: Weekday */}
-        <div className="absolute right-1/2 mr-[72px] md:mr-[95px] w-[8rem] md:w-[10.6rem] h-[3.4rem] md:h-[3.8rem] border-t border-b border-[#b4975a]/30 flex items-center justify-center text-center select-none">
+        <div className="flex-1 max-w-[6.5rem] sm:max-w-[8rem] md:max-w-[10.6rem] h-[3.2rem] md:h-[3.8rem] border-t border-b border-[#b4975a]/30 flex items-center justify-center text-center relative select-none">
           {/* Top-Left Corner Star */}
           <svg viewBox="0 0 24 24" className="absolute -top-[3.5px] -left-[3.5px] w-1.5 h-1.5 fill-[#b4975a]">
             <path d="M12 2Q12 12 22 12Q12 12 12 22Q12 12 2 12Q12 12 12 2" />
@@ -148,17 +148,17 @@ function DateDisplayStack({ dateParsed, lunarText }: { dateParsed: { day: string
             <path d="M12 2Q12 12 22 12Q12 12 12 22Q12 12 2 12Q12 12 12 2" />
           </svg>
           
-          <div className="font-sans text-[0.76rem] md:text-[0.9rem] tracking-[0.12em] font-bold text-[#7d7065] uppercase whitespace-nowrap">
+          <div className="font-sans text-[0.68rem] sm:text-[0.76rem] md:text-[0.9rem] tracking-[0.12em] font-bold text-[#7d7065] uppercase whitespace-nowrap px-1">
             {dateParsed.weekday}
           </div>
         </div>
 
         {/* Middle Column: Day & Vertical Dividers */}
-        <div className="absolute left-1/2 -translate-x-1/2 flex items-center select-none">
+        <div className="flex items-center mx-2 sm:mx-3 md:mx-4 select-none">
           {/* Vertical Divider 1 */}
-          <div className="flex flex-col items-center justify-between h-[5.2rem] md:h-[6rem] py-1.5">
+          <div className="flex flex-col items-center justify-between h-[4.5rem] md:h-[6rem] py-1.5">
             <div className="w-[0.5px] flex-grow bg-[#b4975a]/35" />
-            <svg viewBox="0 0 24 24" className="w-3 h-3 my-1.5 fill-[#b4975a]">
+            <svg viewBox="0 0 24 24" className="w-2.5 h-2.5 my-1 fill-[#b4975a]">
               <path d="M12 2Q12 12 22 12Q12 12 12 22Q12 12 2 12Q12 12 12 2" />
             </svg>
             <div className="w-[0.5px] flex-grow bg-[#b4975a]/35" />
@@ -166,20 +166,20 @@ function DateDisplayStack({ dateParsed, lunarText }: { dateParsed: { day: string
 
           {/* Middle Column: Day */}
           {dateParsed.day.trim().length === 2 ? (
-            <div className="flex items-center justify-center font-serif text-[5.5rem] md:text-[6.2rem] font-light leading-none text-[#b4975a] select-none translate-y-[-0.05em] mx-3">
-              <span className="w-[2.5rem] md:w-[2.9rem] text-right">{dateParsed.day.trim()[0]}</span>
-              <span className="w-[2.5rem] md:w-[2.9rem] text-left">{dateParsed.day.trim()[1]}</span>
+            <div className="flex items-center justify-center font-serif text-[4.2rem] sm:text-[5.5rem] md:text-[6.2rem] font-light leading-none text-[#b4975a] select-none translate-y-[-0.03em] mx-1 sm:mx-2 md:mx-3">
+              <span className="w-[1.9rem] sm:w-[2.5rem] md:w-[2.9rem] text-right">{dateParsed.day.trim()[0]}</span>
+              <span className="w-[1.9rem] sm:w-[2.5rem] md:w-[2.9rem] text-left">{dateParsed.day.trim()[1]}</span>
             </div>
           ) : (
-            <div className="font-serif text-[5.5rem] md:text-[6.2rem] font-light leading-none text-[#b4975a] text-center translate-y-[-0.05em] min-w-[5rem] md:min-w-[5.8rem] mx-3">
+            <div className="font-serif text-[4.2rem] sm:text-[5.5rem] md:text-[6.2rem] font-light leading-none text-[#b4975a] text-center translate-y-[-0.03em] min-w-[3.8rem] sm:min-w-[5rem] md:min-w-[5.8rem] mx-1 sm:mx-2 md:mx-3">
               {dateParsed.day}
             </div>
           )}
 
           {/* Vertical Divider 2 */}
-          <div className="flex flex-col items-center justify-between h-[5.2rem] md:h-[6rem] py-1.5">
+          <div className="flex flex-col items-center justify-between h-[4.5rem] md:h-[6rem] py-1.5">
             <div className="w-[0.5px] flex-grow bg-[#b4975a]/35" />
-            <svg viewBox="0 0 24 24" className="w-3 h-3 my-1.5 fill-[#b4975a]">
+            <svg viewBox="0 0 24 24" className="w-2.5 h-2.5 my-1 fill-[#b4975a]">
               <path d="M12 2Q12 12 22 12Q12 12 12 22Q12 12 2 12Q12 12 12 2" />
             </svg>
             <div className="w-[0.5px] flex-grow bg-[#b4975a]/35" />
@@ -187,7 +187,7 @@ function DateDisplayStack({ dateParsed, lunarText }: { dateParsed: { day: string
         </div>
 
         {/* Right Column Frame: Month & Year */}
-        <div className="absolute left-1/2 ml-[72px] md:ml-[95px] w-[8rem] md:w-[10.6rem] h-[3.4rem] md:h-[3.8rem] border-t border-b border-[#b4975a]/30 flex items-center justify-center text-center select-none">
+        <div className="flex-1 max-w-[6.5rem] sm:max-w-[8rem] md:max-w-[10.6rem] h-[3.2rem] md:h-[3.8rem] border-t border-b border-[#b4975a]/30 flex items-center justify-center text-center relative select-none">
           {/* Top-Right Corner Star */}
           <svg viewBox="0 0 24 24" className="absolute -top-[3.5px] -right-[3.5px] w-1.5 h-1.5 fill-[#b4975a]">
             <path d="M12 2Q12 12 22 12Q12 12 12 22Q12 12 2 12Q12 12 12 2" />
@@ -197,7 +197,7 @@ function DateDisplayStack({ dateParsed, lunarText }: { dateParsed: { day: string
             <path d="M12 2Q12 12 22 12Q12 12 12 22Q12 12 2 12Q12 12 12 2" />
           </svg>
 
-          <div className="font-sans text-[0.76rem] md:text-[0.9rem] tracking-[0.06em] font-bold text-[#7d7065] uppercase whitespace-nowrap">
+          <div className="font-sans text-[0.62rem] sm:text-[0.76rem] md:text-[0.9rem] tracking-[0.06em] font-bold text-[#7d7065] uppercase whitespace-nowrap px-1">
             THÁNG {dateParsed.month} • {dateParsed.year}
           </div>
         </div>
