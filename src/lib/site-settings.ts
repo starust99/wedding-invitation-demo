@@ -298,7 +298,7 @@ export function normalizeSettings(settings: SettingsInput | null): SiteSettings 
       text.includes("Thương mời quý khách diện trang phục theo bảng màu") || 
       text.includes("Giữ ấm là ưu tiên hàng đầu");
 
-    const newDressCodeText = "Để cùng tạo nên những khung hình đẹp và hài hòa cho đêm tiệc, Quý khách có thể tham khảo các ý tưởng phối đồ dựa trên bảng màu dưới đây:\n\nLưu ý thời tiết: Đà Lạt vào đông rất lạnh, quý khách hãy ưu tiên trang phục và phụ kiện đủ ấm cho bữa tiệc ngoài trời nhé!";
+    const newDressCodeText = "Để cùng tạo nên những khung hình đẹp và hài hòa cho đêm tiệc, Quý khách có thể tham khảo các ý tưởng phối đồ dựa theo bảng màu dưới đây:\n\nLưu ý thời tiết: Đà Lạt vào đông rất lạnh, quý khách hãy ưu tiên trang phục và phụ kiện đủ ấm cho bữa tiệc ngoài trời nhé!";
 
     if (isOldDressCodeText(content.eventDetailsConfig?.content?.dressCodeText)) {
       content = {
@@ -372,7 +372,7 @@ export function normalizeSettings(settings: SettingsInput | null): SiteSettings 
   // Migration v15: Replace the dressCodeText and dressCode.note with the new wording
   if ((settings.schemaVersion ?? 0) < 15) {
     const oldSegment = "Thương mời quý khách diện trang phục tươi sáng theo bảng màu bên dưới\n(xin tránh mặc các tông màu tối).";
-    const newSegment = "Để cùng tạo nên những khung hình đẹp và hài hòa cho đêm tiệc, Quý khách có thể tham khảo các ý tưởng phối đồ dựa trên bảng màu dưới đây:";
+    const newSegment = "Để cùng tạo nên những khung hình đẹp và hài hòa cho đêm tiệc, Quý khách có thể tham khảo các ý tưởng phối đồ dựa theo bảng màu dưới đây:";
 
     const replaceText = (str: string) => {
       if (!str) return "";
