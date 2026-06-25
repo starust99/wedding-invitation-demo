@@ -416,11 +416,11 @@ export function EventDetailsContent({
             <div className="flex flex-col gap-2.5 md:gap-3 text-[#3f4642]/90 font-serif text-[0.95rem] sm:text-[1rem] md:text-[1.05rem] lg:text-[1.12rem] w-full mt-1.5">
               <p className="leading-relaxed">
                 <span className="text-[#7d7065] font-serif font-bold text-[0.8rem] [@media(min-width:375px)]:text-[0.85rem] [@media(min-width:390px)]:text-[0.92rem] [@media(min-width:412px)]:text-[0.95rem] sm:text-[0.95rem] md:text-[0.98rem] tracking-wider uppercase block mb-0.5 md:mb-1">Ông</span>
-                <span className="font-semibold block text-[0.88rem] [@media(min-width:375px)]:text-[0.94rem] [@media(min-width:390px)]:text-[1.02rem] [@media(min-width:412px)]:text-[1.08rem] sm:text-[1.15rem] md:text-[1.21rem] lg:text-[1.29rem] whitespace-nowrap">Trần Trọng Sơn</span>
+                <span className="font-semibold block text-[0.88rem] [@media(min-width:375px)]:text-[0.94rem] [@media(min-width:390px)]:text-[1.02rem] [@media(min-width:412px)]:text-[1.08rem] sm:text-[1.15rem] md:text-[1.21rem] lg:text-[1.29rem] whitespace-nowrap uppercase">TRẦN TRỌNG SƠN</span>
               </p>
               <p className="leading-relaxed">
                 <span className="text-[#7d7065] font-serif font-bold text-[0.8rem] [@media(min-width:375px)]:text-[0.85rem] [@media(min-width:390px)]:text-[0.92rem] [@media(min-width:412px)]:text-[0.95rem] sm:text-[0.95rem] md:text-[0.98rem] tracking-wider uppercase block mb-0.5 md:mb-1">Bà</span>
-                <span className="font-semibold block text-[0.88rem] [@media(min-width:375px)]:text-[0.94rem] [@media(min-width:390px)]:text-[1.02rem] [@media(min-width:412px)]:text-[1.08rem] sm:text-[1.15rem] md:text-[1.21rem] lg:text-[1.29rem] whitespace-nowrap">Nguyễn Thị Minh Duyên</span>
+                <span className="font-semibold block text-[0.88rem] [@media(min-width:375px)]:text-[0.94rem] [@media(min-width:390px)]:text-[1.02rem] [@media(min-width:412px)]:text-[1.08rem] sm:text-[1.15rem] md:text-[1.21rem] lg:text-[1.29rem] whitespace-nowrap uppercase">NGUYỄN THỊ MINH DUYÊN</span>
               </p>
             </div>
           </motion.div>
@@ -443,11 +443,11 @@ export function EventDetailsContent({
             <div className="flex flex-col gap-2.5 md:gap-3 text-[#3f4642]/90 font-serif text-[0.95rem] sm:text-[1rem] md:text-[1.05rem] lg:text-[1.12rem] w-full mt-1.5">
               <p className="leading-relaxed">
                 <span className="text-[#7d7065] font-serif font-bold text-[0.8rem] [@media(min-width:375px)]:text-[0.85rem] [@media(min-width:390px)]:text-[0.92rem] [@media(min-width:412px)]:text-[0.95rem] sm:text-[0.95rem] md:text-[0.98rem] tracking-wider uppercase block mb-0.5 md:mb-1">Ông Felicite</span>
-                <span className="font-semibold block text-[0.88rem] [@media(min-width:375px)]:text-[0.94rem] [@media(min-width:390px)]:text-[1.02rem] [@media(min-width:412px)]:text-[1.08rem] sm:text-[1.15rem] md:text-[1.21rem] lg:text-[1.29rem] whitespace-nowrap">Nguyễn Đức Tài</span>
+                <span className="font-semibold block text-[0.88rem] [@media(min-width:375px)]:text-[0.94rem] [@media(min-width:390px)]:text-[1.02rem] [@media(min-width:412px)]:text-[1.08rem] sm:text-[1.15rem] md:text-[1.21rem] lg:text-[1.29rem] whitespace-nowrap uppercase">NGUYỄN ĐỨC TÀI</span>
               </p>
               <p className="leading-relaxed">
                 <span className="text-[#7d7065] font-serif font-bold text-[0.8rem] [@media(min-width:375px)]:text-[0.85rem] [@media(min-width:390px)]:text-[0.92rem] [@media(min-width:412px)]:text-[0.95rem] sm:text-[0.95rem] md:text-[0.98rem] tracking-wider uppercase block mb-0.5 md:mb-1">Bà Teresa</span>
-                <span className="font-semibold block text-[0.88rem] [@media(min-width:375px)]:text-[0.94rem] [@media(min-width:390px)]:text-[1.02rem] [@media(min-width:412px)]:text-[1.08rem] sm:text-[1.15rem] md:text-[1.21rem] lg:text-[1.29rem] whitespace-nowrap">Phan Thị Thu Hiền</span>
+                <span className="font-semibold block text-[0.88rem] [@media(min-width:375px)]:text-[0.94rem] [@media(min-width:390px)]:text-[1.02rem] [@media(min-width:412px)]:text-[1.08rem] sm:text-[1.15rem] md:text-[1.21rem] lg:text-[1.29rem] whitespace-nowrap uppercase">PHAN THỊ THU HIỀN</span>
               </p>
             </div>
           </motion.div>
