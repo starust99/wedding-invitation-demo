@@ -352,7 +352,7 @@ export function EventDetailsContent({
       ) : null}
 
       <motion.div 
-        className="mb-8 md:mb-12 w-full max-w-4xl mx-auto luxury-wedding-stationery-card px-3 pt-10 pb-10 sm:px-10 sm:pt-14 sm:pb-14 md:px-12 md:pt-16 md:pb-16 text-center flex flex-col relative"
+        className="mb-8 md:mb-12 w-full max-w-4xl mx-auto luxury-wedding-stationery-card px-1.5 pt-10 pb-10 sm:px-10 sm:pt-14 sm:pb-14 md:px-12 md:pt-16 md:pb-16 text-center flex flex-col relative"
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true, margin: "-50px" }}
@@ -456,7 +456,7 @@ export function EventDetailsContent({
         {/* Greeting & Names Block */}
         <div className="relative w-full flex flex-col items-center z-10 mt-1 md:mt-2">
           <motion.div variants={familyItemVariant} className="w-full text-center">
-            <p className="font-serif italic text-[#3f4642]/95 text-[0.88rem] [@media(min-width:375px)]:text-[0.95rem] [@media(min-width:390px)]:text-[1.02rem] [@media(min-width:412px)]:text-[1.08rem] sm:text-[1.28rem] md:text-[1.33rem] lg:text-[1.4rem] tracking-tighter sm:tracking-wide font-medium leading-relaxed whitespace-nowrap">
+            <p className="font-serif italic text-[#3f4642]/95 text-[0.92rem] [@media(min-width:375px)]:text-[1.02rem] [@media(min-width:390px)]:text-[1.1rem] [@media(min-width:412px)]:text-[1.18rem] sm:text-[1.28rem] md:text-[1.33rem] lg:text-[1.4rem] tracking-tighter sm:tracking-wide font-medium leading-relaxed whitespace-nowrap">
               Trân trọng báo tin hôn lễ của hai con chúng tôi:
             </p>
           </motion.div>
