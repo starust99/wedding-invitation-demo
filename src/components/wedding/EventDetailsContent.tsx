@@ -456,8 +456,8 @@ export function EventDetailsContent({
         {/* Greeting & Names Block */}
         <div className="relative w-full flex flex-col items-center z-10 mt-1 md:mt-2">
           <motion.div variants={familyItemVariant} className="w-full text-center">
-            <p className="font-serif italic text-[#3f4642]/95 text-[1.06rem] [@media(min-width:375px)]:text-[1.12rem] [@media(min-width:390px)]:text-[1.18rem] [@media(min-width:412px)]:text-[1.24rem] sm:text-[1.28rem] md:text-[1.33rem] lg:text-[1.4rem] tracking-[-0.085em] sm:tracking-wide font-medium leading-relaxed whitespace-nowrap">
-              Trân trọng báo tin hôn lễ của hai con chúng tôi:
+            <p className="font-serif italic text-[#3f4642]/95 text-[1.1rem] sm:text-[1.28rem] md:text-[1.33rem] lg:text-[1.4rem] tracking-wide font-medium leading-relaxed">
+              Trân trọng báo tin hôn lễ <br className="sm:hidden" /> của hai con chúng tôi:
             </p>
           </motion.div>
 
