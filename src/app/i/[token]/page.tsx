@@ -31,7 +31,8 @@ export async function generateMetadata({ params }: { params: Promise<{ token: st
   }
 
   const title = `Thiệp mời: ${guestName} | Nhật & Phương`;
-  const description = `Mời ${guestName} cùng chung vui trong ngày chung đôi của Nhật & Phương, 26.12.2026.`;
+  const guestPrefix = guestName.charAt(0).toUpperCase() + guestName.slice(1);
+  const description = `${guestPrefix} đến chung vui và ghi dấu những khoảnh khắc đáng nhớ cùng Nhật & Phương, 26.12.2026.`;
 
   return {
     title,

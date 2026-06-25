@@ -547,7 +547,7 @@ export function createDefaultWeddingHeroConfig(): WeddingHeroEditorConfig {
       names: "Nhật & Phương",
       date: "26.12.2026",
       description:
-        "Trân trọng kính mời quý khách cùng chung vui trong ngày chung đôi của Nhật & Phương.",
+        "Quý khách đến chung vui và ghi dấu những khoảnh khắc đáng nhớ cùng Nhật & Phương.",
       primaryCta: "Gửi lời hồi đáp",
       secondaryCta: "Xem địa điểm",
       monogramText: "N&P",

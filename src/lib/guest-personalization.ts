@@ -866,7 +866,8 @@ export function buildInvitationCopy(input?: InvitationCopyInput): InvitationCopy
   const personalInviteOwner = isParentsHost ? parentInviteOwner : normalizeInviteOwnerPronoun(hostPronoun);
   const personalInviteLine = `${guestLabel} đến dự Thánh Lễ Hôn Phối & tiệc cưới của ${personalInviteOwner}.`;
   const insideInviteLine = `${personalInviteHeading}\n${personalInviteLine}`;
-  const heroInvitationLine = personalInviteLine;
+  const guestLabelPrefix = guestLabel.charAt(0).toUpperCase() + guestLabel.slice(1);
+  const heroInvitationLine = `${guestLabelPrefix} đến chung vui và ghi dấu những khoảnh khắc đáng nhớ cùng Nhật & Phương.`;
   const rsvpLead = tone === "parents_host"
     ? `${hostSubject} mong nhận được lời hồi đáp để chuẩn bị đón tiếp chu đáo`
     : tone === "elder"

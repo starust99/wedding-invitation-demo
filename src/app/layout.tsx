@@ -35,10 +35,10 @@ const fontVariables = [
 export const metadata: Metadata = {
   metadataBase: new URL("https://nhatphuong.love"),
   title: "Nhật & Phương — Thiệp cưới",
-  description: "Mời bạn cùng chung vui trong ngày chung đôi của Nhật & Phương, 26.12.2026.",
+  description: "Quý khách đến chung vui và ghi dấu những khoảnh khắc đáng nhớ cùng Nhật & Phương, 26.12.2026.",
   openGraph: {
     title: "Nhật & Phương — Thiệp cưới",
-    description: "Mời bạn cùng chung vui trong ngày chung đôi của Nhật & Phương, 26.12.2026.",
+    description: "Quý khách đến chung vui và ghi dấu những khoảnh khắc đáng nhớ cùng Nhật & Phương, 26.12.2026.",
     url: "https://nhatphuong.love",
     siteName: "Nhật & Phương Wedding",
     images: [
@@ -55,7 +55,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "Nhật & Phương — Thiệp cưới",
-    description: "Mời bạn cùng chung vui trong ngày chung đôi của Nhật & Phương, 26.12.2026.",
+    description: "Quý khách đến chung vui và ghi dấu những khoảnh khắc đáng nhớ cùng Nhật & Phương, 26.12.2026.",
     images: ["/assets/og-image.png"],
   },
 };
