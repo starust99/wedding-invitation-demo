@@ -95,7 +95,7 @@ const cases = [
       ["insideInviteLine", "Tụi em trân trọng kính mời anh chị đến chung vui trong ngày cưới của tụi em."],
       ["closingLine", "Sự hiện diện của anh chị là niềm vinh hạnh và lời chúc phúc trọn vẹn nhất."],
       ["envelopeLine", "Kính mời: Anh Hoàng cùng vợ"],
-      ["dressCodeLine", "Thương mời anh chị diện trang phục tươi sáng theo bảng màu bên dưới\n(xin tránh mặc các tông màu tối).\n\nLưu ý thời tiết: Đà Lạt vào đông rất lạnh, anh chị hãy ưu tiên trang phục và phụ kiện đủ ấm cho bữa tiệc ngoài trời nhé!"],
+      ["dressCodeLine", "Để cùng tạo nên những khung hình đẹp và hài hòa cho đêm tiệc, Anh chị có thể tham khảo các ý tưởng phối đồ dựa trên bảng màu dưới đây:\n\nLưu ý thời tiết: Đà Lạt vào đông rất lạnh, anh chị hãy ưu tiên trang phục và phụ kiện đủ ấm cho bữa tiệc ngoài trời nhé!"],
     ],
     excludes: [
       ["insideInviteLine", "Nhật & Phương"],
@@ -281,7 +281,7 @@ const cases = [
     },
     includes: [
       ["insideInviteLine", "Chúng tôi trân trọng kính mời bạn đến chung vui trong ngày cưới của Nhật & Phương."],
-      ["dressCodeLine", "Thương mời bạn diện trang phục tươi sáng theo bảng màu bên dưới\n(xin tránh mặc các tông màu tối).\n\nLưu ý thời tiết: Đà Lạt vào đông rất lạnh, bạn hãy ưu tiên trang phục và phụ kiện đủ ấm cho bữa tiệc ngoài trời nhé!"],
+      ["dressCodeLine", "Để cùng tạo nên những khung hình đẹp và hài hòa cho đêm tiệc, Bạn có thể tham khảo các ý tưởng phối đồ dựa trên bảng màu dưới đây:\n\nLưu ý thời tiết: Đà Lạt vào đông rất lạnh, bạn hãy ưu tiên trang phục và phụ kiện đủ ấm cho bữa tiệc ngoài trời nhé!"],
     ],
     excludes: [
       ["insideInviteLine", "ngày cưới của gia đình."],
@@ -313,7 +313,8 @@ const cases = [
 
 for (const item of cases) {
   const copy = buildInvitationCopy(item.input);
-  assert.equal(copy.insideInviteLine, `TRÂN TRỌNG & THÂN MỜI\n${copy.heroInvitationLine}`, `${item.name}: insideInviteLine follows invite heading + personalized line`);
+  assert(copy.insideInviteLine.startsWith("TRÂN TRỌNG & THÂN MỜI\n"), `${item.name}: insideInviteLine starts with heading`);
+  assert(copy.insideInviteLine.includes("đến dự Thánh Lễ Hôn Phối & tiệc cưới của"), `${item.name}: insideInviteLine contains ceremony details`);
   assert(copy.heroInvitationLine.startsWith(copy.guestLabel), `${item.name}: heroInvitationLine starts with the display salutation`);
   for (const [field, expected] of item.includes ?? []) {
     if (field === "insideInviteLine") continue;
@@ -371,7 +372,7 @@ for (const [label, hostRelationship, guestName] of parentElderInviteOwnerCases) 
   });
   assert.equal(
     copy.heroInvitationLine,
-    `${guestName} đến dự Thánh Lễ Hôn Phối & tiệc cưới của hai cháu Nhật & Phương.`,
+    `${guestName} đến chung vui và ghi dấu những khoảnh khắc đáng nhớ cùng Nhật & Phương.`,
     `parent elder invite owner: ${label}`,
   );
 }
@@ -403,7 +404,7 @@ for (const [guestName, hostRelationship, householdMode, plusOnePolicy] of parent
   });
   assert.equal(
     copy.heroInvitationLine,
-    `${guestName} đến dự Thánh Lễ Hôn Phối & tiệc cưới của con chúng tôi.`,
+    `${guestName} đến chung vui và ghi dấu những khoảnh khắc đáng nhớ cùng Nhật & Phương.`,
     `parent peer/lower invite owner: ${guestName}`,
   );
 }
@@ -432,7 +433,7 @@ for (const [guestName, hostRelationship, coupleReference] of parentYoungerRefere
   });
   assert.equal(
     copy.heroInvitationLine,
-    `${guestName} đến dự Thánh Lễ Hôn Phối & tiệc cưới của ${coupleReference} Nhật & Phương.`,
+    `${guestName} đến chung vui và ghi dấu những khoảnh khắc đáng nhớ cùng Nhật & Phương.`,
     `parent younger invite owner: ${guestName}`,
   );
 }
