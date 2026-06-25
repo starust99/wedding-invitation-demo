@@ -108,21 +108,49 @@ const [status, setStatus] = useState<SplashStatus>("checking");
           role="dialog"
           aria-modal="true"
           aria-label="Mở thiệp cưới"
+          id="wedding-splash-screen"
           className="fixed inset-0 z-[80] grid min-h-dvh place-items-center overflow-hidden bg-[#FBF8F1] text-ink"
           initial={{ opacity: 1 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0, scale: 1.05 }}
           transition={{ duration: isImmediateClose ? 0 : 1.2, ease: "easeInOut" }}
         >
+          {/* Synchronous script to immediately hide splash screen on mount if already seen to prevent flash */}
+          <script
+            dangerouslySetInnerHTML={{
+              __html: `
+                try {
+                  var key = "wedding-splash:" + "${storageKey}";
+                  var shouldForce = new URLSearchParams(window.location.search).get("intro") === "1";
+                  if (window.localStorage.getItem(key) === "1" && !shouldForce) {
+                    var style = document.createElement('style');
+                    style.innerHTML = '#wedding-splash-screen { display: none !important; }';
+                    document.head.appendChild(style);
+                  }
+                } catch (e) {}
+              `,
+            }}
+          />
           
           {/* THE VIDEO - responsive sources for mobile (9:16) and desktop (16:9) */}
           <div className="absolute inset-0 flex items-center justify-center overflow-hidden">
+            {/* Desktop Splash Video */}
             <CanvasVideo 
-              className="h-full w-full pointer-events-none scale-[1.08] md:scale-100"
-              isPlaying={status === "opening"}
+              className="hidden md:block h-full w-full pointer-events-none scale-[1.08] md:scale-100"
+              isPlaying={status === "opening" && viewport === "desktop"}
               onEnded={closeIntro}
-              poster={viewport === "mobile" ? "/assets/wedding/ui/splash-poster-mobile.jpg" : "/assets/wedding/ui/splash-closed.png"}
-              src={viewport === "mobile" ? "/assets/wedding/ui/splash-video-mobile.mp4" : viewport === "desktop" ? "/assets/wedding/ui/splash-video.mp4" : undefined}
+              poster="/assets/wedding/ui/splash-closed.png"
+              src="/assets/wedding/ui/splash-video.mp4"
+              preload={viewport === "desktop" ? "auto" : "none"}
+            />
+            {/* Mobile Splash Video */}
+            <CanvasVideo 
+              className="block md:hidden h-full w-full pointer-events-none scale-[1.08]"
+              isPlaying={status === "opening" && viewport === "mobile"}
+              onEnded={closeIntro}
+              poster="/assets/wedding/ui/splash-poster-mobile.jpg"
+              src="/assets/wedding/ui/splash-video-mobile.mp4"
+              preload={viewport === "mobile" ? "auto" : "none"}
             />
           </div>
 

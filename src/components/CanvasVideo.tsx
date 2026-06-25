@@ -9,9 +9,10 @@ type CanvasVideoProps = {
   onEnded?: () => void;
   className?: string;
   objectFit?: "cover" | "contain";
+  preload?: "auto" | "metadata" | "none";
 };
 
-export function CanvasVideo({ src, poster, isPlaying, onEnded, className = "", objectFit = "cover" }: CanvasVideoProps) {
+export function CanvasVideo({ src, poster, isPlaying, onEnded, className = "", objectFit = "cover", preload = "auto" }: CanvasVideoProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const playPromiseRef = useRef<Promise<void> | null>(null);
@@ -96,7 +97,7 @@ export function CanvasVideo({ src, poster, isPlaying, onEnded, className = "", o
         disableRemotePlayback
         onEnded={onEnded}
         className="absolute w-[1px] h-[1px] opacity-0 pointer-events-none -z-10"
-        preload="auto"
+        preload={preload}
       />
       {poster && !isPlaying && (
         // eslint-disable-next-line @next/next/no-img-element
