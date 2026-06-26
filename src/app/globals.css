@@ -2276,6 +2276,21 @@ textarea {
     width: 47%;
     max-width: 11.5rem;
   }
+
+  .timeline-garden-card {
+    padding: 0.65rem 0.75rem;
+    gap: 0.35rem;
+    border-radius: 1rem;
+  }
+
+  .timeline-garden-time {
+    font-size: 1.35rem;
+  }
+
+  .timeline-garden-card h3 {
+    font-size: 1.1rem;
+    line-height: 1.2;
+  }
 }
 
 @media (max-width: 767px) {
