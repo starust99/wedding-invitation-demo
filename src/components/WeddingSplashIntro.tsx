@@ -70,6 +70,7 @@ export function WeddingSplashIntro({
 
     // List of critical assets to load before showing "Chạm để mở"
     const imagesToLoad = [
+      "/assets/preloader-logo.webp",
       "/assets/bg-mobile.webp",
       "/assets/bg-desktop.webp",
       "/assets/divider_cards.png",
@@ -134,14 +135,15 @@ export function WeddingSplashIntro({
   }, [closeIntro, status, ready]);
 
   useEffect(() => {
-    if (!isVisible) return;
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
+    if (preloading || isVisible) {
+      const previousOverflow = document.body.style.overflow;
+      document.body.style.overflow = "hidden";
 
-    return () => {
-      document.body.style.overflow = previousOverflow;
-    };
-  }, [isVisible]);
+      return () => {
+        document.body.style.overflow = previousOverflow;
+      };
+    }
+  }, [preloading, isVisible]);
 
   useEffect(() => () => {
     if (closeTimer.current) window.clearTimeout(closeTimer.current);
@@ -154,15 +156,19 @@ export function WeddingSplashIntro({
       {preloading ? (
         <motion.div
           key="wedding-preloader"
-          className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-[#FDFBF7] text-[#3f4642]"
+          className="fixed inset-0 w-screen h-screen z-[999999] flex flex-col items-center justify-center bg-[#FDFBF7] text-[#3f4642] select-none"
           initial={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.5, ease: "easeInOut" }}
         >
           <div className="flex flex-col items-center max-w-[280px] w-full text-center px-4">
-            {/* Monogram "N & P" with elegant gold serif styling */}
-            <div className="font-serif text-[2.75rem] font-light tracking-[0.25em] text-[#b4975a] mb-8 select-none animate-pulse">
-              N & P
+            {/* Preloader Logo replacing text initials */}
+            <div className="mb-6 select-none animate-pulse">
+              <img 
+                src="/assets/preloader-logo.webp" 
+                alt="Nhật & Phương Logo" 
+                className="w-32 h-32 sm:w-40 sm:h-40 object-contain mx-auto" 
+              />
             </div>
             
             {/* Sợi chỉ vàng / Gold progress line */}
@@ -175,7 +181,7 @@ export function WeddingSplashIntro({
             
             {/* Subtext */}
             <p className="text-[0.62rem] font-bold uppercase tracking-[0.25em] text-[#3f4642]/50 leading-relaxed">
-              Đang chuẩn bị phong thư... {progress}%
+              Loading... {progress}%
             </p>
           </div>
         </motion.div>
