@@ -4088,7 +4088,7 @@ html.splash-skipped body {
 /* "Gió thổi mây trôi" background panning effect */
 .bg-panning {
   background-size: 120% 120% !important;
-  animation: gio-thoi 14s ease-in-out infinite alternate !important;
+  animation: gio-thoi 19s ease-in-out infinite alternate !important;
   will-change: background-position;
 }
 
