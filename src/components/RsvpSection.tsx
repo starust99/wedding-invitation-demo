@@ -46,7 +46,7 @@ export function RsvpSection({
               <span className="h-2 w-2 rounded-full border border-[rgba(212,175,55,0.5)] bg-white/78" />
               <span className="h-px w-16 bg-[rgba(212,175,55,0.5)] sm:w-20" />
             </div>
-            <p suppressHydrationWarning className="wedding-type-meta font-sans mt-6 max-w-xl text-ink/62 uppercase tracking-wider" style={{ fontSize: "1.18em" }}>
+            <p suppressHydrationWarning className="wedding-type-meta font-sans mt-6 max-w-xl text-ink/62 uppercase tracking-wider" style={{ fontSize: "1.09em" }}>
               {inviteCopy.greeting.toUpperCase()},
             </p>
             <p className="wedding-type-body font-sans mt-4 max-w-2xl text-ink/68">
