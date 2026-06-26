@@ -50,7 +50,10 @@ export function RsvpSection({
               {inviteCopy.greeting.toUpperCase()},
             </p>
             <p className="wedding-type-body font-sans mt-4 max-w-2xl text-ink/68">
-              Sự hiện diện của {inviteCopy.presenceSubject === "quý khách" ? "Quý khách" : inviteCopy.presenceSubject.charAt(0).toUpperCase() + inviteCopy.presenceSubject.slice(1)} để cùng chia sẻ những khoảnh khắc ý nghĩa là niềm vinh hạnh lớn của hai gia đình trong ngày vui sắp tới. Để khâu tổ chức và công tác tiếp đón được chuẩn bị chu đáo nhất, {inviteCopy.kinshipPronoun === "quý khách" ? "Quý khách" : inviteCopy.kinshipPronoun.charAt(0).toUpperCase() + inviteCopy.kinshipPronoun.slice(1)} vui lòng xác nhận thông tin tham dự qua biểu mẫu dưới đây trước ngày {config.rsvp.deadline}.
+              Sự hiện diện của {inviteCopy.presenceSubject === "quý khách" ? "Quý khách" : inviteCopy.presenceSubject.charAt(0).toUpperCase() + inviteCopy.presenceSubject.slice(1)} để cùng chia sẻ những khoảnh khắc ý nghĩa là niềm vinh hạnh lớn của hai gia đình trong ngày vui sắp tới.
+            </p>
+            <p className="wedding-type-body font-sans mt-4 max-w-2xl text-ink/68">
+              Để khâu tổ chức và công tác tiếp đón được chuẩn bị chu đáo nhất, {inviteCopy.kinshipPronoun === "quý khách" ? "Quý khách" : inviteCopy.kinshipPronoun.charAt(0).toUpperCase() + inviteCopy.kinshipPronoun.slice(1)} vui lòng xác nhận thông tin tham dự qua biểu mẫu dưới đây trước ngày <strong className="font-bold text-ink/90">{config.rsvp.deadline}</strong>.
             </p>
             <p className="wedding-type-body font-sans mt-4 max-w-xl text-ink/68">
               Xin bấm nút "Gửi hồi đáp" để điền thông tin.
