@@ -1,9 +1,8 @@
 "use client";
 
-import { motion, useReducedMotion, useScroll, useSpring, useTransform } from "framer-motion";
+import { motion, useScroll, useSpring, useTransform } from "framer-motion";
 
 export function InvitationWatercolorBackdrop() {
-  const reduceMotion = useReducedMotion();
   const { scrollYProgress } = useScroll();
   const smoothScroll = useSpring(scrollYProgress, {
     stiffness: 48,
@@ -19,7 +18,7 @@ export function InvitationWatercolorBackdrop() {
       <motion.div
         aria-hidden="true"
         className="invitation-watercolor-backdrop__wash bg-panning"
-        style={reduceMotion ? undefined : { x, y, scale }}
+        style={{ x, y, scale }}
       />
     </div>
   );

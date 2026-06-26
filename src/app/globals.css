@@ -3950,16 +3950,6 @@ textarea {
   }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    scroll-behavior: auto !important;
-    transition-duration: 0.01ms !important;
-  }
-}
 
 /* --- Global Rendering Optimization --- */
 /* Force GPU acceleration on all frosted glass elements to prevent Safari scroll glitches and maintain 60fps */

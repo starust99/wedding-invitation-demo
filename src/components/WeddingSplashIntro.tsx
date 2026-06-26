@@ -39,7 +39,9 @@ export function WeddingSplashIntro({
   storageKey?: string;
   ready?: boolean;
 }) {
-const [status, setStatus] = useState<SplashStatus>("checking");
+  const [preloading, setPreloading] = useState(true);
+  const [progress, setProgress] = useState(0);
+  const [status, setStatus] = useState<SplashStatus>("checking");
   const [isImmediateClose, setIsImmediateClose] = useState(false);
   const [viewport, setViewport] = useState<"desktop" | "mobile" | null>(null);
 
@@ -57,16 +59,63 @@ const [status, setStatus] = useState<SplashStatus>("checking");
   useEffect(() => {
     if (!ready) return;
     const shouldForce = readForceIntro();
-    window.requestAnimationFrame(() => {
-      const isHidden = hasSeenSplash(sessionKey) && !shouldForce;
-      if (isHidden) {
-        setIsImmediateClose(true);
+    const isHidden = hasSeenSplash(sessionKey) && !shouldForce;
+    if (isHidden) {
+      setIsImmediateClose(true);
+      setPreloading(false);
+      setStatus("hidden");
+      window.dispatchEvent(new Event("introFinished"));
+      return;
+    }
+
+    // List of critical assets to load before showing "Chạm để mở"
+    const imagesToLoad = [
+      "/assets/bg-mobile.webp",
+      "/assets/bg-desktop.webp",
+      "/assets/divider_cards.png",
+      "/assets/hero-names-logo-v9-centered.png",
+      "/assets/hero-invite-heading-v5.png",
+      "/assets/hero-corner-left-v2.png",
+      "/assets/hero-corner-right-v3.png",
+    ];
+
+    let loadedCount = 0;
+    const totalAssets = imagesToLoad.length;
+
+    if (totalAssets === 0) {
+      setPreloading(false);
+      setStatus("closed");
+      return;
+    }
+
+    let isCancelled = false;
+
+    const checkComplete = () => {
+      loadedCount++;
+      if (!isCancelled) {
+        const percent = Math.min(100, Math.round((loadedCount / totalAssets) * 100));
+        setProgress(percent);
+        if (loadedCount >= totalAssets) {
+          setTimeout(() => {
+            if (!isCancelled) {
+              setPreloading(false);
+              setStatus("closed");
+            }
+          }, 600);
+        }
       }
-      setStatus(isHidden ? "hidden" : "closed");
-      if (isHidden) {
-        window.dispatchEvent(new Event("introFinished"));
-      }
+    };
+
+    imagesToLoad.forEach((src) => {
+      const img = new Image();
+      img.src = src;
+      img.onload = checkComplete;
+      img.onerror = checkComplete;
     });
+
+    return () => {
+      isCancelled = true;
+    };
   }, [ready, sessionKey]);
 
   const closeIntro = useCallback(() => {
@@ -102,7 +151,35 @@ const [status, setStatus] = useState<SplashStatus>("checking");
 
   return (
     <AnimatePresence>
-      {isVisible ? (
+      {preloading ? (
+        <motion.div
+          key="wedding-preloader"
+          className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-[#FDFBF7] text-[#3f4642]"
+          initial={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.5, ease: "easeInOut" }}
+        >
+          <div className="flex flex-col items-center max-w-[280px] w-full text-center px-4">
+            {/* Monogram "N & P" with elegant gold serif styling */}
+            <div className="font-serif text-[2.75rem] font-light tracking-[0.25em] text-[#b4975a] mb-8 select-none animate-pulse">
+              N & P
+            </div>
+            
+            {/* Sợi chỉ vàng / Gold progress line */}
+            <div className="relative w-full h-[1.5px] bg-[#3f4642]/10 overflow-hidden mb-4 rounded-full">
+              <div 
+                className="absolute top-0 left-0 h-full bg-gradient-to-r from-[#b4975a] via-[#dfcfad] to-[#b4975a] transition-all duration-300 ease-out"
+                style={{ width: `${progress}%` }}
+              />
+            </div>
+            
+            {/* Subtext */}
+            <p className="text-[0.62rem] font-bold uppercase tracking-[0.25em] text-[#3f4642]/50 leading-relaxed">
+              Đang chuẩn bị phong thư... {progress}%
+            </p>
+          </div>
+        </motion.div>
+      ) : isVisible ? (
         <motion.div
           key="wedding-splash"
           role="dialog"
@@ -178,9 +255,6 @@ const [status, setStatus] = useState<SplashStatus>("checking");
               </motion.div>
             </motion.div>
           </motion.div>
-
-
-
         </motion.div>
       ) : null}
     </AnimatePresence>
