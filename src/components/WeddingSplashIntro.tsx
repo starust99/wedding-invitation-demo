@@ -71,6 +71,8 @@ export function WeddingSplashIntro({
     // List of critical assets to load before showing "Chạm để mở"
     const imagesToLoad = [
       "/assets/preloader-logo.webp",
+      "/assets/wedding/ui/splash-closed.png",
+      "/assets/wedding/ui/splash-poster-mobile.jpg",
       "/assets/bg-mobile.webp",
       "/assets/bg-desktop.webp",
       "/assets/divider_cards.png",
@@ -153,39 +155,7 @@ export function WeddingSplashIntro({
 
   return (
     <AnimatePresence>
-      {preloading ? (
-        <motion.div
-          key="wedding-preloader"
-          className="fixed inset-0 w-screen h-screen z-[999999] flex flex-col items-center justify-center bg-[#FDFBF7] text-[#3f4642] select-none"
-          initial={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.5, ease: "easeInOut" }}
-        >
-          <div className="flex flex-col items-center max-w-[280px] w-full text-center px-4">
-            {/* Preloader Logo replacing text initials */}
-            <div className="mb-6 select-none animate-pulse">
-              <img 
-                src="/assets/preloader-logo.webp" 
-                alt="Nhật & Phương Logo" 
-                className="w-32 h-32 sm:w-40 sm:h-40 object-contain mx-auto" 
-              />
-            </div>
-            
-            {/* Sợi chỉ vàng / Gold progress line */}
-            <div className="relative w-full h-[1.5px] bg-[#3f4642]/10 overflow-hidden mb-4 rounded-full">
-              <div 
-                className="absolute top-0 left-0 h-full bg-gradient-to-r from-[#b4975a] via-[#dfcfad] to-[#b4975a] transition-all duration-300 ease-out"
-                style={{ width: `${progress}%` }}
-              />
-            </div>
-            
-            {/* Subtext */}
-            <p className="text-[0.62rem] font-bold uppercase tracking-[0.25em] text-[#3f4642]/50 leading-relaxed">
-              Loading... {progress}%
-            </p>
-          </div>
-        </motion.div>
-      ) : isVisible ? (
+      {isVisible ? (
         <motion.div
           key="wedding-splash"
           role="dialog"
@@ -261,6 +231,44 @@ export function WeddingSplashIntro({
               </motion.div>
             </motion.div>
           </motion.div>
+
+          {/* PRELOADER OVERLAY - rendered on top, fades out when loaded */}
+          <AnimatePresence>
+            {preloading && (
+              <motion.div
+                key="wedding-preloader"
+                className="absolute inset-0 w-full h-full z-[999999] flex flex-col items-center justify-center bg-[#FDFBF7] text-[#3f4642] select-none"
+                initial={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.5, ease: "easeInOut" }}
+              >
+                <div className="flex flex-col items-center max-w-[280px] w-full text-center px-4">
+                  {/* Preloader Logo */}
+                  <div className="mb-6 select-none animate-pulse">
+                    <img 
+                      src="/assets/preloader-logo.webp" 
+                      alt="Nhật & Phương Logo" 
+                      className="w-32 h-32 sm:w-40 sm:h-40 object-contain mx-auto" 
+                    />
+                  </div>
+                  
+                  {/* Sợi chỉ vàng / Gold progress line */}
+                  <div className="relative w-full h-[1.5px] bg-[#3f4642]/10 overflow-hidden mb-4 rounded-full">
+                    <div 
+                      className="absolute top-0 left-0 h-full bg-gradient-to-r from-[#b4975a] via-[#dfcfad] to-[#b4975a] transition-all duration-300 ease-out"
+                      style={{ width: `${progress}%` }}
+                    />
+                  </div>
+                  
+                  {/* Subtext */}
+                  <p className="text-[0.62rem] font-bold uppercase tracking-[0.25em] text-[#3f4642]/50 leading-relaxed">
+                    Loading... {progress}%
+                  </p>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
         </motion.div>
       ) : null}
     </AnimatePresence>
