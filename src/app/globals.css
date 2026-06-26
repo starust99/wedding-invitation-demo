@@ -266,7 +266,21 @@ video::-webkit-media-controls-panel {
 
 @media (min-width: 768px) {
   .invitation-watercolor-backdrop__wash {
-    background-image: url("/assets/bg-desktop.webp");
+    background-image:
+      radial-gradient(circle at 12% 14%, rgba(242, 198, 207, 0.34), transparent 35%),
+      radial-gradient(circle at 88% 80%, rgba(143, 170, 220, 0.32), transparent 40%),
+      linear-gradient(180deg, rgba(253, 251, 247, 0.65), rgba(253, 251, 247, 0.45)),
+      url("/assets/bg-desktop.webp");
+    background-position:
+      12% 14%,
+      88% 80%,
+      center,
+      center top;
+    background-size:
+      auto,
+      auto,
+      cover,
+      cover;
   }
 }
 
