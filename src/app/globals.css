@@ -2242,7 +2242,7 @@ textarea {
 @media (min-width: 768px) and (max-width: 1023px) {
   .timeline-garden-path-scene {
     padding-top: 2rem;
-    max-width: 28rem;
+    max-width: 32rem;
     margin: 0 auto;
   }
 
@@ -2258,23 +2258,23 @@ textarea {
 
   .timeline-garden-node {
     justify-self: start;
-    width: 47%;
-    max-width: 11.5rem;
+    width: 46%;
+    max-width: 13rem;
     margin-left: 0;
     rotate: -0.7deg;
   }
 
   .timeline-garden-node:nth-child(even) {
     justify-self: end;
-    width: 47%;
-    max-width: 11.5rem;
+    width: 46%;
+    max-width: 13rem;
     margin-left: 0;
     rotate: 0.7deg;
   }
 
   .timeline-garden-node:nth-child(3n) {
-    width: 47%;
-    max-width: 11.5rem;
+    width: 46%;
+    max-width: 13rem;
   }
 
   .timeline-garden-card {
