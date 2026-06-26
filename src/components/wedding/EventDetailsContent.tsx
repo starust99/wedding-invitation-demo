@@ -524,7 +524,7 @@ export function EventDetailsContent({
 
           {/* Time Display */}
           <span className="font-sans text-[0.82rem] sm:text-[1.01rem] md:text-[1.08rem] tracking-[0.18em] font-bold text-[#7d7065] uppercase mb-1">
-            Thánh Lễ
+            Cử Hành
           </span>
           <div className="font-serif text-[2.35rem] sm:text-[2.89rem] md:text-[3.32rem] font-light text-[#3f4642] tracking-wider leading-none mb-3">
             {content.churchTime || "15:00"}

@@ -447,7 +447,7 @@ export default function AdminEditorPage() {
 
           <div className={`${shellClass} grid gap-5 p-4 sm:p-5 lg:p-6 xl:col-span-2`}>
             <div className="grid gap-2 text-left">
-              <p className="text-[0.68rem] font-black uppercase tracking-[0.32em] text-[#2F3A35]/48">Thánh Lễ</p>
+              <p className="text-[0.68rem] font-black uppercase tracking-[0.32em] text-[#2F3A35]/48">Cử Hành</p>
               <h2 className="font-serif text-[clamp(2rem,3vw,3rem)] leading-none">Thông tin Nhà thờ</h2>
             </div>
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
