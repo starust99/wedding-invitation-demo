@@ -2199,7 +2199,7 @@ textarea {
 
   .timeline-garden-list {
     position: absolute;
-    inset: 0;
+    inset: 0 13%;
     display: block;
   }
 
