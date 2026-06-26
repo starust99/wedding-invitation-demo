@@ -18,7 +18,7 @@ export function InvitationWatercolorBackdrop() {
     <div aria-hidden="true" className="invitation-watercolor-backdrop">
       <motion.div
         aria-hidden="true"
-        className="invitation-watercolor-backdrop__wash"
+        className="invitation-watercolor-backdrop__wash bg-panning"
         style={reduceMotion ? undefined : { x, y, scale }}
       />
     </div>

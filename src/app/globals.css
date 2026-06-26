@@ -4084,3 +4084,19 @@ html.splash-skipped body {
   color: #3f4642 !important;
   text-shadow: none !important;
 }
+
+/* "Gió thổi mây trôi" background panning effect */
+.bg-panning {
+  background-size: 120% 120% !important;
+  animation: gio-thoi 24s ease-in-out infinite alternate !important;
+  will-change: background-position;
+}
+
+@keyframes gio-thoi {
+  0% {
+    background-position: left top !important;
+  }
+  100% {
+    background-position: right bottom !important;
+  }
+}
