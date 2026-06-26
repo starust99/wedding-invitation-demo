@@ -634,7 +634,7 @@ export function EventDetailsContent({
             Lịch Trình Tiệc
           </h3>
           
-          <div className="timeline-garden-path-scene w-full min-h-[28rem] overflow-visible relative">
+          <div className="timeline-garden-path-scene w-full max-w-[26rem] mx-auto min-h-[28rem] overflow-visible relative">
             {/* Winding road */}
             <div
               className="timeline-garden-path-image opacity-[0.55]"
@@ -645,7 +645,7 @@ export function EventDetailsContent({
                 style={{ backgroundImage: "url('/assets/timeline-garden-path-desktop.webp')", backgroundPosition: "center", backgroundRepeat: "no-repeat", backgroundSize: "100% 100%" }}
               />
             </div>
-            <ol className="timeline-garden-list relative z-10 grid justify-items-center w-full max-w-[24rem] mx-auto">
+            <ol className="timeline-garden-list relative z-10 grid justify-items-center w-full">
               {(publicData?.timeline || defaultTimelineFallback).map((item, index) => (
                 <motion.li
                   key={index}
