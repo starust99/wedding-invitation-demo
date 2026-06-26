@@ -2242,34 +2242,39 @@ textarea {
 @media (min-width: 768px) and (max-width: 1023px) {
   .timeline-garden-path-scene {
     padding-top: 2rem;
+    max-width: 28rem;
+    margin: 0 auto;
   }
 
   .timeline-garden-path-image {
-    inset: -1rem 18% -3.4rem;
+    inset: 0.6rem -2% -2.2rem;
     background-image: url("/assets/timeline-garden-path-desktop.webp");
     opacity: 0.52;
   }
 
   .timeline-garden-list {
-    gap: 2rem;
+    gap: 1.5rem;
   }
 
   .timeline-garden-node {
     justify-self: start;
-    width: min(58%, 27rem);
+    width: 47%;
+    max-width: 11.5rem;
     margin-left: 0;
     rotate: -0.7deg;
   }
 
   .timeline-garden-node:nth-child(even) {
     justify-self: end;
-    width: min(58%, 27rem);
+    width: 47%;
+    max-width: 11.5rem;
     margin-left: 0;
     rotate: 0.7deg;
   }
 
   .timeline-garden-node:nth-child(3n) {
-    width: min(54%, 25rem);
+    width: 47%;
+    max-width: 11.5rem;
   }
 }
 

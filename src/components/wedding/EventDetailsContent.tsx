@@ -634,7 +634,7 @@ export function EventDetailsContent({
             Lịch Trình Tiệc
           </h3>
           
-          <div className="timeline-garden-path-scene w-full min-h-[28rem] overflow-visible relative">
+          <div className="timeline-garden-path-scene w-full max-w-[25rem] mx-auto min-h-[28rem] overflow-visible relative">
             {/* Winding road */}
             <div
               className="timeline-garden-path-image opacity-[0.55]"
