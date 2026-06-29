@@ -229,8 +229,8 @@ export function BackgroundMusic() {
             />
           </div>
 
-          {/* Diagonal slash line when muted/paused */}
-          {!isPlaying && (
+          {/* Diagonal slash line when muted */}
+          {isMuted && (
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
               <svg viewBox="0 0 24 24" fill="none" className="w-[36px] h-[36px] md:w-[45px] md:h-[45px] stroke-[#b4975a]">
                 <line 
