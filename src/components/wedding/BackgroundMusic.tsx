@@ -144,6 +144,51 @@ export function BackgroundMusic() {
     };
   }, []);
 
+  // Listen to first user interaction to resume audio on reload if it wasn't explicitly muted
+  useEffect(() => {
+    let hasTriggered = false;
+
+    const handleFirstInteraction = () => {
+      if (hasTriggered) return;
+
+      const audio = audioRef.current;
+      if (audio && !isPlayingRef.current) {
+        const savedMuted = localStorage.getItem("wedding-music-muted");
+        if (savedMuted === "1") {
+          removeListeners();
+          return;
+        }
+
+        hasTriggered = true;
+        audio.volume = 0.75;
+        audio.play()
+          .then(() => {
+            setIsPlaying(true);
+            setIsMuted(false);
+            removeListeners();
+          })
+          .catch((err) => {
+            console.log("Play on interaction failed:", err);
+            hasTriggered = false;
+          });
+      } else if (isPlayingRef.current) {
+        removeListeners();
+      }
+    };
+
+    const removeListeners = () => {
+      window.removeEventListener("click", handleFirstInteraction);
+      window.removeEventListener("touchstart", handleFirstInteraction);
+    };
+
+    window.addEventListener("click", handleFirstInteraction);
+    window.addEventListener("touchstart", handleFirstInteraction);
+
+    return () => {
+      removeListeners();
+    };
+  }, []);
+
   return (
     <>
       <style dangerouslySetInnerHTML={{
