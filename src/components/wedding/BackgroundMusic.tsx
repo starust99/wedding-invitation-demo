@@ -81,10 +81,11 @@ export function BackgroundMusic() {
 
   useEffect(() => {
     const handlePlaySignal = () => {
-      // Don't play if the user previously muted it
-      const savedMuted = localStorage.getItem("wedding-music-muted");
-      if (savedMuted === "1") return;
-
+      // Force play when the user clicks "Chạm để mở", overriding any previous mute choice
+      try {
+        localStorage.removeItem("wedding-music-muted");
+      } catch (e) {}
+      setIsMuted(false);
       startFadeIn();
     };
 
