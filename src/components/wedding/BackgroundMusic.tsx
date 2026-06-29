@@ -165,9 +165,9 @@ export function BackgroundMusic() {
       <button
         onClick={togglePlay}
         aria-label={isPlaying ? "Tắt nhạc nền" : "Bật nhạc nền"}
-        className="fixed bottom-6 right-6 z-[90] w-[42px] h-[42px] rounded-full flex items-center justify-center bg-white/5 backdrop-blur-md border-[0.5px] border-[#b4975a]/30 shadow-[0_4px_20px_rgba(180,151,90,0.08)] opacity-40 hover:opacity-100 hover:scale-105 active:scale-95 transition-all duration-500 cursor-pointer select-none"
+        className="fixed bottom-6 right-6 z-[90] w-[36px] h-[36px] rounded-full flex items-center justify-center opacity-40 hover:opacity-100 hover:scale-105 active:scale-95 transition-all duration-500 cursor-pointer select-none"
       >
-        <div className={`w-[34px] h-[34px] relative transition-transform duration-500 ${isPlaying ? "vinyl-spin-active" : "vinyl-spin-paused"}`}>
+        <div className="w-[36px] h-[36px] relative transition-transform duration-500 vinyl-spin-active">
           <img 
             src="/assets/music-icon.png" 
             alt="Music Icon" 
@@ -179,7 +179,7 @@ export function BackgroundMusic() {
         {/* Diagonal slash line when muted/paused */}
         {!isPlaying && (
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-            <svg viewBox="0 0 24 24" fill="none" className="w-[34px] h-[34px] stroke-[#b4975a]/80">
+            <svg viewBox="0 0 24 24" fill="none" className="w-[36px] h-[36px] stroke-[#b4975a]/80">
               <line 
                 x1="4" 
                 y1="20" 
