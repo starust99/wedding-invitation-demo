@@ -3,6 +3,7 @@ import { Cormorant_Garamond, Be_Vietnam_Pro, Dancing_Script } from "next/font/go
 import "./globals.css";
 import { PageTransitionEffect } from "@/components/PageTransitionEffect";
 import { InvitationWatercolorBackdrop } from "@/components/InvitationWatercolorBackdrop";
+import { BackgroundMusic } from "@/components/wedding/BackgroundMusic";
 
 const cormorantGaramond = Cormorant_Garamond({
   display: "swap",
@@ -89,6 +90,7 @@ export default function RootLayout({
       <body>
         <InvitationWatercolorBackdrop />
         <PageTransitionEffect>{children}</PageTransitionEffect>
+        <BackgroundMusic />
       </body>
     </html>
   );

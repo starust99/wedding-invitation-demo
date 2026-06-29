@@ -9,7 +9,6 @@ import { ThankYouSection } from "@/components/ThankYouSection";
 import { TimelineSection } from "@/components/TimelineSection";
 import { WeddingDetailsSection } from "@/components/WeddingDetailsSection";
 import { WeddingSplashIntro } from "@/components/WeddingSplashIntro";
-import { BackgroundMusic } from "@/components/wedding/BackgroundMusic";
 import { resolveGuestIdentity, normalizeText, type GuestIdentity } from "@/lib/guest-personalization";
 import { applyTheme } from "@/lib/site-settings";
 import { usePublishedSettings } from "@/lib/use-published-settings";
@@ -75,7 +74,6 @@ export default function Home() {
     <main data-od-id="rose-serenity-invitation" className="public-invitation-page relative min-h-screen overflow-x-hidden bg-transparent text-[#252934]">
       <WeddingSplashIntro config={config} guestIdentity={guestIdentity} storageKey="home" />
       <SceneProgress />
-      <BackgroundMusic />
       <HeroSaveTheDate config={config} guestIdentity={guestIdentity} />
       <WeddingDetailsSection config={config} guestIdentity={guestIdentity} />
       <TimelineSection config={config} />

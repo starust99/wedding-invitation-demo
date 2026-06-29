@@ -9,7 +9,6 @@ import { ThankYouSection } from "@/components/ThankYouSection";
 import { TimelineSection } from "@/components/TimelineSection";
 import { WeddingDetailsSection } from "@/components/WeddingDetailsSection";
 import { WeddingSplashIntro } from "@/components/WeddingSplashIntro";
-import { BackgroundMusic } from "@/components/wedding/BackgroundMusic";
 import { resolveGuestIdentity, type GuestIdentity } from "@/lib/guest-personalization";
 import { InviteAccessGate } from "@/components/InviteAccessGate";
 import { readLocalInvitees, type Invitee } from "@/lib/invites";
@@ -160,7 +159,6 @@ export function InviteTokenPage({ token }: { token: string }) {
     <main data-od-id="token-wedding-invitation" className="public-invitation-page min-h-screen overflow-x-hidden bg-transparent text-[#252934]">
       <WeddingSplashIntro config={config} guestIdentity={guestIdentity} storageKey={token} ready={!loading} />
       <SceneProgress />
-      <BackgroundMusic />
       <HeroSaveTheDate config={config} guestIdentity={guestIdentity} />
       <WeddingDetailsSection config={config} guestIdentity={guestIdentity} />
       <TimelineSection config={config} />
