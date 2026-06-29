@@ -141,26 +141,17 @@ export function BackgroundMusic() {
     <>
       <style dangerouslySetInnerHTML={{
         __html: `
-          @keyframes music-wave-bar-1 {
-            0% { height: 4px; }
-            100% { height: 16px; }
+          @keyframes vinyl-spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
           }
-          @keyframes music-wave-bar-2 {
-            0% { height: 4px; }
-            100% { height: 22px; }
+          .vinyl-spin-active {
+            animation: vinyl-spin 12s linear infinite;
           }
-          @keyframes music-wave-bar-3 {
-            0% { height: 4px; }
-            100% { height: 18px; }
+          .vinyl-spin-paused {
+            animation: vinyl-spin 12s linear infinite;
+            animation-play-state: paused;
           }
-          @keyframes music-wave-bar-4 {
-            0% { height: 4px; }
-            100% { height: 12px; }
-          }
-          .music-wave-active-1 { animation: music-wave-bar-1 0.6s ease-in-out infinite alternate; }
-          .music-wave-active-2 { animation: music-wave-bar-2 0.8s ease-in-out infinite alternate; }
-          .music-wave-active-3 { animation: music-wave-bar-3 0.7s ease-in-out infinite alternate; }
-          .music-wave-active-4 { animation: music-wave-bar-4 0.5s ease-in-out infinite alternate; }
         `
       }} />
       
@@ -174,30 +165,45 @@ export function BackgroundMusic() {
       <button
         onClick={togglePlay}
         aria-label={isPlaying ? "Tắt nhạc nền" : "Bật nhạc nền"}
-        className="fixed bottom-6 right-6 z-[90] w-11 h-11 rounded-full flex items-center justify-center bg-white/70 backdrop-blur-md border border-[#b4975a]/30 shadow-[0_4px_16px_rgba(63,70,66,0.12)] hover:shadow-[0_6px_20px_rgba(63,70,66,0.18)] hover:scale-105 active:scale-95 transition-all duration-300 cursor-pointer select-none"
+        className="fixed bottom-6 right-6 z-[90] w-12 h-12 rounded-full flex items-center justify-center bg-white/5 backdrop-blur-md border-[0.5px] border-[#b4975a]/30 shadow-[0_4px_20px_rgba(180,151,90,0.08)] opacity-40 hover:opacity-100 hover:scale-105 active:scale-95 transition-all duration-500 cursor-pointer select-none"
       >
-        <div className="flex items-end justify-center gap-[3px] h-6 w-6">
-          <span 
-            className={`w-[2.5px] bg-[#b4975a] rounded-full transition-all duration-300 ${
-              isPlaying ? "music-wave-active-1" : "h-[6px]"
-            }`} 
-          />
-          <span 
-            className={`w-[2.5px] bg-[#b4975a] rounded-full transition-all duration-300 ${
-              isPlaying ? "music-wave-active-2" : "h-[10px]"
-            }`} 
-          />
-          <span 
-            className={`w-[2.5px] bg-[#b4975a] rounded-full transition-all duration-300 ${
-              isPlaying ? "music-wave-active-3" : "h-[8px]"
-            }`} 
-          />
-          <span 
-            className={`w-[2.5px] bg-[#b4975a] rounded-full transition-all duration-300 ${
-              isPlaying ? "music-wave-active-4" : "h-[5px]"
-            }`} 
-          />
+        <div className={`w-8 h-8 relative transition-transform duration-500 ${isPlaying ? "vinyl-spin-active" : "vinyl-spin-paused"}`}>
+          <svg viewBox="0 0 24 24" fill="none" className="w-full h-full stroke-[#b4975a]">
+            {/* Outer edge */}
+            <circle cx="12" cy="12" r="10" strokeWidth="0.8" />
+            {/* Grooves */}
+            <circle cx="12" cy="12" r="7.5" strokeDasharray="3 2" strokeWidth="0.5" opacity="0.6" />
+            <circle cx="12" cy="12" r="5" strokeWidth="0.5" opacity="0.4" />
+            {/* Center label */}
+            <circle cx="12" cy="12" r="2.5" fill="#b4975a" fillOpacity="0.15" strokeWidth="0.5" />
+            {/* Center hole */}
+            <circle cx="12" cy="12" r="0.8" fill="#b4975a" />
+            {/* Stylized shine highlights */}
+            <path d="M12 2 A10 10 0 0 1 20 8" strokeWidth="0.8" strokeLinecap="round" opacity="0.4" />
+            <path d="M12 22 A10 10 0 0 1 4 16" strokeWidth="0.8" strokeLinecap="round" opacity="0.4" />
+          </svg>
         </div>
+
+        {/* Diagonal slash line when muted/paused */}
+        {!isPlaying && (
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+            <svg viewBox="0 0 24 24" fill="none" className="w-8 h-8 stroke-[#b4975a]/80">
+              <line 
+                x1="4" 
+                y1="20" 
+                x2="20" 
+                y2="4" 
+                strokeWidth="1.2" 
+                strokeLinecap="round"
+                style={{
+                  strokeDasharray: 30,
+                  strokeDashoffset: 0,
+                  transition: "stroke-dashoffset 0.3s ease"
+                }}
+              />
+            </svg>
+          </div>
+        )}
       </button>
     </>
   );
