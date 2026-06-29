@@ -99,17 +99,24 @@ export function BackgroundMusic() {
         const savedMuted = localStorage.getItem("wedding-music-muted");
         if (savedMuted === "1") return;
         
-        // Auto-play attempt
-        audio.volume = 0.75;
-        audio.play()
-          .then(() => {
-            setIsPlaying(true);
-            setIsMuted(false);
-          })
-          .catch(() => {
-            // Browsers block autoplay without interaction, which is expected if intro was skipped
-            setIsPlaying(false);
-          });
+        const tryPlay = () => {
+          audio.volume = 0.75;
+          audio.play()
+            .then(() => {
+              setIsPlaying(true);
+              setIsMuted(false);
+            })
+            .catch((err) => {
+              console.log("Autoplay failed/blocked by browser:", err);
+              setIsPlaying(false);
+            });
+        };
+
+        if (audio.readyState >= 2) {
+          tryPlay();
+        } else {
+          audio.addEventListener("canplay", tryPlay, { once: true });
+        }
       }
     };
 
