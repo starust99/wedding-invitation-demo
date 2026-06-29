@@ -165,9 +165,9 @@ export function BackgroundMusic() {
       <button
         onClick={togglePlay}
         aria-label={isPlaying ? "Tắt nhạc nền" : "Bật nhạc nền"}
-        className="fixed bottom-6 right-6 z-[90] w-12 h-12 rounded-full flex items-center justify-center bg-white/5 backdrop-blur-md border-[0.5px] border-[#b4975a]/30 shadow-[0_4px_20px_rgba(180,151,90,0.08)] opacity-40 hover:opacity-100 hover:scale-105 active:scale-95 transition-all duration-500 cursor-pointer select-none"
+        className="fixed bottom-6 right-6 z-[90] w-[42px] h-[42px] rounded-full flex items-center justify-center bg-white/5 backdrop-blur-md border-[0.5px] border-[#b4975a]/30 shadow-[0_4px_20px_rgba(180,151,90,0.08)] opacity-40 hover:opacity-100 hover:scale-105 active:scale-95 transition-all duration-500 cursor-pointer select-none"
       >
-        <div className={`w-8 h-8 relative transition-transform duration-500 ${isPlaying ? "vinyl-spin-active" : "vinyl-spin-paused"}`}>
+        <div className={`w-[34px] h-[34px] relative transition-transform duration-500 ${isPlaying ? "vinyl-spin-active" : "vinyl-spin-paused"}`}>
           <svg viewBox="0 0 24 24" fill="none" className="w-full h-full stroke-[#b4975a]">
             {/* Outer edge */}
             <circle cx="12" cy="12" r="10" strokeWidth="0.8" />
@@ -177,15 +177,15 @@ export function BackgroundMusic() {
             {/* Center label backing */}
             <circle cx="12" cy="12" r="3.2" fill="#b4975a" fillOpacity="0.08" strokeWidth="0.3" strokeDasharray="1 1" />
             {/* Center musical note */}
+            <circle cx="10" cy="14" r="1.5" fill="#b4975a" stroke="none" />
             <path
-              d="M10.8 13.5 A 1.1 0.9 0 1 1 12.2 12.8 L 12.2 9 C 12.2 9 13.5 8.6 14.2 9.8"
+              d="M11.5 14 V 7 Q 13.2 6.5 14.5 8.2"
               stroke="#b4975a"
               strokeWidth="0.8"
               strokeLinecap="round"
               strokeLinejoin="round"
               fill="none"
             />
-            <circle cx="11.1" cy="13.2" r="0.8" fill="#b4975a" />
             {/* Stylized shine highlights */}
             <path d="M12 2 A10 10 0 0 1 20 8" strokeWidth="0.8" strokeLinecap="round" opacity="0.4" />
             <path d="M12 22 A10 10 0 0 1 4 16" strokeWidth="0.8" strokeLinecap="round" opacity="0.4" />
@@ -195,7 +195,7 @@ export function BackgroundMusic() {
         {/* Diagonal slash line when muted/paused */}
         {!isPlaying && (
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-            <svg viewBox="0 0 24 24" fill="none" className="w-8 h-8 stroke-[#b4975a]/80">
+            <svg viewBox="0 0 24 24" fill="none" className="w-[34px] h-[34px] stroke-[#b4975a]/80">
               <line 
                 x1="4" 
                 y1="20" 
