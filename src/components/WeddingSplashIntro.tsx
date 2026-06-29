@@ -131,6 +131,7 @@ export function WeddingSplashIntro({
   const openIntro = useCallback(() => {
     if (!ready || status === "opening") return;
     setStatus("opening");
+    window.dispatchEvent(new Event("playWeddingMusic"));
     
     // Fallback timer just in case video onEnded fails or user is on low-power mode (increased for slow networks)
     closeTimer.current = window.setTimeout(closeIntro, 15000);
