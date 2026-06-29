@@ -174,10 +174,18 @@ export function BackgroundMusic() {
             {/* Grooves */}
             <circle cx="12" cy="12" r="7.5" strokeDasharray="3 2" strokeWidth="0.5" opacity="0.6" />
             <circle cx="12" cy="12" r="5" strokeWidth="0.5" opacity="0.4" />
-            {/* Center label */}
-            <circle cx="12" cy="12" r="2.5" fill="#b4975a" fillOpacity="0.15" strokeWidth="0.5" />
-            {/* Center hole */}
-            <circle cx="12" cy="12" r="0.8" fill="#b4975a" />
+            {/* Center label backing */}
+            <circle cx="12" cy="12" r="3.2" fill="#b4975a" fillOpacity="0.08" strokeWidth="0.3" strokeDasharray="1 1" />
+            {/* Center musical note */}
+            <path
+              d="M10.8 13.5 A 1.1 0.9 0 1 1 12.2 12.8 L 12.2 9 C 12.2 9 13.5 8.6 14.2 9.8"
+              stroke="#b4975a"
+              strokeWidth="0.8"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              fill="none"
+            />
+            <circle cx="11.1" cy="13.2" r="0.8" fill="#b4975a" />
             {/* Stylized shine highlights */}
             <path d="M12 2 A10 10 0 0 1 20 8" strokeWidth="0.8" strokeLinecap="round" opacity="0.4" />
             <path d="M12 22 A10 10 0 0 1 4 16" strokeWidth="0.8" strokeLinecap="round" opacity="0.4" />
