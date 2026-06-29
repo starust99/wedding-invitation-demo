@@ -8,6 +8,11 @@ export function BackgroundMusic() {
   const [isMuted, setIsMuted] = useState(false);
   const fadeIntervalRef = useRef<number | null>(null);
 
+  const isPlayingRef = useRef(false);
+  useEffect(() => {
+    isPlayingRef.current = isPlaying;
+  }, [isPlaying]);
+
   // Initialize audio and check user preference
   useEffect(() => {
     const savedMuted = localStorage.getItem("wedding-music-muted");
@@ -86,7 +91,7 @@ export function BackgroundMusic() {
     const handleIntroFinishedSignal = () => {
       // If intro finished and we aren't playing yet, attempt autoplay
       const audio = audioRef.current;
-      if (audio && !isPlaying) {
+      if (audio && !isPlayingRef.current) {
         const savedMuted = localStorage.getItem("wedding-music-muted");
         if (savedMuted === "1") return;
         
@@ -130,7 +135,7 @@ export function BackgroundMusic() {
         window.clearInterval(fadeIntervalRef.current);
       }
     };
-  }, [isPlaying]);
+  }, []);
 
   return (
     <>
