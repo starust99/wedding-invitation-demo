@@ -168,31 +168,12 @@ export function BackgroundMusic() {
         className="fixed bottom-6 right-6 z-[90] w-[42px] h-[42px] rounded-full flex items-center justify-center bg-white/5 backdrop-blur-md border-[0.5px] border-[#b4975a]/30 shadow-[0_4px_20px_rgba(180,151,90,0.08)] opacity-40 hover:opacity-100 hover:scale-105 active:scale-95 transition-all duration-500 cursor-pointer select-none"
       >
         <div className={`w-[34px] h-[34px] relative transition-transform duration-500 ${isPlaying ? "vinyl-spin-active" : "vinyl-spin-paused"}`}>
-          <svg viewBox="0 0 24 24" fill="none" className="w-full h-full stroke-[#b4975a]">
-            {/* Outer edge */}
-            <circle cx="12" cy="12" r="10" strokeWidth="0.8" />
-            {/* Grooves */}
-            <circle cx="12" cy="12" r="7.5" strokeDasharray="3 2" strokeWidth="0.5" opacity="0.6" />
-            <circle cx="12" cy="12" r="5" strokeWidth="0.5" opacity="0.4" />
-            {/* Center label backing */}
-            <circle cx="12" cy="12" r="3.2" fill="#b4975a" fillOpacity="0.08" strokeWidth="0.3" strokeDasharray="1 1" />
-            {/* Center G-clef (Khóa Sol) */}
-            <path 
-              d="M 12.5 3 L 12.5 18.5 C 12.5 19.8, 11.2 20.2, 10.5 19 C 9.8 17.8, 11.2 17.2, 12.5 18.5" 
-              strokeWidth="0.55" 
-              strokeLinecap="round" 
-              strokeLinejoin="round"
-            />
-            <path 
-              d="M 12.5 10.5 C 13.8 8, 15 5.5, 14 3.5 C 13.2 1.8, 11.2 1.8, 12.5 4 V 10.5 C 9 12.5, 8.5 15.5, 11.5 17.5 C 14.2 19.2, 16.5 17, 16.5 14 C 16.5 11.5, 13.5 11.5, 12.5 13 C 11.5 14.2, 12.5 15.5, 13.5 14.5" 
-              strokeWidth="0.55" 
-              strokeLinecap="round" 
-              strokeLinejoin="round"
-            />
-            {/* Stylized shine highlights */}
-            <path d="M12 2 A10 10 0 0 1 20 8" strokeWidth="0.8" strokeLinecap="round" opacity="0.4" />
-            <path d="M12 22 A10 10 0 0 1 4 16" strokeWidth="0.8" strokeLinecap="round" opacity="0.4" />
-          </svg>
+          <img 
+            src="/assets/music-icon.png" 
+            alt="Music Icon" 
+            className="w-full h-full object-contain"
+            draggable={false}
+          />
         </div>
 
         {/* Diagonal slash line when muted/paused */}
