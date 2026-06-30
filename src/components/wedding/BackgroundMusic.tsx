@@ -14,19 +14,10 @@ export function BackgroundMusic() {
     isPlayingRef.current = isPlaying;
   }, [isPlaying]);
 
-  // Initialize audio and check user preference
-  useEffect(() => {
-    const savedMuted = localStorage.getItem("wedding-music-muted");
-    if (savedMuted === "1") {
-      setIsMuted(true);
-    }
-  }, []);
-
   const startFadeIn = () => {
     const audio = audioRef.current;
     if (!audio) return;
 
-    // Clear any active fade interval
     if (fadeIntervalRef.current) {
       window.clearInterval(fadeIntervalRef.current);
     }
@@ -35,7 +26,6 @@ export function BackgroundMusic() {
     audio.play()
       .then(() => {
         setIsPlaying(true);
-        // Smoothly fade volume in to 0.75 over 2.5 seconds
         const targetVolume = 0.75;
         const duration = 2500;
         const intervalTime = 100;
@@ -80,9 +70,22 @@ export function BackgroundMusic() {
     }
   };
 
+  // Initialize audio and check user preference & native script status
   useEffect(() => {
+    const audio = audioRef.current;
+    
+    // 1. Sync React state with actual DOM audio state (in case native script already started it)
+    const savedMuted = localStorage.getItem("wedding-music-muted");
+    if (savedMuted === "1") {
+      setIsMuted(true);
+    } else if (audio && !audio.paused) {
+      setIsPlaying(true);
+      setIsMuted(false);
+      setShowController(true);
+    }
+
+    // 2. Setup handlers for audio events
     const handlePlaySignal = () => {
-      // Force play when the user clicks "Chạm để mở", overriding any previous mute choice
       try {
         localStorage.removeItem("wedding-music-muted");
       } catch (e) {}
@@ -93,9 +96,9 @@ export function BackgroundMusic() {
 
     const handleIntroFinishedSignal = () => {
       setShowController(true);
-      // If intro finished and we aren't playing yet, attempt autoplay
+      
       const audio = audioRef.current;
-      if (audio && !isPlayingRef.current) {
+      if (audio && audio.paused) {
         const savedMuted = localStorage.getItem("wedding-music-muted");
         if (savedMuted === "1") return;
         
@@ -107,8 +110,7 @@ export function BackgroundMusic() {
               setIsMuted(false);
             })
             .catch((err) => {
-              console.log("Autoplay failed/blocked by browser:", err);
-              setIsPlaying(false);
+              console.log("React autoplay fallback deferred:", err);
             });
         };
 
@@ -120,8 +122,15 @@ export function BackgroundMusic() {
       }
     };
 
+    const handleNativePlay = () => {
+      setIsPlaying(true);
+      setIsMuted(false);
+      setShowController(true);
+    };
+
     window.addEventListener("playWeddingMusic", handlePlaySignal);
     window.addEventListener("introFinished", handleIntroFinishedSignal);
+    window.addEventListener("wedding-music-playing-native", handleNativePlay);
 
     // Initial check: if the intro was already skipped on mount, try playing
     const sessionKeyHome = "wedding-splash:home";
@@ -139,60 +148,17 @@ export function BackgroundMusic() {
     };
 
     if (isIntroSkipped()) {
+      setShowController(true);
       handleIntroFinishedSignal();
     }
 
     return () => {
       window.removeEventListener("playWeddingMusic", handlePlaySignal);
       window.removeEventListener("introFinished", handleIntroFinishedSignal);
+      window.removeEventListener("wedding-music-playing-native", handleNativePlay);
       if (fadeIntervalRef.current) {
         window.clearInterval(fadeIntervalRef.current);
       }
-    };
-  }, []);
-
-  // Listen to first user interaction to resume audio on reload if it wasn't explicitly muted
-  useEffect(() => {
-    let hasTriggered = false;
-
-    const handleFirstInteraction = () => {
-      if (hasTriggered) return;
-
-      const audio = audioRef.current;
-      if (audio && !isPlayingRef.current) {
-        const savedMuted = localStorage.getItem("wedding-music-muted");
-        if (savedMuted === "1") {
-          removeListeners();
-          return;
-        }
-
-        hasTriggered = true;
-        audio.volume = 0.75;
-        audio.play()
-          .then(() => {
-            setIsPlaying(true);
-            setIsMuted(false);
-            removeListeners();
-          })
-          .catch((err) => {
-            console.log("Play on interaction failed:", err);
-            hasTriggered = false;
-          });
-      } else if (isPlayingRef.current) {
-        removeListeners();
-      }
-    };
-
-    const removeListeners = () => {
-      window.removeEventListener("click", handleFirstInteraction);
-      window.removeEventListener("touchstart", handleFirstInteraction);
-    };
-
-    window.addEventListener("click", handleFirstInteraction);
-    window.addEventListener("touchstart", handleFirstInteraction);
-
-    return () => {
-      removeListeners();
     };
   }, []);
 
@@ -215,11 +181,82 @@ export function BackgroundMusic() {
       }} />
       
       <audio
+        id="wedding-audio"
         ref={audioRef}
         src="/assets/audio/co-chut-ngot-ngao.mp3"
         loop
         preload="auto"
       />
+
+      <script dangerouslySetInnerHTML={{
+        __html: `
+          (function() {
+            var sessionKeyHome = "wedding-splash:home";
+            var sessionKeyPublic = "wedding-splash:public";
+            
+            var isIntroSkipped = false;
+            try {
+              var shouldForce = new URLSearchParams(window.location.search).get("intro") === "1";
+              if (!shouldForce) {
+                isIntroSkipped = localStorage.getItem(sessionKeyHome) === "1" || 
+                                 localStorage.getItem(sessionKeyPublic) === "1";
+              }
+            } catch (e) {}
+
+            var savedMuted = null;
+            try {
+              savedMuted = localStorage.getItem("wedding-music-muted");
+            } catch (e) {}
+
+            if (!isIntroSkipped || savedMuted === "1") return;
+
+            var audio = document.getElementById("wedding-audio");
+            if (!audio) return;
+
+            var playStarted = false;
+
+            var tryPlay = function() {
+              if (playStarted) return;
+              try {
+                if (localStorage.getItem("wedding-music-muted") === "1") return;
+              } catch (e) {}
+
+              audio.volume = 0.75;
+              audio.play()
+                .then(function() {
+                  playStarted = true;
+                  window.dispatchEvent(new CustomEvent("wedding-music-playing-native"));
+                  removeListeners();
+                })
+                .catch(function(err) {
+                  console.log("Autoplay deferred:", err);
+                });
+            };
+
+            var handleInteraction = function() {
+              tryPlay();
+            };
+
+            var removeListeners = function() {
+              document.removeEventListener("click", handleInteraction);
+              document.removeEventListener("touchstart", handleInteraction);
+              document.removeEventListener("mousedown", handleInteraction);
+              document.removeEventListener("keydown", handleInteraction);
+            };
+
+            document.addEventListener("click", handleInteraction);
+            document.addEventListener("touchstart", handleInteraction);
+            document.addEventListener("mousedown", handleInteraction);
+            document.addEventListener("keydown", handleInteraction);
+
+            if (audio.readyState >= 2) {
+              tryPlay();
+            } else {
+              audio.addEventListener("canplay", tryPlay, { once: true });
+            }
+          })();
+        `
+      }} />
 
       {showController && (
         <button
@@ -227,7 +264,7 @@ export function BackgroundMusic() {
           aria-label={isPlaying ? "Tắt nhạc nền" : "Bật nhạc nền"}
           className="fixed bottom-6 right-6 md:bottom-8 md:right-8 z-[90] w-[36px] h-[36px] md:w-[45px] md:h-[45px] rounded-full flex items-center justify-center opacity-90 hover:opacity-100 hover:scale-105 active:scale-95 transition-all duration-500 cursor-pointer select-none"
         >
-          <div className="w-[36px] h-[36px] md:w-[45px] md:h-[45px] relative transition-transform duration-500 vinyl-spin-active">
+          <div className={`w-[36px] h-[36px] md:w-[45px] md:h-[45px] relative transition-transform duration-500 ${isPlaying ? "vinyl-spin-active" : "vinyl-spin-paused"}`}>
             <img 
               src="/assets/music-icon.png" 
               alt="Music Icon" 
