@@ -288,7 +288,7 @@ video::-webkit-media-controls-panel {
   height: 100%;
   display: flex;
   z-index: 1;
-  animation: pan-one-direction 18s linear infinite !important;
+  animation: pan-one-direction 26s linear infinite !important;
   will-change: transform;
 }
 
@@ -302,6 +302,9 @@ video::-webkit-media-controls-panel {
 }
 
 @media (min-width: 768px) {
+  .panning-track {
+    animation: pan-one-direction 42s linear infinite !important;
+  }
   .panning-slice {
     background-image: url("/assets/bg-desktop.webp");
   }
