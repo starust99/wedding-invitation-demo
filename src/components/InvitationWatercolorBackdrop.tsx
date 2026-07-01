@@ -22,7 +22,9 @@ export function InvitationWatercolorBackdrop() {
       >
         <div className="panning-track">
           <div className="panning-slice" />
+          <div className="panning-seam-blend" style={{ left: "33.3333%" }} />
           <div className="panning-slice" />
+          <div className="panning-seam-blend" style={{ left: "66.6666%" }} />
           <div className="panning-slice" />
         </div>
       </motion.div>

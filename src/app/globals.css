@@ -307,6 +307,24 @@ video::-webkit-media-controls-panel {
   }
 }
 
+.panning-seam-blend {
+  position: absolute;
+  top: -10px;
+  bottom: -10px;
+  width: 14vw;
+  transform: translateX(-50%);
+  background: linear-gradient(
+    to right,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.95) 45%,
+    rgba(255, 255, 255, 0.95) 55%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  filter: blur(12px);
+  pointer-events: none;
+  z-index: 3;
+}
+
 @keyframes pan-one-direction {
   0% {
     transform: translate3d(-33.3333%, 0, 0);
