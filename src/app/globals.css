@@ -288,7 +288,7 @@ video::-webkit-media-controls-panel {
   height: 100%;
   display: flex;
   z-index: 1;
-  animation: pan-one-direction 10s linear infinite !important;
+  animation: pan-one-direction 14s linear infinite !important;
   will-change: transform;
 }
 
