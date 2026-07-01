@@ -17,9 +17,15 @@ export function InvitationWatercolorBackdrop() {
     <div aria-hidden="true" className="invitation-watercolor-backdrop">
       <motion.div
         aria-hidden="true"
-        className="invitation-watercolor-backdrop__wash bg-panning"
+        className="invitation-watercolor-backdrop__wash"
         style={{ x, y, scale }}
-      />
+      >
+        <div className="panning-track">
+          <div className="panning-slice" />
+          <div className="panning-slice mirrored" />
+          <div className="panning-slice" />
+        </div>
+      </motion.div>
     </div>
   );
 }
