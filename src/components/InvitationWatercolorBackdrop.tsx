@@ -22,7 +22,7 @@ export function InvitationWatercolorBackdrop() {
       >
         <div className="panning-track">
           <div className="panning-slice" />
-          <div className="panning-slice mirrored" />
+          <div className="panning-slice" />
           <div className="panning-slice" />
         </div>
       </motion.div>

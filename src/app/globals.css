@@ -288,7 +288,7 @@ video::-webkit-media-controls-panel {
   height: 100%;
   display: flex;
   z-index: 1;
-  animation: pan-one-direction 55s linear infinite !important;
+  animation: pan-one-direction 10s linear infinite !important;
   will-change: transform;
 }
 
@@ -301,10 +301,6 @@ video::-webkit-media-controls-panel {
   background-repeat: no-repeat;
 }
 
-.panning-slice.mirrored {
-  transform: scaleX(-1);
-}
-
 @media (min-width: 768px) {
   .panning-slice {
     background-image: url("/assets/bg-desktop.webp");
@@ -313,10 +309,10 @@ video::-webkit-media-controls-panel {
 
 @keyframes pan-one-direction {
   0% {
-    transform: translate3d(0, 0, 0);
+    transform: translate3d(-33.3333%, 0, 0);
   }
   100% {
-    transform: translate3d(-66.6666%, 0, 0);
+    transform: translate3d(0, 0, 0);
   }
 }
 
