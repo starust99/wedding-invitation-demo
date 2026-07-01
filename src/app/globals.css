@@ -251,6 +251,7 @@ video::-webkit-media-controls-panel {
   z-index: 0;
   pointer-events: none;
   overflow: hidden;
+  background-color: #fdfbf7; /* Màu nền dự phòng tránh chớp trắng */
 }
 
 .invitation-watercolor-backdrop__wash {
@@ -288,8 +289,17 @@ video::-webkit-media-controls-panel {
   height: 100%;
   display: flex;
   z-index: 1;
+  background-color: #fdfbf7; /* Màu nền dự phòng tránh chớp trắng */
   animation: pan-one-direction 26s linear infinite !important;
   will-change: transform;
+
+  /* Khóa tầng dựng hình phần cứng GPU để triệt tiêu chớp giật */
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  -webkit-transform-style: preserve-3d;
+  transform-style: preserve-3d;
+  -webkit-perspective: 1000px;
+  perspective: 1000px;
 }
 
 .panning-slice {
@@ -299,6 +309,12 @@ video::-webkit-media-controls-panel {
   background-size: cover;
   background-position: center top;
   background-repeat: no-repeat;
+
+  /* Khóa GPU trên từng slice */
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  -webkit-transform-style: preserve-3d;
+  transform-style: preserve-3d;
 }
 
 @media (min-width: 768px) {
