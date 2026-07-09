@@ -290,7 +290,7 @@ video::-webkit-media-controls-panel {
   display: flex;
   z-index: 1;
   background-color: #fdfbf7; /* Màu nền dự phòng tránh chớp trắng */
-  animation: pan-one-direction 26s linear infinite !important;
+  animation: pan-one-direction 42s linear infinite !important;
   will-change: transform;
 
   /* Khóa tầng dựng hình phần cứng GPU để triệt tiêu chớp giật */
@@ -319,7 +319,7 @@ video::-webkit-media-controls-panel {
 
 @media (min-width: 768px) {
   .panning-track {
-    animation: pan-one-direction 42s linear infinite !important;
+    animation: pan-one-direction 68s linear infinite !important;
   }
   .panning-slice {
     background-image: url("/assets/bg-desktop.webp");
