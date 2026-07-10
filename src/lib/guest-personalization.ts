@@ -915,7 +915,7 @@ export function buildInvitationCopy(input?: InvitationCopyInput): InvitationCopy
     closingLine: `Sự hiện diện của ${presenceSubject} là niềm vinh hạnh và lời chúc phúc trọn vẹn nhất.`,
     signaturePrefix: tone === "elder" ? "Thương kính" : tone === "peer" || tone === "junior" ? "Thân mến" : "Trân trọng",
     kinshipPronoun,
-    dressCodeLine: `Để cùng tạo nên những khung hình đẹp và hài hòa cho đêm tiệc, ${sentenceCase(kinshipPronoun)} có thể tham khảo các ý tưởng phối đồ dựa theo bảng màu dưới đây:\n\nLưu ý: Tiệc được tổ chức ngoài trời trong không khí se lạnh của mùa đông Đà Lạt, ${kinshipPronoun} hãy ưu tiên trang phục và phụ kiện đủ ấm để tận hưởng trọn vẹn buổi tiệc.`,
+    dressCodeLine: `Để cùng tạo nên những khung hình đẹp và hài hòa cho đêm tiệc, Quý khách có thể tham khảo các ý tưởng phối đồ dựa theo bảng màu dưới đây:\n\nLưu ý: Tiệc được tổ chức ngoài trời trong không khí se lạnh của mùa đông Đà Lạt, Quý khách hãy ưu tiên trang phục và phụ kiện đủ ấm để tận hưởng trọn vẹn buổi tiệc.`,
     presenceSubject,
   };
 }
