@@ -39,13 +39,12 @@ const galleryContainerVariant: Variants = {
 };
 
 const galleryTileVariant: Variants = {
-  hidden: { opacity: 0, y: 40, scale: 0.95 },
+  hidden: { opacity: 0, y: 30 },
   visible: {
     opacity: 1,
     y: 0,
-    scale: 1,
     transition: {
-      duration: 0.8,
+      duration: 0.6,
       ease: [0.25, 0.1, 0.25, 1],
     },
   },
@@ -213,7 +212,7 @@ export function GallerySection({ config }: { config: WeddingConfig }) {
           className="gallery-mosaic-intro grid max-w-4xl justify-items-center gap-5 pb-8 text-center lg:pb-10"
           initial="hidden"
           whileInView="visible"
-          viewport={{ once: false, margin: "-10% 0px -10% 0px" }}
+          viewport={{ once: true, margin: "-10% 0px -10% 0px" }}
           variants={galleryIntroVariant}
         >
             <h3 className="font-serif text-[1.12rem] sm:text-[1.25rem] md:text-[1.38rem] font-bold gold-foil-text uppercase leading-tight mt-0.5 mb-1.5">
@@ -230,7 +229,7 @@ export function GallerySection({ config }: { config: WeddingConfig }) {
           className="gallery-mosaic-stage mt-12 lg:mt-14"
           initial="hidden"
           whileInView="visible"
-          viewport={{ once: false, margin: "-10% 0px -10% 0px" }}
+          viewport={{ once: true, margin: "-10% 0px -10% 0px" }}
           variants={galleryContainerVariant}
         >
           {tiles.map((tile, index) => {

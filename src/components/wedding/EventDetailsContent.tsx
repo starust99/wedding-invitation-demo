@@ -225,11 +225,10 @@ const staggerContainer: Variants = {
 };
 
 const cardVariant: Variants = {
-  hidden: { opacity: 0, y: 40, scale: 0.95 },
+  hidden: { opacity: 0, y: 40 },
   visible: {
     opacity: 1,
     y: 0,
-    scale: 1,
     transition: {
       duration: 0.7,
       ease: [0.25, 0.1, 0.25, 1],
@@ -250,11 +249,10 @@ const headerVariant: Variants = {
 };
 
 const familyPanelVariant: Variants = {
-  hidden: { opacity: 0, y: 20, scale: 0.99 },
+  hidden: { opacity: 0, y: 20 },
   visible: {
     opacity: 1,
     y: 0,
-    scale: 1,
     transition: {
       duration: 0.5,
       ease: [0.16, 1, 0.3, 1],
@@ -649,9 +647,9 @@ export function EventDetailsContent({
               {(publicData?.timeline || defaultTimelineFallback).map((item, index) => (
                 <motion.li
                   key={index}
-                  initial={{ opacity: 0.3, scale: 0.9, y: 15 }}
-                  whileInView={{ opacity: 1, scale: 1, y: 0 }}
-                  viewport={{ once: true }}
+                  initial={{ opacity: 0, y: 15 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, margin: "-50px" }}
                   transition={{ duration: 0.5 }}
                   className="timeline-garden-node !w-[47%] !max-w-[9.2rem] !ml-0 !mr-0"
                 >

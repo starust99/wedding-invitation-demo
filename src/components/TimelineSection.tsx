@@ -73,9 +73,9 @@ export function TimelineSection({ config }: { config: WeddingConfig }) {
             {nodes.map((node) => (
               <motion.li
                 key={`${node.time}-${node.title}`}
-                initial={{ opacity: 0.3, scale: 0.9, y: 30, filter: "blur(4px)" }}
-                whileInView={{ opacity: 1, scale: 1, y: 0, filter: "blur(0px)" }}
-                viewport={{ once: false, margin: "-15% 0px -15% 0px" }}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-15% 0px -15% 0px" }}
                 transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1], delay: 0.1 }}
                 className="timeline-garden-node"
                 style={
