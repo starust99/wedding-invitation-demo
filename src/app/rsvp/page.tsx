@@ -16,6 +16,8 @@ import {
   Trash2,
   CalendarDays,
   Calendar,
+  Lock,
+  Key,
 } from "lucide-react";
 import { weddingConfig } from "@/config/wedding.config";
 import {
@@ -281,7 +283,32 @@ export default function RSVPPage() {
   const [tokenGateChecked, setTokenGateChecked] = useState(false);
   const [missingInviteToken, setMissingInviteToken] = useState(false);
   const [guestRsvpLocked, setGuestRsvpLocked] = useState(false);
+  const [isAdminBypassed, setIsAdminBypassed] = useState(false);
+  const [adminLoginError, setAdminLoginError] = useState("");
   const { navigateWithTransition } = usePageTransition();
+
+  const handleAdminLogin = async (password: string) => {
+    setAdminLoginError("");
+    try {
+      const response = await fetch("/api/admin/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password }),
+      });
+      if (response.ok) {
+        sessionStorage.setItem("admin_rsvp_bypass", "true");
+        setIsAdminBypassed(true);
+        setMissingInviteToken(false);
+        setGuestRsvpLocked(false);
+      } else {
+        const result = await response.json().catch(() => ({}));
+        setAdminLoginError(result.error || "Sai mật khẩu Admin");
+      }
+    } catch {
+      setAdminLoginError("Lỗi kết nối máy chủ");
+    }
+  };
+
   const {
     control,
     register,
@@ -338,6 +365,11 @@ export default function RSVPPage() {
 
   useEffect(() => {
     let cancelled = false;
+
+    const bypassed = typeof window !== "undefined" && sessionStorage.getItem("admin_rsvp_bypass") === "true";
+    if (bypassed) {
+      setIsAdminBypassed(true);
+    }
 
     function finishHydration() {
       if (!cancelled) setIsHydratingGuest(false);
@@ -401,9 +433,10 @@ export default function RSVPPage() {
         }
       }
 
+      const bypassed = typeof window !== "undefined" && sessionStorage.getItem("admin_rsvp_bypass") === "true";
       setTokenGateChecked(true);
-      setMissingInviteToken(!token);
-      setGuestRsvpLocked(Date.now() >= RSVP_GUEST_EDIT_DEADLINE.getTime());
+      setMissingInviteToken(!token && !bypassed);
+      setGuestRsvpLocked(Date.now() >= RSVP_GUEST_EDIT_DEADLINE.getTime() && !bypassed);
 
       if (token) {
         setInviteToken(token);
@@ -488,9 +521,13 @@ export default function RSVPPage() {
     setSubmitError("");
 
     if (currentStep.key === "attendance") {
-      const isValid = await trigger(["attendingCeremony", "attendingBanquet", "attending", "guestCount"], { shouldFocus: true });
+      const fieldsToTrigger = ["attendingCeremony", "attendingBanquet", "attending", "guestCount"];
+      if (isAdminBypassed) {
+        fieldsToTrigger.push("name", "guestGroup");
+      }
+      const isValid = await trigger(fieldsToTrigger as any, { shouldFocus: true });
       if (!isValid) {
-        setSubmitError("Vui lòng chọn phản hồi trước khi tiếp tục.");
+        setSubmitError(isAdminBypassed ? "Vui lòng điền họ tên, nhóm khách và chọn phản hồi trước khi tiếp tục." : "Vui lòng chọn phản hồi trước khi tiếp tục.");
         return;
       }
     }
@@ -536,6 +573,18 @@ export default function RSVPPage() {
 
   async function onSubmit(data: RSVPFormOutput) {
     setSubmitError("");
+
+    if (isAdminBypassed) {
+      if (!data.name?.trim()) {
+        setSubmitError("Vui lòng điền họ tên khách mời.");
+        return;
+      }
+      if (!data.guestGroup?.trim()) {
+        setSubmitError("Vui lòng điền nhóm khách mời.");
+        return;
+      }
+    }
+
     const cleanLodgingGuests = data.attending === "no" || !data.accommodationNeeded
       ? []
       : normalizeLodgingGuests(data.lodgingGuests);
@@ -637,8 +686,66 @@ export default function RSVPPage() {
     }
   };
 
-  if (missingInviteToken && tokenGateChecked) {
-    return <InviteAccessGate variant="rsvp-missing-token" />;
+  if (missingInviteToken && tokenGateChecked && !isAdminBypassed) {
+    return (
+      <main className="public-invitation-page relative flex min-h-screen items-center justify-center px-6 py-16 text-[#252934]">
+        <div aria-hidden="true" className="aurora-wash pointer-events-none absolute inset-0 -z-10 opacity-50" />
+        <div aria-hidden="true" className="film-grain-soft pointer-events-none absolute inset-0 -z-10" />
+        <section className="glass-panel w-full max-w-lg rounded-[2rem] p-10 text-center shadow-[0_24px_64px_rgba(37,41,52,0.08)]">
+          <div className="mx-auto mb-6 flex h-14 w-14 items-center justify-center rounded-full bg-serenity/10 text-serenity">
+            <Lock className="h-6 w-6" />
+          </div>
+          <p className="section-kicker-dark wedding-type-kicker text-serenity">Xác nhận lời mời</p>
+          <h1 className="wedding-type-title mt-4 text-[#252934]">Cần link thiệp</h1>
+          <p className="wedding-type-body mt-5 text-[#252934]/62">
+            Vui lòng mở đúng link thiệp mời cá nhân được gửi cho bạn để xác nhận sự hiện diện.
+          </p>
+          <div className="my-6 border-t border-serenity/12" />
+          <p className="wedding-type-body text-xs font-semibold text-[#252934]/48 uppercase tracking-wider">
+            Quyền truy cập Admin
+          </p>
+          <p className="wedding-type-body mt-2 text-sm text-[#252934]/58">
+            Nhập mật khẩu Admin để ghi nhận hoặc điền hộ RSVP:
+          </p>
+
+          <div className="mt-5 flex flex-col gap-3">
+            <input
+              type="password"
+              placeholder="Nhập mật khẩu..."
+              className="min-h-12 w-full rounded-2xl border border-serenity/22 bg-white/75 px-4 text-center text-[#252934] outline-none transition placeholder:text-[#252934]/36 focus:border-serenity focus:bg-white"
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  handleAdminLogin((e.target as HTMLInputElement).value);
+                }
+              }}
+            />
+            <button
+              type="button"
+              onClick={(e) => {
+                const input = e.currentTarget.previousElementSibling as HTMLInputElement;
+                handleAdminLogin(input.value);
+              }}
+              className="light-sweep wedding-type-button inline-flex min-h-12 items-center justify-center rounded-full bg-rose-quartz px-8 text-[#252934] shadow-[0_16px_48px_rgba(146,168,209,0.22)] ring-1 ring-rose-quartz/70"
+            >
+              Đăng nhập Admin
+            </button>
+            {adminLoginError && (
+              <p className="text-xs font-bold text-[#9B4E5C] mt-2">{adminLoginError}</p>
+            )}
+          </div>
+
+          <div className="mt-8 flex justify-center gap-4 border-t border-serenity/12 pt-6">
+            <button
+              type="button"
+              onClick={() => navigateWithTransition("/")}
+              className="wedding-type-button inline-flex min-h-11 items-center justify-center rounded-full border border-serenity/26 bg-white/80 px-6 text-sm text-[#252934] transition hover:border-serenity/46"
+            >
+              Về trang chủ
+            </button>
+          </div>
+        </section>
+      </main>
+    );
   }
 
   return (
@@ -732,7 +839,7 @@ export default function RSVPPage() {
             </motion.div>
           ) : (
             <div className="grid min-w-0 lg:grid-cols-[0.86fr_1.14fr]">
-              <aside className="min-w-0 border-b border-serenity/20 p-6 text-center sm:p-8 lg:border-b-0 lg:border-r">
+              <aside className="min-w-0 border-b border-serenity/20 px-4 py-6 text-center sm:p-8 lg:border-b-0 lg:border-r">
               <p className="section-kicker-dark wedding-type-kicker text-serenity">Xác nhận lời mời</p>
               <h1 className="wedding-type-title mt-5 break-words text-[#252934]">Lời hồi đáp</h1>
 
@@ -745,7 +852,7 @@ export default function RSVPPage() {
                 ))}
               </div>
 
-              <div className="wedding-type-body mt-10 rounded-[1.4rem] premium-glass p-5 text-[#252934]/62">
+              <div className="wedding-type-body mt-10 rounded-[1.4rem] premium-glass px-4 py-5 text-[#252934]/62">
                 {currentStep.key === "review"
                   ? hasBanquet 
                     ? "Đọc lại toàn bộ thông tin trước khi gửi. Sau khi gửi, thông tin sẽ được dùng để chuẩn bị tiếp đón chu đáo"
@@ -765,7 +872,7 @@ export default function RSVPPage() {
                 setSubmitError("Có vài mục cần bổ sung. Vui lòng kiểm tra lại phần được đánh dấu.");
                 goToStepByKey(resolveStepFromErrors(errors, attending, attendingBanquet));
               })}
-              className="min-w-0 p-6 text-center sm:p-8"
+              className="min-w-0 px-4 py-6 text-center sm:p-8"
             >
               <AnimatePresence mode="wait">
                 <motion.div
@@ -779,12 +886,29 @@ export default function RSVPPage() {
 
                   {currentStep.key === "attendance" ? (
                     <div className="mt-8 grid gap-5">
-                      <div className="rounded-[1.4rem] premium-glass p-5 text-center">
-                        <p className="wedding-type-card-title text-[#252934]">
-                          {displayedInsideInviteLine}
-                        </p>
-                        <p className="wedding-type-body mt-3 text-[#252934]/58">{displayedClosingLine}</p>
-                      </div>
+                      {isAdminBypassed ? (
+                        <div className="rounded-[1.4rem] premium-glass p-6 text-left grid gap-4">
+                          <p className="wedding-type-card-title text-serenity font-bold text-center mb-2">
+                            Chế độ Admin - Nhập thông tin khách
+                          </p>
+                          <Field label="Danh xưng & Họ tên khách mời" error={errors.name?.message}>
+                            <input className={inputClass} placeholder="VD: Anh Nathan, Gia đình cô Hải" {...register("name", { required: "Vui lòng nhập tên khách mời." })} />
+                          </Field>
+                          <Field label="Nhóm khách mời (phân loại)" error={errors.guestGroup?.message}>
+                            <input className={inputClass} placeholder="VD: Bạn chú rể, Bạn cô dâu, Họ nhà gái" {...register("guestGroup", { required: "Vui lòng nhập nhóm khách mời." })} />
+                          </Field>
+                          <Field label="Số điện thoại" error={errors.phone?.message}>
+                            <input className={inputClass} placeholder="VD: 0901234567 (Không bắt buộc)" {...register("phone")} />
+                          </Field>
+                        </div>
+                      ) : (
+                        <div className="rounded-[1.4rem] premium-glass p-5 text-center">
+                          <p className="wedding-type-card-title text-[#252934]">
+                            {displayedInsideInviteLine}
+                          </p>
+                          <p className="wedding-type-body mt-3 text-[#252934]/58">{displayedClosingLine}</p>
+                        </div>
+                      )}
 
                       <div className="grid gap-6">
                         {/* Question 1: Ceremony */}
@@ -1061,7 +1185,8 @@ export default function RSVPPage() {
                         <ReviewLine label="Dự Thánh lễ Hôn phối" value={formValues.attendingCeremony === "yes" ? "Có, sẽ tham dự" : formValues.attendingCeremony === "no" ? "Rất tiếc, không thể" : "Chưa chọn"} />
                         <ReviewLine label="Dự Tiệc mừng" value={formValues.attendingBanquet === "yes" ? "Có, sẽ tham dự" : formValues.attendingBanquet === "no" ? "Rất tiếc, không thể" : "Chưa chọn"} />
                         <ReviewLine label="Phản hồi chung" value={formValues.attending === "no" ? "Rất tiếc không tham dự" : "Xác nhận tham dự"} />
-                        <ReviewLine label="Tên mời" value={inviteCopy.guestLabel} />
+                        <ReviewLine label="Tên mời" value={isAdminBypassed ? formValues.name : inviteCopy.guestLabel} />
+                        {isAdminBypassed && <ReviewLine label="Nhóm khách" value={formValues.guestGroup} />}
                         {formValues.attending === "no" ? (
                           <ReviewLine label="Lời nhắn gửi" value={formValues.notes || "Không có"} />
                         ) : hasBanquet ? (

@@ -3972,8 +3972,8 @@ textarea {
   }
 
   .rsvp-page .glass-panel {
-    width: min(calc(100vw - 2.5rem), 21.875rem);
-    max-width: 21.875rem;
+    width: min(calc(100vw - 1.5rem), 28.75rem);
+    max-width: 28.75rem;
     margin-inline: auto;
   }
 
