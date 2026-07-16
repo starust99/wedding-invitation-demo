@@ -47,6 +47,7 @@ function getTimelineIconPath(title: string): string | null {
 }
 
 export function TimelineSection({ config }: { config: WeddingConfig }) {
+  return null;
   const nodes = config.timeline.map(buildTimelineNode);
 
   return (
