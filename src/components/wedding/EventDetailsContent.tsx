@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { MapPin } from "lucide-react";
 import type { ReactNode } from "react";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import type { Variants } from "framer-motion";
 import type { EventDetailsViewportMode, WeddingEventDetailsEditorConfig } from "@/lib/wedding/event-details-types";
@@ -322,6 +322,19 @@ export function EventDetailsContent({
   const compact = mode === "preview";
   const mobilePreview = compact && viewport === "mobile";
   const [selectedColorId, setSelectedColorId] = useState<DressColorId | null>(null);
+  const ringsVideoRef = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    if (ringsVideoRef.current) {
+      ringsVideoRef.current.load();
+      const playPromise = ringsVideoRef.current.play();
+      if (playPromise !== undefined) {
+        playPromise.catch((error) => {
+          console.warn("Autoplay was prevented or video failed to load:", error);
+        });
+      }
+    }
+  }, []);
   const content = config.content;
   const churchDateParsed = parseChurchDate(content.churchDate);
   const banquetDateParsed = {
@@ -485,6 +498,7 @@ export function EventDetailsContent({
             {/* Video of wedding rings in the middle */}
             <div className="w-[7.2rem] h-[7.2rem] sm:w-[9.2rem] sm:h-[9.2rem] relative flex items-center justify-center overflow-visible select-none mt-[-2.2rem] mb-[-2.2rem] sm:mt-[-2.6rem] sm:mb-[-2.6rem] pointer-events-none z-10">
               <video
+                ref={ringsVideoRef}
                 autoPlay
                 loop
                 muted
