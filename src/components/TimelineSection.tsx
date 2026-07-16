@@ -1,39 +1,8 @@
 "use client";
 
-import type { CSSProperties } from "react";
 import { motion } from "framer-motion";
 import { SectionMediaLayers } from "@/components/SectionMediaLayers";
 import type { WeddingConfig } from "@/lib/site-settings";
-
-type TimelineNode = {
-  time: string;
-  title: string;
-  x: string;
-  y: string;
-  rotate: string;
-  width: string;
-};
-
-const desktopTimelineNodes = [
-  { x: "29%", y: "7.5%",  rotate: "-1.2deg", width: "17rem" },
-  { x: "71%", y: "22.5%", rotate: "1deg",    width: "17rem" },
-  { x: "27%", y: "40%",   rotate: "-1deg",   width: "17rem" },
-  { x: "69%", y: "57%",   rotate: "1.1deg",  width: "17rem" },
-  { x: "31%", y: "74.5%", rotate: "-0.9deg", width: "17rem" },
-  { x: "67%", y: "91%",   rotate: "1deg",    width: "17rem" },
-];
-
-function buildTimelineNode(item: WeddingConfig["timeline"][number], index: number): TimelineNode {
-  const fallback = desktopTimelineNodes[index % desktopTimelineNodes.length];
-  return {
-    time: item.time,
-    title: item.title,
-    x: fallback.x,
-    y: fallback.y,
-    rotate: fallback.rotate,
-    width: fallback.width,
-  };
-}
 
 function getTimelineIconPath(title: string): string | null {
   const t = title.toLowerCase();
@@ -47,10 +16,8 @@ function getTimelineIconPath(title: string): string | null {
 }
 
 export function TimelineSection({ config }: { config: WeddingConfig }) {
-  const nodes = config.timeline.map(buildTimelineNode);
-
   return (
-    <section id="timeline" className="hidden md:block timeline-garden-section cinematic-stage relative overflow-hidden px-5 pt-14 pb-24 text-ink sm:px-8 lg:pt-16 lg:pb-32">
+    <section id="timeline" className="timeline-garden-section cinematic-stage relative overflow-hidden px-5 pt-14 pb-24 text-ink sm:px-8 lg:pt-16 lg:pb-32">
       <SectionMediaLayers config={config} section="timeline" className="timeline-garden-media opacity-[0.08]" />
       <div aria-hidden="true" className="paper-grain-luxury timeline-garden-grain opacity-15" />
 
@@ -66,59 +33,52 @@ export function TimelineSection({ config }: { config: WeddingConfig }) {
           )}
         </div>
 
-        <div className="timeline-garden-path-scene">
-          <video
-            className="timeline-garden-path-video"
-            playsInline
-            muted
-            loop
-            autoPlay
-            src="/assets/timeline-garden-path.mp4"
-            poster="/assets/timeline-garden-path-desktop.webp"
-            style={{ objectFit: "contain" }}
-          />
-          <img
-            className="timeline-garden-path-image"
-            src="/assets/timeline-garden-path-desktop.webp"
-            alt="Winding road"
-            style={{ objectFit: "contain" }}
-          />
+        <div className="timeline-garden-path-scene w-full max-w-[26rem] sm:max-w-[28rem] md:max-w-[30rem] mx-auto min-h-[28rem] sm:min-h-[32rem] overflow-visible relative">
+          {/* Winding road */}
+          <div className="timeline-garden-path-image opacity-[0.55] absolute inset-0">
+            <div
+              aria-hidden="true"
+              className="absolute inset-0"
+              style={{
+                backgroundImage: "url('/assets/timeline-garden-path-desktop.webp')",
+                backgroundPosition: "center",
+                backgroundRepeat: "no-repeat",
+                backgroundSize: "100% 100%",
+              }}
+            />
+          </div>
 
-          <ol className="timeline-garden-list">
-            {nodes.map((node, index) => {
-              return (
-                <motion.li
-                  key={`${node.time}-${node.title}`}
-                  initial={{ opacity: 0, y: 30 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true, margin: "-15% 0px -15% 0px" }}
-                  transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1], delay: 0.1 }}
-                  className="timeline-garden-node"
-                  style={
-                    {
-                      "--node-x": node.x,
-                      "--node-y": node.y,
-                      "--node-rot": node.rotate,
-                      "--node-width": node.width,
-                    } as CSSProperties
-                  }
-                >
-                  <div className="timeline-garden-card">
-                    <div className="timeline-garden-text">
-                      <p className="timeline-garden-time">{node.time}</p>
-                      <h3 className="font-serif font-semibold text-[#2f3532] leading-snug">{node.title}</h3>
+          <ol className="timeline-garden-list relative z-10 grid justify-items-center w-full">
+            {config.timeline.map((item, index) => (
+              <motion.li
+                key={index}
+                initial={{ opacity: 0, y: 15 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-50px" }}
+                transition={{ duration: 0.5, delay: index * 0.05 }}
+                className="timeline-garden-node !w-[47%] !max-w-[11.2rem] sm:!max-w-[13rem] md:!max-w-[15rem] !ml-0 !mr-0"
+              >
+                <div className="timeline-garden-card !flex !flex-row !items-center !justify-center !py-1.5 !px-2 shadow-[0_6px_16px_rgba(63,70,66,0.07)] bg-[#fdfbf7]/95 border border-[#b4975a]/25 backdrop-blur-[8px] rounded-xl w-full">
+                  <div className="flex flex-row items-center justify-center gap-1.5 w-full">
+                    <div className="flex flex-col items-center justify-center text-center min-w-0 flex-1">
+                      <p className="timeline-garden-time !text-[0.82rem] sm:!text-[0.95rem] !font-bold text-[#8d713a] tracking-wider mb-0.5 leading-none text-center w-full">
+                        {item.time}
+                      </p>
+                      <h3 className="!text-[0.82rem] sm:!text-[0.95rem] !font-semibold text-[#2f3532] font-serif leading-tight text-center w-full">
+                        {item.title}
+                      </h3>
                     </div>
-                    {getTimelineIconPath(node.title) && (
+                    {getTimelineIconPath(item.title) && (
                       <img
-                        src={getTimelineIconPath(node.title) || ""}
-                        alt={node.title}
-                        className="timeline-garden-icon"
+                        src={getTimelineIconPath(item.title) || ""}
+                        alt={item.title}
+                        className="w-6.5 h-6.5 sm:w-8 sm:h-8 object-contain flex-shrink-0"
                       />
                     )}
                   </div>
-                </motion.li>
-              );
-            })}
+                </div>
+              </motion.li>
+            ))}
           </ol>
         </div>
       </div>

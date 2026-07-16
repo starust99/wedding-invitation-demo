@@ -664,57 +664,6 @@ export function EventDetailsContent({
             />
           </div>
         </motion.div>
-
-        {/* Standalone Mobile Timeline Section */}
-        <motion.div
-          variants={cardVariant}
-          className="flex md:hidden flex-col gap-3 px-1 w-full pt-8 pb-4 relative z-10"
-        >
-          <h3 className="font-serif text-[1.12rem] font-bold gold-foil-text uppercase text-center mb-5 leading-tight">
-            Lịch Trình Tiệc
-          </h3>
-          
-          <div className="timeline-garden-path-scene w-full max-w-[26rem] mx-auto min-h-[28rem] overflow-visible relative">
-            {/* Winding road */}
-            <div
-              className="timeline-garden-path-image opacity-[0.55]"
-            >
-              <div
-                aria-hidden="true"
-                className="absolute inset-0"
-                style={{ backgroundImage: "url('/assets/timeline-garden-path-desktop.webp')", backgroundPosition: "center", backgroundRepeat: "no-repeat", backgroundSize: "100% 100%" }}
-              />
-            </div>
-            <ol className="timeline-garden-list relative z-10 grid justify-items-center w-full">
-              {(publicData?.timeline || defaultTimelineFallback).map((item, index) => (
-                <motion.li
-                  key={index}
-                  initial={{ opacity: 0, y: 15 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true, margin: "-50px" }}
-                  transition={{ duration: 0.5 }}
-                  className="timeline-garden-node !w-[47%] !max-w-[11.2rem] !ml-0 !mr-0"
-                >
-                  <div className="timeline-garden-card !flex !flex-row !items-center !justify-center !py-1.5 !px-2 shadow-[0_6px_16px_rgba(63,70,66,0.07)] bg-[#fdfbf7]/95 border border-[#b4975a]/25 backdrop-blur-[8px] rounded-xl w-full">
-                    <div className="flex flex-row items-center justify-center gap-1.5 w-full">
-                      <div className="flex flex-col items-center justify-center text-center min-w-0 flex-1">
-                        <p className="timeline-garden-time !text-[0.82rem] !font-bold text-[#8d713a] tracking-wider mb-0.5 leading-none text-center w-full">{item.time}</p>
-                        <h3 className="!text-[0.82rem] !font-semibold text-[#2f3532] font-serif leading-tight text-center w-full">{item.title}</h3>
-                      </div>
-                      {getTimelineIconPath(item.title) && (
-                        <img
-                          src={getTimelineIconPath(item.title) || ""}
-                          alt={item.title}
-                          className="w-6.5 h-6.5 object-contain flex-shrink-0"
-                        />
-                      )}
-                    </div>
-                  </div>
-                </motion.li>
-              ))}
-            </ol>
-          </div>
-        </motion.div>
       </motion.div>
 
     </div>
