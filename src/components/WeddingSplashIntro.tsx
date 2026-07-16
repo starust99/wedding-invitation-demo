@@ -90,7 +90,7 @@ export function WeddingSplashIntro({
       // Active opening splash video
       isMobile ? "/assets/wedding/ui/splash-video-mobile.mp4" : "/assets/wedding/ui/splash-video.mp4",
       // Active rings video
-      isSafari ? "/assets/wedding-rings.mov?v=5" : "/assets/wedding-rings.webm?v=5",
+      isSafari ? "/assets/wedding-rings.mov?v=6" : "/assets/wedding-rings.webm?v=6",
       // Background music
       "/assets/audio/co-chut-ngot-ngao.mp3"
     ];
