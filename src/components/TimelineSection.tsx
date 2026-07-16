@@ -22,7 +22,7 @@ export function TimelineSection({ config }: { config: WeddingConfig }) {
       <div aria-hidden="true" className="paper-grain-luxury timeline-garden-grain opacity-15" />
 
       <div className="timeline-garden-shell mx-auto max-w-7xl">
-        <div className="timeline-garden-intro grid justify-items-center gap-5 text-center mb-10">
+        <div className="timeline-garden-intro grid justify-items-center gap-5 text-center mb-3">
           <h3 className="font-serif text-[1.12rem] sm:text-[1.25rem] md:text-[1.38rem] font-bold gold-foil-text uppercase leading-tight mt-0.5 mb-1.5">
             {config.sections.timeline.eyebrow}
           </h3>
@@ -33,7 +33,7 @@ export function TimelineSection({ config }: { config: WeddingConfig }) {
           )}
         </div>
 
-        <div className="timeline-garden-path-scene w-full max-w-[26rem] sm:max-w-[28rem] md:max-w-[30rem] mx-auto min-h-[28rem] sm:min-h-[32rem] overflow-visible relative">
+        <div className="timeline-garden-path-scene w-full max-w-[26rem] sm:max-w-[28rem] md:max-w-[30rem] mx-auto -mt-6 sm:-mt-8 md:-mt-10 min-h-[28rem] sm:min-h-[32rem] overflow-visible relative">
           {/* Winding road */}
           <div className="timeline-garden-path-image opacity-[0.55] absolute inset-0">
             <div

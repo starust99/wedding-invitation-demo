@@ -2104,7 +2104,7 @@ textarea {
 
 .timeline-garden-path-image {
   position: absolute;
-  inset: -2.2rem 8% -2.4rem;
+  inset: -6.5rem 8% -2.4rem;
   z-index: 1;
   pointer-events: none;
   background-image: url("/assets/timeline-garden-path-mobile.png");
@@ -2232,7 +2232,7 @@ textarea {
   .timeline-garden-path-video,
   .timeline-garden-path-image {
     position: absolute;
-    inset: -2.2rem 8% -2.4rem;
+    inset: -6.5rem 8% -2.4rem;
     z-index: 1;
     pointer-events: none;
     background-image: url("/assets/timeline-garden-path-desktop.webp");
