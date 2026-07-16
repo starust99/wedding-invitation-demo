@@ -80,6 +80,35 @@ export function WeddingSplashIntro({
       "/assets/hero-invite-heading-v5.png",
       "/assets/hero-corner-left-v2.png",
       "/assets/hero-corner-right-v3.png",
+      // Section decoration dividers and background ornaments
+      "/assets/corner_ornament.png",
+      "/assets/divider_family_title.png",
+      "/assets/divider_family_vertical.png",
+      "/assets/divider_title_marriage.png",
+      "/assets/divider_title_party.png",
+      "/assets/divider_title_church.png",
+      "/assets/music-icon.png",
+      // Dress code theme and map graphics
+      "/assets/dresscode-theme-v4.png?v=9",
+      "/assets/venue-map-poster.webp",
+      // Timeline path graphics
+      "/assets/timeline-garden-path-mobile.png",
+      "/assets/timeline-garden-path-desktop.webp",
+      // Timeline item icons
+      "/assets/wedding/timeline/icon-1730.png",
+      "/assets/wedding/timeline/icon-1900.png",
+      "/assets/wedding/timeline/icon-1910.png",
+      "/assets/wedding/timeline/icon-1920.png",
+      "/assets/wedding/timeline/icon-2000.png",
+      "/assets/wedding/timeline/icon-2050.png",
+      // Dress code color swatch images
+      "/assets/dresscode-pink-v3.jpg?v=8",
+      "/assets/dresscode-blue-v3.jpg?v=8",
+      "/assets/dresscode-yellow-v3.jpg?v=8",
+      "/assets/dresscode-green-v4.png?v=8",
+      "/assets/dresscode-cream-v3.jpg?v=8",
+      "/assets/dresscode-beige-v3.jpg?v=8",
+      "/assets/dresscode-brown-v3.jpg?v=8",
     ];
 
     const isMobile = window.innerWidth < 768;
