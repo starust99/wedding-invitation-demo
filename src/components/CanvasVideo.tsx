@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 type CanvasVideoProps = {
   src?: string;
@@ -16,6 +16,8 @@ export function CanvasVideo({ src, poster, isPlaying, onEnded, className = "", o
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const playPromiseRef = useRef<Promise<void> | null>(null);
+  const [hasStartedPlaying, setHasStartedPlaying] = useState(false);
+  const hasStartedRef = useRef(false);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -29,6 +31,8 @@ export function CanvasVideo({ src, poster, isPlaying, onEnded, className = "", o
         });
       }
     } else {
+      hasStartedRef.current = false;
+      setHasStartedPlaying(false);
       if (!video.paused) {
         if (playPromiseRef.current !== undefined) {
           playPromiseRef.current?.then(() => {
@@ -56,6 +60,11 @@ export function CanvasVideo({ src, poster, isPlaying, onEnded, className = "", o
         if (canvas.width !== video.videoWidth) canvas.width = video.videoWidth;
         if (canvas.height !== video.videoHeight) canvas.height = video.videoHeight;
         ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        
+        if (video.currentTime > 0 && !hasStartedRef.current) {
+          hasStartedRef.current = true;
+          setHasStartedPlaying(true);
+        }
       }
       animationId = requestAnimationFrame(drawFrame);
     };
@@ -85,6 +94,8 @@ export function CanvasVideo({ src, poster, isPlaying, onEnded, className = "", o
     };
   }, []);
 
+  const showPoster = poster && !hasStartedPlaying;
+
   return (
     <div className={`relative overflow-hidden ${className}`}>
       {/* Invisible video element */}
@@ -99,13 +110,18 @@ export function CanvasVideo({ src, poster, isPlaying, onEnded, className = "", o
         className="absolute w-[1px] h-[1px] opacity-0 pointer-events-none -z-10"
         preload={preload}
       />
-      {poster && !isPlaying && (
+      {poster && (
         // eslint-disable-next-line @next/next/no-img-element
-        <img src={poster} alt="" className="absolute inset-0 w-full h-full" style={{ objectFit }} />
+        <img 
+          src={poster} 
+          alt="" 
+          className={`absolute inset-0 w-full h-full transition-opacity duration-300 pointer-events-none ${showPoster ? 'opacity-100 z-10' : 'opacity-0 -z-10'}`} 
+          style={{ objectFit }} 
+        />
       )}
       <canvas
         ref={canvasRef}
-        className={`w-full h-full transition-opacity duration-300 ${!isPlaying && poster ? 'opacity-0' : 'opacity-100'}`}
+        className="w-full h-full"
         style={{ objectFit }}
       />
     </div>
