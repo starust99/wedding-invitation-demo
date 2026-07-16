@@ -82,8 +82,21 @@ export function WeddingSplashIntro({
       "/assets/hero-corner-right-v3.png",
     ];
 
+    const isMobile = window.innerWidth < 768;
+    const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent) || 
+                     /iPad|iPhone|iPod/.test(navigator.userAgent);
+
+    const mediaToLoad = [
+      // Active opening splash video
+      isMobile ? "/assets/wedding/ui/splash-video-mobile.mp4" : "/assets/wedding/ui/splash-video.mp4",
+      // Active rings video
+      isSafari ? "/assets/wedding-rings.mov?v=5" : "/assets/wedding-rings.webm?v=5",
+      // Background music
+      "/assets/audio/co-chut-ngot-ngao.mp3"
+    ];
+
     let loadedCount = 0;
-    const totalAssets = imagesToLoad.length;
+    const totalAssets = imagesToLoad.length + mediaToLoad.length;
 
     if (totalAssets === 0) {
       setPreloading(false);
@@ -109,11 +122,19 @@ export function WeddingSplashIntro({
       }
     };
 
+    // Load images
     imagesToLoad.forEach((src) => {
       const img = new Image();
       img.src = src;
       img.onload = checkComplete;
       img.onerror = checkComplete;
+    });
+
+    // Load media (videos & audio) via fetch to populate browser HTTP cache
+    mediaToLoad.forEach((src) => {
+      fetch(src)
+        .then(() => checkComplete())
+        .catch(() => checkComplete()); // fallback so it doesn't block the site if request fails
     });
 
     return () => {
@@ -195,7 +216,7 @@ export function WeddingSplashIntro({
               onEnded={closeIntro}
               poster="/assets/wedding/ui/splash-closed.png"
               src="/assets/wedding/ui/splash-video.mp4"
-              preload={viewport === "desktop" ? "auto" : "none"}
+              preload="auto"
             />
             {/* Mobile Splash Video */}
             <CanvasVideo 
@@ -204,7 +225,7 @@ export function WeddingSplashIntro({
               onEnded={closeIntro}
               poster="/assets/wedding/ui/splash-poster-mobile.jpg"
               src="/assets/wedding/ui/splash-video-mobile.mp4"
-              preload={viewport === "mobile" ? "auto" : "none"}
+              preload="auto"
             />
           </div>
 

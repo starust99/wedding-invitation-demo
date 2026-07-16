@@ -61,7 +61,7 @@ export function CanvasVideo({ src, poster, isPlaying, onEnded, className = "", o
         if (canvas.height !== video.videoHeight) canvas.height = video.videoHeight;
         ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
         
-        if (video.currentTime > 0 && !hasStartedRef.current) {
+        if (!hasStartedRef.current) {
           hasStartedRef.current = true;
           setHasStartedPlaying(true);
         }
