@@ -675,18 +675,14 @@ export function EventDetailsContent({
             Lịch Trình Tiệc
           </h3>
           
-          <div className="timeline-garden-path-scene w-full max-w-[28rem] sm:max-w-[34rem] md:max-w-[38rem] mx-auto min-h-[28rem] overflow-visible relative">
+          <div className="timeline-garden-path-scene w-full max-w-[24rem] sm:max-w-[28rem] md:max-w-[32rem] mx-auto min-h-[35rem] sm:min-h-[42rem] md:min-h-[48rem] overflow-visible relative">
             {/* Winding road */}
             <div
-              className="timeline-garden-path-image opacity-[0.55]"
-            >
-              <div
-                aria-hidden="true"
-                className="absolute inset-0"
-                style={{ backgroundImage: "url('/assets/timeline-garden-path-desktop.webp')", backgroundPosition: "center", backgroundRepeat: "no-repeat", backgroundSize: "100% 100%" }}
-              />
-            </div>
-            <ol className="timeline-garden-list-zigzag relative z-10 grid w-full gap-4 sm:gap-5 px-1 list-none m-0 p-0">
+              aria-hidden="true"
+              className="absolute inset-0 pointer-events-none opacity-[0.55]"
+              style={{ backgroundImage: "url('/assets/timeline-garden-path-desktop.webp')", backgroundPosition: "center", backgroundRepeat: "no-repeat", backgroundSize: "100% 100%" }}
+            />
+            <ol className="timeline-garden-list-zigzag relative z-10 grid w-full gap-6 sm:gap-10 md:gap-14 px-1 list-none m-0 p-0">
               {(publicData?.timeline || defaultTimelineFallback).map((item, index) => {
                 const isRight = index % 2 === 0;
                 return (
@@ -698,7 +694,7 @@ export function EventDetailsContent({
                     transition={{ duration: 0.5, delay: index * 0.05 }}
                     className={`timeline-garden-node-zigzag !m-0 flex w-full relative ${isRight ? "justify-end" : "justify-start"}`}
                   >
-                    <div className="timeline-garden-card !py-3 !pl-4 !pr-12 !gap-1 shadow-[0_6px_16px_rgba(63,70,66,0.07)] bg-[#fdfbf7]/95 border border-[#b4975a]/25 backdrop-blur-[8px] rounded-2xl relative overflow-hidden w-[62%] sm:w-[58%] md:w-[54%] min-w-[11rem] flex flex-col items-start justify-center text-left">
+                    <div className="timeline-garden-card !py-3 !pl-4 !pr-12 !gap-1 shadow-[0_6px_16px_rgba(63,70,66,0.07)] bg-[#fdfbf7]/95 border border-[#b4975a]/25 backdrop-blur-[8px] rounded-2xl relative overflow-hidden w-[45%] sm:w-[42%] md:w-[38%] min-w-[11rem] flex flex-col items-start justify-center text-left">
                       <div className="flex flex-col items-start justify-center w-full min-w-0">
                         <p className="timeline-garden-time !text-[1rem] !font-bold text-[#8d713a] tracking-wider mb-0.5 leading-none text-left">{item.time}</p>
                         <h3 className="!text-[1.05rem] !font-semibold text-[#2f3532] font-serif leading-snug text-left">{item.title}</h3>
