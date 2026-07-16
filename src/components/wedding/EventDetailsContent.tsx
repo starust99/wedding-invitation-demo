@@ -333,7 +333,7 @@ export function EventDetailsContent({
         const playPromise = video.play();
         if (playPromise !== undefined) {
           playPromise.catch((error) => {
-            console.warn("Autoplay failed on resume:", error);
+            // Silence warning since background policy pause is expected behavior
           });
         }
       }
@@ -343,26 +343,52 @@ export function EventDetailsContent({
     video.load();
     playVideo();
 
-    // Listen to tab visibility changes (locking/unlocking screen or backgrounding)
+    // 1. Visibility change listener (tab switcher / lock screen)
     const handleVisibilityChange = () => {
       if (document.visibilityState === "visible") {
         playVideo();
       }
     };
 
-    // Listen to focus & pageshow events (additional fallbacks for backgrounding)
+    // 2. Window focus & pageshow listener (app switcher / wake up)
     const handleFocus = () => {
       playVideo();
     };
 
+    // 3. Scroll listener (play backup when user interacting with the page)
+    const handleScroll = () => {
+      if (document.visibilityState === "visible") {
+        playVideo();
+      }
+    };
+
+    // 4. Manual loop backup (in case standard HTML5 loop attribute behaves inconsistently)
+    const handleEnded = () => {
+      playVideo();
+    };
+
+    // 5. Polling recovery interval (actively check and force play if paused every 800ms)
+    const intervalId = setInterval(() => {
+      if (document.visibilityState === "visible" && video.paused) {
+        playVideo();
+      }
+    }, 800);
+
     document.addEventListener("visibilitychange", handleVisibilityChange);
     window.addEventListener("focus", handleFocus);
     window.addEventListener("pageshow", handleFocus);
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    video.addEventListener("ended", handleEnded);
 
     return () => {
+      clearInterval(intervalId);
       document.removeEventListener("visibilitychange", handleVisibilityChange);
       window.removeEventListener("focus", handleFocus);
       window.removeEventListener("pageshow", handleFocus);
+      window.removeEventListener("scroll", handleScroll);
+      if (video) {
+        video.removeEventListener("ended", handleEnded);
+      }
     };
   }, []);
   const content = config.content;
