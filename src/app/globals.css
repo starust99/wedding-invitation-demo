@@ -2250,36 +2250,18 @@ textarea {
     position: absolute;
     left: var(--node-x);
     top: var(--node-y);
-    width: min(var(--node-width), calc(50% - 3rem));
-    translate: -50% -50%;
+    width: min(var(--node-width), calc(50% - 3.8rem));
+    translate: calc(-100% - 2.6rem) -50%;
     rotate: var(--node-rot);
   }
 
   .timeline-garden-node:nth-child(even) {
     margin-left: 0;
-    width: min(var(--node-width), calc(50% - 3rem));
+    width: min(var(--node-width), calc(50% - 3.8rem));
+    translate: 2.6rem -50%;
   }
 
-  .timeline-garden-node::before {
-    content: "";
-    position: absolute;
-    top: 1.35rem;
-    width: 0.58rem;
-    height: 0.58rem;
-    border-radius: 999px;
-    background: rgba(212, 175, 55, 0.54);
-    box-shadow:
-      0 0 0 0.35rem rgba(255, 255, 255, 0.34),
-      0 8px 20px rgba(63, 70, 66, 0.1);
-  }
 
-  .timeline-garden-node:nth-child(odd)::before {
-    right: -0.35rem;
-  }
-
-  .timeline-garden-node:nth-child(even)::before {
-    left: -0.35rem;
-  }
 }
 
 @media (min-width: 768px) and (max-width: 1023px) {
@@ -4128,5 +4110,17 @@ html.splash-skipped body {
   color: #3f4642 !important;
   text-shadow: none !important;
 }
+
+/* Tối ưu hóa hiển thị video cặp nhẫn khử răng cưa và tăng độ nét */
+.rings-video-optimize {
+  will-change: transform;
+  transform: translate3d(0, 0, 0) scale(1.001);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  
+  /* Cải thiện chất lượng lọc khi trình duyệt thực hiện thu nhỏ (downscale) */
+  image-rendering: -webkit-optimize-contrast;
+}
+
 
 

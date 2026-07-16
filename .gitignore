@@ -55,3 +55,10 @@ scripts/bin/harness-cli
 scripts/bin/harness-cli.exe
 wedding.db
 
+# agent metadata and temporary workspace files
+.agents/
+skills-lock.json
+*.xlsx
+~$*
+
+

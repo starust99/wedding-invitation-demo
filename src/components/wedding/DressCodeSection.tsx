@@ -37,7 +37,7 @@ const DRESS_COLORS: DressCodeColor[] = [
     id: "green",
     name: "Xanh lá",
     hex: "#B8C6A3",
-    imgSrc: "/assets/dresscode-green-v3.jpg",
+    imgSrc: "/assets/dresscode-green-v4.png",
   },
   {
     id: "cream",
@@ -75,7 +75,7 @@ export function DressCodeSection({
   // Preload all dress code images to make color transitions instantaneous
   useEffect(() => {
     const imagesToPreload = [
-      "/assets/dresscode-theme-v3.jpg?v=8",
+      "/assets/dresscode-theme-v4.png?v=9",
       ...DRESS_COLORS.map((c) => `${c.imgSrc}?v=8`),
     ];
     imagesToPreload.forEach((src) => {
@@ -110,20 +110,23 @@ export function DressCodeSection({
       </p>
 
       {/* Top Header */}
-      <div className="flex flex-col items-center text-center w-full px-4 mb-2">
-        <div className="mb-2 select-none pointer-events-none" aria-hidden="true">
-          <img
-            src="/assets/dresscode-bow-icon.png"
-            alt="Bow tie icon"
-            className="w-12 h-auto object-contain"
-          />
-        </div>
-
-        <h3 className="font-serif text-[1.12rem] sm:text-[1.25rem] md:text-[1.38rem] font-bold gold-foil-text mt-0.5 mb-1.5 leading-tight">
+      <div className="flex flex-col items-center text-center w-full px-4 mb-4">
+        {/* "TRANG PHỤC CHỦ ĐỀ" - Sans-serif, uppercase, wide tracking, elegant taupe color */}
+        <h3 className="font-sans text-[0.88rem] sm:text-[0.94rem] md:text-[1rem] font-bold tracking-[0.22em] text-[#7d7065] uppercase leading-none mt-2 mb-3">
           TRANG PHỤC CHỦ ĐỀ
         </h3>
 
-        <span className="font-serif text-[0.8rem] sm:text-[0.85rem] md:text-[0.9rem] tracking-[0.15em] text-[#7d7065] font-bold uppercase leading-none mb-3.5 block">
+        {/* Custom Gold Star Divider */}
+        <div className="flex items-center justify-center gap-3.5 w-full max-w-[11rem] sm:max-w-[13rem] mb-4.5 select-none pointer-events-none" aria-hidden="true">
+          <div className="h-[1px] flex-grow bg-[#b4975a]/35" />
+          <svg viewBox="0 0 24 24" className="w-[11px] h-[11px] sm:w-3 sm:h-3 fill-[#b4975a] flex-shrink-0">
+            <path d="M12 2Q12 12 22 12Q12 12 12 22Q12 12 2 12Q12 12 12 2" />
+          </svg>
+          <div className="h-[1px] flex-grow bg-[#b4975a]/35" />
+        </div>
+
+        {/* "{title}" (Sắc màu vườn xuân) - Serif, italic, larger, elegant */}
+        <span className="font-serif italic text-[1.65rem] sm:text-[1.9rem] md:text-[2.1rem] font-medium text-[#3f4642] leading-tight mb-4.5 block">
           {title}
         </span>
 
@@ -146,7 +149,7 @@ export function DressCodeSection({
                 className="absolute inset-0 w-full h-full"
               >
                 <Image
-                  src={selectedColor ? `${selectedColor.imgSrc}?v=8` : "/assets/dresscode-theme-v3.jpg?v=8"}
+                  src={selectedColor ? `${selectedColor.imgSrc}?v=8` : "/assets/dresscode-theme-v4.png?v=9"}
                   alt={selectedColor ? `Gợi ý phối đồ màu ${selectedColor.name}` : "Gợi ý phối đồ theo bảng màu vườn xuân"}
                   fill
                   unoptimized

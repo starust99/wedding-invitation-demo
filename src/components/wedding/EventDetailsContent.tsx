@@ -39,11 +39,11 @@ type EventDetailsContentProps = {
 
 const defaultTimelineFallback: EventDetailsTimelineItem[] = [
   { time: "17:30", title: "Đón khách", description: "Gia đình đón khách, chụp ảnh lưu niệm và mời khách ổn định chỗ ngồi." },
-  { time: "18:00", title: "Nghi thức", description: "Khoảnh khắc chính của buổi lễ, với sự chứng kiến của gia đình và khách quý." },
-  { time: "18:30", title: "Nâng ly", description: "Cùng nâng ly chúc mừng ngày vui của cô dâu chú rể." },
-  { time: "19:30", title: "Dùng tiệc", description: "Dùng bữa tối ấm cúng trong không gian ngoài trời của Terracotta." },
-  { time: "20:00", title: "Giao lưu", description: "Âm nhạc, trò chuyện và những khoảnh khắc thân tình trong buổi tối." },
-  { time: "21:00", title: "Lời cảm ơn & chụp hình", description: "Gia đình gửi lời cảm ơn và chụp ảnh cùng khách mời." },
+  { time: "19:00", title: "Khai mạc", description: "Bắt đầu buổi tiệc tối ấm cúng." },
+  { time: "19:10", title: "Nghi lễ", description: "Các nghi thức cưới chính thức của Nhật & Phương." },
+  { time: "19:20", title: "Nâng ly khai tiệc", description: "Cùng nâng ly và dùng bữa tối ấm cúng." },
+  { time: "20:00", title: "Giao lưu", description: "Âm nhạc, trò chuyện và những khoảnh khắc thân tình." },
+  { time: "20:50", title: "Chụp ảnh kỷ niệm", description: "Chụp hình lưu niệm cùng cô dâu chú rể." },
 ];
 
 const defaultColorsFallback = ["#F5C7C7", "#BCD4DE", "#FDF6D6", "#C2D3C2", "#FAF5EB", "#E5D3C0", "#8C7A6B"];
@@ -213,6 +213,18 @@ function DateDisplayStack({ dateParsed, lunarText }: { dateParsed: { day: string
   );
 }
 
+function getTimelineIconPath(title: string): string | null {
+  const t = title.toLowerCase();
+  if (t.includes("đón khách")) return "/assets/wedding/timeline/icon-1730.png";
+  if (t.includes("khai mạc")) return "/assets/wedding/timeline/icon-1900.png";
+  if (t.includes("nghi lễ") || t.includes("nghi thức")) return "/assets/wedding/timeline/icon-1910.png";
+  if (t.includes("nâng ly") || t.includes("khai tiệc") || t.includes("dùng tiệc")) return "/assets/wedding/timeline/icon-1920.png";
+  if (t.includes("giao lưu")) return "/assets/wedding/timeline/icon-2000.png";
+  if (t.includes("chụp ảnh") || t.includes("chụp hình") || t.includes("cảm ơn") || t.includes("kỷ niệm")) return "/assets/wedding/timeline/icon-2050.png";
+  return null;
+}
+
+
 
 const staggerContainer: Variants = {
   hidden: { opacity: 0 },
@@ -323,7 +335,7 @@ export function EventDetailsContent({
   const venueLocation = publicData?.venueLocation || formatSchedule(publicData?.dateLabel || content.ceremonyTime, publicData?.welcomeTime || content.ceremonyLocation, content.mapText);
   const dressCodeTitle = publicData?.dressCodeTitle || content.dressCodeLabel;
   const dressCodeNote = publicData?.dressCodeNote || content.dressCodeText;
-  const dressCodeImageSrc = publicData?.dressCodeImageSrc || "/assets/dresscode-theme-v2.jpg";
+  const dressCodeImageSrc = publicData?.dressCodeImageSrc || "/assets/dresscode-theme-v4.png";
 
   return (
     <div
@@ -459,13 +471,42 @@ export function EventDetailsContent({
             </p>
           </motion.div>
 
-          <motion.div variants={familyItemVariant} className="w-full flex flex-col items-center mt-4 sm:mt-5 select-none pointer-events-none">
-            <img 
-              src="/assets/event-details-names-v4.png" 
-              alt="Augustino Trần Long Nhật & Teresa Nguyễn Anh Phương" 
-              className="w-full max-w-[15.5rem] sm:max-w-[21rem] h-auto object-contain names-image-color"
-              draggable={false}
-            />
+          <motion.div variants={familyItemVariant} className="w-full flex flex-col items-center justify-center mt-3 sm:mt-4 select-none">
+            {/* Top Name (Augustino Trần Long Nhật) - Cropped from original image */}
+            <div className="w-full max-w-[18.5rem] sm:max-w-[21rem] aspect-[929/250] overflow-hidden relative">
+              <img 
+                src="/assets/event-details-names-v4-blank.png" 
+                alt="Augustino Trần Long Nhật" 
+                className="absolute top-0 left-0 w-full h-auto names-image-color"
+                draggable={false}
+              />
+            </div>
+            
+            {/* Video of wedding rings in the middle */}
+            <div className="w-[7.2rem] h-[7.2rem] sm:w-[9.2rem] sm:h-[9.2rem] relative flex items-center justify-center overflow-visible select-none mt-[-2.2rem] mb-[-2.2rem] sm:mt-[-2.6rem] sm:mb-[-2.6rem] pointer-events-none z-10">
+              <video
+                autoPlay
+                loop
+                muted
+                playsInline
+                className="w-full h-full object-contain rings-video-optimize"
+              >
+                {/* Safari/iOS: HEVC with Alpha */}
+                <source src="/assets/wedding-rings.mov?v=4" type="video/quicktime; codecs=hvc1" />
+                {/* Chrome/Android/Firefox: VP9 with Alpha */}
+                <source src="/assets/wedding-rings.webm?v=4" type="video/webm; codecs=vp9" />
+              </video>
+            </div>
+
+            {/* Bottom Name (Teresa Nguyễn Anh Phương) - Cropped from original image */}
+            <div className="w-full max-w-[18.5rem] sm:max-w-[21rem] aspect-[929/250] overflow-hidden relative">
+              <img 
+                src="/assets/event-details-names-v4-blank.png" 
+                alt="Teresa Nguyễn Anh Phương" 
+                className="absolute bottom-0 left-0 w-full h-auto names-image-color"
+                draggable={false}
+              />
+            </div>
           </motion.div>
         </div>
       </motion.div>
@@ -651,11 +692,22 @@ export function EventDetailsContent({
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true, margin: "-50px" }}
                   transition={{ duration: 0.5 }}
-                  className="timeline-garden-node !w-[47%] !max-w-[9.2rem] !ml-0 !mr-0"
+                  className="timeline-garden-node !w-[47%] !max-w-[11.2rem] !ml-0 !mr-0"
                 >
-                  <div className="timeline-garden-card !py-2.5 !px-3 !gap-1 shadow-[0_6px_16px_rgba(63,70,66,0.07)] text-center flex flex-col items-center justify-center bg-[#fdfbf7]/95 border border-[#b4975a]/25 backdrop-blur-[8px] rounded-xl">
-                    <p className="timeline-garden-time !text-[0.98rem] !font-bold text-[#8d713a] tracking-wider mb-0.5">{item.time}</p>
-                    <h3 className="!text-[1.02rem] !font-semibold text-[#2f3532] font-serif leading-snug">{item.title}</h3>
+                  <div className="timeline-garden-card !flex !flex-row !items-center !justify-center !py-1.5 !px-2 shadow-[0_6px_16px_rgba(63,70,66,0.07)] bg-[#fdfbf7]/95 border border-[#b4975a]/25 backdrop-blur-[8px] rounded-xl w-full">
+                    <div className="flex flex-row items-center justify-center gap-1.5 w-full">
+                      <div className="flex flex-col items-center justify-center text-center min-w-0 flex-1">
+                        <p className="timeline-garden-time !text-[0.82rem] !font-bold text-[#8d713a] tracking-wider mb-0.5 leading-none text-center w-full">{item.time}</p>
+                        <h3 className="!text-[0.82rem] !font-semibold text-[#2f3532] font-serif leading-tight text-center w-full">{item.title}</h3>
+                      </div>
+                      {getTimelineIconPath(item.title) && (
+                        <img
+                          src={getTimelineIconPath(item.title) || ""}
+                          alt={item.title}
+                          className="w-6.5 h-6.5 object-contain flex-shrink-0"
+                        />
+                      )}
+                    </div>
                   </div>
                 </motion.li>
               ))}

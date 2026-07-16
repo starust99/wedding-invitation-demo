@@ -15,12 +15,12 @@ type TimelineNode = {
 };
 
 const desktopTimelineNodes: Array<Pick<TimelineNode, "x" | "y" | "rotate" | "width">> = [
-  { x: "29%", y: "7.5%", rotate: "-1.2deg", width: "17rem" },
-  { x: "71%", y: "22.5%", rotate: "1deg", width: "17rem" },
-  { x: "27%", y: "40%", rotate: "-1deg", width: "17rem" },
-  { x: "69%", y: "57%", rotate: "1.1deg", width: "17rem" },
-  { x: "31%", y: "74.5%", rotate: "-0.9deg", width: "17rem" },
-  { x: "67%", y: "91%", rotate: "1deg", width: "17rem" },
+  { x: "35%", y: "7.5%", rotate: "-1.2deg", width: "14.5rem" },
+  { x: "65%", y: "22.5%", rotate: "1deg", width: "14.5rem" },
+  { x: "32%", y: "40%", rotate: "-1deg", width: "14.5rem" },
+  { x: "68%", y: "57%", rotate: "1.1deg", width: "14.5rem" },
+  { x: "34%", y: "74.5%", rotate: "-0.9deg", width: "14.5rem" },
+  { x: "54%", y: "91%", rotate: "1deg", width: "14.5rem" },
 ];
 
 function buildTimelineNode(item: WeddingConfig["timeline"][number], index: number): TimelineNode {
@@ -33,6 +33,17 @@ function buildTimelineNode(item: WeddingConfig["timeline"][number], index: numbe
     rotate: fallback.rotate,
     width: fallback.width,
   };
+}
+
+function getTimelineIconPath(title: string): string | null {
+  const t = title.toLowerCase();
+  if (t.includes("đón khách")) return "/assets/wedding/timeline/icon-1730.png";
+  if (t.includes("khai mạc")) return "/assets/wedding/timeline/icon-1900.png";
+  if (t.includes("nghi lễ") || t.includes("nghi thức")) return "/assets/wedding/timeline/icon-1910.png";
+  if (t.includes("nâng ly") || t.includes("khai tiệc") || t.includes("dùng tiệc")) return "/assets/wedding/timeline/icon-1920.png";
+  if (t.includes("giao lưu")) return "/assets/wedding/timeline/icon-2000.png";
+  if (t.includes("chụp ảnh") || t.includes("chụp hình") || t.includes("cảm ơn") || t.includes("kỷ niệm")) return "/assets/wedding/timeline/icon-2050.png";
+  return null;
 }
 
 export function TimelineSection({ config }: { config: WeddingConfig }) {
@@ -87,9 +98,20 @@ export function TimelineSection({ config }: { config: WeddingConfig }) {
                   } as CSSProperties
                 }
               >
-                <div className="timeline-garden-card">
-                  <p className="timeline-garden-time">{node.time}</p>
-                  <h3 className="font-serif">{node.title}</h3>
+                <div className="timeline-garden-card !flex !flex-row !items-center !justify-center !px-3 !py-2.5 !w-full">
+                  <div className="flex flex-row items-center justify-center gap-3">
+                    <div className="flex flex-col items-center justify-center text-center">
+                      <p className="timeline-garden-time !text-[1.4rem] sm:!text-[1.65rem] !m-0 !text-center leading-none w-full">{node.time}</p>
+                      <h3 className="font-serif !text-[0.95rem] sm:!text-[1.02rem] !m-0 !text-center leading-tight mt-0.5 w-full">{node.title}</h3>
+                    </div>
+                    {getTimelineIconPath(node.title) && (
+                      <img
+                        src={getTimelineIconPath(node.title) || ""}
+                        alt={node.title}
+                        className="w-9 h-9 md:w-10 md:h-10 object-contain flex-shrink-0"
+                      />
+                    )}
+                  </div>
                 </div>
               </motion.li>
             ))}
