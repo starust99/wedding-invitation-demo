@@ -325,15 +325,45 @@ export function EventDetailsContent({
   const ringsVideoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
-    if (ringsVideoRef.current) {
-      ringsVideoRef.current.load();
-      const playPromise = ringsVideoRef.current.play();
-      if (playPromise !== undefined) {
-        playPromise.catch((error) => {
-          console.warn("Autoplay was prevented or video failed to load:", error);
-        });
+    const video = ringsVideoRef.current;
+    if (!video) return;
+
+    const playVideo = () => {
+      if (video.paused) {
+        const playPromise = video.play();
+        if (playPromise !== undefined) {
+          playPromise.catch((error) => {
+            console.warn("Autoplay failed on resume:", error);
+          });
+        }
       }
-    }
+    };
+
+    // Initial load and play
+    video.load();
+    playVideo();
+
+    // Listen to tab visibility changes (locking/unlocking screen or backgrounding)
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        playVideo();
+      }
+    };
+
+    // Listen to focus & pageshow events (additional fallbacks for backgrounding)
+    const handleFocus = () => {
+      playVideo();
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    window.addEventListener("focus", handleFocus);
+    window.addEventListener("pageshow", handleFocus);
+
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      window.removeEventListener("focus", handleFocus);
+      window.removeEventListener("pageshow", handleFocus);
+    };
   }, []);
   const content = config.content;
   const churchDateParsed = parseChurchDate(content.churchDate);
