@@ -22,7 +22,7 @@ export function TimelineSection({ config }: { config: WeddingConfig }) {
       <div aria-hidden="true" className="paper-grain-luxury timeline-garden-grain opacity-15" />
 
       <div className="timeline-garden-shell mx-auto max-w-7xl">
-        <div className="timeline-garden-intro grid justify-items-center gap-5 text-center mb-3">
+        <div className="timeline-garden-intro grid justify-items-center gap-5 text-center mb-5">
           <h3 className="font-serif text-[1.12rem] sm:text-[1.25rem] md:text-[1.38rem] font-bold gold-foil-text uppercase leading-tight mt-0.5 mb-1.5">
             {config.sections.timeline.eyebrow}
           </h3>
@@ -33,7 +33,7 @@ export function TimelineSection({ config }: { config: WeddingConfig }) {
           )}
         </div>
 
-        <div className="timeline-garden-path-scene w-full max-w-[26rem] sm:max-w-[28rem] md:max-w-[30rem] mx-auto -mt-6 sm:-mt-8 md:-mt-10 min-h-[28rem] sm:min-h-[32rem] overflow-visible relative">
+        <div className="timeline-garden-path-scene w-full max-w-[26rem] sm:max-w-[32rem] md:max-w-[37rem] mx-auto -mt-3 sm:-mt-4 md:-mt-4 min-h-[28rem] sm:min-h-[32rem] overflow-visible relative">
           {/* Winding road */}
           <div className="timeline-garden-path-image opacity-[0.55] absolute inset-0">
             <div
@@ -56,7 +56,7 @@ export function TimelineSection({ config }: { config: WeddingConfig }) {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: "-50px" }}
                 transition={{ duration: 0.5, delay: index * 0.05 }}
-                className="timeline-garden-node !w-[47%] !max-w-[11.2rem] sm:!max-w-[13rem] md:!max-w-[15rem] !ml-0 !mr-0"
+                className="timeline-garden-node !w-[47%] !max-w-[11.2rem] sm:!max-w-[14.5rem] md:!max-w-[17.5rem] !ml-0 !mr-0"
               >
                 <div className="timeline-garden-card !flex !flex-row !items-center !justify-center !py-1.5 !px-2 shadow-[0_6px_16px_rgba(63,70,66,0.07)] bg-[#fdfbf7]/95 border border-[#b4975a]/25 backdrop-blur-[8px] rounded-xl w-full">
                   <div className="flex flex-row items-center justify-center gap-1.5 w-full">

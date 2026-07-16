@@ -2104,7 +2104,7 @@ textarea {
 
 .timeline-garden-path-image {
   position: absolute;
-  inset: -6.5rem 8% -2.4rem;
+  inset: -3.8rem 8% -2.4rem;
   z-index: 1;
   pointer-events: none;
   background-image: url("/assets/timeline-garden-path-mobile.png");
@@ -2222,7 +2222,7 @@ textarea {
   .timeline-garden-path-scene {
     position: relative;
     width: 100%;
-    max-width: 30rem;
+    max-width: 37rem;
     margin-inline: auto;
     min-height: 32rem;
     isolation: isolate;
@@ -2232,7 +2232,7 @@ textarea {
   .timeline-garden-path-video,
   .timeline-garden-path-image {
     position: absolute;
-    inset: -6.5rem 8% -2.4rem;
+    inset: -3.8rem 8% -2.4rem;
     z-index: 1;
     pointer-events: none;
     background-image: url("/assets/timeline-garden-path-desktop.webp");
