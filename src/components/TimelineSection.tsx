@@ -17,7 +17,7 @@ function getTimelineIconPath(title: string): string | null {
 
 export function TimelineSection({ config }: { config: WeddingConfig }) {
   return (
-    <section id="timeline" className="timeline-garden-section cinematic-stage relative overflow-hidden px-5 pt-14 pb-24 text-ink sm:px-8 lg:pt-16 lg:pb-32">
+    <section id="timeline" className="timeline-garden-section cinematic-stage relative overflow-hidden px-5 pt-8 pb-20 text-ink sm:px-8 lg:pt-10 lg:pb-24">
       <SectionMediaLayers config={config} section="timeline" className="timeline-garden-media opacity-[0.08]" />
       <div aria-hidden="true" className="paper-grain-luxury timeline-garden-grain opacity-15" />
 
@@ -56,15 +56,15 @@ export function TimelineSection({ config }: { config: WeddingConfig }) {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: "-50px" }}
                 transition={{ duration: 0.5, delay: index * 0.05 }}
-                className="timeline-garden-node !w-[47%] !max-w-[11.2rem] sm:!max-w-[14.5rem] md:!max-w-[17.5rem] !ml-0 !mr-0"
+                className="timeline-garden-node !w-[47%] sm:!w-[42%] md:!w-[38%] !max-w-[11.2rem] sm:!max-w-[13.5rem] md:!max-w-[14.5rem] !ml-0 !mr-0"
               >
-                <div className="timeline-garden-card !flex !flex-row !items-center !justify-center !py-1.5 !px-2 shadow-[0_6px_16px_rgba(63,70,66,0.07)] bg-[#fdfbf7]/95 border border-[#b4975a]/25 backdrop-blur-[8px] rounded-xl w-full">
-                  <div className="flex flex-row items-center justify-center gap-1.5 w-full">
+                <div className="timeline-garden-card !flex !flex-row !items-center !justify-center !py-1.5 !px-2 sm:!py-2 sm:!px-3 md:!py-2.5 md:!px-4 shadow-[0_6px_16px_rgba(63,70,66,0.07)] bg-[#fdfbf7]/95 border border-[#b4975a]/25 backdrop-blur-[8px] rounded-xl w-full">
+                  <div className="flex flex-row items-center justify-center gap-1.5 sm:gap-2 w-full">
                     <div className="flex flex-col items-center justify-center text-center min-w-0 flex-1">
-                      <p className="timeline-garden-time !text-[0.82rem] sm:!text-[0.95rem] !font-bold text-[#8d713a] tracking-wider mb-0.5 leading-none text-center w-full">
+                      <p className="timeline-garden-time !text-[0.82rem] sm:!text-[0.95rem] md:!text-[1.12rem] !font-bold text-[#8d713a] tracking-wider mb-0.5 leading-none text-center w-full">
                         {item.time}
                       </p>
-                      <h3 className="!text-[0.82rem] sm:!text-[0.95rem] !font-semibold text-[#2f3532] font-serif leading-tight text-center w-full">
+                      <h3 className="!text-[0.82rem] sm:!text-[0.95rem] md:!text-[1.05rem] !font-semibold text-[#2f3532] font-serif leading-tight text-center w-full">
                         {item.title}
                       </h3>
                     </div>
@@ -72,7 +72,7 @@ export function TimelineSection({ config }: { config: WeddingConfig }) {
                       <img
                         src={getTimelineIconPath(item.title) || ""}
                         alt={item.title}
-                        className="w-6.5 h-6.5 sm:w-8 sm:h-8 object-contain flex-shrink-0"
+                        className="w-6.5 h-6.5 sm:w-8 sm:h-8 md:w-9.5 md:h-9.5 object-contain flex-shrink-0"
                       />
                     )}
                   </div>
