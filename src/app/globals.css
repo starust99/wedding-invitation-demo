@@ -4218,7 +4218,7 @@ html.splash-skipped body {
 
 /* Precise alignment and non-overlapping widths for the timeline nodes */
 .event-details-timeline-scene .timeline-garden-node {
-  width: 41% !important;
+  width: 44% !important;
   margin-top: 0.5rem !important;
   margin-bottom: 0.5rem !important;
   display: flex !important;
@@ -4253,24 +4253,26 @@ html.splash-skipped body {
 }
 
 .event-details-timeline-scene .timeline-garden-card p {
-  font-size: 1.1rem !important;
+  font-size: 0.95rem !important;
   font-weight: 700 !important;
   color: #8d713a !important;
   margin-bottom: 0.2rem !important;
+  white-space: nowrap !important;
 }
 
 .event-details-timeline-scene .timeline-garden-card h3 {
-  font-size: 1.1rem !important;
+  font-size: 0.95rem !important;
   font-weight: 600 !important;
   color: #2f3532 !important;
   line-height: 1.25 !important;
   margin: 0 !important;
+  white-space: nowrap !important;
 }
 
 /* Adjust card width dynamically on larger screens */
 @media (min-width: 640px) {
   .event-details-timeline-scene .timeline-garden-node {
-    width: 37% !important;
+    width: 42% !important;
   }
   .event-details-timeline-scene .timeline-garden-card {
     padding: 0.85rem 3.5rem 0.85rem 1rem !important;
@@ -4279,7 +4281,7 @@ html.splash-skipped body {
 
 @media (min-width: 768px) {
   .event-details-timeline-scene .timeline-garden-node {
-    width: 31% !important;
+    width: 38% !important;
   }
   .event-details-timeline-scene .timeline-garden-card {
     padding: 1rem 3.5rem 1rem 1rem !important;
