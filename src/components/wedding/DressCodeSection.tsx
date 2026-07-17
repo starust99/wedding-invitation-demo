@@ -164,7 +164,11 @@ export function DressCodeSection({
 
         {/* Color Selection Bar (moved below) */}
         <div
-          className="flex w-full bg-white/30 backdrop-blur-[12px] border border-white/50 shadow-[0_8px_32px_rgba(0,0,0,0.04)] rounded-[2.5rem] py-2.5 px-3 justify-around items-center z-10 mt-5"
+          className="flex w-full bg-white/10 border border-white/30 shadow-[0_8px_32px_rgba(0,0,0,0.03)] rounded-[2.5rem] py-2.5 px-3 justify-around items-center z-10 mt-5"
+          style={{
+            backdropFilter: "blur(12px)",
+            WebkitBackdropFilter: "blur(12px)",
+          }}
           role="group"
           aria-label="Chọn màu trang phục"
         >
