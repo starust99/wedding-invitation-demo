@@ -4143,5 +4143,78 @@ html.splash-skipped body {
   image-rendering: -webkit-optimize-contrast;
 }
 
+.timeline-path-video-wrap {
+  background-image: none !important;
+  position: absolute;
+  isolation: isolate;
+}
+
+.timeline-path-video {
+  -webkit-mask-image:
+    linear-gradient(to bottom, transparent 0%, transparent 6%, rgba(0,0,0,0.5) 18%, black 32%, black 68%, rgba(0,0,0,0.5) 82%, transparent 94%, transparent 100%),
+    linear-gradient(to right, transparent 0%, transparent 8%, rgba(0,0,0,0.5) 20%, black 34%, black 66%, rgba(0,0,0,0.5) 80%, transparent 92%, transparent 100%);
+  -webkit-mask-composite: source-in;
+  mask-image:
+    linear-gradient(to bottom, transparent 0%, transparent 6%, rgba(0,0,0,0.5) 18%, black 32%, black 68%, rgba(0,0,0,0.5) 82%, transparent 94%, transparent 100%),
+    linear-gradient(to right, transparent 0%, transparent 8%, rgba(0,0,0,0.5) 20%, black 34%, black 66%, rgba(0,0,0,0.5) 80%, transparent 92%, transparent 100%);
+  mask-composite: intersect;
+  mix-blend-mode: normal;
+  filter: saturate(1.35) contrast(1.12) brightness(1.03);
+  opacity: 1;
+}
+
+.timeline-path-video-wrap::before,
+.timeline-path-video-wrap::after {
+  content: "";
+  position: absolute;
+  inset: -4%;
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* Blur mềm 4 cạnh video để hoà vào background */
+.timeline-path-video-wrap::before {
+  backdrop-filter: blur(28px) saturate(0.75);
+  -webkit-mask-image:
+    linear-gradient(to right, black 0%, rgba(0,0,0,0.85) 12%, transparent 32%, transparent 68%, rgba(0,0,0,0.85) 88%, black 100%),
+    linear-gradient(to bottom, black 0%, rgba(0,0,0,0.85) 10%, transparent 28%, transparent 72%, rgba(0,0,0,0.85) 90%, black 100%);
+  -webkit-mask-composite: source-over;
+  mask-image:
+    linear-gradient(to right, black 0%, rgba(0,0,0,0.85) 12%, transparent 32%, transparent 68%, rgba(0,0,0,0.85) 88%, black 100%),
+    linear-gradient(to bottom, black 0%, rgba(0,0,0,0.85) 10%, transparent 28%, transparent 72%, rgba(0,0,0,0.85) 90%, black 100%);
+  mask-composite: add;
+}
+
+.timeline-path-video-wrap::after {
+  background: radial-gradient(ellipse 85% 92% at center, transparent 72%, rgba(247,242,234,0.6) 88%, var(--wedding-cream, #f7f2ea) 100%);
+  mix-blend-mode: normal;
+}
+
+/* Tablet/Desktop: video bị letterbox hẹp hơn → siết feather + blur mạnh hơn ở 2 bên */
+@media (min-width: 640px) {
+  .timeline-path-video {
+    -webkit-mask-image:
+      linear-gradient(to bottom, transparent 0%, transparent 4%, rgba(0,0,0,0.4) 14%, black 26%, black 74%, rgba(0,0,0,0.4) 86%, transparent 96%, transparent 100%),
+      linear-gradient(to right, transparent 0%, transparent 26%, rgba(0,0,0,0.35) 32%, rgba(0,0,0,0.8) 38%, black 42%, black 58%, rgba(0,0,0,0.8) 62%, rgba(0,0,0,0.35) 68%, transparent 74%, transparent 100%);
+    mask-image:
+      linear-gradient(to bottom, transparent 0%, transparent 4%, rgba(0,0,0,0.4) 14%, black 26%, black 74%, rgba(0,0,0,0.4) 86%, transparent 96%, transparent 100%),
+      linear-gradient(to right, transparent 0%, transparent 26%, rgba(0,0,0,0.35) 32%, rgba(0,0,0,0.8) 38%, black 42%, black 58%, rgba(0,0,0,0.8) 62%, rgba(0,0,0,0.35) 68%, transparent 74%, transparent 100%);
+  }
+
+  .timeline-path-video-wrap::before {
+    backdrop-filter: blur(40px) saturate(0.7);
+    -webkit-mask-image:
+      linear-gradient(to right, black 0%, black 24%, rgba(0,0,0,0.85) 32%, rgba(0,0,0,0.35) 40%, transparent 46%, transparent 54%, rgba(0,0,0,0.35) 60%, rgba(0,0,0,0.85) 68%, black 76%, black 100%),
+      linear-gradient(to bottom, black 0%, rgba(0,0,0,0.9) 12%, transparent 26%, transparent 74%, rgba(0,0,0,0.9) 88%, black 100%);
+    mask-image:
+      linear-gradient(to right, black 0%, black 24%, rgba(0,0,0,0.85) 32%, rgba(0,0,0,0.35) 40%, transparent 46%, transparent 54%, rgba(0,0,0,0.35) 60%, rgba(0,0,0,0.85) 68%, black 76%, black 100%),
+      linear-gradient(to bottom, black 0%, rgba(0,0,0,0.9) 12%, transparent 26%, transparent 74%, rgba(0,0,0,0.9) 88%, black 100%);
+  }
+
+  .timeline-path-video-wrap::after {
+    background: none;
+  }
+}
+
 
 

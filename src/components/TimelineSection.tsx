@@ -3,6 +3,8 @@
 import { motion } from "framer-motion";
 import { SectionMediaLayers } from "@/components/SectionMediaLayers";
 import type { WeddingConfig } from "@/lib/site-settings";
+const timelinePathVideo = "/assets/timeline-path.mp4";
+const timelinePathWebm = "/assets/timeline-path-web.webm";
 
 function getTimelineIconPath(title: string): string | null {
   const t = title.toLowerCase();
@@ -13,6 +15,19 @@ function getTimelineIconPath(title: string): string | null {
   if (t.includes("giao lưu")) return "/assets/wedding/timeline/icon-2000.png";
   if (t.includes("chụp ảnh") || t.includes("chụp hình") || t.includes("cảm ơn") || t.includes("kỷ niệm")) return "/assets/wedding/timeline/icon-2050.png";
   return null;
+}
+
+function TimelineIcon({ title, className }: { title: string; className?: string }) {
+  const iconPath = getTimelineIconPath(title);
+  if (!iconPath) return null;
+  return (
+    <img
+      src={iconPath}
+      alt={title}
+      className={className}
+      draggable={false}
+    />
+  );
 }
 
 export function TimelineSection({ config }: { config: WeddingConfig }) {
@@ -33,52 +48,36 @@ export function TimelineSection({ config }: { config: WeddingConfig }) {
           )}
         </div>
 
-        <div className="timeline-garden-path-scene w-full max-w-[26rem] sm:max-w-[32rem] md:max-w-[37rem] mx-auto -mt-3 sm:-mt-4 md:-mt-4 min-h-[28rem] sm:min-h-[32rem] overflow-visible relative">
-          {/* Winding road */}
-          <div className="timeline-garden-path-image opacity-[0.55] absolute inset-0">
-            <div
+        <div className="event-details-timeline-scene timeline-garden-path-scene w-full max-w-[28rem] sm:max-w-[34rem] md:max-w-[38rem] mx-auto min-h-[28rem] overflow-visible relative">
+          {/* Con đường: video nền */}
+          <div className="timeline-garden-path-image timeline-path-video-wrap opacity-[0.85] absolute inset-0 pointer-events-none">
+            <video
               aria-hidden="true"
-              className="absolute inset-0"
-              style={{
-                backgroundImage: "url('/assets/timeline-garden-path-desktop.webp')",
-                backgroundPosition: "center",
-                backgroundRepeat: "no-repeat",
-                backgroundSize: "100% 100%",
-              }}
-            />
+              className="absolute inset-0 w-full h-full object-contain timeline-path-video"
+              autoPlay loop muted playsInline
+            >
+              <source src={timelinePathWebm} type="video/webm" />
+              <source src={timelinePathVideo} type="video/mp4" />
+            </video>
           </div>
 
-          <ol className="timeline-garden-list relative z-10 grid justify-items-center w-full">
-            {config.timeline.map((item, index) => (
-              <motion.li
-                key={index}
-                initial={{ opacity: 0, y: 15 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-50px" }}
-                transition={{ duration: 0.5, delay: index * 0.05 }}
-                className="timeline-garden-node !w-[47%] sm:!w-[42%] md:!w-[38%] !max-w-[11.2rem] sm:!max-w-[13.5rem] md:!max-w-[14.5rem] !ml-0 !mr-0"
-              >
-                <div className="timeline-garden-card !flex !flex-row !items-center !justify-center !py-1.5 !px-2 sm:!py-2 sm:!px-3 md:!py-2.5 md:!px-4 shadow-[0_6px_16px_rgba(63,70,66,0.07)] bg-[#fdfbf7]/95 border border-[#b4975a]/25 backdrop-blur-[8px] rounded-xl w-full">
-                  <div className="flex flex-row items-center justify-center gap-1.5 sm:gap-2 w-full">
-                    <div className="flex flex-col items-center justify-center text-center min-w-0 flex-1">
-                      <p className="timeline-garden-time !text-[0.82rem] sm:!text-[0.95rem] md:!text-[1.12rem] !font-bold text-[#8d713a] tracking-wider mb-0.5 leading-none text-center w-full">
-                        {item.time}
-                      </p>
-                      <h3 className="!text-[0.82rem] sm:!text-[0.95rem] md:!text-[1.05rem] !font-semibold text-[#2f3532] font-serif leading-tight text-center w-full">
-                        {item.title}
-                      </h3>
-                    </div>
-                    {getTimelineIconPath(item.title) && (
-                      <img
-                        src={getTimelineIconPath(item.title) || ""}
-                        alt={item.title}
-                        className="w-6.5 h-6.5 sm:w-8 sm:h-8 md:w-9.5 md:h-9.5 object-contain flex-shrink-0"
-                      />
-                    )}
+          {/* Các thẻ mốc thời gian — so le trái/phải */}
+          <ol className="event-details-timeline-list timeline-garden-list relative z-10 grid w-full gap-4 sm:gap-5 px-1">
+            {config.timeline.map((item, index) => {
+              const isRight = index % 2 === 0;
+              return (
+                <li
+                  key={index}
+                  className={`timeline-garden-node !m-0 flex w-full ${isRight ? "justify-end" : "justify-start"}`}
+                >
+                  <div className="timeline-garden-card !py-3 !pl-4 !pr-12 !gap-1 shadow-[0_6px_16px_rgba(63,70,66,0.07)] text-left flex flex-col items-start justify-center bg-[#fdfbf7]/95 border border-[#b4975a]/25 backdrop-blur-[8px] rounded-2xl relative overflow-hidden w-[62%] sm:w-[58%] md:w-[54%] min-w-[11rem]">
+                    <TimelineIcon title={item.title} className="!absolute !right-2 !top-1/2 !-translate-y-1/2 !w-9 !h-9 !m-0 opacity-50 pointer-events-none" />
+                    <p className="!text-[1rem] !font-bold text-[#8d713a] tracking-wider mb-0.5 relative z-10">{item.time}</p>
+                    <h3 className="!text-[1.05rem] !font-semibold text-[#2f3532] font-serif leading-snug relative z-10">{item.title}</h3>
                   </div>
-                </div>
-              </motion.li>
-            ))}
+                </li>
+              );
+            })}
           </ol>
         </div>
       </div>
