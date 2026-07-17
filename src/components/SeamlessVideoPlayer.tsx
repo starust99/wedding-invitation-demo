@@ -15,19 +15,19 @@ export default function SeamlessVideoPlayer({
 }: SeamlessVideoPlayerProps) {
   const videoRefA = useRef<HTMLVideoElement>(null);
   const videoRefB = useRef<HTMLVideoElement>(null);
-  
-  // Track which video is currently playing as the active source
+
+  // activeVideo determines which video element is on top (zIndex: 2)
   const [activeVideo, setActiveVideo] = useState<"A" | "B">("A");
-  // Opacity controls for smooth crossfade transitions
-  const [opacityA, setOpacityA] = useState(1);
-  const [opacityB, setOpacityB] = useState(0);
+  
+  // Opacity of the active top video
+  const [topOpacity, setTopOpacity] = useState(1);
 
   useEffect(() => {
     const videoA = videoRefA.current;
     const videoB = videoRefB.current;
     if (!videoA || !videoB) return;
 
-    // Initially make sure video A is playing
+    // Make sure the active video is playing
     if (activeVideo === "A" && videoA.paused) {
       videoA.play().catch(() => {});
     }
@@ -40,52 +40,40 @@ export default function SeamlessVideoPlayer({
 
       if (!activeVideoEl || !nextVideoEl || isTransitioning) return;
 
-      // Start pre-playing the next video slightly before the current one ends
-      // 0.35s is the perfect duration to ensure smooth decoding and alignment
+      // Start the transition 0.5s before the current video ends
       if (
-        activeVideoEl.currentTime >= activeVideoEl.duration - 0.35 &&
+        activeVideoEl.currentTime >= activeVideoEl.duration - 0.5 &&
         activeVideoEl.duration > 0
       ) {
         isTransitioning = true;
-        
-        // Start next video at the beginning
+
+        // Reset and play the background video (which is underneath with opacity 1)
         nextVideoEl.currentTime = 0;
-        
         nextVideoEl.play().then(() => {
-          if (activeVideo === "A") {
-            setActiveVideo("B");
-            setOpacityB(1);
+          // Fade out the top video (A if activeVideo === "A", B if activeVideo === "B")
+          setTopOpacity(0);
+
+          // Once the opacity transition is complete (400ms)
+          setTimeout(() => {
+            // Swap active video to make nextVideoEl the top video
+            setActiveVideo(activeVideo === "A" ? "B" : "A");
             
-            // Wait briefly for video B to render its first frames, then fade out video A
-            setTimeout(() => {
-              setOpacityA(0);
-              setTimeout(() => {
-                videoA.pause();
-                videoA.currentTime = 0;
-                isTransitioning = false;
-              }, 250); // Pause A after its opacity fades to 0
-            }, 50);
-          } else {
-            setActiveVideo("A");
-            setOpacityA(1);
+            // Instantly restore opacity of the top video to 1
+            setTopOpacity(1);
+
+            // Pause and reset the old video (now underneath)
+            activeVideoEl.pause();
+            activeVideoEl.currentTime = 0;
             
-            setTimeout(() => {
-              setOpacityB(0);
-              setTimeout(() => {
-                videoB.pause();
-                videoB.currentTime = 0;
-                isTransitioning = false;
-              }, 250);
-            }, 50);
-          }
+            isTransitioning = false;
+          }, 450);
         }).catch(() => {
           isTransitioning = false;
         });
       }
     };
 
-    // Use a fast interval for checking the playback progress
-    const intervalId = setInterval(checkLoopTransition, 80);
+    const intervalId = setInterval(checkLoopTransition, 50);
 
     return () => {
       clearInterval(intervalId);
@@ -96,10 +84,11 @@ export default function SeamlessVideoPlayer({
     <div className={`relative w-full h-full overflow-hidden ${className}`}>
       <video
         ref={videoRefA}
-        className="timeline-path-video absolute inset-0 w-full h-full object-cover transition-opacity duration-300 pointer-events-none"
-        style={{ 
-          opacity: opacityA, 
+        className="timeline-path-video absolute inset-0 w-full h-full object-contain pointer-events-none"
+        style={{
           zIndex: activeVideo === "A" ? 2 : 1,
+          opacity: activeVideo === "A" ? topOpacity : 1,
+          transition: "opacity 400ms ease-in-out",
           backgroundColor: "var(--wedding-cream, #f7f2ea)"
         }}
         muted
@@ -110,10 +99,11 @@ export default function SeamlessVideoPlayer({
       </video>
       <video
         ref={videoRefB}
-        className="timeline-path-video absolute inset-0 w-full h-full object-cover transition-opacity duration-300 pointer-events-none"
-        style={{ 
-          opacity: opacityB, 
+        className="timeline-path-video absolute inset-0 w-full h-full object-contain pointer-events-none"
+        style={{
           zIndex: activeVideo === "B" ? 2 : 1,
+          opacity: activeVideo === "B" ? topOpacity : 1,
+          transition: "opacity 400ms ease-in-out",
           backgroundColor: "var(--wedding-cream, #f7f2ea)"
         }}
         muted
