@@ -137,6 +137,7 @@ export function DressCodeSection({
 
       {/* Interactive Illustration Image */}
       <div className="w-full max-w-[24rem] sm:max-w-[26rem] md:max-w-[27rem] mx-auto flex flex-col items-center">
+        {/* Card containing image */}
         <div className="relative w-full aspect-[3/4] rounded-[2.2rem] overflow-hidden shadow-[0_6px_20px_rgba(0,0,0,0.05)] bg-white/50 border border-white/20">
           <div className="w-full h-full overflow-hidden relative">
             <AnimatePresence mode="popLayout">
@@ -159,51 +160,51 @@ export function DressCodeSection({
               </motion.div>
             </AnimatePresence>
           </div>
-
-          {/* Floating Pill Swatches Bar */}
-          <div
-            className="flex absolute bottom-4 left-1/2 -translate-x-1/2 w-[calc(100%-1.2rem)] xs:w-[calc(100%-1.8rem)] max-w-[25rem] bg-white/35 border border-white/45 shadow-[0_8px_32px_rgba(0,0,0,0.06)] rounded-[2.5rem] py-2.5 px-3 justify-around items-center z-10"
-            role="group"
-            aria-label="Chọn màu trang phục"
-          >
-            {DRESS_COLORS.map((color) => {
-              const isSelected = selectedColorId === color.id;
-              return (
-                <button
-                  key={color.id}
-                  type="button"
-                  aria-pressed={isSelected}
-                  aria-label={`Xem gợi ý phối đồ màu ${color.name}`}
-                  onClick={() => setSelectedColorId(isSelected ? null : color.id)}
-                  className={`w-[2.05rem] h-[2.05rem] xs:w-[2.3rem] xs:h-[2.3rem] rounded-full flex-shrink-0 transition-all duration-300 relative flex items-center justify-center focus-visible:outline-none ${
-                    isSelected ? "scale-[1.12]" : "hover:scale-[1.05]"
-                  }`}
-                >
-                  <span
-                    className={`w-full h-full rounded-full transition-all duration-300 relative shadow-[inset_0_1px_2.5px_rgba(255,255,255,0.35),0_2px_6px_rgba(0,0,0,0.18)] ${
-                      isSelected
-                        ? "border-[2.5px] border-[#b4975a]"
-                        : "border-[1.5px] border-white"
-                    }`}
-                    style={{
-                      backgroundColor: color.hex,
-                      backgroundImage: "linear-gradient(135deg, rgba(255, 255, 255, 0.12) 0%, rgba(0, 0, 0, 0.04) 100%)",
-                    }}
-                  />
-                  {isSelected && (
-                    <span className="absolute -top-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-[#b4975a] flex items-center justify-center shadow-[0_1.5px_3.5px_rgba(0,0,0,0.15)] z-10 text-white border border-white">
-                      <svg viewBox="0 0 24 24" className="w-2.2 h-2.2 fill-none stroke-current" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                        <polyline points="20 6 9 17 4 12" />
-                      </svg>
-                    </span>
-                  )}
-                </button>
-              );
-            })}
-          </div>
         </div>
 
-        {/* Selected Color Name below Card */}
+        {/* Color Selection Bar (moved below) */}
+        <div
+          className="flex w-full bg-[#fdfbf7]/80 border border-[#b4975a]/20 shadow-[0_6px_16px_rgba(63,70,66,0.04)] rounded-[2.5rem] py-2.5 px-3 justify-around items-center z-10 mt-5"
+          role="group"
+          aria-label="Chọn màu trang phục"
+        >
+          {DRESS_COLORS.map((color) => {
+            const isSelected = selectedColorId === color.id;
+            return (
+              <button
+                key={color.id}
+                type="button"
+                aria-pressed={isSelected}
+                aria-label={`Xem gợi ý phối đồ màu ${color.name}`}
+                onClick={() => setSelectedColorId(isSelected ? null : color.id)}
+                className={`w-[2.05rem] h-[2.05rem] xs:w-[2.3rem] xs:h-[2.3rem] rounded-full flex-shrink-0 transition-all duration-300 relative flex items-center justify-center focus-visible:outline-none ${
+                  isSelected ? "scale-[1.12]" : "hover:scale-[1.05]"
+                }`}
+              >
+                <span
+                  className={`w-full h-full rounded-full transition-all duration-300 relative shadow-[inset_0_1px_2.5px_rgba(255,255,255,0.35),0_2px_6px_rgba(0,0,0,0.18)] ${
+                    isSelected
+                      ? "border-[2.5px] border-[#b4975a]"
+                      : "border-[1.5px] border-white"
+                  }`}
+                  style={{
+                    backgroundColor: color.hex,
+                    backgroundImage: "linear-gradient(135deg, rgba(255, 255, 255, 0.12) 0%, rgba(0, 0, 0, 0.04) 100%)",
+                  }}
+                />
+                {isSelected && (
+                  <span className="absolute -top-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-[#b4975a] flex items-center justify-center shadow-[0_1.5px_3.5px_rgba(0,0,0,0.15)] z-10 text-white border border-white">
+                    <svg viewBox="0 0 24 24" className="w-2.2 h-2.2 fill-none stroke-current" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="20 6 9 17 4 12" />
+                    </svg>
+                  </span>
+                )}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Selected Color Name below Swatches */}
         <div className="flex items-center justify-center gap-2 mt-4 text-[#7d7065] select-none min-h-[1.75rem]">
           <span className="text-[#b4975a] text-[0.8rem] font-bold">✦</span>
           {selectedColor ? (
