@@ -64,13 +64,13 @@ export function TimelineSection({ config }: { config: WeddingConfig }) {
           {/* Các thẻ mốc thời gian — so le trái/phải */}
           <ol className="event-details-timeline-list timeline-garden-list relative z-10 grid w-full gap-4 sm:gap-5 px-1">
             {config.timeline.map((item, index) => {
-              const isRight = index % 2 === 0;
+              const isRight = index % 2 === 1;
               return (
                 <li
                   key={index}
                   className={`timeline-garden-node !m-0 flex w-full ${isRight ? "justify-end" : "justify-start"}`}
                 >
-                  <div className="timeline-garden-card !py-3 !pl-4 !pr-12 !gap-1 shadow-[0_6px_16px_rgba(63,70,66,0.07)] text-left flex flex-col items-start justify-center bg-[#fdfbf7]/95 border border-[#b4975a]/25 backdrop-blur-[8px] rounded-2xl relative overflow-hidden w-[62%] sm:w-[58%] md:w-[54%] min-w-[11rem]">
+                  <div className="timeline-garden-card !py-3 !pl-4 !pr-12 !gap-1 shadow-[0_6px_16px_rgba(63,70,66,0.07)] text-left flex flex-col items-start justify-center bg-[#fdfbf7]/95 border border-[#b4975a]/25 backdrop-blur-[8px] rounded-2xl relative overflow-hidden w-full min-w-[11rem]">
                     <TimelineIcon title={item.title} className="!absolute !right-2 !top-1/2 !-translate-y-1/2 !w-9 !h-9 !m-0 opacity-50 pointer-events-none" />
                     <p className="!text-[1rem] !font-bold text-[#8d713a] tracking-wider mb-0.5 relative z-10">{item.time}</p>
                     <h3 className="!text-[1.05rem] !font-semibold text-[#2f3532] font-serif leading-snug relative z-10">{item.title}</h3>
