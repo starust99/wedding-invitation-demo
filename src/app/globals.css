@@ -4226,19 +4226,19 @@ html.splash-skipped body {
 }
 
 .event-details-timeline-scene .timeline-garden-node:nth-child(odd) {
-  justify-self: start !important;
-  justify-content: flex-start !important;
-  margin-right: auto !important;
-  margin-left: 0 !important;
-  rotate: -0.5deg !important;
-}
-
-.event-details-timeline-scene .timeline-garden-node:nth-child(even) {
   justify-self: end !important;
   justify-content: flex-end !important;
   margin-left: auto !important;
   margin-right: 0 !important;
   rotate: 0.5deg !important;
+}
+
+.event-details-timeline-scene .timeline-garden-node:nth-child(even) {
+  justify-self: start !important;
+  justify-content: flex-start !important;
+  margin-right: auto !important;
+  margin-left: 0 !important;
+  rotate: -0.5deg !important;
 }
 
 .event-details-timeline-scene .timeline-garden-card {

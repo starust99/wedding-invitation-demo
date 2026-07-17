@@ -64,7 +64,7 @@ export function TimelineSection({ config }: { config: WeddingConfig }) {
           {/* Các thẻ mốc thời gian — so le trái/phải */}
           <ol className="event-details-timeline-list timeline-garden-list relative z-10 grid w-full gap-4 sm:gap-5 px-1">
             {config.timeline.map((item, index) => {
-              const isRight = index % 2 === 1;
+              const isRight = index % 2 === 0;
               return (
                 <li
                   key={index}
