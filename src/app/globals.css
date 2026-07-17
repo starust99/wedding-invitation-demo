@@ -4218,7 +4218,7 @@ html.splash-skipped body {
 
 /* Precise alignment and non-overlapping widths for the timeline nodes */
 .event-details-timeline-scene .timeline-garden-node {
-  width: 44% !important;
+  width: 41% !important;
   margin-top: 0.5rem !important;
   margin-bottom: 0.5rem !important;
   display: flex !important;
@@ -4244,25 +4244,45 @@ html.splash-skipped body {
 .event-details-timeline-scene .timeline-garden-card {
   width: 100% !important;
   max-width: 100% !important;
-  padding: 0.75rem 2.5rem 0.75rem 0.85rem !important;
+  padding: 0.85rem 3.5rem 0.85rem 1rem !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-align: center !important;
+}
+
+.event-details-timeline-scene .timeline-garden-card p {
+  font-size: 1.1rem !important;
+  font-weight: 700 !important;
+  color: #8d713a !important;
+  margin-bottom: 0.2rem !important;
+}
+
+.event-details-timeline-scene .timeline-garden-card h3 {
+  font-size: 1.1rem !important;
+  font-weight: 600 !important;
+  color: #2f3532 !important;
+  line-height: 1.25 !important;
+  margin: 0 !important;
 }
 
 /* Adjust card width dynamically on larger screens */
 @media (min-width: 640px) {
   .event-details-timeline-scene .timeline-garden-node {
-    width: 42% !important;
+    width: 37% !important;
   }
   .event-details-timeline-scene .timeline-garden-card {
-    padding: 0.85rem 3rem 0.85rem 1rem !important;
+    padding: 0.85rem 3.5rem 0.85rem 1rem !important;
   }
 }
 
 @media (min-width: 768px) {
   .event-details-timeline-scene .timeline-garden-node {
-    width: 38% !important;
+    width: 31% !important;
   }
   .event-details-timeline-scene .timeline-garden-card {
-    padding: 1rem 3.25rem 1rem 1.15rem !important;
+    padding: 1rem 3.5rem 1rem 1rem !important;
   }
 }
 
