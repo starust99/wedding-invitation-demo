@@ -157,6 +157,7 @@ export function WeddingSplashIntro({
 
   const openIntro = useCallback(() => {
     if (!ready || status === "opening") return;
+    setPreloading(false);
     setStatus("opening");
     window.dispatchEvent(new Event("playWeddingMusic"));
     
@@ -268,7 +269,8 @@ export function WeddingSplashIntro({
             {preloading && (
               <motion.div
                 key="wedding-preloader"
-                className="absolute inset-0 w-full h-full z-[999999] flex flex-col items-center justify-center bg-[#FDFBF7] text-[#3f4642] select-none"
+                onClick={openIntro}
+                className="absolute inset-0 w-full h-full z-[999999] cursor-pointer flex flex-col items-center justify-center bg-[#FDFBF7] text-[#3f4642] select-none"
                 initial={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.5, ease: "easeInOut" }}
