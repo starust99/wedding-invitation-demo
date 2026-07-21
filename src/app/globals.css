@@ -4081,6 +4081,21 @@ html.splash-skipped body {
   overflow: auto !important;
 }
 
+/* Fail-safe CSS rule: When splash is skipped/done or not active, force 100% opacity on all hero elements instantly */
+html.splash-skipped .hero-logo-fade,
+html.splash-skipped .hero-photo-fade,
+html.splash-skipped .hero-ornament-fade-left,
+html.splash-skipped .hero-ornament-fade-right,
+html.splash-skipped .hero-text-fade,
+body:not(.splash-active) .hero-logo-fade,
+body:not(.splash-active) .hero-photo-fade,
+body:not(.splash-active) .hero-ornament-fade-left,
+body:not(.splash-active) .hero-ornament-fade-right,
+body:not(.splash-active) .hero-text-fade {
+  opacity: 1 !important;
+  transform: none !important;
+}
+
 /* Watercolor illustration blending styles */
 .watercolor-blend-container {
   position: relative !important;

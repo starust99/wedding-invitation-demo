@@ -4,18 +4,34 @@ import { motion, useInView } from "framer-motion";
 import { useRef, useSyncExternalStore, useState, useEffect } from "react";
 
 export let isIntroDone = false;
-if (typeof window !== "undefined") {
+
+function checkLocalStorageIntro(): boolean {
+  if (typeof window === "undefined") return false;
   try {
     const shouldForce = new URLSearchParams(window.location.search).get("intro") === "1";
     const keys = Object.keys(window.localStorage);
     const hasSeen = keys.some(key => key.startsWith("wedding-splash:") && window.localStorage.getItem(key) === "1");
-    if (hasSeen && !shouldForce) {
-      isIntroDone = true;
-    }
-  } catch (e) {
-    // Fail-safe for private browsing modes or locked sessionStorage
+    return hasSeen && !shouldForce;
+  } catch {
+    return false;
   }
 }
+
+export function checkIsIntroDone(): boolean {
+  if (isIntroDone) return true;
+  if (checkLocalStorageIntro()) {
+    isIntroDone = true;
+    return true;
+  }
+  return false;
+}
+
+if (typeof window !== "undefined") {
+  if (checkLocalStorageIntro()) {
+    isIntroDone = true;
+  }
+}
+
 const introDoneListeners = new Set<() => void>();
 
 function notifyIntroDone() {
@@ -36,24 +52,24 @@ function subscribeIntroDone(listener: () => void) {
 }
 
 function getIntroDoneSnapshot() {
-  return isIntroDone;
+  return checkIsIntroDone();
 }
 
 export function useRevealReady(isInView: boolean) {
   const [mounted, setMounted] = useState(false);
-  const [delayedReady, setDelayedReady] = useState(() => isIntroDone);
   const introDone = useSyncExternalStore(subscribeIntroDone, getIntroDoneSnapshot, () => false);
+  const isDoneNow = introDone || checkIsIntroDone();
+  const [delayedReady, setDelayedReady] = useState(() => isDoneNow);
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  const isActuallyReady = (introDone || isIntroDone) && isInView;
+  const isActuallyReady = (introDone || isDoneNow) && isInView;
 
   useEffect(() => {
     if (isActuallyReady && mounted) {
-      // If intro is already done on load (reload / return navigation), reveal immediately with 0ms delay
-      if (isIntroDone) {
+      if (isDoneNow) {
         setDelayedReady(true);
         return;
       }
@@ -65,17 +81,18 @@ export function useRevealReady(isInView: boolean) {
     } else {
       setDelayedReady(false);
     }
-  }, [isActuallyReady, mounted]);
+  }, [isActuallyReady, isDoneNow, mounted]);
 
-  if (!mounted && !isIntroDone) return false;
-  return delayedReady || isIntroDone;
+  if (!mounted && !isDoneNow) return false;
+  return delayedReady || isDoneNow;
 }
 
 export function LineReveal({ children, delay = 0, className = "" }: { children: React.ReactNode; delay?: number; className?: string }) {
   const ref = useRef(null);
   const ready = useRevealReady(true);
+  const isDone = checkIsIntroDone();
 
-  if (isIntroDone) {
+  if (isDone) {
     return (
       <div ref={ref} className={className}>
         <div className="hero-text-fade is-visible" style={{ opacity: 1, transform: "none", transition: "none" }}>
@@ -102,8 +119,9 @@ export function WriteReveal({ children, delay = 0, className = "" }: { children:
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "0px 0px -8% 0px" });
   const ready = useRevealReady(isInView);
+  const isDone = checkIsIntroDone();
 
-  if (isIntroDone) {
+  if (isDone) {
     return <div ref={ref} className={className}>{children}</div>;
   }
 
@@ -124,8 +142,9 @@ export function FadeUp({ children, delay = 0, className = "" }: { children: Reac
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "0px 0px -8% 0px" });
   const ready = useRevealReady(isInView);
+  const isDone = checkIsIntroDone();
 
-  if (isIntroDone) {
+  if (isDone) {
     return <div ref={ref} className={className}>{children}</div>;
   }
 
@@ -146,8 +165,9 @@ export function PopReveal({ children, delay = 0, className = "" }: { children: R
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "0px 0px -8% 0px" });
   const ready = useRevealReady(isInView);
+  const isDone = checkIsIntroDone();
 
-  if (isIntroDone) {
+  if (isDone) {
     return <div ref={ref} className={className}>{children}</div>;
   }
 

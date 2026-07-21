@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { ChevronDown } from "lucide-react";
-import { LineReveal, useRevealReady, isIntroDone } from "@/components/ui/CinematicReveal";
+import { LineReveal, useRevealReady, checkIsIntroDone } from "@/components/ui/CinematicReveal";
 import type { WeddingHeroEditorConfig } from "@/lib/wedding/hero-types";
 
 type ReferenceWeddingHeroProps = {
@@ -32,6 +32,9 @@ function stripRepeatedHeroInvitePrefix(text: string) {
 
 export function ReferenceWeddingHero({ config, summary }: ReferenceWeddingHeroProps) {
   const ready = useRevealReady(true);
+  const isDone = checkIsIntroDone();
+  const isHeroVisible = ready || isDone;
+
   const [imageLoaded, setImageLoaded] = useState(false);
   const imgRef = useRef<HTMLImageElement>(null);
 
@@ -45,8 +48,8 @@ export function ReferenceWeddingHero({ config, summary }: ReferenceWeddingHeroPr
     summary?.invitationLine || config.content.description,
   );
 
-  const textHeaderDelay = isIntroDone ? 0 : 1.05;
-  const textBodyDelay = isIntroDone ? 0 : 1.2;
+  const textHeaderDelay = isDone ? 0 : 1.05;
+  const textBodyDelay = isDone ? 0 : 1.2;
 
   return (
     <section id="home" className="save-date-hero save-date-hero-arch">
@@ -57,8 +60,8 @@ export function ReferenceWeddingHero({ config, summary }: ReferenceWeddingHeroPr
         aria-label="Long Nhật † Anh Phương"
       >
         <div
-          className={`save-date-name-logo hero-logo-fade ${ready ? "is-visible" : ""}`}
-          style={{ transitionDelay: isIntroDone ? "0s" : "0.15s" }}
+          className={`save-date-name-logo hero-logo-fade ${isHeroVisible ? "is-visible" : ""}`}
+          style={{ transitionDelay: isDone ? "0s" : "0.15s" }}
           aria-hidden="true"
         >
           <Image
@@ -74,8 +77,8 @@ export function ReferenceWeddingHero({ config, summary }: ReferenceWeddingHeroPr
       <div className="save-date-arch-shell">
         <div className="save-date-arch-wrapper">
           <div
-            className={`hero-photo-fade ${ready && imageLoaded ? "is-visible" : ""}`}
-            style={{ transitionDelay: isIntroDone ? "0s" : "0.45s" }}
+            className={`hero-photo-fade ${isDone || (ready && imageLoaded) ? "is-visible" : ""}`}
+            style={{ transitionDelay: isDone ? "0s" : "0.45s" }}
           >
             {/* Invisible img for preloading and onload detection outside figure */}
             <img
@@ -128,8 +131,8 @@ export function ReferenceWeddingHero({ config, summary }: ReferenceWeddingHeroPr
 
           {/* Left Ornament */}
           <div
-            className={`save-date-hero-ornament save-date-hero-ornament-left hero-ornament-fade-left ${ready ? "is-visible" : ""}`}
-            style={{ transitionDelay: isIntroDone ? "0s" : "0.7s" }}
+            className={`save-date-hero-ornament save-date-hero-ornament-left hero-ornament-fade-left ${isHeroVisible ? "is-visible" : ""}`}
+            style={{ transitionDelay: isDone ? "0s" : "0.7s" }}
           >
             <Image
               src="/assets/hero-corner-left-v2.png"
@@ -143,8 +146,8 @@ export function ReferenceWeddingHero({ config, summary }: ReferenceWeddingHeroPr
 
           {/* Right Ornament */}
           <div
-            className={`save-date-hero-ornament save-date-hero-ornament-right hero-ornament-fade-right ${ready ? "is-visible" : ""}`}
-            style={{ transitionDelay: isIntroDone ? "0s" : "0.85s" }}
+            className={`save-date-hero-ornament save-date-hero-ornament-right hero-ornament-fade-right ${isHeroVisible ? "is-visible" : ""}`}
+            style={{ transitionDelay: isDone ? "0s" : "0.85s" }}
           >
             <Image
               src="/assets/hero-corner-right-v3.png"
