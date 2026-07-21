@@ -4114,22 +4114,15 @@ textarea {
   animation: heroTextKeyframes 1.2s cubic-bezier(0.25, 1, 0.5, 1) 1.2s forwards;
 }
 
-/* Instant splash skip styles to prevent hydration flash */
-html.splash-skipped [role="dialog"][aria-label="Mở thiệp cưới"] {
+/* Instant splash skip styles to prevent hydration flash when loading page after splash seen */
+html.splash-skipped:not(.splash-active) [role="dialog"][aria-label="Mở thiệp cưới"] {
   display: none !important;
 }
 html.splash-skipped body {
   overflow: auto !important;
 }
 
-/* Fail-safe CSS rule: When splash is skipped/done or in static mode, force 100% opacity on all hero elements instantly */
-html.splash-skipped .hero-logo-fade,
-html.splash-skipped .hero-photo-fade,
-html.splash-skipped .hero-ornament-fade-left,
-html.splash-skipped .hero-ornament-fade-right,
-html.splash-skipped .hero-text-fade,
-html.splash-skipped .hero-text-fade-header,
-html.splash-skipped .hero-text-fade-body,
+/* Fail-safe CSS rule: When hero is in static mode (reload / F5 / return navigation), force 100% opacity instantly */
 .hero-static .hero-logo-fade,
 .hero-static .hero-photo-fade,
 .hero-static .hero-ornament-fade-left,

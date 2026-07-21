@@ -174,7 +174,6 @@ export function WeddingSplashIntro({
 
   const closeIntro = useCallback(() => {
     markSplashSeen(sessionKey);
-    document.documentElement.classList.add("splash-skipped");
     setStatus("hidden");
     // Dispatch immediately so Hero animations run concurrently with the exit transition
     window.dispatchEvent(new Event("introFinished"));
@@ -218,8 +217,11 @@ export function WeddingSplashIntro({
           className="fixed inset-0 z-[80] grid min-h-dvh place-items-center overflow-hidden bg-[#FBF8F1] text-ink"
           initial={{ opacity: 1 }}
           animate={{ opacity: 1 }}
-          exit={{ opacity: 0, scale: 1.05 }}
+          exit={{ opacity: 0, scale: 1.05, filter: "blur(6px)" }}
           transition={{ duration: isImmediateClose ? 0 : 1.2, ease: "easeInOut" }}
+          onAnimationComplete={() => {
+            document.documentElement.classList.add("splash-skipped");
+          }}
         >
           {/* Synchronous script to immediately hide splash screen on mount if already seen to prevent flash */}
           <script
