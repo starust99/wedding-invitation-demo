@@ -8,9 +8,11 @@ export let isIntroDone = false;
 function checkLocalStorageIntro(): boolean {
   if (typeof window === "undefined") return false;
   try {
-    const shouldForce = new URLSearchParams(window.location.search).get("intro") === "1" || window.location.href.includes("intro=1");
-    const keys = Object.keys(window.sessionStorage);
-    const hasSeen = keys.some(key => key.startsWith("wedding-splash:") && window.sessionStorage.getItem(key) === "1");
+    const search = window.location.search || "";
+    const href = window.location.href || "";
+    const shouldForce = search.includes("intro=1") || href.includes("intro=1");
+    const keys = Object.keys(window.localStorage);
+    const hasSeen = keys.some(key => key.startsWith("wedding-splash:") && window.localStorage.getItem(key) === "1");
     return hasSeen && !shouldForce;
   } catch {
     return false;

@@ -19,13 +19,13 @@ function readForceIntro() {
 
 function markSplashSeen(key: string) {
   try {
-    window.sessionStorage.setItem(key, "1");
+    window.localStorage.setItem(key, "1");
   } catch {}
 }
 
 function hasSeenSplash(key: string) {
   try {
-    return window.sessionStorage.getItem(key) === "1";
+    return window.localStorage.getItem(key) === "1";
   } catch {
     return false;
   }
@@ -206,7 +206,9 @@ export function WeddingSplashIntro({
               __html: `
                 try {
                   var key = "wedding-splash:" + "${storageKey}";
-                  var shouldForce = new URLSearchParams(window.location.search).get("intro") === "1";
+                  var search = window.location.search || "";
+                  var href = window.location.href || "";
+                  var shouldForce = search.indexOf("intro=1") !== -1 || href.indexOf("intro=1") !== -1;
                   if (window.localStorage.getItem(key) === "1" && !shouldForce) {
                     var style = document.createElement('style');
                     style.innerHTML = '#wedding-splash-screen { display: none !important; }';
