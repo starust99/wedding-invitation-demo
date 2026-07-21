@@ -45,8 +45,8 @@ export function ReferenceWeddingHero({ config, summary }: ReferenceWeddingHeroPr
     summary?.invitationLine || config.content.description,
   );
 
-  const textHeaderDelay = 1.05;
-  const textBodyDelay = 1.2;
+  const textHeaderDelay = isIntroDone ? 0 : 1.05;
+  const textBodyDelay = isIntroDone ? 0 : 1.2;
 
   return (
     <section id="home" className="save-date-hero save-date-hero-arch">
@@ -58,7 +58,7 @@ export function ReferenceWeddingHero({ config, summary }: ReferenceWeddingHeroPr
       >
         <div
           className={`save-date-name-logo hero-logo-fade ${ready ? "is-visible" : ""}`}
-          style={{ transitionDelay: "0.15s" }}
+          style={{ transitionDelay: isIntroDone ? "0s" : "0.15s" }}
           aria-hidden="true"
         >
           <Image
@@ -75,7 +75,7 @@ export function ReferenceWeddingHero({ config, summary }: ReferenceWeddingHeroPr
         <div className="save-date-arch-wrapper">
           <div
             className={`hero-photo-fade ${ready && imageLoaded ? "is-visible" : ""}`}
-            style={{ transitionDelay: "0.45s" }}
+            style={{ transitionDelay: isIntroDone ? "0s" : "0.45s" }}
           >
             {/* Invisible img for preloading and onload detection outside figure */}
             <img
@@ -129,13 +129,14 @@ export function ReferenceWeddingHero({ config, summary }: ReferenceWeddingHeroPr
           {/* Left Ornament */}
           <div
             className={`save-date-hero-ornament save-date-hero-ornament-left hero-ornament-fade-left ${ready ? "is-visible" : ""}`}
-            style={{ transitionDelay: "0.7s" }}
+            style={{ transitionDelay: isIntroDone ? "0s" : "0.7s" }}
           >
             <Image
               src="/assets/hero-corner-left-v2.png"
               alt=""
               width={250}
               height={250}
+              priority
               className="object-contain pointer-events-none"
             />
           </div>
@@ -143,13 +144,14 @@ export function ReferenceWeddingHero({ config, summary }: ReferenceWeddingHeroPr
           {/* Right Ornament */}
           <div
             className={`save-date-hero-ornament save-date-hero-ornament-right hero-ornament-fade-right ${ready ? "is-visible" : ""}`}
-            style={{ transitionDelay: "0.85s" }}
+            style={{ transitionDelay: isIntroDone ? "0s" : "0.85s" }}
           >
             <Image
               src="/assets/hero-corner-right-v3.png"
               alt=""
               width={250}
               height={250}
+              priority
               className="object-contain pointer-events-none"
             />
           </div>
@@ -162,6 +164,7 @@ export function ReferenceWeddingHero({ config, summary }: ReferenceWeddingHeroPr
                 src="/assets/hero-invite-heading-v5.png"
                 alt=""
                 fill
+                priority
                 aria-hidden="true"
                 sizes="(max-width: 767px) 78vw, 24rem"
                 className="object-contain"

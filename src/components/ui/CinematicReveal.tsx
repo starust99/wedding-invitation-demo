@@ -44,9 +44,6 @@ export function useRevealReady(isInView: boolean) {
   const [delayedReady, setDelayedReady] = useState(false);
   const introDone = useSyncExternalStore(subscribeIntroDone, getIntroDoneSnapshot, () => false);
 
-  // Track if the intro was already completed on mount (e.g. splash skipped)
-  const [wasIntroDoneOnMount] = useState(() => isIntroDone);
-
   useEffect(() => {
     setMounted(true);
   }, []);
@@ -55,7 +52,11 @@ export function useRevealReady(isInView: boolean) {
 
   useEffect(() => {
     if (isActuallyReady && mounted) {
-      // Add a safe 850ms delay to allow the Splash envelope to fade out (first load) or prevent layout lag (reload)
+      // If intro is already done on load (reload / splash skipped), reveal immediately with 0ms delay
+      if (isIntroDone) {
+        setDelayedReady(true);
+        return;
+      }
       const delayTime = 850;
       const timer = setTimeout(() => {
         setDelayedReady(true);
@@ -84,7 +85,7 @@ export function LineReveal({ children, delay = 0, className = "" }: { children: 
       <div ref={ref} className={className}>
         <div
           className={`hero-text-fade ${ready ? "is-visible" : ""}`}
-          style={{ transitionDelay: `${delay}s` }}
+          style={{ transitionDelay: isIntroDone ? "0s" : `${delay}s` }}
         >
           {children}
         </div>
