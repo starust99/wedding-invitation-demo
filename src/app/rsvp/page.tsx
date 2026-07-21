@@ -261,7 +261,12 @@ export default function RSVPPage() {
   const [guestRsvpLocked, setGuestRsvpLocked] = useState(false);
   const [isAdminBypassed, setIsAdminBypassed] = useState(false);
   const [adminLoginError, setAdminLoginError] = useState("");
-  const { navigateWithTransition } = usePageTransition();
+  const { navigateWithTransition, prefetch } = usePageTransition();
+
+  // Prefetch home page / on mount for instant return navigation
+  useEffect(() => {
+    prefetch("/");
+  }, [prefetch]);
 
   const handleAdminLogin = async (password: string) => {
     setAdminLoginError("");

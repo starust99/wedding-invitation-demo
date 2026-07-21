@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { HeartHandshake } from "lucide-react";
 import { SectionMediaLayers } from "@/components/SectionMediaLayers";
 import type { WeddingConfig } from "@/lib/site-settings";
@@ -18,7 +18,12 @@ export function RsvpSection({
   rsvpHref?: string;
 }) {
   const inviteCopy = useMemo(() => buildInvitationCopy(guestIdentity), [guestIdentity]);
-  const { navigateWithTransition } = usePageTransition();
+  const { navigateWithTransition, prefetch } = usePageTransition();
+
+  // Prefetch /rsvp as soon as RsvpSection is rendered
+  useEffect(() => {
+    prefetch(rsvpHref);
+  }, [prefetch, rsvpHref]);
 
   return (
     <section id="rsvp" className="cinematic-stage editorial-band relative overflow-hidden px-5 py-24 text-ink sm:px-8 sm:py-28 lg:py-32">
@@ -65,6 +70,8 @@ export function RsvpSection({
               <button
                 type="button"
                 onClick={() => navigateWithTransition(rsvpHref)}
+                onMouseEnter={() => prefetch(rsvpHref)}
+                onTouchStart={() => prefetch(rsvpHref)}
                 className="mt-8 inline-flex h-[3.5rem] sm:h-[4.2rem] w-full max-w-[13.5rem] sm:max-w-[16.5rem] items-center justify-center transition hover:-translate-y-0.5 save-date-watercolor-btn"
               >
                 <span className="save-date-btn-label font-sans">

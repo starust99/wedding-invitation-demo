@@ -5,17 +5,19 @@ import { usePathname, useRouter } from "next/navigation";
 
 type TransitionContextValue = {
   navigateWithTransition: (href: string) => void;
+  prefetch: (href: string) => void;
 };
 
 const TransitionContext = createContext<TransitionContextValue>({
   navigateWithTransition: () => {},
+  prefetch: () => {},
 });
 
 export function usePageTransition() {
   return useContext(TransitionContext);
 }
 
-const EXIT_MS = 300;
+const EXIT_MS = 160;
 
 export function PageTransitionEffect({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -23,29 +25,40 @@ export function PageTransitionEffect({ children }: { children: React.ReactNode }
   const [leaving, setLeaving] = useState(false);
   const navRef = useRef(false);
 
+  const prefetch = useCallback(
+    (href: string) => {
+      try {
+        router.prefetch(href);
+      } catch {
+        // Silently swallow prefetch errors
+      }
+    },
+    [router],
+  );
+
   const navigateWithTransition = useCallback(
     (href: string) => {
       if (navRef.current) return;
       navRef.current = true;
 
-      // Phase 1: fade out current page
+      // Trigger prefetch and exit transition concurrently
+      prefetch(href);
       setLeaving(true);
 
-      // Phase 2: navigate after fade-out completes
+      // Push route in parallel (40ms) while exit transition completes
       setTimeout(() => {
         router.push(href);
-        // Reset after navigation
         setTimeout(() => {
           setLeaving(false);
           navRef.current = false;
-        }, 50);
-      }, EXIT_MS);
+        }, EXIT_MS);
+      }, 40);
     },
-    [router],
+    [prefetch, router],
   );
 
   return (
-    <TransitionContext.Provider value={{ navigateWithTransition }}>
+    <TransitionContext.Provider value={{ navigateWithTransition, prefetch }}>
       <div
         key={pathname}
         className={`page-transition-wrapper ${leaving ? "page-leaving" : ""}`}
