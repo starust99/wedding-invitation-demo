@@ -36,17 +36,21 @@ export function ThankYouSection({
   const isBoth = rsvpAttendingCeremony === true && rsvpAttendingBanquet === true;
   const isDefault = !isDeclined && !isCeremonyOnly && !isBanquetOnly && !isBoth;
 
+  const recipient = inviteCopy.shortRecipientLabel === "quý khách"
+    ? "Quý khách"
+    : inviteCopy.shortRecipientLabel.charAt(0).toUpperCase() + inviteCopy.shortRecipientLabel.slice(1);
+
   let thankYouMessage = "";
   if (rsvpAttending === "no") {
-    thankYouMessage = `${inviteCopy.hostSubject} đã ghi nhận phản hồi không thể tham dự của ${inviteCopy.shortRecipientLabel}. Rất hy vọng sẽ có dịp được đón tiếp ${inviteCopy.shortRecipientLabel} trong những sự kiện sắp tới của ${inviteCopy.hostPronoun}.`;
+    thankYouMessage = `Xin chân thành cảm ơn ${recipient}. Rất hy vọng sẽ có dịp được đón tiếp ${recipient} vào một dịp khác.`;
   } else if (rsvpAttendingBanquet === false) {
-    thankYouMessage = `${inviteCopy.thankYouLine} Hẹn gặp ${inviteCopy.shortRecipientLabel} tại Thánh lễ Hôn phối sắp tới.`;
+    thankYouMessage = `Xin chân thành cảm ơn! Hẹn gặp ${recipient} tại Thánh lễ Hôn phối.`;
   } else if (rsvpAttendingCeremony === true && rsvpAttendingBanquet === true) {
-    thankYouMessage = `${inviteCopy.thankYouLine} Hẹn gặp ${inviteCopy.shortRecipientLabel} tại Thánh lễ Hôn phối và sau đó là Tiệc mừng ở ${config.venue.name} trong một buổi tối thật ấm áp.`;
+    thankYouMessage = `Xin chân thành cảm ơn! Hẹn gặp ${recipient} tại Thánh lễ Hôn phối và Tiệc cưới.`;
   } else if (rsvpAttendingCeremony === false && rsvpAttendingBanquet === true) {
-    thankYouMessage = `${inviteCopy.thankYouLine} Hẹn gặp ${inviteCopy.shortRecipientLabel} tại Tiệc mừng ở ${config.venue.name} trong một buổi tối thật ấm áp.`;
+    thankYouMessage = `Xin chân thành cảm ơn! Hẹn gặp ${recipient} vào buổi Tiệc cưới thân mật tại Đà Lạt.`;
   } else {
-    thankYouMessage = `${inviteCopy.thankYouLine} Hẹn gặp ${inviteCopy.shortRecipientLabel} tại ${config.venue.name} trong một buổi tối thật ấm áp.`;
+    thankYouMessage = `Xin chân thành cảm ơn! Hẹn gặp ${recipient} tại ngày vui sắp tới.`;
   }
 
   return (
@@ -93,7 +97,7 @@ export function ThankYouSection({
                         href={galleryLink}
                         target="_blank"
                         rel="noreferrer"
-                        className="inline-flex h-[3.8rem] sm:h-[4.5rem] lg:h-[5rem] text-[1.02rem] sm:text-lg items-center justify-center transition hover:-translate-y-0.5 save-date-watercolor-btn"
+                        className="inline-flex h-[3.8rem] sm:h-[4.5rem] lg:h-[5rem] w-full max-w-[14.5rem] sm:max-w-[17.5rem] text-[1.02rem] sm:text-lg items-center justify-center transition hover:-translate-y-0.5 save-date-watercolor-btn"
                       >
                         <span className="save-date-btn-label font-sans">
                           <ImageIcon aria-hidden="true" size={16} className="sm:w-[18px] sm:h-[18px]" />
@@ -104,7 +108,7 @@ export function ThankYouSection({
                       <button
                         type="button"
                         onClick={() => navigateWithTransition(rsvpHref)}
-                        className="inline-flex h-[3.8rem] sm:h-[4.5rem] lg:h-[5rem] text-[1.02rem] sm:text-lg items-center justify-center transition hover:-translate-y-0.5 save-date-watercolor-btn"
+                        className="inline-flex h-[3.8rem] sm:h-[4.5rem] lg:h-[5rem] w-full max-w-[14.5rem] sm:max-w-[17.5rem] text-[1.02rem] sm:text-lg items-center justify-center transition hover:-translate-y-0.5 save-date-watercolor-btn"
                       >
                         <span className="save-date-btn-label font-sans">
                           <HeartHandshake aria-hidden="true" size={16} className="sm:w-[18px] sm:h-[18px]" />
@@ -118,7 +122,7 @@ export function ThankYouSection({
                         href={config.church?.mapUrl || config.venue.mapUrl}
                         target="_blank"
                         rel="noreferrer"
-                        className="inline-flex h-[3.8rem] sm:h-[4.5rem] lg:h-[5rem] text-[1.02rem] sm:text-lg items-center justify-center transition hover:-translate-y-0.5 save-date-watercolor-btn"
+                        className="inline-flex h-[3.8rem] sm:h-[4.5rem] lg:h-[5rem] w-full max-w-[14.5rem] sm:max-w-[17.5rem] text-[1.02rem] sm:text-lg items-center justify-center transition hover:-translate-y-0.5 save-date-watercolor-btn"
                       >
                         <span className="save-date-btn-label font-sans">
                         <MapPin aria-hidden="true" size={16} className="sm:w-[18px] sm:h-[18px]" />
@@ -133,11 +137,11 @@ export function ThankYouSection({
                         href={config.venue.mapUrl}
                         target="_blank"
                         rel="noreferrer"
-                        className="inline-flex h-[3.8rem] sm:h-[4.5rem] lg:h-[5rem] text-[1.02rem] sm:text-lg items-center justify-center transition hover:-translate-y-0.5 save-date-watercolor-btn"
+                        className="inline-flex h-[3.8rem] sm:h-[4.5rem] lg:h-[5rem] w-full max-w-[14.5rem] sm:max-w-[17.5rem] text-[1.02rem] sm:text-lg items-center justify-center transition hover:-translate-y-0.5 save-date-watercolor-btn"
                       >
                         <span className="save-date-btn-label font-sans">
                         <MapPin aria-hidden="true" size={16} className="sm:w-[18px] sm:h-[18px]" />
-                        <span>{isBanquetOnly || isBoth ? "Đến Tiệc mừng" : "Chỉ đường"}</span>
+                        <span>{isBanquetOnly || isBoth ? "Đến Tiệc cưới" : "Chỉ đường"}</span>
                       </span>
                       </a>
                     ) : null}

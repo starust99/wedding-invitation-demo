@@ -15,6 +15,7 @@ import {
   Lock,
   Info,
   X,
+  Check,
 } from "lucide-react";
 import { weddingConfig } from "@/config/wedding.config";
 import {
@@ -150,39 +151,39 @@ function buildSubmissionCopy(
 
   if (attending === "no") {
     return {
-      title: "Đã gửi lời nhắn",
-      body: `${inviteCopy.rsvpReceivedLine} thành công. ${host} chân thành cảm ơn ${recipient} đã gửi lời nhắn chúc phúc. Dù rất tiếc không thể chung vui trực tiếp, ${host} vẫn luôn trân trọng tình cảm của ${recipient} và hẹn gặp lại vào một dịp sớm nhất.`,
+      title: "Đã xác nhận",
+      body: `Cảm ơn ${recipient} đã phản hồi.\n\nDù rất tiếc không thể chung vui trực tiếp, ${host} vẫn luôn trân trọng tình cảm của ${recipient} và hẹn gặp lại vào một dịp sớm nhất.`,
       showCalendar: false,
     };
   }
 
   if (attendingCeremony === "yes" && attendingBanquet === "yes") {
     return {
-      title: "Đã xác nhận tham dự",
-      body: `Lời hồi đáp đã được gửi thành công. ${host} vô cùng hạnh phúc khi biết ${recipient} sẽ có mặt ở cả Thánh lễ Hôn phối lẫn Tiệc cưới để chung vui. Sự hiện diện của ${recipient} chính là món quà ý nghĩa nhất dành cho ${inviteCopy.tone === "parents_host" ? "gia đình" : "hai đứa"}. Hẹn gặp ${recipient} tại ngày cưới sắp tới!`,
+      title: "Đã xác nhận",
+      body: `Lời hồi đáp đã được gửi thành công!\n\nThật hạnh phúc khi biết ${recipient} sẽ có mặt ở cả Thánh lễ Hôn phối lẫn Tiệc cưới để chung vui cùng Nhật & Phương.\n\nSự hiện diện của ${recipient} chính là món quà ý nghĩa nhất. Chân thành cảm ơn!`,
       showCalendar: true,
     };
   }
 
   if (attendingCeremony === "yes" && attendingBanquet === "no") {
     return {
-      title: "Xác nhận tham dự Thánh lễ",
-      body: `Lời hồi đáp đã được gửi thành công. ${host} vô cùng trân quý và cảm ơn ${recipient} đã sắp xếp thời gian đến chứng kiến Thánh lễ Hôn phối của ${inviteCopy.tone === "parents_host" ? "hai cháu" : "hai đứa"}. Dù rất tiếc không thể đồng hành cùng ${recipient} trong đêm Tiệc cưới, sự hiện diện của ${recipient} tại Nhà thờ đã là niềm hạnh phúc vô cùng lớn đối với ${inviteCopy.tone === "parents_host" ? "gia đình" : "chúng em"}.`,
+      title: "Đã xác nhận",
+      body: `Lời hồi đáp đã được gửi thành công!\n\nCảm ơn ${recipient} đã sắp xếp thời gian đến chứng kiến và hiệp thông trong Thánh lễ Hôn phối của Nhật & Phương.\n\nDù rất tiếc không thể đồng hành cùng ${recipient} trong buổi Tiệc cưới, sự hiện diện của ${recipient} tại Nhà thờ đã là niềm hạnh phúc vô cùng lớn đối với ${inviteCopy.tone === "parents_host" ? "gia đình" : "chúng em"}.`,
       showCalendar: true,
     };
   }
 
   if (attendingCeremony === "no" && attendingBanquet === "yes") {
     return {
-      title: "Xác nhận tham dự Tiệc cưới",
-      body: `Lời hồi đáp đã được gửi thành công. ${host} rất vui mừng khi ${recipient} sẽ đến chung vui trong đêm Tiệc cưới ấm áp. Chân thành cảm ơn sự hiện diện và những lời chúc phúc ngọt ngào của ${recipient}. Hẹn sớm gặp ${recipient} tại Đà Lạt!`,
+      title: "Đã xác nhận",
+      body: `Lời hồi đáp đã được gửi thành công!\n\nCảm ơn ${recipient} đã sắp xếp thời gian đến chung vui tại Tiệc cưới của Nhật & Phương, sự hiện diện của ${recipient} tại buổi tiệc là niềm hạnh phúc vô cùng lớn đối với ${inviteCopy.tone === "parents_host" ? "gia đình" : "chúng em"}.\n\nHẹn sớm gặp ${recipient} tại Đà Lạt!`,
       showCalendar: true,
     };
   }
 
   return {
-    title: "Đã ghi nhận tham dự",
-    body: `Lời hồi đáp đã được gửi thành công. ${inviteCopy.closingLine}`,
+    title: "Đã xác nhận",
+    body: `Lời hồi đáp đã được gửi thành công.\n\n${inviteCopy.closingLine}`,
     showCalendar: true,
   };
 }
@@ -330,6 +331,7 @@ export default function RSVPPage() {
   const lodgingGuests = normalizeLodgingGuests((watchedLodgingGuests ?? []) as Array<Partial<LodgingGuestForm> | undefined>);
   const terracottaNote = buildTerracottaNote(lodgingGuests);
   const canRegisterStay = attending !== "no";
+  const hasAnsweredBothEvents = attendingCeremony !== null && attendingBanquet !== null;
 
   useEffect(() => {
     let cancelled = false;
@@ -720,10 +722,18 @@ export default function RSVPPage() {
         <div className="flex justify-start mb-6">
           <button
             type="button"
-            onClick={() => navigateWithTransition(returnHref)}
+            onClick={() => {
+              if (isSubmitted || isReviewing) {
+                setIsSubmitted(false);
+                setIsReviewing(false);
+                window.scrollTo({ top: 0, behavior: "smooth" });
+              } else {
+                navigateWithTransition(returnHref);
+              }
+            }}
             className="wedding-type-button inline-flex items-center gap-2 text-[#252934]/62 transition hover:text-[#252934] font-semibold text-sm"
           >
-            <ArrowLeft className="h-4 w-4" /> Về trang thiệp
+            <ArrowLeft className="h-4 w-4" /> {(isSubmitted || isReviewing) ? "Quay lại trang hồi đáp" : "Về trang thiệp"}
           </button>
         </div>
 
@@ -742,11 +752,8 @@ export default function RSVPPage() {
               className="px-4 sm:px-6 text-center flex flex-col items-center"
             >
               <h2 className="wedding-type-title mt-2 text-[#252934] font-serif italic text-2xl sm:text-3xl font-bold">{submissionCopy.title}</h2>
-              <p className="wedding-type-body mt-4 max-w-lg mx-auto text-[#252934]/62 leading-relaxed">
+              <p className="wedding-type-body mt-4 max-w-lg mx-auto text-[#252934]/70 leading-relaxed whitespace-pre-line text-center">
                 {submissionCopy.body}
-              </p>
-              <p className="wedding-type-body mt-3 max-w-lg mx-auto text-[#252934]/54 text-sm leading-relaxed">
-                Ngay sau khi quay lại trang thiệp, phần cảm ơn và hướng dẫn tiếp theo sẽ hiện sẵn ở cuối trang để {inviteCopy.shortRecipientLabel} dễ theo dõi.
               </p>
 
               {submissionCopy.showCalendar ? (
@@ -773,7 +780,6 @@ export default function RSVPPage() {
                   </div>
                 </div>
               ) : null}
-
               <div className="mt-12">
                 <button
                   type="button"
@@ -791,90 +797,84 @@ export default function RSVPPage() {
               transition={{ duration: 0.4 }}
               className="px-4 sm:px-8 text-center flex flex-col items-center w-full max-w-2xl mx-auto py-2 sm:py-4"
             >
-              {/* Title */}
-              <h2 className="wedding-type-title text-[#252934] font-serif italic text-2xl sm:text-3xl font-bold mb-6">
+              <h2 className="wedding-type-title text-[#252934] font-serif italic font-bold mb-5 !text-[2.2rem] sm:!text-[2.6rem]">
                 Xác nhận thông tin hồi đáp
               </h2>
 
-              {/* Card xem lại thông tin */}
-              <div className="w-full rounded-[1.6rem] border border-serenity/20 bg-white/90 p-5 sm:p-8 shadow-[0_12px_36px_rgba(37,41,52,0.04)] text-left grid gap-5 mb-8">
+              <div className="w-full rounded-[1.8rem] border border-serenity/22 bg-white/95 p-6 sm:p-9 shadow-[0_16px_40px_rgba(37,41,52,0.05)] text-center grid gap-6 mb-8 backdrop-blur-md">
                 
-                {/* 1. Người hồi đáp */}
-                <div className="border-b border-serenity/16 pb-4">
-                  <p className="text-[11px] font-bold tracking-[0.14em] text-[#7a6a5d] uppercase mb-2">
-                    1. Người gửi hồi đáp
+                <div className="border-b border-serenity/16 pb-6">
+                  <p className="text-xs sm:text-sm font-bold tracking-[0.14em] text-[#54473b] uppercase text-center mb-2.5">
+                    1. NGƯỜI GỬI HỒI ĐÁP
                   </p>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm text-[#252934]">
-                    <div>
-                      <span className="text-[#252934]/60">Họ và tên: </span>
-                      <strong className="font-semibold">{formValues.honorific ? `${formValues.honorific} ` : ""}{formValues.name || inviteCopy.shortRecipientLabel}</strong>
-                    </div>
+                  <div className="text-center max-w-lg mx-auto w-full">
+                    <strong className="font-bold text-lg sm:text-xl text-[#252934] block">
+                      {formValues.honorific ? `${formValues.honorific} ` : ""}{formValues.name || inviteCopy.shortRecipientLabel}
+                    </strong>
                     {formValues.phone && (
-                      <div>
-                        <span className="text-[#252934]/60">Số điện thoại: </span>
-                        <span className="font-medium">{formValues.phone}</span>
-                      </div>
+                      <span className="font-medium text-sm text-[#7a6a5d] block mt-1">{formValues.phone}</span>
                     )}
                   </div>
                 </div>
 
-                {/* 2. Xác nhận tham dự */}
-                <div className="border-b border-serenity/16 pb-4">
-                  <p className="text-[11px] font-bold tracking-[0.14em] text-[#7a6a5d] uppercase mb-2">
-                    2. Tham dự sự kiện
+                <div className="border-b border-serenity/16 pb-6">
+                  <p className="text-xs sm:text-sm font-bold tracking-[0.14em] text-[#54473b] uppercase text-center mb-3.5">
+                    2. THAM DỰ SỰ KIỆN
                   </p>
-                  <div className="grid gap-2.5 text-sm text-[#252934]">
-                    {/* Sự kiện 1 */}
-                    <div className="flex items-center justify-between bg-[#fcfaf7] p-3.5 rounded-xl border border-serenity/12">
-                      <div>
-                        <p className="font-bold text-[#252934]">Thánh lễ Hôn phối</p>
-                        <p className="text-xs text-[#252934]/65">15:00 — Chủ Nhật, 20/12/2026</p>
+                  <div className="grid gap-3.5 text-sm text-[#252934] max-w-lg mx-auto w-full">
+                    <div className="flex items-center justify-between py-3.5 px-4.5 sm:px-5.5 rounded-2xl bg-serenity/8 border border-serenity/14">
+                      <div className="text-left">
+                        <p className="font-bold text-[#252934] text-base sm:text-lg">Thánh lễ Hôn phối</p>
+                        <p className="text-xs sm:text-sm text-[#7a6a5d] font-medium mt-0.5">15:00 • Chủ Nhật, 20/12/2026</p>
                       </div>
-                      <span className={`px-3.5 py-1.5 rounded-full text-xs font-bold ${
+                      <span className={`inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs sm:text-sm font-semibold shadow-xs shrink-0 ${
                         formValues.attendingCeremony === "yes" 
-                          ? "bg-[#7a8a5c]/15 text-[#58683e]" 
-                          : "bg-rose-100/70 text-[#7a4a4a]"
+                          ? "bg-[#7a8a5c] text-white" 
+                          : "bg-[#7a4a4a] text-white"
                       }`}>
-                        {formValues.attendingCeremony === "yes" ? "Sẽ tham dự" : "Không tham dự"}
+                        {formValues.attendingCeremony === "yes" ? (
+                          <><Check className="w-4 h-4 text-white" /> Sẽ tham dự</>
+                        ) : (
+                          <><X className="w-4 h-4 text-white" /> Không tham dự</>
+                        )}
                       </span>
                     </div>
 
-                    {/* Sự kiện 2 */}
-                    <div className="flex items-center justify-between bg-[#fcfaf7] p-3.5 rounded-xl border border-serenity/12">
-                      <div>
-                        <p className="font-bold text-[#252934]">Tiệc cưới</p>
-                        <p className="text-xs text-[#252934]/65">17:30 — Thứ Bảy, 26/12/2026</p>
+                    <div className="flex items-center justify-between py-3.5 px-4.5 sm:px-5.5 rounded-2xl bg-serenity/8 border border-serenity/14">
+                      <div className="text-left">
+                        <p className="font-bold text-[#252934] text-base sm:text-lg">Tiệc cưới</p>
+                        <p className="text-xs sm:text-sm text-[#7a6a5d] font-medium mt-0.5">17:30 • Thứ Bảy, 26/12/2026</p>
                       </div>
-                      <span className={`px-3.5 py-1.5 rounded-full text-xs font-bold ${
+                      <span className={`inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs sm:text-sm font-semibold shadow-xs shrink-0 ${
                         formValues.attendingBanquet === "yes" 
-                          ? "bg-[#7a8a5c]/15 text-[#58683e]" 
-                          : "bg-rose-100/70 text-[#7a4a4a]"
+                          ? "bg-[#7a8a5c] text-white" 
+                          : "bg-[#7a4a4a] text-white"
                       }`}>
-                        {formValues.attendingBanquet === "yes" ? "Sẽ tham dự" : "Không tham dự"}
+                        {formValues.attendingBanquet === "yes" ? (
+                          <><Check className="w-3.5 h-3.5 text-white" /> Sẽ tham dự</>
+                        ) : (
+                          <><X className="w-3.5 h-3.5 text-white" /> Không tham dự</>
+                        )}
                       </span>
                     </div>
                   </div>
                 </div>
 
-                {/* 3. Lưu trú (nếu chọn tham dự tiệc cưới) */}
                 {formValues.attendingBanquet === "yes" && (
-                  <div className="border-b border-serenity/16 pb-4">
-                    <p className="text-[11px] font-bold tracking-[0.14em] text-[#7a6a5d] uppercase mb-2">
-                      3. Lưu trú tại Resort Terracotta
+                  <div className="border-b border-serenity/16 pb-6">
+                    <p className="text-xs sm:text-sm font-bold tracking-[0.14em] text-[#54473b] uppercase text-center mb-2.5">
+                      3. LƯU TRÚ TẠI RESORT TERRACOTTA
                     </p>
-                    <div className="text-sm text-[#252934] grid gap-3">
-                      <div>
-                        <span className="text-[#252934]/60">Lựa chọn: </span>
-                        <strong className="font-semibold text-[#252934]">
-                          {stayDecision === "25" && "Nghỉ lại Đêm 25/12 (đêm trước tiệc)"}
-                          {stayDecision === "26" && "Nghỉ lại Đêm 26/12 (đêm sau tiệc)"}
-                          {stayDecision === "both" && "Nghỉ lại Cả hai đêm (25/12 & 26/12)"}
-                          {stayDecision === "none" && "Không nghỉ lại"}
-                        </strong>
-                      </div>
+                    <div className="text-sm text-[#252934] grid gap-3 text-center">
+                      <strong className="font-semibold text-[#252934] text-base sm:text-lg block">
+                        {stayDecision === "25" && "Nghỉ lại Đêm 25/12 (đêm trước tiệc)"}
+                        {stayDecision === "26" && "Nghỉ lại Đêm 26/12 (đêm sau tiệc)"}
+                        {stayDecision === "both" && "Nghỉ lại Cả hai đêm (25/12 & 26/12)"}
+                        {stayDecision === "none" && "Không nghỉ lại"}
+                      </strong>
 
                       {stayDecision !== "none" && lodgingGuests.length > 0 && (
-                        <div className="bg-[#fcfaf7] p-3.5 rounded-xl border border-serenity/12">
+                        <div className="bg-serenity/8 p-4.5 rounded-2xl border border-serenity/14 max-w-lg mx-auto w-full text-left mt-1">
                           <p className="text-xs font-bold text-[#7a6a5d] uppercase mb-2">
                             Danh sách người lưu trú ({lodgingGuests.length} người):
                           </p>
@@ -900,22 +900,21 @@ export default function RSVPPage() {
                   </div>
                 )}
 
-                {/* 4. Ghi chú & Lời nhắn */}
                 {(formValues.dietaryNote?.trim() || formValues.notes?.trim()) && (
                   <div>
-                    <p className="text-[11px] font-bold tracking-[0.14em] text-[#7a6a5d] uppercase mb-2">
-                      4. Ghi chú & Lời nhắn
+                    <p className="text-xs sm:text-sm font-bold tracking-[0.14em] text-[#54473b] uppercase text-center mb-3.5">
+                      4. GHI CHÚ & LỜI NHẮN
                     </p>
-                    <div className="grid gap-2.5 text-sm text-[#252934]">
+                    <div className="grid gap-3 text-sm text-[#252934] max-w-lg mx-auto w-full text-left">
                       {formValues.dietaryNote?.trim() && (
-                        <div className="bg-[#fcfaf7] p-3.5 rounded-xl border border-serenity/12">
-                          <p className="text-xs font-semibold text-[#7a6a5d] mb-0.5">Lưu ý thực đơn:</p>
+                        <div className="bg-serenity/8 p-4 rounded-2xl border border-serenity/14">
+                          <p className="text-xs font-semibold text-[#7a6a5d] mb-1">Lưu ý thực đơn:</p>
                           <p className="italic text-[#252934]/90">{formValues.dietaryNote.trim()}</p>
                         </div>
                       )}
                       {formValues.notes?.trim() && (
-                        <div className="bg-[#fcfaf7] p-3.5 rounded-xl border border-serenity/12">
-                          <p className="text-xs font-semibold text-[#7a6a5d] mb-0.5">Ghi chú / Lời nhắn:</p>
+                        <div className="bg-serenity/8 p-4 rounded-2xl border border-serenity/14">
+                          <p className="text-xs font-semibold text-[#7a6a5d] mb-1">Ghi chú / Lời nhắn:</p>
                           <p className="italic text-[#252934]/90">{formValues.notes.trim()}</p>
                         </div>
                       )}
@@ -924,33 +923,32 @@ export default function RSVPPage() {
                 )}
               </div>
 
-              {/* Nút thao tác */}
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-3.5 w-full max-w-md">
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-3.5 w-full max-w-xl mx-auto">
                 <button
                   type="button"
                   onClick={() => {
                     setIsReviewing(false);
                     window.scrollTo({ top: 0, behavior: "smooth" });
                   }}
-                  className="w-full sm:w-auto inline-flex h-12 items-center justify-center rounded-full border border-serenity/30 bg-white px-7 text-sm font-semibold text-[#252934] hover:bg-[#252934]/5 transition"
+                  className="w-full sm:w-auto min-w-[170px] inline-flex h-12 items-center justify-center rounded-full border border-serenity/30 bg-white px-7 text-sm font-semibold text-[#252934] hover:bg-white/80 transition shadow-xs whitespace-nowrap"
                 >
-                  <ArrowLeft className="w-4 h-4 mr-2" /> Chỉnh sửa lại
+                  <ArrowLeft className="w-4 h-4 mr-2 shrink-0" /> Chỉnh sửa lại
                 </button>
 
                 <motion.button
                   type="button"
                   onClick={handleSubmit(onSubmit)}
                   disabled={isSubmitting}
-                  className="w-full sm:w-auto light-sweep inline-flex h-12 items-center justify-center rounded-full bg-rose-quartz px-8 text-sm font-bold text-[#252934] shadow-[0_16px_48px_rgba(146,168,209,0.22)] ring-1 ring-rose-quartz/70 transition hover:-translate-y-0.5 disabled:opacity-60"
-                  whileHover={{ scale: 1.03 }}
-                  whileTap={{ scale: 0.97 }}
+                  className="w-full sm:w-auto sm:flex-1 light-sweep inline-flex h-12 items-center justify-center rounded-full bg-rose-quartz px-7 text-sm font-bold text-[#252934] shadow-[0_16px_48px_rgba(146,168,209,0.22)] ring-1 ring-rose-quartz/70 transition hover:-translate-y-0.5 disabled:opacity-60 whitespace-nowrap"
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
                 >
                   {isSubmitting ? (
                     <svg className="mr-2 h-4 w-4 animate-spin text-[#252934]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
                   ) : (
-                    <Mail className="mr-2 h-4 w-4" />
+                    <Mail className="mr-2 h-4 w-4 shrink-0" />
                   )}
-                  {isSubmitting ? "Đang gửi..." : "Xác nhận gửi hồi đáp"}
+                  <span className="whitespace-nowrap">{isSubmitting ? "Đang gửi..." : "Xác nhận gửi hồi đáp"}</span>
                 </motion.button>
               </div>
             </motion.div>
@@ -1285,55 +1283,59 @@ export default function RSVPPage() {
                   )}
                 </AnimatePresence>
 
-                {/* Ghi chú */}
-                <div className="rounded-[1.6rem] border border-serenity/18 bg-white/80 p-5 shadow-sm text-left mb-6">
-                  <p className="text-xs font-bold tracking-widest text-[#7a6a5d] uppercase mb-4">
-                    Ghi chú
-                  </p>
-                  {attending === "no" ? (
-                    <Field label="Lời nhắn gửi (không bắt buộc)">
-                      <textarea
-                        className={`${inputClass} min-h-32 py-4 text-left`}
-                        placeholder={`Nếu muốn, ${rsvpRecipientLabel} có thể để lại vài dòng nhắn gửi cho gia đình.`}
-                        {...register("notes")}
-                      />
-                    </Field>
-                  ) : (
-                    <div className="grid gap-5">
-                      {hasBanquet && (
-                        <Field label="Lưu ý thực đơn">
+                {/* Ghi chú & Nút gửi - chỉ hiện khi đã trả lời xong 2 câu hỏi trên */}
+                <AnimatePresence initial={false}>
+                  {hasAnsweredBothEvents && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0, overflow: "hidden" }}
+                      animate={{ height: "auto", opacity: 1, overflow: "visible" }}
+                      exit={{ height: 0, opacity: 0, overflow: "hidden" }}
+                      transition={{ duration: 0.3, ease: "easeInOut" }}
+                    >
+                      {/* Ghi chú */}
+                      <div className="rounded-[1.6rem] border border-serenity/18 bg-white/80 p-5 shadow-sm text-left mb-6">
+                        <p className="text-xs font-bold tracking-widest text-[#7a6a5d] uppercase mb-4">
+                          Ghi chú
+                        </p>
+                        <div className="grid gap-5">
                           <textarea
-                            className={`${inputClass} min-h-24 py-4 text-left`}
-                            placeholder="Ăn chay, dị ứng, kiêng món, không dùng rượu/cồn, hoặc cần suất trẻ em nếu có."
-                            {...register("dietaryNote")}
+                            className={`${inputClass} min-h-28 py-4 text-left`}
+                            placeholder={
+                              attending === "no"
+                                ? "Quý khách có thể để lại lời chúc mừng hoặc nhắn gửi cho Nhật & Phương"
+                                : "Quý khách có thể nhắn giờ đến dự kiến, yêu cầu ghế trẻ em, hỗ trợ đi lại hoặc hỗ trợ người lớn tuổi,..."
+                            }
+                            {...register("notes")}
                           />
-                        </Field>
-                      )}
-                      <Field label="Lưu ý khác / Lời nhắn gửi">
-                        <textarea
-                          className={`${inputClass} min-h-28 py-4 text-left`}
-                          placeholder="Giờ đến dự kiến, hỗ trợ người lớn tuổi hoặc trẻ nhỏ, ghế ăn trẻ em, hoặc lời chúc mừng của bạn."
-                          {...register("notes")}
-                        />
-                      </Field>
-                    </div>
-                  )}
-                </div>
+                          {hasBanquet && attending !== "no" && (
+                            <Field label="Lưu ý thực đơn">
+                              <textarea
+                                className={`${inputClass} min-h-24 py-4 text-left`}
+                                placeholder="Ăn chay, dị ứng, kiêng món, không dùng rượu/cồn, hoặc cần suất trẻ em nếu có."
+                                {...register("dietaryNote")}
+                              />
+                            </Field>
+                          )}
+                        </div>
+                      </div>
 
-                {/* Nút XEM LẠI VÀ HOÀN TẤT */}
-                <div className="mt-4 flex justify-center">
-                  <motion.button
-                    type="button"
-                    onClick={handleGoToReview}
-                    disabled={guestRsvpLocked}
-                    className="light-sweep wedding-type-button inline-flex min-h-13 items-center justify-center rounded-full bg-rose-quartz px-10 text-base font-bold text-[#252934] shadow-[0_16px_48px_rgba(146,168,209,0.22)] ring-1 ring-rose-quartz/70 disabled:opacity-60 uppercase tracking-wide"
-                    whileHover={{ scale: 1.03 }}
-                    whileTap={{ scale: 0.97 }}
-                  >
-                    <Mail className="mr-2.5 h-5 w-5" />
-                    XEM LẠI VÀ HOÀN TẤT
-                  </motion.button>
-                </div>
+                      {/* Nút XEM LẠI VÀ HOÀN TẤT */}
+                      <div className="mt-4 flex justify-center">
+                        <motion.button
+                          type="button"
+                          onClick={handleGoToReview}
+                          disabled={guestRsvpLocked}
+                          className="light-sweep wedding-type-button inline-flex min-h-13 items-center justify-center rounded-full bg-rose-quartz px-10 text-base font-bold text-[#252934] shadow-[0_16px_48px_rgba(146,168,209,0.22)] ring-1 ring-rose-quartz/70 disabled:opacity-60 uppercase tracking-wide"
+                          whileHover={{ scale: 1.03 }}
+                          whileTap={{ scale: 0.97 }}
+                        >
+                          <Mail className="mr-2.5 h-5 w-5" />
+                          XEM LẠI VÀ HOÀN TẤT
+                        </motion.button>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </form>
             </div>
           )}

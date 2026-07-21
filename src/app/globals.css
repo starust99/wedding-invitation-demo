@@ -234,6 +234,10 @@ video::-webkit-media-controls-panel {
   letter-spacing: 0.12em;
   text-align: center;
   text-transform: uppercase;
+  max-width: 100%;
+  box-sizing: border-box;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .public-invitation-page {
@@ -1438,7 +1442,10 @@ textarea {
     inset 0 2px 5px rgba(255, 255, 255, 0.9) !important;
   backdrop-filter: blur(14px) saturate(140%) !important;
   -webkit-backdrop-filter: blur(14px) saturate(140%) !important;
-  aspect-ratio: 185 / 50;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
   transition: transform 300ms ease, box-shadow 300ms ease;
   overflow: hidden;
 }

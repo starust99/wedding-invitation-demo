@@ -38,34 +38,34 @@ export function RsvpSection({
           <div aria-hidden="true" className="absolute inset-x-8 bottom-5 h-px bg-[linear-gradient(90deg,transparent,rgba(212,175,55,0.3),transparent)] sm:inset-x-16 sm:bottom-7 lg:bottom-8" />
 
           <div className="relative z-10 mx-auto flex max-w-2xl flex-col items-center text-center">
-            <h3 className="font-serif text-[1.12rem] sm:text-[1.25rem] md:text-[1.38rem] font-bold gold-foil-text uppercase leading-tight mt-0.5 mb-1.5">
+            <h3 className="font-serif text-[1.12rem] sm:text-[1.25rem] md:text-[1.38rem] font-bold gold-foil-text uppercase leading-tight mt-0.5 mb-1">
               {config.sections.cta.eyebrow}
             </h3>
-            <div className="mt-6 flex items-center gap-3">
+            <div className="mt-2.5 flex items-center gap-3">
               <span className="h-px w-16 bg-[rgba(212,175,55,0.5)] sm:w-20" />
               <span className="h-2 w-2 rounded-full border border-[rgba(212,175,55,0.5)] bg-white/78" />
               <span className="h-px w-16 bg-[rgba(212,175,55,0.5)] sm:w-20" />
             </div>
-            <p suppressHydrationWarning className="wedding-type-meta font-sans mt-6 max-w-xl text-ink/62 uppercase tracking-wider" style={{ fontSize: "1.09em" }}>
+            <p suppressHydrationWarning className="wedding-type-meta font-sans mt-3.5 max-w-xl text-ink/62 uppercase tracking-wider" style={{ fontSize: "1.09em" }}>
               {inviteCopy.greeting.toUpperCase()},
             </p>
             <p className="wedding-type-body font-sans mt-4 max-w-2xl text-ink/68">
-              Sự hiện diện của {inviteCopy.presenceSubject === "quý khách" ? "Quý khách" : inviteCopy.presenceSubject.charAt(0).toUpperCase() + inviteCopy.presenceSubject.slice(1)} để cùng chia sẻ những khoảnh khắc ý nghĩa là niềm vinh hạnh lớn của hai gia đình trong ngày vui sắp tới.
+              Sự hiện diện của {inviteCopy.presenceSubject === "quý khách" ? "Quý khách" : inviteCopy.presenceSubject.charAt(0).toUpperCase() + inviteCopy.presenceSubject.slice(1)} là niềm vinh hạnh lớn nhất của hai gia đình.
             </p>
-            <p className="wedding-type-body font-sans mt-4 max-w-2xl text-ink/68">
-              Để khâu tổ chức và công tác tiếp đón được chuẩn bị chu đáo nhất, {inviteCopy.kinshipPronoun === "quý khách" ? "Quý khách" : inviteCopy.kinshipPronoun.charAt(0).toUpperCase() + inviteCopy.kinshipPronoun.slice(1)} vui lòng xác nhận thông tin tham dự qua biểu mẫu dưới đây trước ngày <strong className="font-bold text-ink/90">{config.rsvp.deadline}</strong>.
+            <p className="wedding-type-body font-sans mt-3.5 max-w-2xl text-ink/68">
+              Để công tác đón tiếp được chuẩn bị chu đáo, xin {inviteCopy.kinshipPronoun === "quý khách" ? "Quý khách" : inviteCopy.kinshipPronoun.charAt(0).toUpperCase() + inviteCopy.kinshipPronoun.slice(1)} vui lòng xác nhận thông tin tham dự trước ngày <strong className="font-bold text-ink/90">{config.rsvp.deadline}</strong>.
             </p>
-            <p className="wedding-type-body font-sans mt-4 max-w-xl text-ink/68">
+            <p className="wedding-type-body font-sans mt-3.5 max-w-xl text-ink/68">
               Xin bấm nút "Gửi hồi đáp" để điền thông tin.
             </p>
             <p className="wedding-type-body font-sans mt-2 max-w-xl text-ink/68">
-              Xin trân trọng cảm ơn.
+              Trân trọng cảm ơn.
             </p>
 
               <button
                 type="button"
                 onClick={() => navigateWithTransition(rsvpHref)}
-                className="mt-8 inline-flex h-[4.2rem] items-center justify-center transition hover:-translate-y-0.5 save-date-watercolor-btn"
+                className="mt-8 inline-flex h-[3.5rem] sm:h-[4.2rem] w-full max-w-[13.5rem] sm:max-w-[16.5rem] items-center justify-center transition hover:-translate-y-0.5 save-date-watercolor-btn"
               >
                 <span className="save-date-btn-label font-sans">
                   <HeartHandshake aria-hidden="true" size={18} />

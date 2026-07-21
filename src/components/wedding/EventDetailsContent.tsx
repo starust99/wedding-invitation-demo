@@ -205,9 +205,7 @@ function DateDisplayStack({ dateParsed, lunarText }: { dateParsed: { day: string
 
       {/* Lunar Calendar Date */}
       <div className="font-serif text-[#7d7065] text-[1.18rem] sm:text-[1.45rem] md:text-[1.66rem] italic tracking-wide mt-2 select-none">
-        <span className="text-[#b4975a] mr-2">✦</span>
         {lunarText}
-        <span className="text-[#b4975a] ml-2">✦</span>
       </div>
     </div>
   );
@@ -670,7 +668,7 @@ export function EventDetailsContent({
 
           {/* Main Title */}
           <h4 className="font-serif text-[1.2rem] sm:text-[1.35rem] font-bold tracking-[0.14em] md:tracking-[0.18em] uppercase text-[#3f4642] mt-1 mb-1.5 leading-tight">
-            Tiệc mừng hôn lễ
+            Tiệc cưới
           </h4>
 
           {/* Decorative Divider */}
