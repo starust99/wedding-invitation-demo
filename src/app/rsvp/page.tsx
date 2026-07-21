@@ -3,21 +3,18 @@
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useFieldArray, useForm, useWatch, type FieldErrors } from "react-hook-form";
+import { useFieldArray, useForm, useWatch } from "react-hook-form";
 import { z } from "zod";
 import {
   ArrowLeft,
-  BedDouble,
-  CheckCircle2,
-  ChevronRight,
   CircleHelp,
   Mail,
   Plus,
   Trash2,
   CalendarDays,
-  Calendar,
   Lock,
-  Key,
+  Info,
+  X,
 } from "lucide-react";
 import { weddingConfig } from "@/config/wedding.config";
 import {
@@ -30,21 +27,13 @@ import {
 import { buildInvitationCopy, resolveGuestIdentity, type GuestIdentity, type InvitationCopy } from "@/lib/guest-personalization";
 import { getInviteStatusFromRsvp, readLocalInvitees, upsertLocalInvitees, type Invitee } from "@/lib/invites";
 import { usePageTransition } from "@/components/PageTransitionEffect";
-import { InviteAccessGate } from "@/components/InviteAccessGate";
 import { findAnyStoredInviteToken } from "@/lib/guest-personalization";
 
-const lodgingGuestSchema = z
-  .object({
-    fullName: z.string().trim().min(2, "Nhập họ tên người lưu trú."),
-    idNumber: z.string().trim().optional().default(""),
-    isChild: z.boolean().default(false),
-    age: z.number().int().min(0, "Tuổi không hợp lệ.").optional(),
-  })
-  .superRefine((guest, ctx) => {
-    if (guest.isChild && typeof guest.age !== "number") {
-      ctx.addIssue({ code: "custom", path: ["age"], message: "Nhập tuổi của bé để resort sắp xếp phù hợp." });
-    }
-  });
+const lodgingGuestSchema = z.object({
+  fullName: z.string().trim().optional(),
+  isChild: z.boolean().default(false),
+  age: z.number().int().min(0, "Tuổi không hợp lệ.").optional(),
+});
 
 const rsvpSchema = z
   .object({
@@ -53,11 +42,10 @@ const rsvpSchema = z
     phone: z.string().trim().optional().default(""),
     attendingCeremony: z.enum(["yes", "no"]).nullable().default(null),
     attendingBanquet: z.enum(["yes", "no"]).nullable().default(null),
-    // "attending" is a DERIVED shadow field — it is auto-set by the UI logic
-    // based on attendingCeremony + attendingBanquet. "no" only when BOTH are "no".
     attending: z.enum(["yes", "no"]),
     guestCount: z.coerce.number().min(0),
     guestGroup: z.string().trim().optional().default(""),
+    stayDecision: z.enum(["25", "26", "both", "none"]).default("none"),
     accommodationNeeded: z.boolean().default(false),
     lodgingGuests: z.array(lodgingGuestSchema).default([]),
     dietaryNote: z.string().trim().optional(),
@@ -65,18 +53,28 @@ const rsvpSchema = z
   })
   .superRefine((data, ctx) => {
     if (!data.attendingCeremony) {
-      ctx.addIssue({ code: "custom", path: ["attendingCeremony"], message: "Vui lòng chọn phản hồi cho Thánh lễ." });
+      ctx.addIssue({ code: "custom", path: ["attendingCeremony"], message: "Vui lòng chọn phản hồi cho Thánh lễ Hôn phối." });
     }
     if (!data.attendingBanquet) {
-      ctx.addIssue({ code: "custom", path: ["attendingBanquet"], message: "Vui lòng chọn phản hồi cho Tiệc mừng." });
+      ctx.addIssue({ code: "custom", path: ["attendingBanquet"], message: "Vui lòng chọn phản hồi cho Tiệc cưới." });
     }
     
     if (data.attending !== "no" && data.guestCount < 1) {
       ctx.addIssue({ code: "custom", path: ["guestCount"], message: "Nếu tham dự, số người cần từ 1 trở lên." });
     }
 
-    if (data.accommodationNeeded && data.lodgingGuests.length < 1) {
-      ctx.addIssue({ code: "custom", path: ["lodgingGuests"], message: "Thêm ít nhất một người lưu trú." });
+    if (data.attending === "yes" && data.attendingBanquet === "yes" && data.stayDecision !== "none") {
+      if (data.lodgingGuests.length < 1) {
+        ctx.addIssue({ code: "custom", path: ["lodgingGuests"], message: "Vui lòng thêm ít nhất một người lưu trú." });
+      }
+      data.lodgingGuests.forEach((guest, index) => {
+        if (!guest.fullName || guest.fullName.trim().length < 2) {
+          ctx.addIssue({ code: "custom", path: ["lodgingGuests", index, "fullName"], message: "Nhập họ tên người lưu trú." });
+        }
+        if (guest.isChild && (typeof guest.age !== "number" || isNaN(guest.age))) {
+          ctx.addIssue({ code: "custom", path: ["lodgingGuests", index, "age"], message: "Nhập tuổi của bé để resort sắp xếp." });
+        }
+      });
     }
   });
 
@@ -84,46 +82,18 @@ type RSVPFormInput = z.input<typeof rsvpSchema>;
 type RSVPFormOutput = z.output<typeof rsvpSchema>;
 type LodgingGuestForm = {
   fullName: string;
-  idNumber: string;
   isChild: boolean;
   age?: number;
 };
-
-type StepKey = "attendance" | "stay" | "message" | "review";
-
-const allSteps: { key: StepKey; title: string; eyebrow: string }[] = [
-  { key: "attendance", title: "Lời hồi đáp", eyebrow: "01" },
-  { key: "stay", title: "Đăng ký hỗ trợ lưu trú", eyebrow: "02" },
-  { key: "message", title: "Lưu ý thêm", eyebrow: "03" },
-  { key: "review", title: "Xem lại và gửi", eyebrow: "04" },
-] as const;
-
-const regretSteps: { key: StepKey; title: string; eyebrow: string }[] = [
-  { key: "attendance", title: "Lời hồi đáp", eyebrow: "01" },
-  { key: "message", title: "Lời nhắn gửi", eyebrow: "02" },
-] as const;
-
-const regretBanquetSteps: { key: StepKey; title: string; eyebrow: string }[] = [
-  { key: "attendance", title: "Lời hồi đáp", eyebrow: "01" },
-  { key: "review", title: "Xem lại và gửi", eyebrow: "02" },
-] as const;
 
 const RSVP_GUEST_EDIT_DEADLINE = new Date("2026-09-26T00:00:00+07:00");
 
 const inputClass =
   "min-h-13 w-full rounded-2xl border border-serenity/22 bg-white/75 px-4 text-base text-center text-[#252934] outline-none transition placeholder:text-[#252934]/36 focus:border-serenity focus:bg-white/86 focus:ring-4 focus:ring-serenity/18";
 
-const terracottaPolicy = [
-  "Bé dưới 5 tuổi: chỉ cần ghi họ tên.",
-  "Bé từ 5 đến dưới 11 tuổi: ghi họ tên và tuổi.",
-  "Bé từ 11 tuổi trở lên: khai như người lớn.",
-  "Nếu cần nôi em bé, ghi ở phần lưu ý.",
-];
-
 function createLodgingGuest(fullName = ""): LodgingGuestForm {
   return {
     fullName,
-    idNumber: "",
     isChild: false,
     age: undefined,
   };
@@ -138,7 +108,7 @@ function normalizeLodgingGuests(guests: Array<Partial<LodgingGuestForm> | undefi
 
     return [{
       fullName,
-      idNumber: guest.idNumber?.trim() ?? "",
+      idNumber: "",
       isChild: Boolean(guest.isChild),
       age: guest.isChild ? age : undefined,
     }];
@@ -161,52 +131,12 @@ function inlineRecipientLabel(label: string) {
 
 function Field({ label, error, children }: { label: ReactNode; error?: string; children: ReactNode }) {
   return (
-    <label className="grid justify-items-center gap-2 text-center text-sm font-bold text-[#252934]/68">
+    <label className="grid justify-items-center gap-2 text-center text-sm font-bold text-[#252934]/68 w-full">
       {label}
       {children}
       {error ? <span className="text-xs font-bold text-[#9B4E5C]">{error}</span> : null}
     </label>
   );
-}
-
-function StepDot({ active, done, label }: { active: boolean; done: boolean; label: string }) {
-  return (
-    <span
-      className={[
-        "grid h-8 w-8 place-items-center rounded-full border text-xs font-black transition",
-        active ? "border-rose-quartz bg-rose-quartz text-[#252934]" : done ? "border-serenity bg-serenity text-[#252934]" : "border-serenity/24 text-[#252934]/42",
-      ].join(" ")}
-    >
-      {done ? <CheckCircle2 className="h-4 w-4" /> : label}
-    </span>
-  );
-}
-
-function ReviewLine({ label, value }: { label: string; value: ReactNode }) {
-  return (
-    <div className="grid justify-items-center gap-1 border-b border-serenity/14 py-3 text-center last:border-b-0">
-      <p className="wedding-type-meta text-[#252934]/40">{label}</p>
-      <p className="wedding-type-body max-w-[26rem] font-semibold text-[#252934]/76">{value}</p>
-    </div>
-  );
-}
-
-function resolveStepFromErrors(
-  errors: FieldErrors<RSVPFormInput>,
-  attending: RSVPFormInput["attending"],
-  attendingBanquet: RSVPFormInput["attendingBanquet"]
-): StepKey {
-  if (errors.attendingCeremony || errors.attendingBanquet || errors.attending || errors.honorific) return "attendance";
-  if (attending === "no") return "message";
-  if (attendingBanquet !== "no" && (errors.accommodationNeeded || errors.lodgingGuests)) return "stay";
-  if (attendingBanquet !== "no" && (errors.dietaryNote || errors.notes)) return "message";
-  return "review";
-}
-
-function getVisibleSteps(attending: RSVPFormInput["attending"], attendingBanquet: RSVPFormInput["attendingBanquet"]) {
-  if (attending === "no") return regretSteps;
-  if (attendingBanquet === "no") return regretBanquetSteps;
-  return allSteps;
 }
 
 function buildSubmissionCopy(
@@ -218,7 +148,6 @@ function buildSubmissionCopy(
   const host = inviteCopy.hostSubject;
   const recipient = inviteCopy.shortRecipientLabel;
 
-  // 1. Từ chối hoàn toàn
   if (attending === "no") {
     return {
       title: "Đã gửi lời nhắn",
@@ -227,34 +156,30 @@ function buildSubmissionCopy(
     };
   }
 
-  // 2. Dự cả hai
   if (attendingCeremony === "yes" && attendingBanquet === "yes") {
     return {
       title: "Đã xác nhận tham dự",
-      body: `Lời hồi đáp đã được gửi thành công. ${host} vô cùng hạnh phúc khi biết ${recipient} sẽ có mặt ở cả Thánh lễ Hôn phối lẫn Tiệc mừng để chung vui. Sự hiện diện của ${recipient} chính là món quà ý nghĩa nhất dành cho ${inviteCopy.tone === "parents_host" ? "gia đình" : "hai đứa"}. Hẹn gặp ${recipient} tại ngày cưới sắp tới!`,
+      body: `Lời hồi đáp đã được gửi thành công. ${host} vô cùng hạnh phúc khi biết ${recipient} sẽ có mặt ở cả Thánh lễ Hôn phối lẫn Tiệc cưới để chung vui. Sự hiện diện của ${recipient} chính là món quà ý nghĩa nhất dành cho ${inviteCopy.tone === "parents_host" ? "gia đình" : "hai đứa"}. Hẹn gặp ${recipient} tại ngày cưới sắp tới!`,
       showCalendar: true,
     };
   }
 
-  // 3. Chỉ dự Thánh lễ
   if (attendingCeremony === "yes" && attendingBanquet === "no") {
     return {
       title: "Xác nhận tham dự Thánh lễ",
-      body: `Lời hồi đáp đã được gửi thành công. ${host} vô cùng trân quý và cảm ơn ${recipient} đã sắp xếp thời gian đến chứng kiến Thánh lễ Hôn phối của ${inviteCopy.tone === "parents_host" ? "hai cháu" : "hai đứa"}. Dù rất tiếc không thể đồng hành cùng ${recipient} trong đêm Tiệc mừng, sự hiện diện của ${recipient} tại Nhà thờ đã là niềm hạnh phúc vô cùng lớn đối với ${inviteCopy.tone === "parents_host" ? "gia đình" : "chúng em"}.`,
+      body: `Lời hồi đáp đã được gửi thành công. ${host} vô cùng trân quý và cảm ơn ${recipient} đã sắp xếp thời gian đến chứng kiến Thánh lễ Hôn phối của ${inviteCopy.tone === "parents_host" ? "hai cháu" : "hai đứa"}. Dù rất tiếc không thể đồng hành cùng ${recipient} trong đêm Tiệc cưới, sự hiện diện của ${recipient} tại Nhà thờ đã là niềm hạnh phúc vô cùng lớn đối với ${inviteCopy.tone === "parents_host" ? "gia đình" : "chúng em"}.`,
       showCalendar: true,
     };
   }
 
-  // 4. Chỉ dự Tiệc mừng
   if (attendingCeremony === "no" && attendingBanquet === "yes") {
     return {
-      title: "Xác nhận tham dự Tiệc mừng",
-      body: `Lời hồi đáp đã được gửi thành công. ${host} rất vui mừng khi ${recipient} sẽ đến chung vui trong đêm Tiệc mừng ấm áp. Chân thành cảm ơn sự hiện diện và những lời chúc phúc ngọt ngào của ${recipient}. Hẹn sớm gặp ${recipient} tại Đà Lạt!`,
+      title: "Xác nhận tham dự Tiệc cưới",
+      body: `Lời hồi đáp đã được gửi thành công. ${host} rất vui mừng khi ${recipient} sẽ đến chung vui trong đêm Tiệc cưới ấm áp. Chân thành cảm ơn sự hiện diện và những lời chúc phúc ngọt ngào của ${recipient}. Hẹn sớm gặp ${recipient} tại Đà Lạt!`,
       showCalendar: true,
     };
   }
 
-  // Fallback mặc định
   return {
     title: "Đã ghi nhận tham dự",
     body: `Lời hồi đáp đã được gửi thành công. ${inviteCopy.closingLine}`,
@@ -272,9 +197,59 @@ function normalizeBoolean(value: boolean | undefined): "yes" | "no" | null {
   return null;
 }
 
+function getRecapText(
+  attendingCeremony: "yes" | "no" | null,
+  attendingBanquet: "yes" | "no" | null,
+  stayDecision: "25" | "26" | "both" | "none",
+  lodgingGuests: Array<{ fullName?: string; isChild?: boolean }>,
+  inviteCopy: InvitationCopy
+) {
+  if (attendingCeremony === null && attendingBanquet === null) {
+    return "Vui lòng chọn phản hồi tham dự của bạn.";
+  }
+
+  const recipient = inviteCopy.recipientPronoun
+    ? inviteCopy.recipientPronoun.charAt(0).toUpperCase() + inviteCopy.recipientPronoun.slice(1)
+    : "Khách mời";
+
+  if (attendingCeremony === "no" && attendingBanquet === "no") {
+    return `${recipient} rất tiếc không thể tham dự ngày vui.`;
+  }
+
+  const events: string[] = [];
+  if (attendingCeremony === "yes") events.push("Thánh lễ Hôn phối");
+  if (attendingBanquet === "yes") events.push("Tiệc cưới");
+
+  const eventText = events.join(" và ");
+  let stayText = "";
+
+  if (attendingBanquet === "yes" && stayDecision !== "none") {
+    const adults = lodgingGuests.filter((g) => !g.isChild && g.fullName?.trim()).length;
+    const children = lodgingGuests.filter((g) => g.isChild && g.fullName?.trim()).length;
+
+    let nightLabel = "";
+    if (stayDecision === "25") nightLabel = "đêm 25/12";
+    else if (stayDecision === "26") nightLabel = "đêm 26/12";
+    else if (stayDecision === "both") nightLabel = "cả hai đêm 25 và 26/12";
+
+    const peopleParts: string[] = [];
+    if (adults > 0) peopleParts.push(`${adults} người lớn`);
+    if (children > 0) peopleParts.push(`${children} trẻ em`);
+    const peopleText = peopleParts.join(" và ");
+
+    if (peopleText) {
+      stayText = `, nghỉ lại ${nightLabel} cho ${peopleText} tại Resort Terracotta`;
+    } else {
+      stayText = `, nghỉ lại ${nightLabel} tại Resort Terracotta`;
+    }
+  }
+
+  return `${recipient} sẽ tham dự ${eventText}${stayText}.`;
+}
+
 export default function RSVPPage() {
   const [isSubmitted, setIsSubmitted] = useState(false);
-  const [step, setStep] = useState(0);
+  const [isReviewing, setIsReviewing] = useState(false);
   const [guestIdentity, setGuestIdentity] = useState<GuestIdentity>({});
   const [inviteeContext, setInviteeContext] = useState<Invitee | null>(null);
   const [inviteToken, setInviteToken] = useState("");
@@ -328,6 +303,7 @@ export default function RSVPPage() {
       attending: "yes",
       guestCount: 1,
       guestGroup: "",
+      stayDecision: "none",
       accommodationNeeded: false,
       lodgingGuests: [],
       dietaryNote: "",
@@ -341,21 +317,13 @@ export default function RSVPPage() {
   const attendingBanquet = useWatch({ control, name: "attendingBanquet" });
   const guestCount = useWatch({ control, name: "guestCount" });
   const accommodationNeeded = useWatch({ control, name: "accommodationNeeded" });
+  const stayDecision = useWatch({ control, name: "stayDecision" });
   const watchedLodgingGuests = useWatch({ control, name: "lodgingGuests" });
   const formValues = useWatch({ control }) as RSVPFormInput;
-  const visibleSteps = useMemo(() => getVisibleSteps(attending, attendingBanquet), [attending, attendingBanquet]);
-  const stepIndex = Math.min(step, visibleSteps.length - 1);
-  const currentStep = visibleSteps[stepIndex] ?? visibleSteps[0];
-  const progress = useMemo(() => `${Math.round(((stepIndex + 1) / visibleSteps.length) * 100)}%`, [stepIndex, visibleSteps.length]);
   const returnHref = inviteToken ? `/i/${encodeURIComponent(inviteToken)}` : "/";
+
   const inviteCopy = useMemo(() => buildInvitationCopy(inviteeContext ?? guestIdentity), [guestIdentity, inviteeContext]);
   const submissionCopy = useMemo(() => buildSubmissionCopy(attending, attendingCeremony, attendingBanquet, inviteCopy), [attending, attendingCeremony, attendingBanquet, inviteCopy]);
-  const storedInsideInviteLine = inviteeContext?.insideInviteLine ?? "";
-  const staleHostSubjects = ["Gia đình chúng tôi", "Gia đình anh chị", "Gia đình chúng con", "Anh chị", "Cô chú", "Em"]
-    .filter((subject) => subject !== inviteCopy.hostSubject);
-  const shouldUseComputedInsideInviteLine = storedInsideInviteLine.includes("vợ/chồng")
-    || (inviteCopy.insideInviteLine.includes("hai em") && storedInsideInviteLine.includes("hai cháu"))
-    || staleHostSubjects.some((subject) => storedInsideInviteLine.includes(`${subject} trân trọng kính mời`));
   const displayedInsideInviteLine = isHydratingGuest ? "Đang tải lời mời..." : inviteCopy.insideInviteLine;
   const displayedClosingLine = isHydratingGuest ? "Thông tin riêng của khách mời sẽ hiện trong giây lát." : inviteCopy.closingLine;
   const rsvpRecipientLabel = isHydratingGuest ? "khách mời" : inlineRecipientLabel(inviteCopy.shortRecipientLabel);
@@ -410,11 +378,26 @@ export default function RSVPPage() {
       setValue("attendingBanquet", normalizeBoolean(response?.attendingBanquet), { shouldDirty: false });
       setValue("attending", normalizeAttendanceForForm(response?.attending), { shouldDirty: false });
       setValue("dietaryNote", response?.dietaryNote ?? "", { shouldDirty: false });
+      let initialStayDecision: "25" | "26" | "both" | "none" = "none";
+      if (response?.accommodationNeeded) {
+        const inDate = response.checkInDate;
+        const outDate = response.checkOutDate;
+        if (inDate === "2026-12-25" && outDate === "2026-12-27") {
+          initialStayDecision = "both";
+        } else if (inDate === "2026-12-25") {
+          initialStayDecision = "25";
+        } else if (inDate === "2026-12-26") {
+          initialStayDecision = "26";
+        } else {
+          initialStayDecision = "both";
+        }
+      }
       setValue("accommodationNeeded", response?.accommodationNeeded ?? false, { shouldDirty: false });
+      setValue("stayDecision", initialStayDecision, { shouldDirty: false });
       setValue("notes", response?.notes ?? "", { shouldDirty: false });
       replace(response?.lodgingGuests?.length
         ? response.lodgingGuests
-        : response?.accommodationNeeded
+        : initialStayDecision !== "none"
           ? [createLodgingGuest("")]
           : []);
     }
@@ -435,7 +418,7 @@ export default function RSVPPage() {
 
       const bypassed = typeof window !== "undefined" && sessionStorage.getItem("admin_rsvp_bypass") === "true";
       setTokenGateChecked(true);
-      setMissingInviteToken(!token && !bypassed);
+      setMissingInviteToken(false);
       setGuestRsvpLocked(Date.now() >= RSVP_GUEST_EDIT_DEADLINE.getTime() && !bypassed);
 
       if (token) {
@@ -483,8 +466,15 @@ export default function RSVPPage() {
       setValue("attending", "no", { shouldDirty: true });
       setValue("guestCount", 0, { shouldDirty: true });
       setValue("accommodationNeeded", false, { shouldDirty: true });
+      setValue("stayDecision", "none", { shouldDirty: true });
       replace([]);
       return;
+    }
+
+    if (attendingBanquet === "no") {
+      setValue("accommodationNeeded", false, { shouldDirty: true });
+      setValue("stayDecision", "none", { shouldDirty: true });
+      replace([]);
     }
 
     if ((attendingCeremony === "yes" || attendingBanquet === "yes") && attending !== "yes") {
@@ -495,75 +485,17 @@ export default function RSVPPage() {
     }
   }, [attending, attendingBanquet, attendingCeremony, guestCount, inviteeContext?.expectedGuestCount, replace, setValue]);
 
-  function toggleAccommodation(nextValue: boolean) {
+  function handleStayDecisionChange(decision: "25" | "26" | "both" | "none") {
     if (!canRegisterStay) return;
-    setValue("accommodationNeeded", nextValue, { shouldDirty: true });
-    if (!nextValue) {
+    setValue("stayDecision", decision, { shouldDirty: true, shouldValidate: true });
+    setValue("accommodationNeeded", decision !== "none", { shouldDirty: true });
+    if (decision === "none") {
       replace([]);
-      return;
-    }
-
-    if ((getValues("lodgingGuests") ?? []).length === 0) {
-      append(createLodgingGuest(""));
-    }
-  }
-
-  function goToStep(nextStep: number) {
-    window.setTimeout(() => setStep(Math.max(0, Math.min(nextStep, visibleSteps.length - 1))), 0);
-  }
-
-  function goToStepByKey(stepKey: StepKey) {
-    const index = visibleSteps.findIndex((item) => item.key === stepKey);
-    goToStep(index < 0 ? 0 : index);
-  }
-
-  async function goNextStep() {
-    setSubmitError("");
-
-    if (currentStep.key === "attendance") {
-      const fieldsToTrigger = ["attendingCeremony", "attendingBanquet", "attending", "guestCount"];
-      if (isAdminBypassed) {
-        fieldsToTrigger.push("name", "guestGroup");
-      }
-      const isValid = await trigger(fieldsToTrigger as any, { shouldFocus: true });
-      if (!isValid) {
-        setSubmitError(isAdminBypassed ? "Vui lòng điền họ tên, nhóm khách và chọn phản hồi trước khi tiếp tục." : "Vui lòng chọn phản hồi trước khi tiếp tục.");
-        return;
+    } else {
+      if ((getValues("lodgingGuests") ?? []).length === 0) {
+        append(createLodgingGuest(""));
       }
     }
-
-    if (currentStep.key === "stay") {
-      const isValid = await trigger(["accommodationNeeded", "lodgingGuests"], { shouldFocus: true });
-      if (!isValid) {
-        setSubmitError("Vui lòng điền đủ thông tin lưu trú bắt buộc trước khi tiếp tục.");
-        return;
-      }
-    }
-
-    if (currentStep.key === "message") {
-      const isValid = await trigger(["dietaryNote", "notes"], { shouldFocus: true });
-      if (!isValid) {
-        setSubmitError("Vui lòng kiểm tra lại phần lời nhắn trước khi tiếp tục.");
-        return;
-      }
-    }
-
-    goToStep(Math.min(visibleSteps.length - 1, stepIndex + 1));
-  }
-
-  function persistLocalRsvp(payload: Omit<RSVPResponse, "id" | "submittedAt">) {
-    const localResponse = saveRSVPResponse(payload);
-    if (inviteeContext) {
-      const updatedInvitee: Invitee = {
-        ...inviteeContext,
-        rsvp: localResponse,
-        inviteStatus: getInviteStatusFromRsvp(payload.attending),
-        updatedAt: new Date().toISOString(),
-      };
-      upsertLocalInvitees([updatedInvitee]);
-      setInviteeContext(updatedInvitee);
-    }
-    return localResponse;
   }
 
   function redirectToInvitePage(token?: string, hash: string = "") {
@@ -574,18 +506,8 @@ export default function RSVPPage() {
   async function onSubmit(data: RSVPFormOutput) {
     setSubmitError("");
 
-    if (isAdminBypassed) {
-      if (!data.name?.trim()) {
-        setSubmitError("Vui lòng điền họ tên khách mời.");
-        return;
-      }
-      if (!data.guestGroup?.trim()) {
-        setSubmitError("Vui lòng điền nhóm khách mời.");
-        return;
-      }
-    }
-
-    const cleanLodgingGuests = data.attending === "no" || !data.accommodationNeeded
+    const isStaying = data.attending === "yes" && data.attendingBanquet === "yes" && data.stayDecision !== "none";
+    const cleanLodgingGuests = !isStaying
       ? []
       : normalizeLodgingGuests(data.lodgingGuests);
     const stayingGuestCount = cleanLodgingGuests.length;
@@ -603,6 +525,21 @@ export default function RSVPPage() {
     const resolvedGroup = data.guestGroup?.trim() || inviteeContext?.guestGroup || guestIdentity.group || "Khác";
     const resolvedGuestCount = data.attending === "no" ? 0 : Math.max(1, data.guestCount || inviteeContext?.expectedGuestCount || 1);
 
+    let checkInDate: string | undefined = undefined;
+    let checkOutDate: string | undefined = undefined;
+    if (isStaying) {
+      if (data.stayDecision === "25") {
+        checkInDate = "2026-12-25";
+        checkOutDate = "2026-12-26";
+      } else if (data.stayDecision === "26") {
+        checkInDate = "2026-12-26";
+        checkOutDate = "2026-12-27";
+      } else if (data.stayDecision === "both") {
+        checkInDate = "2026-12-25";
+        checkOutDate = "2026-12-27";
+      }
+    }
+
     const payload: Omit<RSVPResponse, "id" | "submittedAt"> = {
       inviteeId: inviteeContext?.id,
       inviteToken: inviteeContext?.token ?? (inviteToken || searchToken || undefined),
@@ -616,11 +553,11 @@ export default function RSVPPage() {
       guestGroup: resolvedGroup,
       dietaryNote: data.dietaryNote?.trim() || undefined,
       transportNeeded: false,
-      accommodationNeeded: data.attending !== "no" && data.accommodationNeeded,
+      accommodationNeeded: isStaying,
       stayingGuestCount,
       lodgingGuests: cleanLodgingGuests,
-      checkInDate: undefined,
-      checkOutDate: undefined,
+      checkInDate,
+      checkOutDate,
       roomType: undefined,
       childrenCount,
       elderlySupportNeeded: false,
@@ -648,6 +585,32 @@ export default function RSVPPage() {
     setIsSubmitted(true);
   }
 
+  const handleGoToReview = async () => {
+    setSubmitError("");
+    const isValid = await trigger();
+    if (isValid) {
+      setIsReviewing(true);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    } else {
+      setSubmitError("Có vài mục cần bổ sung. Vui lòng kiểm tra lại phần được đánh dấu.");
+    }
+  };
+
+  function persistLocalRsvp(payload: Omit<RSVPResponse, "id" | "submittedAt">) {
+    const localResponse = saveRSVPResponse(payload);
+    if (inviteeContext) {
+      const updatedInvitee: Invitee = {
+        ...inviteeContext,
+        rsvp: localResponse,
+        inviteStatus: getInviteStatusFromRsvp(payload.attending),
+        updatedAt: new Date().toISOString(),
+      };
+      upsertLocalInvitees([updatedInvitee]);
+      setInviteeContext(updatedInvitee);
+    }
+    return localResponse;
+  }
+
   const hasCeremony = formValues.attendingCeremony === "yes";
   const hasBanquet = formValues.attendingBanquet === "yes";
   
@@ -658,9 +621,9 @@ export default function RSVPPage() {
   const ceremonyIcsContent = `BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//Wedding//EN\nBEGIN:VEVENT\nDTSTART:20261220T080000Z\nDTEND:20261220T093000Z\nSUMMARY:${ceremonyCalTitle}\nLOCATION:${ceremonyCalLocation}\nDESCRIPTION:${ceremonyCalDesc}\nEND:VEVENT\nEND:VCALENDAR`;
   const ceremonyIcsUrl = `data:text/calendar;charset=utf8,${encodeURIComponent(ceremonyIcsContent)}`;
 
-  const banquetCalTitle = `Tiệc mừng ${weddingConfig.couple.displayName}`;
+  const banquetCalTitle = `Tiệc cưới ${weddingConfig.couple.displayName}`;
   const banquetCalLocation = weddingConfig.venue.address;
-  const banquetCalDesc = `Tiệc mừng ngày chung đôi của ${weddingConfig.couple.displayName}.`;
+  const banquetCalDesc = `Tiệc cưới ngày chung đôi của ${weddingConfig.couple.displayName}.`;
   const banquetGcalUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(banquetCalTitle)}&dates=20261226T103000Z/20261226T140000Z&details=${encodeURIComponent(banquetCalDesc)}&location=${encodeURIComponent(banquetCalLocation)}`;
   const banquetIcsContent = `BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//Wedding//EN\nBEGIN:VEVENT\nDTSTART:20261226T103000Z\nDTEND:20261226T140000Z\nSUMMARY:${banquetCalTitle}\nLOCATION:${banquetCalLocation}\nDESCRIPTION:${banquetCalDesc}\nEND:VEVENT\nEND:VCALENDAR`;
   const banquetIcsUrl = `data:text/calendar;charset=utf8,${encodeURIComponent(banquetIcsContent)}`;
@@ -749,56 +712,40 @@ export default function RSVPPage() {
   }
 
   return (
-    <main className="public-invitation-page rsvp-page cinematic-stage relative min-h-screen bg-transparent px-5 py-6 text-center text-[#252934] sm:py-10">
+    <main className="public-invitation-page rsvp-page cinematic-stage relative min-h-screen bg-transparent px-4 py-8 text-center text-[#252934] sm:px-6 sm:py-12">
       <div aria-hidden="true" className="aurora-wash -z-10 opacity-60" />
       <div aria-hidden="true" className="film-grain-soft -z-10" />
-      <div className="mx-auto max-w-6xl">
-        <button
-          type="button"
-          onClick={() => navigateWithTransition(returnHref)}
-          className="wedding-type-button inline-flex items-center gap-2 text-[#252934]/62 transition hover:text-[#252934]"
-        >
-          <ArrowLeft className="h-4 w-4" /> Về trang thiệp
-        </button>
+      
+      <div className="mx-auto max-w-2xl">
+        <div className="flex justify-start mb-6">
+          <button
+            type="button"
+            onClick={() => navigateWithTransition(returnHref)}
+            className="wedding-type-button inline-flex items-center gap-2 text-[#252934]/62 transition hover:text-[#252934] font-semibold text-sm"
+          >
+            <ArrowLeft className="h-4 w-4" /> Về trang thiệp
+          </button>
+        </div>
 
         {guestRsvpLocked ? (
-          <p className="mt-4 rounded-2xl border border-serenity/22 bg-white/70 px-4 py-3 text-sm font-semibold text-[#252934]/72">
+          <p className="mb-6 rounded-2xl border border-serenity/22 bg-white/70 px-4 py-3 text-sm font-semibold text-[#252934]/72 text-center">
             Đã hết hạn chỉnh sửa lời hồi đáp (sau 26/09/2026, 00:00 giờ Việt Nam). Vui lòng liên hệ gia đình nếu cần thay đổi.
           </p>
         ) : null}
-        <section className="glass-panel mt-6 w-full overflow-hidden rounded-[2rem] text-center">
+
+        <section className="glass-panel w-full overflow-hidden rounded-[2rem] text-center shadow-[0_24px_64px_rgba(37,41,52,0.06)] bg-[#fdfbf7]/80 backdrop-blur-[12px] border border-serenity/12 py-8 sm:py-12">
           {isSubmitted ? (
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.4 }}
-              className="py-16 px-6 text-center flex flex-col items-center"
+              className="px-4 sm:px-6 text-center flex flex-col items-center"
             >
-              <div className="flex justify-center mb-8">
-                <motion.div
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  transition={{ type: "spring", stiffness: 200, damping: 15 }}
-                  className="w-24 h-24 bg-serenity/20 rounded-full flex items-center justify-center"
-                >
-                  <svg className="w-12 h-12 text-serenity" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
-                    <motion.path
-                      initial={{ pathLength: 0 }}
-                      animate={{ pathLength: 1 }}
-                      transition={{ duration: 0.5, delay: 0.2 }}
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M5 13l4 4L19 7"
-                    />
-                  </svg>
-                </motion.div>
-              </div>
-              <p className="section-kicker-dark wedding-type-kicker text-serenity">Hoàn tất</p>
-              <h2 className="wedding-type-title mt-4 text-[#252934]">{submissionCopy.title}</h2>
-              <p className="wedding-type-body mt-4 max-w-lg mx-auto text-[#252934]/62">
+              <h2 className="wedding-type-title mt-2 text-[#252934] font-serif italic text-2xl sm:text-3xl font-bold">{submissionCopy.title}</h2>
+              <p className="wedding-type-body mt-4 max-w-lg mx-auto text-[#252934]/62 leading-relaxed">
                 {submissionCopy.body}
               </p>
-              <p className="wedding-type-body mt-3 max-w-lg mx-auto text-[#252934]/54">
+              <p className="wedding-type-body mt-3 max-w-lg mx-auto text-[#252934]/54 text-sm leading-relaxed">
                 Ngay sau khi quay lại trang thiệp, phần cảm ơn và hướng dẫn tiếp theo sẽ hiện sẵn ở cuối trang để {inviteCopy.shortRecipientLabel} dễ theo dõi.
               </p>
 
@@ -817,10 +764,10 @@ export default function RSVPPage() {
                     {hasBanquet && (
                       <button
                         type="button"
-                        onClick={() => openCalendar(banquetIcsUrl, banquetGcalUrl, "tiec-mung-nhat-phuong.ics")}
+                        onClick={() => openCalendar(banquetIcsUrl, banquetGcalUrl, "tiec-cuoi-nhat-phuong.ics")}
                         className="wedding-type-button inline-flex h-12 items-center justify-center gap-2 rounded-full border border-serenity/30 bg-white/80 px-8 font-semibold text-[#252934] transition hover:bg-white hover:shadow-sm"
                       >
-                        <CalendarDays className="w-4 h-4" /> TIỆC MỪNG
+                        <CalendarDays className="w-4 h-4" /> TIỆC CƯỚI
                       </button>
                     )}
                   </div>
@@ -837,436 +784,557 @@ export default function RSVPPage() {
                 </button>
               </div>
             </motion.div>
-          ) : (
-            <div className="grid min-w-0 lg:grid-cols-[0.86fr_1.14fr]">
-              <aside className="min-w-0 border-b border-serenity/20 px-4 py-6 text-center sm:p-8 lg:border-b-0 lg:border-r">
-              <p className="section-kicker-dark wedding-type-kicker text-serenity">Xác nhận lời mời</p>
-              <h1 className="wedding-type-title mt-5 break-words text-[#252934]">Lời hồi đáp</h1>
-
-              <div className="mt-8 h-2 overflow-hidden rounded-full bg-serenity/16 shadow-inner">
-                <motion.div className="h-full rounded-full bg-gradient-to-r from-rose-quartz to-serenity" animate={{ width: progress }} />
-              </div>
-              <div className="mt-5 flex justify-center gap-3">
-                {visibleSteps.map((item, index) => (
-                  <StepDot key={item.key} active={stepIndex === index} done={stepIndex > index} label={item.eyebrow} />
-                ))}
-              </div>
-
-              <div className="wedding-type-body mt-10 rounded-[1.4rem] premium-glass px-4 py-5 text-[#252934]/62">
-                {currentStep.key === "review"
-                  ? hasBanquet 
-                    ? "Đọc lại toàn bộ thông tin trước khi gửi. Sau khi gửi, thông tin sẽ được dùng để chuẩn bị tiếp đón chu đáo"
-                    : "Đọc lại toàn bộ thông tin trước khi gửi. Bấm gửi là lời hồi đáp này được ghi nhận."
-                  : currentStep.key === "stay"
-                    ? `Để tiện chung vui, ${inviteCopy.hostPronoun} có chuẩn bị phòng nghỉ tại Terracotta. Vui lòng chọn bên dưới nếu ${rsvpRecipientLabel} cần hỗ trợ giữ phòng nhé.`
-                    : currentStep.key === "message"
-                      ? "Đôi dòng nhắn gửi"
-                      : isHydratingGuest
-                        ? "Đang tải thông tin lời mời riêng của khách."
-                        : `Vui lòng phản hồi bên dưới để ${inviteCopy.hostPronoun} chuẩn bị đón tiếp ${rsvpRecipientLabel} được chu đáo nhất.`}
-              </div>
-            </aside>
-
-            <form
-              onSubmit={guestRsvpLocked ? (event) => event.preventDefault() : handleSubmit(onSubmit, (errors) => {
-                setSubmitError("Có vài mục cần bổ sung. Vui lòng kiểm tra lại phần được đánh dấu.");
-                goToStepByKey(resolveStepFromErrors(errors, attending, attendingBanquet));
-              })}
-              className="min-w-0 px-4 py-6 text-center sm:p-8"
+          ) : isReviewing ? (
+            <motion.div
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4 }}
+              className="px-4 sm:px-8 text-center flex flex-col items-center w-full max-w-2xl mx-auto py-2 sm:py-4"
             >
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key={currentStep.key}
-                  initial={{ opacity: 0, y: 14 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -14 }}
-                  transition={{ duration: 0.24 }}
-                >
-                  {submitError ? <p className="mt-3 rounded-2xl border border-serenity/18 bg-white/60 px-4 py-3 text-sm font-semibold text-[#9B4E5C]">{submitError}</p> : null}
+              {/* Title */}
+              <h2 className="wedding-type-title text-[#252934] font-serif italic text-2xl sm:text-3xl font-bold mb-6">
+                Xác nhận thông tin hồi đáp
+              </h2>
 
-                  {currentStep.key === "attendance" ? (
-                    <div className="mt-8 grid gap-5">
-                      {isAdminBypassed ? (
-                        <div className="rounded-[1.4rem] premium-glass p-6 text-left grid gap-4">
-                          <p className="wedding-type-card-title text-serenity font-bold text-center mb-2">
-                            Chế độ Admin - Nhập thông tin khách
-                          </p>
-                          <Field label="Danh xưng & Họ tên khách mời" error={errors.name?.message}>
-                            <input className={inputClass} placeholder="VD: Anh Nathan, Gia đình cô Hải" {...register("name", { required: "Vui lòng nhập tên khách mời." })} />
-                          </Field>
-                          <Field label="Nhóm khách mời (phân loại)" error={errors.guestGroup?.message}>
-                            <input className={inputClass} placeholder="VD: Bạn chú rể, Bạn cô dâu, Họ nhà gái" {...register("guestGroup", { required: "Vui lòng nhập nhóm khách mời." })} />
-                          </Field>
-                          <Field label="Số điện thoại" error={errors.phone?.message}>
-                            <input className={inputClass} placeholder="VD: 0901234567 (Không bắt buộc)" {...register("phone")} />
-                          </Field>
-                        </div>
-                      ) : (
-                        <div className="rounded-[1.4rem] premium-glass p-5 text-center">
-                          <p className="wedding-type-card-title text-[#252934]">
-                            {displayedInsideInviteLine}
-                          </p>
-                          <p className="wedding-type-body mt-3 text-[#252934]/58">{displayedClosingLine}</p>
-                        </div>
-                      )}
-
-                      <div className="grid gap-6">
-                        {/* Question 1: Ceremony */}
-                        <div className="rounded-[1.4rem] premium-glass p-5">
-                          <p className="wedding-type-card-title text-[#252934] mb-1 text-center">
-                            {isHydratingGuest ? "Đang tải lời mời..." : `${inviteCopy.recipientPronoun ? inviteCopy.recipientPronoun.charAt(0).toUpperCase() + inviteCopy.recipientPronoun.slice(1) : "Bạn"} có thể tham dự Thánh lễ Hôn phối chứ?`}
-                          </p>
-                          {!isHydratingGuest && (
-                            <p className="text-[1.1rem] sm:text-[1.15rem] text-[#252934]/75 text-center mb-5 font-serif italic leading-relaxed px-2">
-                              Vào lúc 15:00 Chúa Nhật, 20/12/2026. Tại Nhà Thờ Giáo Xứ Tam Hải.
-                            </p>
-                          )}
-                          <div className="grid grid-cols-2 gap-3">
-                            <button
-                              type="button"
-                              className={[
-                                "rounded-xl border py-3 text-center transition",
-                                formValues.attendingCeremony === "yes" ? "border-rose-quartz bg-white/82 ring-2 ring-rose-quartz/18 font-bold" : "border-serenity/18 bg-white/75 text-[#252934]/70 hover:bg-white",
-                              ].join(" ")}
-                              onClick={() => {
-                                setValue("attendingCeremony", "yes", { shouldDirty: true, shouldValidate: true });
-                                if (formValues.attendingBanquet === "yes" || formValues.attendingBanquet === null) {
-                                  setValue("attending", "yes", { shouldDirty: true });
-                                }
-                              }}
-                            >
-                              Có, sẽ tham dự
-                            </button>
-                            <button
-                              type="button"
-                              className={[
-                                "rounded-xl border py-3 text-center transition",
-                                formValues.attendingCeremony === "no" ? "border-rose-quartz bg-white/82 ring-2 ring-rose-quartz/18 font-bold" : "border-serenity/18 bg-white/75 text-[#252934]/70 hover:bg-white",
-                              ].join(" ")}
-                              onClick={() => {
-                                setValue("attendingCeremony", "no", { shouldDirty: true, shouldValidate: true });
-                                if (getValues("attendingBanquet") === "no") {
-                                  setValue("attending", "no", { shouldDirty: true });
-                                  setValue("guestCount", 0, { shouldDirty: true });
-                                  setValue("accommodationNeeded", false, { shouldDirty: true });
-                                  setValue("dietaryNote", "", { shouldDirty: true });
-                                  replace([]);
-                                }
-                              }}
-                            >
-                              Rất tiếc, không thể tham dự
-                            </button>
-                          </div>
-                          {errors.attendingCeremony && <p className="mt-2 text-xs text-center text-[#9B4E5C] font-bold">{errors.attendingCeremony.message}</p>}
-                        </div>
-
-                        {/* Question 2: Banquet */}
-                        <div className="rounded-[1.4rem] premium-glass p-5">
-                          <p className="wedding-type-card-title text-[#252934] mb-1 text-center">
-                            {isHydratingGuest ? "Đang tải lời mời..." : `${inviteCopy.recipientPronoun ? inviteCopy.recipientPronoun.charAt(0).toUpperCase() + inviteCopy.recipientPronoun.slice(1) : "Bạn"} sẽ đến chung vui trong đêm Tiệc mừng chứ?`}
-                          </p>
-                          {!isHydratingGuest && (
-                            <p className="text-[1.1rem] sm:text-[1.15rem] text-[#252934]/75 text-center mb-5 font-serif italic leading-relaxed px-2">
-                              Vào lúc 17:30 Thứ 7, 26/12/2026. Tại Terracotta Đà Lạt.
-                            </p>
-                          )}
-                          <div className="grid grid-cols-2 gap-3">
-                            <button
-                              type="button"
-                              className={[
-                                "rounded-xl border py-3 text-center transition",
-                                formValues.attendingBanquet === "yes" ? "border-rose-quartz bg-white/82 ring-2 ring-rose-quartz/18 font-bold" : "border-serenity/18 bg-white/75 text-[#252934]/70 hover:bg-white",
-                              ].join(" ")}
-                              onClick={() => {
-                                setValue("attendingBanquet", "yes", { shouldDirty: true, shouldValidate: true });
-                                setValue("attending", "yes", { shouldDirty: true });
-                                if (guestCount === 0) {
-                                  setValue("guestCount", inviteeContext?.expectedGuestCount || 1, { shouldDirty: true });
-                                }
-                              }}
-                            >
-                              Có, sẽ tham dự
-                            </button>
-                            <button
-                              type="button"
-                              className={[
-                                "rounded-xl border py-3 text-center transition",
-                                formValues.attendingBanquet === "no" ? "border-rose-quartz bg-white/82 ring-2 ring-rose-quartz/18 font-bold" : "border-serenity/18 bg-white/75 text-[#252934]/70 hover:bg-white",
-                              ].join(" ")}
-                              onClick={() => {
-                                setValue("attendingBanquet", "no", { shouldDirty: true, shouldValidate: true });
-                                if (getValues("attendingCeremony") === "no") {
-                                  setValue("attending", "no", { shouldDirty: true });
-                                  setValue("guestCount", 0, { shouldDirty: true });
-                                  setValue("accommodationNeeded", false, { shouldDirty: true });
-                                  setValue("dietaryNote", "", { shouldDirty: true });
-                                  replace([]);
-                                }
-                              }}
-                            >
-                              Rất tiếc, không thể tham dự
-                            </button>
-                          </div>
-                          {errors.attendingBanquet && <p className="mt-2 text-xs text-center text-[#9B4E5C] font-bold">{errors.attendingBanquet.message}</p>}
-                        </div>
-                      </div>
+              {/* Card xem lại thông tin */}
+              <div className="w-full rounded-[1.6rem] border border-serenity/20 bg-white/90 p-5 sm:p-8 shadow-[0_12px_36px_rgba(37,41,52,0.04)] text-left grid gap-5 mb-8">
+                
+                {/* 1. Người hồi đáp */}
+                <div className="border-b border-serenity/16 pb-4">
+                  <p className="text-[11px] font-bold tracking-[0.14em] text-[#7a6a5d] uppercase mb-2">
+                    1. Người gửi hồi đáp
+                  </p>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm text-[#252934]">
+                    <div>
+                      <span className="text-[#252934]/60">Họ và tên: </span>
+                      <strong className="font-semibold">{formValues.honorific ? `${formValues.honorific} ` : ""}{formValues.name || inviteCopy.shortRecipientLabel}</strong>
                     </div>
-                  ) : null}
+                    {formValues.phone && (
+                      <div>
+                        <span className="text-[#252934]/60">Số điện thoại: </span>
+                        <span className="font-medium">{formValues.phone}</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
 
-                  {currentStep.key === "stay" ? (
-                    <div className="mt-8 grid gap-5">
-                      <div className="grid gap-4 sm:grid-cols-2">
-                        <button
-                          type="button"
-                          className={[
-                            "flex h-full flex-col items-center justify-start rounded-[1.4rem] border p-5 text-center shadow-[0_14px_42px_rgba(37,41,52,0.05)] transition hover:-translate-y-0.5",
-                            accommodationNeeded ? "border-rose-quartz bg-white/82 ring-4 ring-rose-quartz/18" : "border-serenity/18 bg-white/75 hover:bg-white",
-                          ].join(" ")}
-                          onClick={() => toggleAccommodation(true)}
-                        >
-                          <BedDouble className="mb-4 h-6 w-6 text-serenity" />
-                          <p className="wedding-type-card-title text-[#252934]">Nhờ chuẩn bị phòng</p>
-                          <p className="wedding-type-body mt-2 text-[#252934]/58">
-                            Vui lòng nhập thông tin người lưu trú để gia đình sắp xếp phòng.
-                          </p>
-                        </button>
-                        <button
-                          type="button"
-                          className={[
-                            "flex h-full flex-col items-center justify-start rounded-[1.4rem] border p-5 text-center shadow-[0_14px_42px_rgba(37,41,52,0.05)] transition hover:-translate-y-0.5",
-                            !accommodationNeeded ? "border-rose-quartz bg-white/82 ring-4 ring-rose-quartz/18" : "border-serenity/18 bg-white/75 hover:bg-white",
-                          ].join(" ")}
-                          onClick={() => toggleAccommodation(false)}
-                        >
-                          <CheckCircle2 className="mb-4 h-6 w-6 text-serenity" />
-                          <p className="wedding-type-card-title text-[#252934]">Tự túc chỗ ở</p>
-                          <p className="wedding-type-body mt-2 text-[#252934]/58">Đã có kế hoạch lưu trú riêng.</p>
-                        </button>
+                {/* 2. Xác nhận tham dự */}
+                <div className="border-b border-serenity/16 pb-4">
+                  <p className="text-[11px] font-bold tracking-[0.14em] text-[#7a6a5d] uppercase mb-2">
+                    2. Tham dự sự kiện
+                  </p>
+                  <div className="grid gap-2.5 text-sm text-[#252934]">
+                    {/* Sự kiện 1 */}
+                    <div className="flex items-center justify-between bg-[#fcfaf7] p-3.5 rounded-xl border border-serenity/12">
+                      <div>
+                        <p className="font-bold text-[#252934]">Thánh lễ Hôn phối</p>
+                        <p className="text-xs text-[#252934]/65">15:00 — Chủ Nhật, 20/12/2026</p>
+                      </div>
+                      <span className={`px-3.5 py-1.5 rounded-full text-xs font-bold ${
+                        formValues.attendingCeremony === "yes" 
+                          ? "bg-[#7a8a5c]/15 text-[#58683e]" 
+                          : "bg-rose-100/70 text-[#7a4a4a]"
+                      }`}>
+                        {formValues.attendingCeremony === "yes" ? "Sẽ tham dự" : "Không tham dự"}
+                      </span>
+                    </div>
+
+                    {/* Sự kiện 2 */}
+                    <div className="flex items-center justify-between bg-[#fcfaf7] p-3.5 rounded-xl border border-serenity/12">
+                      <div>
+                        <p className="font-bold text-[#252934]">Tiệc cưới</p>
+                        <p className="text-xs text-[#252934]/65">17:30 — Thứ Bảy, 26/12/2026</p>
+                      </div>
+                      <span className={`px-3.5 py-1.5 rounded-full text-xs font-bold ${
+                        formValues.attendingBanquet === "yes" 
+                          ? "bg-[#7a8a5c]/15 text-[#58683e]" 
+                          : "bg-rose-100/70 text-[#7a4a4a]"
+                      }`}>
+                        {formValues.attendingBanquet === "yes" ? "Sẽ tham dự" : "Không tham dự"}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 3. Lưu trú (nếu chọn tham dự tiệc cưới) */}
+                {formValues.attendingBanquet === "yes" && (
+                  <div className="border-b border-serenity/16 pb-4">
+                    <p className="text-[11px] font-bold tracking-[0.14em] text-[#7a6a5d] uppercase mb-2">
+                      3. Lưu trú tại Resort Terracotta
+                    </p>
+                    <div className="text-sm text-[#252934] grid gap-3">
+                      <div>
+                        <span className="text-[#252934]/60">Lựa chọn: </span>
+                        <strong className="font-semibold text-[#252934]">
+                          {stayDecision === "25" && "Nghỉ lại Đêm 25/12 (đêm trước tiệc)"}
+                          {stayDecision === "26" && "Nghỉ lại Đêm 26/12 (đêm sau tiệc)"}
+                          {stayDecision === "both" && "Nghỉ lại Cả hai đêm (25/12 & 26/12)"}
+                          {stayDecision === "none" && "Không nghỉ lại"}
+                        </strong>
                       </div>
 
-                      {accommodationNeeded ? (
-                        <div className="grid gap-4 rounded-[1.4rem] premium-glass p-5 text-center">
-                          <div className="rounded-[1.2rem] bg-serenity/10 px-5 py-4 text-left text-sm text-[#252934]/75">
-                            <p className="font-bold text-[#252934]">Lưu ý khi có trẻ em đi cùng (Tối đa 02 bé/phòng):</p>
-                            <p className="mt-2 leading-relaxed">Vui lòng tích chọn ô <strong>"Là trẻ em"</strong> và ghi rõ số tuổi để {inviteCopy.tone === "parents_host" || inviteCopy.tone === "neutral" ? "gia đình" : inviteCopy.hostPronoun} phân bổ phòng & giường phụ chính xác:</p>
-                            <ul className="mt-1.5 list-inside list-disc space-y-1 leading-relaxed">
-                              <li><span className="font-semibold text-[#252934]">Dưới 11 tuổi:</span> Trẻ sẽ ngủ chung giường.</li>
-                              <li><span className="font-semibold text-[#252934]">Từ 11 tuổi trở lên:</span> Resort sẽ kê thêm giường phụ.</li>
-                            </ul>
-                            <p className="mt-2 text-xs italic opacity-80">(Nếu cần nôi cho em bé, vui lòng ghi chú ở bước tiếp theo).</p>
-                          </div>
-
-                          <div className="mb-2 text-center">
-                            <p className="section-kicker-dark wedding-type-kicker text-serenity">Danh sách người lưu trú</p>
-                            <h3 className="wedding-type-card-title mt-2 text-[#252934]">Thông tin để sắp xếp</h3>
-                          </div>
-
-                          {typeof errors.lodgingGuests?.message === "string" ? (
-                            <p className="text-sm font-bold text-[#9B4E5C]">{errors.lodgingGuests.message}</p>
-                          ) : null}
-
-                          <div className="grid gap-4">
-                            {fields.map((field, index) => {
-                              const isChild = Boolean(watchedLodgingGuests?.[index]?.isChild);
-                              const guestErrors = errors.lodgingGuests?.[index];
-
-                              return (
-                                <div key={field.id} className="relative rounded-[1.4rem] premium-glass p-4 pt-5 text-left shadow-sm">
-                                  <div className="mb-4 flex items-center justify-between">
-                                    <p className="section-kicker-dark wedding-type-kicker text-[#252934]/50">Người lưu trú {index + 1}</p>
-                                    <button
-                                      type="button"
-                                      onClick={() => fields.length === 1 ? replace([createLodgingGuest("")]) : remove(index)}
-                                      className="inline-flex h-[44px] w-[44px] items-center justify-center rounded-full bg-white text-[#9B4E5C] transition hover:bg-[#9B4E5C]/10"
-                                      aria-label="Xóa người lưu trú"
-                                    >
-                                      <Trash2 className="h-5 w-5" />
-                                    </button>
-                                  </div>
-                                  <div className={`grid items-end gap-4 ${isChild ? "" : "sm:grid-cols-[1fr_0.86fr]"}`}>
-                                    <Field label={<>Họ tên <br /> <span className="font-normal opacity-85">(đúng trên giấy tờ)</span></>} error={guestErrors?.fullName?.message}>
-                                      <input className={inputClass} placeholder="VD: Nguyễn Văn A" {...register(`lodgingGuests.${index}.fullName`)} />
-                                    </Field>
-                                    {!isChild && (
-                                      <Field label={<>Số giấy tờ tùy thân <br /> <span className="font-normal opacity-85">(Không bắt buộc)</span></>} error={guestErrors?.idNumber?.message}>
-                                        <input className={inputClass} placeholder="CMND/CCCD/Passport" {...register(`lodgingGuests.${index}.idNumber`)} />
-                                      </Field>
-                                    )}
-                                  </div>
-                                  <div className="mt-4 flex flex-wrap items-end gap-4">
-                                    <label className="flex h-[3.25rem] cursor-pointer items-center gap-3 rounded-2xl border border-serenity/18 bg-white/70 px-4 text-sm font-semibold text-[#252934] transition hover:bg-white">
-                                      <input type="checkbox" className="h-5 w-5 rounded text-serenity accent-serenity focus:ring-serenity/30" {...register(`lodgingGuests.${index}.isChild`)} />
-                                      Là trẻ em (đi cùng phụ huynh)
-                                    </label>
-                                    {isChild ? (
-                                      <div className="w-32">
-                                        <Field label="Tuổi của bé" error={guestErrors?.age?.message}>
-                                          <input
-                                            type="number"
-                                            min={0}
-                                            max={10}
-                                            className={`${inputClass} [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none`}
-                                            placeholder="VD: 5"
-                                            {...register(`lodgingGuests.${index}.age`, {
-                                              setValueAs: (value) => value === "" ? undefined : Number(value),
-                                            })}
-                                          />
-                                        </Field>
-                                      </div>
-                                    ) : null}
-                                  </div>
-                                </div>
-                              );
-                            })}
-                          </div>
-
-                          <div className="grid justify-items-center">
-                            <button
-                              type="button"
-                              onClick={() => append(createLodgingGuest(""))}
-                              className="wedding-type-button inline-flex min-h-11 items-center gap-2 rounded-[1.2rem] border border-serenity/24 bg-serenity/15 px-6 font-semibold text-[#252934] transition hover:bg-serenity/25"
-                            >
-                              <Plus className="h-4 w-4" /> THÊM NGƯỜI LƯU TRÚ
-                            </button>
-                          </div>
-
-
-                          {terracottaNote ? (
-                            <div className="wedding-type-body grid justify-items-center gap-3 rounded-[1.2rem] border border-serenity/14 bg-white/75 p-4 text-[#252934]/62">
-                              <CircleHelp className="mt-1 h-5 w-5 shrink-0 text-serenity" />
-                              {terracottaNote}
-                            </div>
-                          ) : null}
-                        </div>
-                      ) : null}
-                    </div>
-                  ) : null}
-
-                  {currentStep.key === "message" ? (
-                    <div className="mt-8 grid gap-5">
-                      {attending === "no" ? (
-                        <Field label="Lời nhắn gửi (không bắt buộc)">
-                          <textarea
-                            className={`${inputClass} min-h-32 py-4`}
-                            placeholder={`Nếu muốn, ${rsvpRecipientLabel} có thể để lại vài dòng nhắn gửi cho gia đình.`}
-                            {...register("notes")}
-                          />
-                        </Field>
-                      ) : (
-                        <>
-                          <Field label="Lưu ý thực đơn">
-                            <textarea
-                              className={`${inputClass} min-h-28 py-4`}
-                              placeholder="Ăn chay, dị ứng, kiêng món, không dùng rượu/cồn, hoặc cần suất trẻ em nếu có."
-                              {...register("dietaryNote")}
-                            />
-                          </Field>
-                          <Field label="Lưu ý khác">
-                            <textarea
-                              className={`${inputClass} min-h-32 py-4`}
-                              placeholder="Giờ đến dự kiến, hỗ trợ người lớn tuổi hoặc trẻ nhỏ, ghế ăn trẻ em, hoặc điều cần báo trước."
-                              {...register("notes")}
-                            />
-                          </Field>
-                        </>
-                      )}
-                      {attending === "no" ? (
-                        <div className="wedding-type-body grid justify-items-center gap-3 rounded-[1.4rem] premium-glass p-5 text-[#252934]/62">
-                          <CircleHelp className="mt-1 h-5 w-5 shrink-0 text-serenity" />
-                          {`Phần này không bắt buộc. Nếu ${rsvpRecipientLabel} không tiện ghi thêm, có thể bỏ trống và gửi hồi đáp.`}
-                        </div>
-                      ) : null}
-                    </div>
-                  ) : null}
-
-                  {currentStep.key === "review" ? (
-                    <div className={`mt-8 grid gap-5 ${hasBanquet ? "lg:grid-cols-[1fr_0.92fr]" : "max-w-xl mx-auto"}`}>
-                      <div className="grid gap-4 rounded-[1.5rem] premium-glass p-5 text-center">
-                        <ReviewLine label="Dự Thánh lễ Hôn phối" value={formValues.attendingCeremony === "yes" ? "Có, sẽ tham dự" : formValues.attendingCeremony === "no" ? "Rất tiếc, không thể" : "Chưa chọn"} />
-                        <ReviewLine label="Dự Tiệc mừng" value={formValues.attendingBanquet === "yes" ? "Có, sẽ tham dự" : formValues.attendingBanquet === "no" ? "Rất tiếc, không thể" : "Chưa chọn"} />
-                        <ReviewLine label="Phản hồi chung" value={formValues.attending === "no" ? "Rất tiếc không tham dự" : "Xác nhận tham dự"} />
-                        <ReviewLine label="Tên mời" value={isAdminBypassed ? formValues.name : inviteCopy.guestLabel} />
-                        {isAdminBypassed && <ReviewLine label="Nhóm khách" value={formValues.guestGroup} />}
-                        {formValues.attending === "no" ? (
-                          <ReviewLine label="Lời nhắn gửi" value={formValues.notes || "Không có"} />
-                        ) : hasBanquet ? (
-                          <>
-                            <ReviewLine label="Lưu ý thực đơn" value={formValues.dietaryNote || "Không có ghi chú"} />
-                            <ReviewLine label="Lưu ý khác" value={formValues.notes || "Không có"} />
-                          </>
-                        ) : null}
-                      </div>
-
-                      {hasBanquet ? (
-                        <div className="grid gap-4 rounded-[1.5rem] premium-glass p-5 text-center">
-                        <p className="section-kicker-dark wedding-type-kicker text-serenity">Thông tin lưu trú</p>
-                        <h3 className="wedding-type-card-title text-[#252934]">Xem lại đăng ký</h3>
-                        <div className="rounded-[1.2rem] border border-serenity/18 bg-white/75 p-4">
-                          <ReviewLine label="Lưu trú" value={formValues.accommodationNeeded && formValues.attending !== "no" ? "Có đăng ký hỗ trợ" : "Không đăng ký"} />
-                          <ReviewLine label="Số người ở lại" value={formValues.accommodationNeeded ? String(lodgingGuests.length) : "0"} />
-                          <ReviewLine label="Trẻ em dưới 11" value={formValues.accommodationNeeded ? String(countLodgingChildren(lodgingGuests)) : "0"} />
-                        </div>
-                        {formValues.accommodationNeeded && lodgingGuests.length ? (
-                          <div className="grid gap-2 rounded-[1.2rem] border border-serenity/14 bg-white/75 p-4 text-center">
-                            {lodgingGuests.map((guest, index) => (
-                              <p key={`${guest.fullName}-${index}`} className="wedding-type-body font-semibold text-[#252934]/70">
-                                {formatLodgingGuestLabel(guest)}
-                              </p>
+                      {stayDecision !== "none" && lodgingGuests.length > 0 && (
+                        <div className="bg-[#fcfaf7] p-3.5 rounded-xl border border-serenity/12">
+                          <p className="text-xs font-bold text-[#7a6a5d] uppercase mb-2">
+                            Danh sách người lưu trú ({lodgingGuests.length} người):
+                          </p>
+                          <ul className="grid gap-2 text-xs">
+                            {lodgingGuests.map((g, idx) => (
+                              <li key={idx} className="flex items-center justify-between border-b border-serenity/10 pb-1.5 last:border-b-0 last:pb-0">
+                                <span>
+                                  <span className="text-[#7a6a5d] font-semibold mr-1.5">{idx + 1}.</span>
+                                  <strong className="font-semibold text-[#252934]">{g.fullName || "Khách mời"}</strong>
+                                  {g.age ? <span className="text-[#252934]/60 text-[11px] ml-1">({g.age} tuổi)</span> : null}
+                                </span>
+                                {g.isChild && (
+                                  <span className="text-[10px] font-semibold bg-amber-100/80 text-amber-900 px-2.5 py-0.5 rounded-md">
+                                    Trẻ em (&lt;11 tuổi)
+                                  </span>
+                                )}
+                              </li>
                             ))}
-                          </div>
-                        ) : null}
-                        <div className="wedding-type-body rounded-[1.2rem] border border-serenity/14 bg-white/75 p-4 text-[#252934]/62">
-                          {formValues.accommodationNeeded ? terracottaNote || "Không có ghi chú lưu trú cần gửi kèm." : "Không có thông tin lưu trú cần gửi kèm."}
+                          </ul>
                         </div>
-                        <div className="wedding-type-body rounded-[1.2rem] border border-serenity/14 bg-white/75 p-4 text-[#252934]/62">
-                          Bấm gửi là lời hồi đáp này được ghi nhận. Nếu cần sửa, hãy quay lại bước trước.
-                        </div>
-                        </div>
-                      ) : null}
-                    </div>
-                  ) : null}
-                </motion.div>
-              </AnimatePresence>
-
-              <div className="mt-10 flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-center sm:gap-4">
-                <button
-                  type="button"
-                  className="wedding-type-button inline-flex min-h-12 items-center justify-center rounded-full border border-serenity/26 bg-white/54 px-6 text-[#252934]/62 transition hover:border-serenity/46 hover:text-[#252934] disabled:opacity-30"
-                  disabled={stepIndex === 0}
-                  onClick={() => goToStep(Math.max(0, stepIndex - 1))}
-                >
-                  <ArrowLeft className="mr-2 h-4 w-4" /> Quay lại
-                </button>
-
-                {stepIndex < visibleSteps.length - 1 ? (
-                  <motion.button
-                    type="button"
-                    className="light-sweep wedding-type-button inline-flex min-h-12 items-center justify-center rounded-full bg-rose-quartz px-7 text-[#252934] shadow-[0_16px_48px_rgba(146,168,209,0.22)] ring-1 ring-rose-quartz/70 disabled:opacity-60"
-                    disabled={isHydratingGuest}
-                    whileHover={{ scale: 1.03 }}
-                    whileTap={{ scale: 0.97 }}
-                    onClick={() => void goNextStep()}
-                  >
-                    {isHydratingGuest ? "Đang tải..." : "Tiếp tục"} <ChevronRight className="ml-2 h-4 w-4" />
-                  </motion.button>
-                  ) : (
-                    <motion.button
-                      type="submit"
-                      disabled={isSubmitting || guestRsvpLocked}
-                      className="light-sweep wedding-type-button inline-flex min-h-12 items-center justify-center rounded-full bg-rose-quartz px-7 text-[#252934] shadow-[0_16px_48px_rgba(146,168,209,0.22)] ring-1 ring-rose-quartz/70 disabled:opacity-60"
-                      whileHover={{ scale: 1.04 }}
-                      whileTap={{ scale: 0.96 }}
-                    >
-                      {isSubmitting ? (
-                        <svg className="mr-2 h-4 w-4 animate-spin text-[#252934]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-                      ) : (
-                        <Mail className="mr-2 h-4 w-4" />
                       )}
-                      {isSubmitting ? "Đang xử lý..." : attending === "no" ? "Gửi lời nhắn" : "Xác nhận gửi"}
-                    </motion.button>
+                    </div>
+                  </div>
+                )}
+
+                {/* 4. Ghi chú & Lời nhắn */}
+                {(formValues.dietaryNote?.trim() || formValues.notes?.trim()) && (
+                  <div>
+                    <p className="text-[11px] font-bold tracking-[0.14em] text-[#7a6a5d] uppercase mb-2">
+                      4. Ghi chú & Lời nhắn
+                    </p>
+                    <div className="grid gap-2.5 text-sm text-[#252934]">
+                      {formValues.dietaryNote?.trim() && (
+                        <div className="bg-[#fcfaf7] p-3.5 rounded-xl border border-serenity/12">
+                          <p className="text-xs font-semibold text-[#7a6a5d] mb-0.5">Lưu ý thực đơn:</p>
+                          <p className="italic text-[#252934]/90">{formValues.dietaryNote.trim()}</p>
+                        </div>
+                      )}
+                      {formValues.notes?.trim() && (
+                        <div className="bg-[#fcfaf7] p-3.5 rounded-xl border border-serenity/12">
+                          <p className="text-xs font-semibold text-[#7a6a5d] mb-0.5">Ghi chú / Lời nhắn:</p>
+                          <p className="italic text-[#252934]/90">{formValues.notes.trim()}</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
                 )}
               </div>
-            </form>
+
+              {/* Nút thao tác */}
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-3.5 w-full max-w-md">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsReviewing(false);
+                    window.scrollTo({ top: 0, behavior: "smooth" });
+                  }}
+                  className="w-full sm:w-auto inline-flex h-12 items-center justify-center rounded-full border border-serenity/30 bg-white px-7 text-sm font-semibold text-[#252934] hover:bg-[#252934]/5 transition"
+                >
+                  <ArrowLeft className="w-4 h-4 mr-2" /> Chỉnh sửa lại
+                </button>
+
+                <motion.button
+                  type="button"
+                  onClick={handleSubmit(onSubmit)}
+                  disabled={isSubmitting}
+                  className="w-full sm:w-auto light-sweep inline-flex h-12 items-center justify-center rounded-full bg-rose-quartz px-8 text-sm font-bold text-[#252934] shadow-[0_16px_48px_rgba(146,168,209,0.22)] ring-1 ring-rose-quartz/70 transition hover:-translate-y-0.5 disabled:opacity-60"
+                  whileHover={{ scale: 1.03 }}
+                  whileTap={{ scale: 0.97 }}
+                >
+                  {isSubmitting ? (
+                    <svg className="mr-2 h-4 w-4 animate-spin text-[#252934]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                  ) : (
+                    <Mail className="mr-2 h-4 w-4" />
+                  )}
+                  {isSubmitting ? "Đang gửi..." : "Xác nhận gửi hồi đáp"}
+                </motion.button>
+              </div>
+            </motion.div>
+          ) : (
+            <div className="flex flex-col w-full">
+              {/* Hero */}
+              <aside className="mx-auto max-w-2xl text-center mb-8 px-4">
+                <h1 className="wedding-type-title text-[#252934]">
+                  Lời hồi đáp
+                </h1>
+              </aside>
+
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  if (!guestRsvpLocked) handleGoToReview();
+                }}
+                className="w-full px-4 sm:px-8 text-center"
+              >
+                {submitError ? (
+                  <p className="mb-6 rounded-2xl border border-serenity/18 bg-white/60 px-4 py-3 text-sm font-semibold text-[#9B4E5C]">
+                    {submitError}
+                  </p>
+                ) : null}
+
+                {/* Khối Xác nhận tham dự (Attendance) */}
+                <div className="rounded-[1.6rem] border border-serenity/18 bg-white/80 p-4 sm:p-8 shadow-sm text-center mb-6 grid gap-1 sm:gap-2">
+                  
+                  {/* Sự kiện 1: Thánh lễ */}
+                  <div className="py-2 sm:py-6 flex flex-col items-center sm:flex-row sm:justify-between sm:items-center gap-2 sm:gap-6 text-center sm:text-left">
+                    {/* Badge */}
+                    <div className="flex h-13 w-13 sm:h-16 sm:w-16 shrink-0 items-center justify-center rounded-[1.2rem] sm:rounded-[1.6rem] bg-white border border-[#f2e5e0] shadow-[0_8px_20px_rgba(242,229,224,0.5)] mb-1.5 sm:mb-0">
+                      <img src="/assets/icon-cross.png" className="h-8 w-8 sm:h-10 sm:w-10 object-contain" alt="Nhà thờ" />
+                    </div>
+                    
+                    {/* Chữ */}
+                    <div className="mb-2 sm:mb-0 sm:ml-5 sm:flex-1 text-center sm:text-left">
+                      <p className="text-lg sm:text-base font-bold tracking-[0.12em] text-[#7a6a5d] uppercase mb-1 whitespace-nowrap">
+                        THÁNH LỄ HÔN PHỐI
+                      </p>
+                      <p className="text-sm sm:text-sm font-semibold text-[#252934] mb-0.5 whitespace-nowrap">
+                        15:00 — Chủ Nhật, 20/12/2026
+                      </p>
+                      <p className="text-sm sm:text-sm text-[#252934]/72 whitespace-nowrap">
+                        Nhà Thờ Giáo Xứ Tam Hải
+                      </p>
+                    </div>
+
+                    {/* Segmented Pill */}
+                    <div className="flex flex-col items-center gap-1 sm:gap-1.5 shrink-0 self-center sm:self-auto">
+                      <span className="text-[11px] font-bold tracking-[0.14em] text-[#7a6a5d]/75 uppercase">
+                        Tham dự:
+                      </span>
+                      <div className="flex h-11 items-center rounded-full bg-white/80 p-1 ring-1 ring-serenity/30 shadow-[0_4px_14px_rgba(63,70,66,0.08)] shrink-0">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setValue("attendingCeremony", "yes", { shouldDirty: true, shouldValidate: true });
+                          }}
+                          className={[
+                            "h-full px-7 rounded-full text-sm font-semibold transition-all duration-200",
+                            formValues.attendingCeremony === "yes"
+                              ? "bg-[#7a8a5c] text-white shadow-sm"
+                              : "text-[#252934] hover:bg-[#252934]/5"
+                          ].join(" ")}
+                        >
+                          Có
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setValue("attendingCeremony", "no", { shouldDirty: true, shouldValidate: true });
+                          }}
+                          className={[
+                            "h-full px-7 rounded-full text-sm font-semibold transition-all duration-200",
+                            formValues.attendingCeremony === "no"
+                              ? "bg-[#7a4a4a] text-white shadow-sm"
+                              : "text-[#252934] hover:bg-[#252934]/5"
+                          ].join(" ")}
+                        >
+                          Không
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="h-px w-full bg-serenity/28 my-1.5 sm:my-4" />
+
+                  {/* Sự kiện 2: Tiệc cưới */}
+                  <div className="py-2 sm:py-6 flex flex-col items-center sm:flex-row sm:justify-between sm:items-center gap-2 sm:gap-6 text-center sm:text-left">
+                    {/* Badge */}
+                    <div className="flex h-13 w-13 sm:h-16 sm:w-16 shrink-0 items-center justify-center rounded-[1.2rem] sm:rounded-[1.6rem] bg-white border border-[#f2e5e0] shadow-[0_8px_20px_rgba(242,229,224,0.5)] mb-1.5 sm:mb-0">
+                      <img src="/assets/icon-glasses.png" className="h-8 w-8 sm:h-10 sm:w-10 object-contain" alt="Tiệc cưới" />
+                    </div>
+                    
+                    {/* Chữ */}
+                    <div className="mb-2 sm:mb-0 sm:ml-5 sm:flex-1 text-center sm:text-left">
+                      <p className="text-lg sm:text-base font-bold tracking-[0.12em] text-[#7a6a5d] uppercase mb-1 whitespace-nowrap">
+                        TIỆC CƯỚI
+                      </p>
+                      <p className="text-sm sm:text-sm font-semibold text-[#252934] mb-0.5 whitespace-nowrap">
+                        17:30 — Thứ Bảy, 26/12/2026
+                      </p>
+                      <p className="text-sm sm:text-sm text-[#252934]/72 whitespace-nowrap">
+                        Terracotta Hotel & Resort Đà Lạt
+                      </p>
+                    </div>
+
+                    {/* Segmented Pill */}
+                    <div className="flex flex-col items-center gap-1 sm:gap-1.5 shrink-0 self-center sm:self-auto">
+                      <span className="text-[11px] font-bold tracking-[0.14em] text-[#7a6a5d]/75 uppercase">
+                        Tham dự:
+                      </span>
+                      <div className="flex h-11 items-center rounded-full bg-white/80 p-1 ring-1 ring-serenity/30 shadow-[0_4px_14px_rgba(63,70,66,0.08)] shrink-0">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setValue("attendingBanquet", "yes", { shouldDirty: true, shouldValidate: true });
+                          }}
+                          className={[
+                            "h-full px-7 rounded-full text-sm font-semibold transition-all duration-200",
+                            formValues.attendingBanquet === "yes"
+                              ? "bg-[#7a8a5c] text-white shadow-sm"
+                              : "text-[#252934] hover:bg-[#252934]/5"
+                          ].join(" ")}
+                        >
+                          Có
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setValue("attendingBanquet", "no", { shouldDirty: true, shouldValidate: true });
+                          }}
+                          className={[
+                            "h-full px-7 rounded-full text-sm font-semibold transition-all duration-200",
+                            formValues.attendingBanquet === "no"
+                              ? "bg-[#7a4a4a] text-white shadow-sm"
+                              : "text-[#252934] hover:bg-[#252934]/5"
+                          ].join(" ")}
+                        >
+                          Không
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  {errors.attendingCeremony && <p className="mt-2 text-xs text-center text-[#9B4E5C] font-bold">{errors.attendingCeremony.message}</p>}
+                  {errors.attendingBanquet && <p className="mt-2 text-xs text-center text-[#9B4E5C] font-bold">{errors.attendingBanquet.message}</p>}
+                </div>
+
+                {/* Lưu trú - Progressive disclosure inline */}
+                <AnimatePresence initial={false}>
+                  {attendingBanquet === "yes" && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0, overflow: "hidden" }}
+                      animate={{ height: "auto", opacity: 1, overflow: "visible" }}
+                      exit={{ height: 0, opacity: 0, overflow: "hidden" }}
+                      transition={{ duration: 0.28, ease: "easeInOut" }}
+                      className="mb-6"
+                    >
+                      <div className="rounded-[1.6rem] border border-serenity/18 bg-white/80 p-4 sm:p-6 shadow-sm text-center">
+                        <p className="text-xs font-bold tracking-widest text-[#7a6a5d] uppercase mb-2">
+                          LƯU TRÚ
+                        </p>
+                        <p className="text-sm sm:text-base font-normal text-[#252934]/80 mb-5 leading-relaxed max-w-xl mx-auto">
+                          Để việc dự tiệc thuận tiện nhất, gia đình sẽ đặt phòng lưu trú cho Quý khách tại Resort Terracotta.<br />
+                          Xin cho biết thông tin người lưu trú và số đêm nghỉ lại.
+                        </p>
+
+                        {/* Chọn đêm lưu trú (4 lựa chọn dạng thẻ) */}
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 w-full mb-6">
+                          {/* Option 25 */}
+                          <button
+                            type="button"
+                            onClick={() => handleStayDecisionChange("25")}
+                            className={[
+                              "flex flex-col items-center justify-center min-h-[3.6rem] sm:min-h-[4.2rem] rounded-xl border p-2 sm:p-3 text-center transition-all duration-200 cursor-pointer shadow-sm",
+                              stayDecision === "25"
+                                ? "bg-[#7a8a5c] border-[#7a8a5c] text-white"
+                                : "bg-white/80 border-serenity/22 hover:bg-white text-[#252934]"
+                            ].join(" ")}
+                          >
+                            <span className="text-sm sm:text-base font-bold">Đêm 25/12</span>
+                            <span className={`text-[11px] sm:text-xs mt-0.5 ${stayDecision === "25" ? "text-white/80" : "text-[#252934]/55"}`}>đêm trước tiệc</span>
+                          </button>
+
+                          {/* Option 26 */}
+                          <button
+                            type="button"
+                            onClick={() => handleStayDecisionChange("26")}
+                            className={[
+                              "flex flex-col items-center justify-center min-h-[3.6rem] sm:min-h-[4.2rem] rounded-xl border p-2 sm:p-3 text-center transition-all duration-200 cursor-pointer shadow-sm",
+                              stayDecision === "26"
+                                ? "bg-[#7a8a5c] border-[#7a8a5c] text-white"
+                                : "bg-white/80 border-serenity/22 hover:bg-white text-[#252934]"
+                            ].join(" ")}
+                          >
+                            <span className="text-sm sm:text-base font-bold">Đêm 26/12</span>
+                            <span className={`text-[11px] sm:text-xs mt-0.5 ${stayDecision === "26" ? "text-white/80" : "text-[#252934]/55"}`}>đêm sau tiệc</span>
+                          </button>
+
+                          {/* Option both */}
+                          <button
+                            type="button"
+                            onClick={() => handleStayDecisionChange("both")}
+                            className={[
+                              "flex flex-col items-center justify-center min-h-[3.6rem] sm:min-h-[4.2rem] rounded-xl border p-2 sm:p-3 text-center transition-all duration-200 cursor-pointer shadow-sm",
+                              stayDecision === "both"
+                                ? "bg-[#7a8a5c] border-[#7a8a5c] text-white"
+                                : "bg-white/80 border-serenity/22 hover:bg-white text-[#252934]"
+                            ].join(" ")}
+                          >
+                            <span className="text-sm sm:text-base font-bold">Cả hai đêm</span>
+                            <span className={`text-[11px] sm:text-xs mt-0.5 ${stayDecision === "both" ? "text-white/80" : "text-[#252934]/55"}`}>25/12 & 26/12</span>
+                          </button>
+
+                          {/* Option none */}
+                          <button
+                            type="button"
+                            onClick={() => handleStayDecisionChange("none")}
+                            className={[
+                              "flex flex-col items-center justify-center min-h-[3.6rem] sm:min-h-[4.2rem] rounded-xl border p-2 sm:p-3 text-center transition-all duration-200 cursor-pointer shadow-sm",
+                              stayDecision === "none"
+                                ? "bg-[#7a4a4a] border-[#7a4a4a] text-white"
+                                : "bg-[#fcfaf9]/90 border-rose-quartz/30 hover:bg-[#faf6f3] text-[#252934]/80"
+                            ].join(" ")}
+                          >
+                            <span className="text-sm sm:text-base font-bold">Không nghỉ lại</span>
+                          </button>
+                        </div>
+
+                        {/* List người lưu trú */}
+                        <AnimatePresence initial={false}>
+                          {stayDecision !== "none" && (
+                            <motion.div
+                              initial={{ height: 0, opacity: 0, overflow: "hidden" }}
+                              animate={{ height: "auto", opacity: 1, overflow: "visible" }}
+                              exit={{ height: 0, opacity: 0, overflow: "hidden" }}
+                              transition={{ duration: 0.28, ease: "easeInOut" }}
+                              className="mt-6 text-left grid gap-5"
+                            >
+                              {typeof errors.lodgingGuests?.message === "string" ? (
+                                <p className="text-sm font-bold text-[#9B4E5C] text-center">{errors.lodgingGuests.message}</p>
+                              ) : null}
+
+                              <div className="grid gap-4">
+                                {fields.map((field, index) => {
+                                  const isChild = Boolean(watchedLodgingGuests?.[index]?.isChild);
+                                  const guestErrors = errors.lodgingGuests?.[index];
+
+                                  return (
+                                    <div key={field.id} className="relative rounded-2xl border border-serenity/12 bg-white/45 p-4 text-left shadow-[0_2px_8px_rgba(146,168,209,0.06)]">
+                                      {/* Header with Title & Close/Delete Button */}
+                                      <div className="mb-3.5 flex items-center justify-between">
+                                        <p className="text-[11px] font-bold tracking-widest text-[#252934]/40 uppercase">Người lưu trú {index + 1}</p>
+                                        <button
+                                          type="button"
+                                          onClick={() => fields.length === 1 ? replace([createLodgingGuest("")]) : remove(index)}
+                                          className="text-[#7a4a4a]/70 hover:text-[#7a4a4a] transition-colors p-1"
+                                          aria-label="Xóa người lưu trú"
+                                        >
+                                          <X className="h-4.5 w-4.5 stroke-[2.25px]" />
+                                        </button>
+                                      </div>
+
+                                      {/* Input fields */}
+                                      <div className="grid grid-cols-1 gap-3.5">
+                                        <div className="grid grid-cols-1 sm:grid-cols-12 gap-3.5 items-end">
+                                          <div className="sm:col-span-7 w-full">
+                                            <Field
+                                              label={<span className="text-xs font-bold tracking-wider text-[#252934]/68">Họ tên</span>}
+                                              error={guestErrors?.fullName?.message}
+                                            >
+                                              <input className={inputClass} placeholder="VD: Nguyễn Văn A" {...register(`lodgingGuests.${index}.fullName`)} />
+                                            </Field>
+                                          </div>
+                                          <div className="sm:col-span-5 flex items-center justify-center sm:justify-start h-13">
+                                            <label className="flex cursor-pointer items-center gap-2 rounded-xl border border-serenity/18 bg-white/70 px-3 py-2.5 text-xs font-semibold text-[#252934] transition hover:bg-white shadow-sm w-full justify-center">
+                                              <input type="checkbox" className="h-4 w-4 rounded text-serenity accent-serenity focus:ring-serenity/30" {...register(`lodgingGuests.${index}.isChild`)} />
+                                              <span>Là trẻ em (dưới 11 tuổi)</span>
+                                            </label>
+                                          </div>
+                                        </div>
+
+                                        {isChild && (
+                                          <div className="w-full">
+                                            <Field
+                                              label={<span className="text-xs font-bold tracking-wider text-[#252934]/68">Tuổi của bé</span>}
+                                              error={guestErrors?.age?.message}
+                                            >
+                                              <input
+                                                type="number"
+                                                min={0}
+                                                max={10}
+                                                onWheel={(e) => e.currentTarget.blur()}
+                                                className={`${inputClass} [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none`}
+                                                placeholder="VD: 5"
+                                                {...register(`lodgingGuests.${index}.age`, {
+                                                  setValueAs: (value) => value === "" ? undefined : Number(value),
+                                                })}
+                                              />
+                                            </Field>
+                                          </div>
+                                        )}
+                                      </div>
+                                    </div>
+                                  );
+                                })}
+                              </div>
+
+                              <div className="grid justify-items-center">
+                                <button
+                                  type="button"
+                                  onClick={() => append(createLodgingGuest(""))}
+                                  className="wedding-type-button inline-flex min-h-11 items-center gap-2 rounded-full border border-serenity/24 bg-serenity/15 px-6 font-bold text-[#252934] transition hover:bg-serenity/25"
+                                >
+                                  <Plus className="h-4 w-4" /> THÊM NGƯỜI LƯU TRÚ
+                                </button>
+                              </div>
+
+                              {terracottaNote ? (
+                                <div className="wedding-type-body grid justify-items-center gap-3 rounded-[1.2rem] border border-serenity/14 bg-white/75 p-4 text-[#252934]/62">
+                                  <CircleHelp className="mt-1 h-5 w-5 shrink-0 text-serenity" />
+                                  {terracottaNote}
+                                </div>
+                              ) : null}
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+
+                {/* Ghi chú */}
+                <div className="rounded-[1.6rem] border border-serenity/18 bg-white/80 p-5 shadow-sm text-left mb-6">
+                  <p className="text-xs font-bold tracking-widest text-[#7a6a5d] uppercase mb-4">
+                    Ghi chú
+                  </p>
+                  {attending === "no" ? (
+                    <Field label="Lời nhắn gửi (không bắt buộc)">
+                      <textarea
+                        className={`${inputClass} min-h-32 py-4 text-left`}
+                        placeholder={`Nếu muốn, ${rsvpRecipientLabel} có thể để lại vài dòng nhắn gửi cho gia đình.`}
+                        {...register("notes")}
+                      />
+                    </Field>
+                  ) : (
+                    <div className="grid gap-5">
+                      {hasBanquet && (
+                        <Field label="Lưu ý thực đơn">
+                          <textarea
+                            className={`${inputClass} min-h-24 py-4 text-left`}
+                            placeholder="Ăn chay, dị ứng, kiêng món, không dùng rượu/cồn, hoặc cần suất trẻ em nếu có."
+                            {...register("dietaryNote")}
+                          />
+                        </Field>
+                      )}
+                      <Field label="Lưu ý khác / Lời nhắn gửi">
+                        <textarea
+                          className={`${inputClass} min-h-28 py-4 text-left`}
+                          placeholder="Giờ đến dự kiến, hỗ trợ người lớn tuổi hoặc trẻ nhỏ, ghế ăn trẻ em, hoặc lời chúc mừng của bạn."
+                          {...register("notes")}
+                        />
+                      </Field>
+                    </div>
+                  )}
+                </div>
+
+                {/* Nút XEM LẠI VÀ HOÀN TẤT */}
+                <div className="mt-4 flex justify-center">
+                  <motion.button
+                    type="button"
+                    onClick={handleGoToReview}
+                    disabled={guestRsvpLocked}
+                    className="light-sweep wedding-type-button inline-flex min-h-13 items-center justify-center rounded-full bg-rose-quartz px-10 text-base font-bold text-[#252934] shadow-[0_16px_48px_rgba(146,168,209,0.22)] ring-1 ring-rose-quartz/70 disabled:opacity-60 uppercase tracking-wide"
+                    whileHover={{ scale: 1.03 }}
+                    whileTap={{ scale: 0.97 }}
+                  >
+                    <Mail className="mr-2.5 h-5 w-5" />
+                    XEM LẠI VÀ HOÀN TẤT
+                  </motion.button>
+                </div>
+              </form>
             </div>
           )}
         </section>
