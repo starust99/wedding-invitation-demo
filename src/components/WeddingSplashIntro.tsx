@@ -19,13 +19,13 @@ function readForceIntro() {
 
 function markSplashSeen(key: string) {
   try {
-    window.localStorage.setItem(key, "1");
+    window.sessionStorage.setItem(key, "1");
   } catch {}
 }
 
 function hasSeenSplash(key: string) {
   try {
-    return window.localStorage.getItem(key) === "1";
+    return window.sessionStorage.getItem(key) === "1";
   } catch {
     return false;
   }

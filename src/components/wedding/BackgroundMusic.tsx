@@ -198,8 +198,8 @@ export function BackgroundMusic() {
             try {
               var shouldForce = new URLSearchParams(window.location.search).get("intro") === "1";
               if (!shouldForce) {
-                isIntroSkipped = localStorage.getItem(sessionKeyHome) === "1" || 
-                                 localStorage.getItem(sessionKeyPublic) === "1";
+                isIntroSkipped = sessionStorage.getItem(sessionKeyHome) === "1" || 
+                                 sessionStorage.getItem(sessionKeyPublic) === "1";
               }
             } catch (e) {}
 
