@@ -41,7 +41,7 @@ function getIntroDoneSnapshot() {
 
 export function useRevealReady(isInView: boolean) {
   const [mounted, setMounted] = useState(false);
-  const [delayedReady, setDelayedReady] = useState(false);
+  const [delayedReady, setDelayedReady] = useState(() => isIntroDone);
   const introDone = useSyncExternalStore(subscribeIntroDone, getIntroDoneSnapshot, () => false);
 
   useEffect(() => {
@@ -52,7 +52,7 @@ export function useRevealReady(isInView: boolean) {
 
   useEffect(() => {
     if (isActuallyReady && mounted) {
-      // If intro is already done on load (reload / splash skipped), reveal immediately with 0ms delay
+      // If intro is already done on load (reload / return navigation), reveal immediately with 0ms delay
       if (isIntroDone) {
         setDelayedReady(true);
         return;
@@ -67,26 +67,18 @@ export function useRevealReady(isInView: boolean) {
     }
   }, [isActuallyReady, mounted]);
 
-  if (!mounted) return false;
-  return delayedReady;
+  if (!mounted && !isIntroDone) return false;
+  return delayedReady || isIntroDone;
 }
 
 export function LineReveal({ children, delay = 0, className = "" }: { children: React.ReactNode; delay?: number; className?: string }) {
   const ref = useRef(null);
   const ready = useRevealReady(true);
-  const [isSkipped, setIsSkipped] = useState(false);
 
-  useEffect(() => {
-    setIsSkipped(isIntroDone);
-  }, []);
-
-  if (isSkipped) {
+  if (isIntroDone) {
     return (
       <div ref={ref} className={className}>
-        <div
-          className={`hero-text-fade ${ready ? "is-visible" : ""}`}
-          style={{ transitionDelay: isIntroDone ? "0s" : `${delay}s` }}
-        >
+        <div className="hero-text-fade is-visible" style={{ opacity: 1, transform: "none", transition: "none" }}>
           {children}
         </div>
       </div>
@@ -111,6 +103,10 @@ export function WriteReveal({ children, delay = 0, className = "" }: { children:
   const isInView = useInView(ref, { once: true, margin: "0px 0px -8% 0px" });
   const ready = useRevealReady(isInView);
 
+  if (isIntroDone) {
+    return <div ref={ref} className={className}>{children}</div>;
+  }
+
   return (
     <motion.div
       ref={ref}
@@ -129,6 +125,10 @@ export function FadeUp({ children, delay = 0, className = "" }: { children: Reac
   const isInView = useInView(ref, { once: true, margin: "0px 0px -8% 0px" });
   const ready = useRevealReady(isInView);
 
+  if (isIntroDone) {
+    return <div ref={ref} className={className}>{children}</div>;
+  }
+
   return (
     <motion.div
       ref={ref}
@@ -146,6 +146,10 @@ export function PopReveal({ children, delay = 0, className = "" }: { children: R
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "0px 0px -8% 0px" });
   const ready = useRevealReady(isInView);
+
+  if (isIntroDone) {
+    return <div ref={ref} className={className}>{children}</div>;
+  }
 
   return (
     <motion.div
