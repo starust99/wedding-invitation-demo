@@ -10,7 +10,11 @@ type SplashStatus = "checking" | "closed" | "opening" | "hidden";
 
 function readForceIntro() {
   if (typeof window === "undefined") return false;
-  return new URLSearchParams(window.location.search).get("intro") === "1";
+  try {
+    return new URLSearchParams(window.location.search).get("intro") === "1" || window.location.href.includes("intro=1");
+  } catch {
+    return false;
+  }
 }
 
 function markSplashSeen(key: string) {
@@ -69,47 +73,15 @@ export function WeddingSplashIntro({
       return;
     }
 
-    // List of critical assets to load before showing "Chạm để mở"
+    // Essential assets required before showing "Chạm để mở"
     const imagesToLoad = [
       "/assets/preloader-logo.webp",
       "/assets/wedding/ui/splash-closed.png",
       "/assets/wedding/ui/splash-poster-mobile.jpg",
-      "/assets/bg-mobile.webp",
-      "/assets/bg-desktop.webp",
-      "/assets/divider_cards.png",
       "/assets/hero-names-logo-v9-centered.png",
       "/assets/hero-invite-heading-v5.png",
       "/assets/hero-corner-left-v2.png",
       "/assets/hero-corner-right-v3.png",
-      // Section decoration dividers and background ornaments
-      "/assets/corner_ornament.png",
-      "/assets/divider_family_title.png",
-      "/assets/divider_family_vertical.png",
-      "/assets/divider_title_marriage.png",
-      "/assets/divider_title_party.png",
-      "/assets/divider_title_church.png",
-      "/assets/music-icon.png",
-      // Dress code theme and map graphics
-      "/assets/dresscode-theme-v4.png?v=9",
-      "/assets/venue-map-poster.webp",
-      // Timeline path graphics
-      "/assets/timeline-garden-path-mobile.png",
-      "/assets/timeline-garden-path-desktop.webp",
-      // Timeline item icons
-      "/assets/wedding/timeline/icon-1730.png",
-      "/assets/wedding/timeline/icon-1900.png",
-      "/assets/wedding/timeline/icon-1910.png",
-      "/assets/wedding/timeline/icon-1920.png",
-      "/assets/wedding/timeline/icon-2000.png",
-      "/assets/wedding/timeline/icon-2050.png",
-      // Dress code color swatch images
-      "/assets/dresscode-pink-v3.jpg?v=8",
-      "/assets/dresscode-blue-v3.jpg?v=8",
-      "/assets/dresscode-yellow-v3.jpg?v=8",
-      "/assets/dresscode-green-v4.png?v=8",
-      "/assets/dresscode-cream-v3.jpg?v=8",
-      "/assets/dresscode-beige-v3.jpg?v=8",
-      "/assets/dresscode-brown-v3.jpg?v=8",
     ];
 
     const isMobile = window.innerWidth < 768;
@@ -117,12 +89,7 @@ export function WeddingSplashIntro({
                      /iPad|iPhone|iPod/.test(navigator.userAgent);
 
     const mediaToLoad = [
-      // Active opening splash video
       isMobile ? "/assets/wedding/ui/splash-video-mobile.mp4" : "/assets/wedding/ui/splash-video.mp4",
-      // Active rings video
-      isSafari ? "/assets/wedding-rings.mov?v=7" : "/assets/wedding-rings.webm?v=7",
-      // Background music
-      "/assets/audio/co-chut-ngot-ngao.mp3"
     ];
 
     let loadedCount = 0;
@@ -136,18 +103,26 @@ export function WeddingSplashIntro({
 
     let isCancelled = false;
 
+    const maxPreloadTimer = setTimeout(() => {
+      if (!isCancelled) {
+        setPreloading(false);
+        setStatus("closed");
+      }
+    }, 1500);
+
     const checkComplete = () => {
       loadedCount++;
       if (!isCancelled) {
         const percent = Math.min(100, Math.round((loadedCount / totalAssets) * 100));
         setProgress(percent);
         if (loadedCount >= totalAssets) {
+          clearTimeout(maxPreloadTimer);
           setTimeout(() => {
             if (!isCancelled) {
               setPreloading(false);
               setStatus("closed");
             }
-          }, 600);
+          }, 150);
         }
       }
     };
@@ -169,6 +144,7 @@ export function WeddingSplashIntro({
 
     return () => {
       isCancelled = true;
+      clearTimeout(maxPreloadTimer);
     };
   }, [ready, sessionKey]);
 
@@ -271,7 +247,7 @@ export function WeddingSplashIntro({
             <motion.div 
               initial={{ opacity: 0 }}
               animate={opening ? { opacity: 0 } : { opacity: 1 }}
-              transition={{ delay: 0.8, duration: 1 }}
+              transition={{ delay: 0, duration: 0.4 }}
             >
               <motion.div 
                 className="relative flex flex-col items-center justify-center"

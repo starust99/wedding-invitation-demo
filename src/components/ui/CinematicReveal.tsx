@@ -8,7 +8,7 @@ export let isIntroDone = false;
 function checkLocalStorageIntro(): boolean {
   if (typeof window === "undefined") return false;
   try {
-    const shouldForce = new URLSearchParams(window.location.search).get("intro") === "1";
+    const shouldForce = new URLSearchParams(window.location.search).get("intro") === "1" || window.location.href.includes("intro=1");
     const keys = Object.keys(window.localStorage);
     const hasSeen = keys.some(key => key.startsWith("wedding-splash:") && window.localStorage.getItem(key) === "1");
     return hasSeen && !shouldForce;
