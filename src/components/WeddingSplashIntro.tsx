@@ -63,6 +63,9 @@ export function WeddingSplashIntro({
   useEffect(() => {
     if (!ready) return;
     const shouldForce = readForceIntro();
+    if (shouldForce) {
+      document.documentElement.classList.remove("splash-skipped");
+    }
     const isHidden = hasSeenSplash(sessionKey) && !shouldForce;
     if (isHidden) {
       document.documentElement.classList.add("splash-skipped");

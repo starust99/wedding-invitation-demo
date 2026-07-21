@@ -79,7 +79,12 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{
             __html: `
               try {
-                if (localStorage.getItem('wedding-splash:home') === '1' && !window.location.search.includes('intro=1')) {
+                var href = window.location.href || "";
+                var search = window.location.search || "";
+                var isForce = search.indexOf("intro=1") !== -1 || href.indexOf("intro=1") !== -1;
+                if (isForce) {
+                  document.documentElement.classList.remove('splash-skipped');
+                } else if (localStorage.getItem('wedding-splash:home') === '1') {
                   document.documentElement.classList.add('splash-skipped');
                 }
               } catch (e) {}
