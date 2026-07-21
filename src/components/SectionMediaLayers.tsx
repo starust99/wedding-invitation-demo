@@ -20,10 +20,11 @@ function MediaAsset({ layer, mobile = false }: { layer: MediaLayer; mobile?: boo
     return (
       <video
         src={src}
+        autoPlay
         muted
         playsInline
         loop
-        preload="metadata"
+        preload="auto"
         className={className}
         style={{ opacity: layer.opacity, objectPosition, transform: `scale(${scale})` }}
         {...{
@@ -45,6 +46,7 @@ function MediaAsset({ layer, mobile = false }: { layer: MediaLayer; mobile?: boo
       className={className}
       style={{ opacity: layer.opacity, objectPosition, transform: `scale(${scale})` }}
       draggable={false}
+      loading="lazy"
     />
   );
 }
@@ -64,12 +66,21 @@ export function SectionMediaLayers({
 
   return (
     <div aria-hidden="true" className={`pointer-events-none absolute inset-0 overflow-hidden ${className}`}>
-      {layers.map((layer) => (
-        <div key={layer.id} className="absolute inset-0">
-          <MediaAsset layer={layer} />
-          <MediaAsset layer={layer} mobile />
-        </div>
-      ))}
+      {layers.map((layer) => {
+        const isSameSrc = !layer.mobileSrc || layer.mobileSrc === layer.src;
+        return (
+          <div key={layer.id} className="absolute inset-0">
+            {isSameSrc ? (
+              <MediaAsset layer={layer} />
+            ) : (
+              <>
+                <MediaAsset layer={layer} />
+                <MediaAsset layer={layer} mobile />
+              </>
+            )}
+          </div>
+        );
+      })}
     </div>
   );
 }

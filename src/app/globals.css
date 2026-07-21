@@ -169,11 +169,14 @@ video::-webkit-media-controls-panel {
 }
 
 .page-transition-wrapper {
-  animation: page-fade-in 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+  will-change: opacity, transform;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  animation: page-fade-in 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 .page-transition-wrapper.page-leaving {
-  animation: page-fade-out 0.3s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: page-fade-out 0.25s cubic-bezier(0.22, 1, 0.36, 1) both;
   pointer-events: none;
 }
 

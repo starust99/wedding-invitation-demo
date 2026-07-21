@@ -326,67 +326,62 @@ export function EventDetailsContent({
     const video = ringsVideoRef.current;
     if (!video) return;
 
-    const playVideo = () => {
-      if (video.paused) {
+    // Synchronously enforce autoplay attributes for Mobile WebKit / Safari
+    video.muted = true;
+    video.defaultMuted = true;
+    video.playsInline = true;
+
+    const safePlay = () => {
+      if (video && video.paused) {
         const playPromise = video.play();
         if (playPromise !== undefined) {
-          playPromise.catch((error) => {
-            // Silence warning since background policy pause is expected behavior
+          playPromise.catch(() => {
+            // Silently swallow browser autoplay/power-saver rejections
           });
         }
       }
     };
 
-    // Initial load and play
-    video.load();
-    playVideo();
+    // 1. Play immediately if video buffer is already ready
+    if (video.readyState >= 2) {
+      safePlay();
+    }
 
-    // 1. Visibility change listener (tab switcher / lock screen)
+    // 2. Listen to native media load events
+    const handleCanPlay = () => safePlay();
+
+    // 3. Tab visibility / Page show handler (app switcher / wake up)
     const handleVisibilityChange = () => {
       if (document.visibilityState === "visible") {
-        playVideo();
+        safePlay();
       }
     };
 
-    // 2. Window focus & pageshow listener (app switcher / wake up)
-    const handleFocus = () => {
-      playVideo();
+    // 4. Touch / scroll fallback (guarantees playback on first user gesture)
+    const handleUserGesture = () => {
+      safePlay();
     };
 
-    // 3. Scroll listener (play backup when user interacting with the page)
-    const handleScroll = () => {
-      if (document.visibilityState === "visible") {
-        playVideo();
-      }
-    };
-
-    // 4. Manual loop backup (in case standard HTML5 loop attribute behaves inconsistently)
-    const handleEnded = () => {
-      playVideo();
-    };
-
-    // 5. Polling recovery interval (actively check and force play if paused every 800ms)
-    const intervalId = setInterval(() => {
-      if (document.visibilityState === "visible" && video.paused) {
-        playVideo();
-      }
-    }, 800);
-
+    video.addEventListener("canplay", handleCanPlay);
+    video.addEventListener("loadeddata", handleCanPlay);
     document.addEventListener("visibilitychange", handleVisibilityChange);
-    window.addEventListener("focus", handleFocus);
-    window.addEventListener("pageshow", handleFocus);
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    video.addEventListener("ended", handleEnded);
+    window.addEventListener("pageshow", handleVisibilityChange);
+    window.addEventListener("touchstart", handleUserGesture, { passive: true, once: true });
+    window.addEventListener("scroll", handleUserGesture, { passive: true, once: true });
+
+    // Initial rAF trigger for smooth mounting
+    const rafId = requestAnimationFrame(() => {
+      safePlay();
+    });
 
     return () => {
-      clearInterval(intervalId);
+      cancelAnimationFrame(rafId);
+      video.removeEventListener("canplay", handleCanPlay);
+      video.removeEventListener("loadeddata", handleCanPlay);
       document.removeEventListener("visibilitychange", handleVisibilityChange);
-      window.removeEventListener("focus", handleFocus);
-      window.removeEventListener("pageshow", handleFocus);
-      window.removeEventListener("scroll", handleScroll);
-      if (video) {
-        video.removeEventListener("ended", handleEnded);
-      }
+      window.removeEventListener("pageshow", handleVisibilityChange);
+      window.removeEventListener("touchstart", handleUserGesture);
+      window.removeEventListener("scroll", handleUserGesture);
     };
   }, []);
   const content = config.content;
