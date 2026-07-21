@@ -20,6 +20,14 @@ function checkLocalStorageIntro(): boolean {
 }
 
 export function checkIsIntroDone(): boolean {
+  if (typeof window !== "undefined") {
+    const search = window.location.search || "";
+    const href = window.location.href || "";
+    if (search.includes("intro=1") || href.includes("intro=1")) {
+      isIntroDone = false;
+      return false;
+    }
+  }
   if (isIntroDone) return true;
   if (checkLocalStorageIntro()) {
     isIntroDone = true;
