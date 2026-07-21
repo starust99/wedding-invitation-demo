@@ -58,6 +58,11 @@ export function WeddingSplashIntro({
   }, []);
   const closeTimer = useRef<number | null>(null);
   const sessionKey = `wedding-splash:${storageKey}`;
+
+  if (typeof window !== "undefined" && readForceIntro()) {
+    document.documentElement.classList.remove("splash-skipped");
+  }
+
   const isVisible = status !== "hidden";
 
   useEffect(() => {
