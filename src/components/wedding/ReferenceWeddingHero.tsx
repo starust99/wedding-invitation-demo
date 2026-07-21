@@ -31,18 +31,30 @@ function stripRepeatedHeroInvitePrefix(text: string) {
 }
 
 export function ReferenceWeddingHero({ config, summary }: ReferenceWeddingHeroProps) {
-  const ready = useRevealReady(true);
-  const isDone = checkIsIntroDone();
-  const isHeroVisible = ready || isDone;
+  const readyFromReveal = useRevealReady(true);
+  const [isHeroVisible, setIsHeroVisible] = useState(() => checkIsIntroDone());
 
   const [imageLoaded, setImageLoaded] = useState(false);
   const imgRef = useRef<HTMLImageElement>(null);
 
   useEffect(() => {
+    const updateVisibility = () => {
+      const isDone = checkIsIntroDone();
+      if (isDone || readyFromReveal) {
+        setIsHeroVisible(true);
+      }
+    };
+    updateVisibility();
+
     if (imgRef.current && imgRef.current.complete) {
       setImageLoaded(true);
     }
-  }, []);
+
+    window.addEventListener("introFinished", updateVisibility);
+    return () => window.removeEventListener("introFinished", updateVisibility);
+  }, [readyFromReveal]);
+
+  const isDone = isHeroVisible;
 
   const invitationText = stripRepeatedHeroInvitePrefix(
     summary?.invitationLine || config.content.description,
@@ -77,7 +89,7 @@ export function ReferenceWeddingHero({ config, summary }: ReferenceWeddingHeroPr
       <div className="save-date-arch-shell">
         <div className="save-date-arch-wrapper">
           <div
-            className={`hero-photo-fade ${isDone || (ready && imageLoaded) ? "is-visible" : ""}`}
+            className={`hero-photo-fade ${isDone || (readyFromReveal && imageLoaded) ? "is-visible" : ""}`}
             style={{ transitionDelay: isDone ? "0s" : "0.45s" }}
           >
             {/* Invisible img for preloading and onload detection outside figure */}

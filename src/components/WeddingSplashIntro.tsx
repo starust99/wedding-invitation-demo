@@ -61,6 +61,7 @@ export function WeddingSplashIntro({
     const shouldForce = readForceIntro();
     const isHidden = hasSeenSplash(sessionKey) && !shouldForce;
     if (isHidden) {
+      document.documentElement.classList.add("splash-skipped");
       setIsImmediateClose(true);
       setPreloading(false);
       setStatus("hidden");
@@ -173,6 +174,7 @@ export function WeddingSplashIntro({
 
   const closeIntro = useCallback(() => {
     markSplashSeen(sessionKey);
+    document.documentElement.classList.add("splash-skipped");
     setStatus("hidden");
     // Dispatch immediately so Hero animations run concurrently with the exit transition
     window.dispatchEvent(new Event("introFinished"));
