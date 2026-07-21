@@ -33,6 +33,7 @@ function stripRepeatedHeroInvitePrefix(text: string) {
 export function ReferenceWeddingHero({ config, summary }: ReferenceWeddingHeroProps) {
   const readyFromReveal = useRevealReady(true);
   const [isHeroVisible, setIsHeroVisible] = useState(() => checkIsIntroDone());
+  const [isAnimatedSequence, setIsAnimatedSequence] = useState(false);
 
   const [imageLoaded, setImageLoaded] = useState(false);
   const imgRef = useRef<HTMLImageElement>(null);
@@ -50,8 +51,13 @@ export function ReferenceWeddingHero({ config, summary }: ReferenceWeddingHeroPr
       setImageLoaded(true);
     }
 
-    window.addEventListener("introFinished", updateVisibility);
-    return () => window.removeEventListener("introFinished", updateVisibility);
+    const handleIntroFinished = () => {
+      updateVisibility();
+      setIsAnimatedSequence(true);
+    };
+
+    window.addEventListener("introFinished", handleIntroFinished);
+    return () => window.removeEventListener("introFinished", handleIntroFinished);
   }, [readyFromReveal]);
 
   const isDone = isHeroVisible;
@@ -63,8 +69,10 @@ export function ReferenceWeddingHero({ config, summary }: ReferenceWeddingHeroPr
   const textHeaderDelay = isDone ? 0 : 1.05;
   const textBodyDelay = isDone ? 0 : 1.2;
 
+  const heroMotionClass = isAnimatedSequence ? "hero-animating" : "hero-static";
+
   return (
-    <section id="home" className="save-date-hero save-date-hero-arch">
+    <section id="home" className={`save-date-hero save-date-hero-arch ${heroMotionClass}`}>
 
       <div
         className="save-date-name-logo-reveal"
@@ -173,7 +181,7 @@ export function ReferenceWeddingHero({ config, summary }: ReferenceWeddingHeroPr
         </div>
 
         <article className="save-date-hero-copy-block">
-          <LineReveal delay={textHeaderDelay} className="w-full">
+          <LineReveal delay={textHeaderDelay} type="header" className="w-full">
             <div className="save-date-invite-heading-image" aria-label={summary?.guestGreeting || "Trân trọng thân mời"}>
               <Image
                 src="/assets/hero-invite-heading-v5.png"
@@ -186,7 +194,7 @@ export function ReferenceWeddingHero({ config, summary }: ReferenceWeddingHeroPr
               />
             </div>
           </LineReveal>
-          <LineReveal delay={textBodyDelay} className="w-full">
+          <LineReveal delay={textBodyDelay} type="body" className="w-full">
             <p className="save-date-copy save-date-copy-arch">{invitationText}</p>
           </LineReveal>
         </article>

@@ -87,16 +87,28 @@ export function useRevealReady(isInView: boolean) {
   return delayedReady || isDoneNow;
 }
 
-export function LineReveal({ children, delay = 0, className = "" }: { children: React.ReactNode; delay?: number; className?: string }) {
+export function LineReveal({
+  children,
+  delay = 0,
+  className = "",
+  type = "header",
+}: {
+  children: React.ReactNode;
+  delay?: number;
+  className?: string;
+  type?: "header" | "body";
+}) {
   const ref = useRef(null);
   const ready = useRevealReady(true);
   const isDone = checkIsIntroDone();
   const isVisible = ready || isDone;
 
+  const fadeClass = type === "body" ? "hero-text-fade-body" : "hero-text-fade-header";
+
   return (
     <div ref={ref} className={className}>
       <div
-        className={`hero-text-fade ${isVisible ? "is-visible" : ""}`}
+        className={`${fadeClass} ${isVisible ? "is-visible" : ""}`}
         style={{ transitionDelay: isDone ? "0s" : `${delay}s` }}
       >
         {children}

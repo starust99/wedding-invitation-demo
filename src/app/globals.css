@@ -4017,60 +4017,101 @@ textarea {
   will-change: transform;
 }
 
-/* CSS-based hardware-accelerated transitions for Hero Section */
-.hero-logo-fade {
-  opacity: 0;
-  transform: translateY(12px) scale(0.98);
-  transition: opacity 1.2s cubic-bezier(0.34, 1.56, 0.64, 1), transform 1.2s cubic-bezier(0.34, 1.56, 0.64, 1);
-  will-change: opacity, transform;
-}
-.hero-logo-fade.is-visible {
-  opacity: 1;
-  transform: translateY(0) scale(1);
-}
-
-.hero-photo-fade {
-  opacity: 0;
-  transform: translateY(10px);
-  transition: opacity 1.5s cubic-bezier(0.25, 1, 0.5, 1), transform 1.5s cubic-bezier(0.25, 1, 0.5, 1);
-  will-change: opacity, transform;
-}
-.hero-photo-fade.is-visible {
-  opacity: 1;
-  transform: translateY(0);
+/* Sustainable Hardware-Accelerated Hero Motion System */
+@keyframes heroLogoKeyframes {
+  0% {
+    opacity: 0;
+    transform: translateY(14px) scale(0.96);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
-.hero-ornament-fade-left {
-  opacity: 0;
-  transform: scale(0.7) rotate(-8deg);
-  transition: opacity 1.2s cubic-bezier(0.34, 1.56, 0.64, 1), transform 1.2s cubic-bezier(0.34, 1.56, 0.64, 1);
-  will-change: opacity, transform;
-}
-.hero-ornament-fade-left.is-visible {
-  opacity: 1;
-  transform: scale(1) rotate(0deg);
-}
-
-.hero-ornament-fade-right {
-  opacity: 0;
-  transform: scale(0.7) rotate(8deg);
-  transition: opacity 1.2s cubic-bezier(0.34, 1.56, 0.64, 1), transform 1.2s cubic-bezier(0.34, 1.56, 0.64, 1);
-  will-change: opacity, transform;
-}
-.hero-ornament-fade-right.is-visible {
-  opacity: 1;
-  transform: scale(1) rotate(0deg);
+@keyframes heroPhotoKeyframes {
+  0% {
+    opacity: 0;
+    transform: translateY(16px) scale(0.98);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
-.hero-text-fade {
-  opacity: 0;
-  transform: translateY(10px);
-  transition: opacity 1.2s cubic-bezier(0.25, 1, 0.5, 1), transform 1.2s cubic-bezier(0.25, 1, 0.5, 1);
+@keyframes heroOrnamentLeftKeyframes {
+  0% {
+    opacity: 0;
+    transform: scale(0.7) rotate(-8deg);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+  }
+}
+
+@keyframes heroOrnamentRightKeyframes {
+  0% {
+    opacity: 0;
+    transform: scale(0.7) rotate(8deg);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+  }
+}
+
+@keyframes heroTextKeyframes {
+  0% {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.hero-logo-fade,
+.hero-photo-fade,
+.hero-ornament-fade-left,
+.hero-ornament-fade-right,
+.hero-text-fade,
+.hero-text-fade-header,
+.hero-text-fade-body {
   will-change: opacity, transform;
 }
-.hero-text-fade.is-visible {
-  opacity: 1;
-  transform: translateY(0);
+
+/* First envelope open cinematic staggered animation sequence */
+.hero-animating .hero-logo-fade {
+  opacity: 0;
+  animation: heroLogoKeyframes 1.2s cubic-bezier(0.34, 1.56, 0.64, 1) 0.15s forwards;
+}
+
+.hero-animating .hero-photo-fade {
+  opacity: 0;
+  animation: heroPhotoKeyframes 1.4s cubic-bezier(0.25, 1, 0.5, 1) 0.45s forwards;
+}
+
+.hero-animating .hero-ornament-fade-left {
+  opacity: 0;
+  animation: heroOrnamentLeftKeyframes 1.2s cubic-bezier(0.34, 1.56, 0.64, 1) 0.7s forwards;
+}
+
+.hero-animating .hero-ornament-fade-right {
+  opacity: 0;
+  animation: heroOrnamentRightKeyframes 1.2s cubic-bezier(0.34, 1.56, 0.64, 1) 0.85s forwards;
+}
+
+.hero-animating .hero-text-fade-header {
+  opacity: 0;
+  animation: heroTextKeyframes 1.2s cubic-bezier(0.25, 1, 0.5, 1) 1.05s forwards;
+}
+
+.hero-animating .hero-text-fade-body {
+  opacity: 0;
+  animation: heroTextKeyframes 1.2s cubic-bezier(0.25, 1, 0.5, 1) 1.2s forwards;
 }
 
 /* Instant splash skip styles to prevent hydration flash */
@@ -4081,19 +4122,24 @@ html.splash-skipped body {
   overflow: auto !important;
 }
 
-/* Fail-safe CSS rule: When splash is skipped/done or not active, force 100% opacity on all hero elements instantly */
+/* Fail-safe CSS rule: When splash is skipped/done or in static mode, force 100% opacity on all hero elements instantly */
 html.splash-skipped .hero-logo-fade,
 html.splash-skipped .hero-photo-fade,
 html.splash-skipped .hero-ornament-fade-left,
 html.splash-skipped .hero-ornament-fade-right,
 html.splash-skipped .hero-text-fade,
-body:not(.splash-active) .hero-logo-fade,
-body:not(.splash-active) .hero-photo-fade,
-body:not(.splash-active) .hero-ornament-fade-left,
-body:not(.splash-active) .hero-ornament-fade-right,
-body:not(.splash-active) .hero-text-fade {
+html.splash-skipped .hero-text-fade-header,
+html.splash-skipped .hero-text-fade-body,
+.hero-static .hero-logo-fade,
+.hero-static .hero-photo-fade,
+.hero-static .hero-ornament-fade-left,
+.hero-static .hero-ornament-fade-right,
+.hero-static .hero-text-fade,
+.hero-static .hero-text-fade-header,
+.hero-static .hero-text-fade-body {
   opacity: 1 !important;
   transform: none !important;
+  animation: none !important;
 }
 
 /* Watercolor illustration blending styles */
