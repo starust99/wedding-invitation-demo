@@ -2286,11 +2286,11 @@ textarea {
   }
 
   .timeline-garden-card {
-    box-shadow: 0 6px 16px rgba(63, 70, 66, 0.07);
-    background: rgba(253, 251, 247, 0.95);
-    border: 1px solid rgba(180, 151, 90, 0.25);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
+    box-shadow: 0 6px 16px rgba(63, 70, 66, 0.04);
+    background: rgba(253, 251, 247, 0.35);
+    border: 1px solid rgba(180, 151, 90, 0.2);
+    backdrop-filter: blur(24px) saturate(140%);
+    -webkit-backdrop-filter: blur(24px) saturate(140%);
     border-radius: 0.75rem;
     width: 100%;
   }
