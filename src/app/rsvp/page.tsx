@@ -796,7 +796,7 @@ export default function RSVPPage() {
                   onClick={() => redirectToInvitePage(inviteToken, "#thank-you")}
                   className="light-sweep wedding-type-button inline-flex min-h-12 items-center justify-center rounded-full bg-rose-quartz px-8 text-[#252934] shadow-[0_16px_48px_rgba(146,168,209,0.22)] ring-1 ring-rose-quartz/70 transition hover:-translate-y-0.5"
                 >
-                  <ArrowLeft className="mr-2 h-4 w-4" /> Quay lại trang thiệp
+                  Trở lại Trang thiệp
                 </button>
               </div>
             </motion.div>
