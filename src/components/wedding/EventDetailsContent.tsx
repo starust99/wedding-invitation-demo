@@ -46,7 +46,7 @@ const defaultTimelineFallback: EventDetailsTimelineItem[] = [
   { time: "20:50", title: "Chụp ảnh kỷ niệm", description: "Chụp hình lưu niệm cùng cô dâu chú rể." },
 ];
 
-const defaultColorsFallback = ["#F5C7C7", "#BCD4DE", "#FDF6D6", "#C2D3C2", "#FAF5EB", "#E5D3C0", "#8C7A6B"];
+const defaultColorsFallback = ["#d39a9c", "#9bb4c5", "#e8c691", "#a9bc99", "#f5e9d2", "#ddd1be", "#b3967d"];
 
 function formatDateLabel(dateLabel?: string) {
   if (!dateLabel) return "";

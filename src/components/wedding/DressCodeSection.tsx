@@ -18,43 +18,43 @@ const DRESS_COLORS: DressCodeColor[] = [
   {
     id: "pink",
     name: "Hồng phấn",
-    hex: "#E5B3B3",
+    hex: "#d39a9c",
     imgSrc: "/assets/dresscode-pink-v3.jpg",
   },
   {
     id: "blue",
     name: "Xanh biển",
-    hex: "#A4C3D2",
+    hex: "#9bb4c5",
     imgSrc: "/assets/dresscode-blue-v3.jpg",
   },
   {
     id: "yellow",
     name: "Vàng",
-    hex: "#F5D6A4",
+    hex: "#e8c691",
     imgSrc: "/assets/dresscode-yellow-v3.jpg",
   },
   {
     id: "green",
     name: "Xanh lá",
-    hex: "#B8C6A3",
+    hex: "#a9bc99",
     imgSrc: "/assets/dresscode-green-v4.jpg",
   },
   {
     id: "cream",
     name: "Kem",
-    hex: "#FAF0DD",
+    hex: "#f5e9d2",
     imgSrc: "/assets/dresscode-cream-v3.jpg",
   },
   {
     id: "beige",
     name: "Be",
-    hex: "#E8D8C8",
+    hex: "#ddd1be",
     imgSrc: "/assets/dresscode-beige-v3.jpg",
   },
   {
     id: "brown",
     name: "Nâu",
-    hex: "#B49A85",
+    hex: "#b3967d",
     imgSrc: "/assets/dresscode-brown-v3.jpg",
   },
 ];
@@ -164,10 +164,10 @@ export function DressCodeSection({
 
         {/* Color Selection Bar (moved below) */}
         <div
-          className="flex w-full bg-white/10 border border-white/30 shadow-[0_8px_32px_rgba(0,0,0,0.03)] rounded-[2.5rem] py-2.5 px-3 justify-around items-center z-10 mt-5"
+          className="flex w-full bg-white/60 border border-white/50 shadow-[0_4px_24px_rgba(63,70,66,0.06)] rounded-full py-2.5 px-4.5 justify-between items-center z-10 mt-5"
           style={{
-            backdropFilter: "blur(12px)",
-            WebkitBackdropFilter: "blur(12px)",
+            backdropFilter: "blur(16px)",
+            WebkitBackdropFilter: "blur(16px)",
           }}
           role="group"
           aria-label="Chọn màu trang phục"
@@ -181,27 +181,19 @@ export function DressCodeSection({
                 aria-pressed={isSelected}
                 aria-label={`Xem gợi ý phối đồ màu ${color.name}`}
                 onClick={() => setSelectedColorId(isSelected ? null : color.id)}
-                className={`w-[2.05rem] h-[2.05rem] xs:w-[2.3rem] xs:h-[2.3rem] rounded-full flex-shrink-0 transition-all duration-300 relative flex items-center justify-center focus-visible:outline-none ${
-                  isSelected ? "scale-[1.12]" : "hover:scale-[1.05]"
-                }`}
+                className="w-[2.1rem] h-[2.1rem] xs:w-[2.45rem] xs:h-[2.45rem] rounded-full flex-shrink-0 transition-all duration-300 relative flex items-center justify-center focus-visible:outline-none border-[2.2px] border-white cursor-pointer hover:scale-105 active:scale-95"
+                style={{
+                  backgroundColor: color.hex,
+                  boxShadow: isSelected 
+                    ? `0 0 12px 1px ${color.hex}c0, inset 0 1.5px 3px rgba(0,0,0,0.15)` 
+                    : "0 2px 5px rgba(0,0,0,0.08), inset 0 1px 2px rgba(255,255,255,0.2)",
+                  transform: isSelected ? "scale(1.12)" : "scale(1.0)",
+                }}
               >
-                <span
-                  className={`w-full h-full rounded-full transition-all duration-300 relative shadow-[inset_0_1px_2.5px_rgba(255,255,255,0.35),0_2px_6px_rgba(0,0,0,0.18)] ${
-                    isSelected
-                      ? "border-[2.5px] border-[#b4975a]"
-                      : "border-[1.5px] border-white"
-                  }`}
-                  style={{
-                    backgroundColor: color.hex,
-                    backgroundImage: "linear-gradient(135deg, rgba(255, 255, 255, 0.12) 0%, rgba(0, 0, 0, 0.04) 100%)",
-                  }}
-                />
                 {isSelected && (
-                  <span className="absolute -top-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-[#b4975a] flex items-center justify-center shadow-[0_1.5px_3.5px_rgba(0,0,0,0.15)] z-10 text-white border border-white">
-                    <svg viewBox="0 0 24 24" className="w-2.2 h-2.2 fill-none stroke-current" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                      <polyline points="20 6 9 17 4 12" />
-                    </svg>
-                  </span>
+                  <svg viewBox="0 0 24 24" className="w-3.5 h-3.5 xs:w-4.2 xs:h-4.2 text-white fill-none stroke-current" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="20 6 9 17 4 12" />
+                  </svg>
                 )}
               </button>
             );
