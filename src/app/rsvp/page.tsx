@@ -764,7 +764,7 @@ export default function RSVPPage() {
               </div>
 
               {submissionCopy.showCalendar ? (
-                <div className="rounded-[1.6rem] border border-serenity/18 bg-white/80 p-5 shadow-sm text-center w-full max-w-md mx-auto mb-6">
+                <div className="w-full max-w-md mx-auto bg-white/40 border border-white/50 shadow-[0_8px_32px_rgba(63,70,66,0.04)] rounded-[2rem] p-5 sm:p-6 mb-6 text-center backdrop-blur-md">
                   <p className="text-[0.82rem] sm:text-sm font-bold tracking-[0.15em] text-[#7a6a5d] uppercase mb-4">
                     Thêm vào lịch
                   </p>
