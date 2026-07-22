@@ -32,7 +32,7 @@ function stripRepeatedHeroInvitePrefix(text: string) {
 
 export function ReferenceWeddingHero({ config, summary }: ReferenceWeddingHeroProps) {
   const readyFromReveal = useRevealReady(true);
-  const [isAnimatedSequence, setIsAnimatedSequence] = useState(false);
+  const [isHeroAnimated, setIsHeroAnimated] = useState(false);
 
   const [imageLoaded, setImageLoaded] = useState(false);
   const imgRef = useRef<HTMLImageElement>(null);
@@ -42,16 +42,34 @@ export function ReferenceWeddingHero({ config, summary }: ReferenceWeddingHeroPr
       setImageLoaded(true);
     }
 
-    const handleIntroFinished = () => {
-      setIsAnimatedSequence(true);
-    };
+    // If splash was already completed/skipped on initial load, do NOT attach introFinished listener
+    const isSkippedOnLoad = typeof window !== "undefined" && (
+      document.documentElement.classList.contains("splash-skipped") || checkIsIntroDone()
+    );
 
-    window.addEventListener("introFinished", handleIntroFinished);
-    return () => window.removeEventListener("introFinished", handleIntroFinished);
+    if (!isSkippedOnLoad) {
+      const handleIntroFinished = () => {
+        setIsHeroAnimated(true);
+      };
+      window.addEventListener("introFinished", handleIntroFinished);
+      return () => window.removeEventListener("introFinished", handleIntroFinished);
+    }
   }, []);
 
-  const isDone = typeof window !== "undefined" ? checkIsIntroDone() : false;
-  const isHeroVisible = isDone || isAnimatedSequence;
+  const isSkipped = typeof window !== "undefined" && checkIsIntroDone();
+
+  // Determine motion class cleanly:
+  // 1. If skipped on load / return visit -> "hero-static" (100% static, never animates)
+  // 2. If envelope just unmounted in this session -> "hero-animating" (plays 1.8s-2.2s keyframes once)
+  // 3. Otherwise -> "hero-preparing" (opacity 0 while envelope is active)
+  let heroMotionClass = "hero-preparing";
+  if (isSkipped && !isHeroAnimated) {
+    heroMotionClass = "hero-static";
+  } else if (isHeroAnimated) {
+    heroMotionClass = "hero-animating";
+  }
+
+  const isDone = heroMotionClass === "hero-static" || heroMotionClass === "hero-animating";
 
   const invitationText = stripRepeatedHeroInvitePrefix(
     summary?.invitationLine || config.content.description,
@@ -59,10 +77,6 @@ export function ReferenceWeddingHero({ config, summary }: ReferenceWeddingHeroPr
 
   const textHeaderDelay = isDone ? 0 : 1.25;
   const textBodyDelay = isDone ? 0 : 1.4;
-
-  const heroMotionClass = isAnimatedSequence
-    ? "hero-animating"
-    : (isHeroVisible ? "hero-static" : "hero-preparing");
 
   return (
     <section id="home" className={`save-date-hero save-date-hero-arch ${heroMotionClass}`}>
@@ -73,7 +87,7 @@ export function ReferenceWeddingHero({ config, summary }: ReferenceWeddingHeroPr
         aria-label="Long Nhật † Anh Phương"
       >
         <div
-          className={`save-date-name-logo hero-logo-fade ${isHeroVisible ? "is-visible" : ""}`}
+          className={`save-date-name-logo hero-logo-fade ${isDone ? "is-visible" : ""}`}
           aria-hidden="true"
         >
           <Image
@@ -142,7 +156,7 @@ export function ReferenceWeddingHero({ config, summary }: ReferenceWeddingHeroPr
 
           {/* Left Ornament */}
           <div
-            className={`save-date-hero-ornament save-date-hero-ornament-left hero-ornament-fade-left ${isHeroVisible ? "is-visible" : ""}`}
+            className={`save-date-hero-ornament save-date-hero-ornament-left hero-ornament-fade-left ${isDone ? "is-visible" : ""}`}
           >
             <Image
               src="/assets/hero-corner-left-v2.png"
@@ -156,7 +170,7 @@ export function ReferenceWeddingHero({ config, summary }: ReferenceWeddingHeroPr
 
           {/* Right Ornament */}
           <div
-            className={`save-date-hero-ornament save-date-hero-ornament-right hero-ornament-fade-right ${isHeroVisible ? "is-visible" : ""}`}
+            className={`save-date-hero-ornament save-date-hero-ornament-right hero-ornament-fade-right ${isDone ? "is-visible" : ""}`}
           >
             <Image
               src="/assets/hero-corner-right-v3.png"

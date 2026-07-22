@@ -77,7 +77,6 @@ export function WeddingSplashIntro({
       setIsImmediateClose(true);
       setPreloading(false);
       setStatus("hidden");
-      window.dispatchEvent(new Event("introFinished"));
       return;
     }
 
@@ -191,6 +190,7 @@ export function WeddingSplashIntro({
   return (
     <AnimatePresence
       onExitComplete={() => {
+        markSplashSeen(sessionKey);
         document.documentElement.classList.add("splash-skipped");
         window.dispatchEvent(new Event("introFinished"));
       }}
