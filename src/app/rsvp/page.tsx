@@ -830,7 +830,7 @@ export default function RSVPPage() {
                     <div className="flex items-center justify-between py-3.5 px-4.5 sm:px-5.5 rounded-2xl bg-serenity/8 border border-serenity/14">
                       <div className="text-left">
                         <p className="font-bold text-[#252934] text-base sm:text-lg">Thánh lễ Hôn phối</p>
-                        <p className="text-xs sm:text-sm text-[#7a6a5d] font-medium mt-0.5">15:00 • Chủ Nhật, 20/12/2026</p>
+                        <p className="text-xs sm:text-sm text-[#7a6a5d] font-medium mt-0.5">10:00 • Chủ Nhật, 20/12/2026</p>
                       </div>
                       <span className={`inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs sm:text-sm font-semibold shadow-xs shrink-0 ${
                         formValues.attendingCeremony === "yes" 
@@ -995,7 +995,7 @@ export default function RSVPPage() {
                         THÁNH LỄ HÔN PHỐI
                       </p>
                       <p className="text-sm sm:text-sm font-semibold text-[#252934] mb-0.5 whitespace-nowrap">
-                        15:00 — Chủ Nhật, 20/12/2026
+                        10:00 — Chủ Nhật, 20/12/2026
                       </p>
                       <p className="text-sm sm:text-sm text-[#252934]/72 whitespace-nowrap">
                         Nhà Thờ Giáo Xứ Tam Hải

@@ -118,16 +118,16 @@ function formatChurchSchedule(dateLabel?: string, timeLabel?: string) {
 
 function parseChurchDate(churchDate?: string) {
   if (!churchDate) {
-    return { day: "20", month: "12", year: "2026", weekday: "CHÚA NHẬT" };
+    return { day: "20", month: "12", year: "2026", weekday: "CHỦ NHẬT" };
   }
 
   const dateMatch = churchDate.match(/(\d{1,2})\.(\d{1,2})\.(\d{4})/);
-  const weekdayMatch = churchDate.match(/(Chúa Nhật|Thứ Hai|Thứ Ba|Thứ Tư|Thứ Năm|Thứ Sáu|Thứ Bảy)/i);
+  const weekdayMatch = churchDate.match(/(Chúa Nhật|Chủ Nhật|Thứ Hai|Thứ Ba|Thứ Tư|Thứ Năm|Thứ Sáu|Thứ Bảy)/i);
 
   const day = dateMatch ? dateMatch[1] : "20";
   const month = dateMatch ? dateMatch[2] : "12";
   const year = dateMatch ? dateMatch[3] : "2026";
-  const weekday = weekdayMatch ? weekdayMatch[0].toUpperCase() : "CHÚA NHẬT";
+  const weekday = weekdayMatch ? weekdayMatch[0].toUpperCase() : "CHỦ NHẬT";
 
   return { day, month, year, weekday };
 }
@@ -630,7 +630,7 @@ export function EventDetailsContent({
             Cử Hành
           </span>
           <div className="font-serif text-[2.35rem] sm:text-[2.89rem] md:text-[3.32rem] font-light text-[#3f4642] tracking-wider leading-none mb-3">
-            {content.churchTime || "15:00"}
+            {content.churchTime || "10:00"}
           </div>
 
           {/* Location */}
