@@ -556,9 +556,9 @@ export function EventDetailsContent({
                 className="w-full h-full object-contain rings-video-optimize"
               >
                 {/* Safari/iOS: HEVC with Alpha */}
-                <source src="/assets/wedding-rings.mov?v=7" type="video/quicktime; codecs=hvc1" />
+                <source src="/assets/wedding-rings.mov?v=8" type="video/quicktime; codecs=hvc1" />
                 {/* Chrome/Android/Firefox: VP9 with Alpha */}
-                <source src="/assets/wedding-rings.webm?v=7" type="video/webm; codecs=vp9" />
+                <source src="/assets/wedding-rings.webm?v=8" type="video/webm; codecs=vp9" />
               </video>
             </div>
 
