@@ -225,15 +225,7 @@ export function GallerySection({ config }: { config: WeddingConfig }) {
                 {section.description}
               </p>
             )}
-            
-            {/* Custom Gold Star Divider */}
-            <div className="flex items-center justify-center gap-3.5 w-full max-w-[11rem] sm:max-w-[13rem] mt-3 select-none pointer-events-none" aria-hidden="true">
-              <div className="h-[1px] flex-grow bg-[#b4975a]/35" />
-              <svg viewBox="0 0 24 24" className="w-[11px] h-[11px] sm:w-3 sm:h-3 fill-[#b4975a] flex-shrink-0">
-                <path d="M12 2Q12 12 22 12Q12 12 12 22Q12 12 2 12Q12 12 12 2" />
-              </svg>
-              <div className="h-[1px] flex-grow bg-[#b4975a]/35" />
-            </div>
+
           </motion.div>
 
           <motion.div
