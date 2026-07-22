@@ -212,8 +212,8 @@ export function WeddingSplashIntro({
           className="fixed inset-0 z-[80] grid min-h-dvh place-items-center overflow-hidden bg-[#FBF8F1] text-ink cursor-pointer"
           initial={{ opacity: 1 }}
           animate={{ opacity: 1 }}
-          exit={{ opacity: 0, scale: 1.02, filter: "blur(4px)" }}
-          transition={{ duration: isImmediateClose ? 0 : 0.4, ease: [0.25, 1, 0.5, 1] }}
+          exit={{ opacity: 0, scale: 1.03, filter: "blur(6px)" }}
+          transition={{ duration: isImmediateClose ? 0 : 1.2, ease: [0.16, 1, 0.3, 1] }}
         >
           {/* THE VIDEO - responsive sources for mobile (9:16) and desktop (16:9) */}
           <div className="absolute inset-0 flex items-center justify-center overflow-hidden">
