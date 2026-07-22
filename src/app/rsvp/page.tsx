@@ -506,7 +506,7 @@ export default function RSVPPage() {
   }
 
   function redirectToInvitePage(token?: string, hash: string = "") {
-    const target = token ? `/i/${encodeURIComponent(token)}${hash}` : "/";
+    const target = token ? `/i/${encodeURIComponent(token)}${hash}` : `/${hash}`;
     navigateWithTransition(target);
   }
 
