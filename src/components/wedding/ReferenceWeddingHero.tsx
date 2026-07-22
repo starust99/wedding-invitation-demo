@@ -66,10 +66,10 @@ export function ReferenceWeddingHero({ config, summary }: ReferenceWeddingHeroPr
     summary?.invitationLine || config.content.description,
   );
 
-  const textHeaderDelay = isDone ? 0 : 1.05;
-  const textBodyDelay = isDone ? 0 : 1.2;
+  const textHeaderDelay = isDone ? 0 : 1.25;
+  const textBodyDelay = isDone ? 0 : 1.4;
 
-  const heroMotionClass = isAnimatedSequence ? "hero-animating" : "hero-static";
+  const heroMotionClass = (!isHeroVisible || isAnimatedSequence) ? "hero-animating" : "hero-static";
 
   return (
     <section id="home" className={`save-date-hero save-date-hero-arch ${heroMotionClass}`}>

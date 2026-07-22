@@ -4086,32 +4086,32 @@ textarea {
 /* First envelope open cinematic staggered animation sequence */
 .hero-animating .hero-logo-fade {
   opacity: 0;
-  animation: heroLogoKeyframes 1.2s cubic-bezier(0.34, 1.56, 0.64, 1) 0.15s forwards;
+  animation: heroLogoKeyframes 1.0s cubic-bezier(0.34, 1.56, 0.64, 1) 0.4s forwards;
 }
 
 .hero-animating .hero-photo-fade {
   opacity: 0;
-  animation: heroPhotoKeyframes 1.4s cubic-bezier(0.25, 1, 0.5, 1) 0.45s forwards;
+  animation: heroPhotoKeyframes 1.2s cubic-bezier(0.25, 1, 0.5, 1) 0.65s forwards;
 }
 
 .hero-animating .hero-ornament-fade-left {
   opacity: 0;
-  animation: heroOrnamentLeftKeyframes 1.2s cubic-bezier(0.34, 1.56, 0.64, 1) 0.7s forwards;
+  animation: heroOrnamentLeftKeyframes 1.0s cubic-bezier(0.34, 1.56, 0.64, 1) 0.9s forwards;
 }
 
 .hero-animating .hero-ornament-fade-right {
   opacity: 0;
-  animation: heroOrnamentRightKeyframes 1.2s cubic-bezier(0.34, 1.56, 0.64, 1) 0.85s forwards;
+  animation: heroOrnamentRightKeyframes 1.0s cubic-bezier(0.34, 1.56, 0.64, 1) 1.05s forwards;
 }
 
 .hero-animating .hero-text-fade-header {
   opacity: 0;
-  animation: heroTextKeyframes 1.2s cubic-bezier(0.25, 1, 0.5, 1) 1.05s forwards;
+  animation: heroTextKeyframes 1.0s cubic-bezier(0.25, 1, 0.5, 1) 1.25s forwards;
 }
 
 .hero-animating .hero-text-fade-body {
   opacity: 0;
-  animation: heroTextKeyframes 1.2s cubic-bezier(0.25, 1, 0.5, 1) 1.2s forwards;
+  animation: heroTextKeyframes 1.0s cubic-bezier(0.25, 1, 0.5, 1) 1.40s forwards;
 }
 
 /* Instant splash skip styles to prevent hydration flash when loading page after splash seen */
