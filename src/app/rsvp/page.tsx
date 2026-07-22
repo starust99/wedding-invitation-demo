@@ -756,7 +756,7 @@ export default function RSVPPage() {
               transition={{ duration: 0.4 }}
               className="px-4 sm:px-6 text-center flex flex-col items-center w-full max-w-2xl mx-auto"
             >
-              <div className="glass-panel w-full bg-white/40 border border-white/50 shadow-[0_8px_32px_rgba(63,70,66,0.04)] rounded-[2rem] p-6 sm:p-10 mb-8 flex flex-col items-center">
+              <div className="w-full bg-white/40 border border-white/50 shadow-[0_8px_32px_rgba(63,70,66,0.04)] rounded-[2rem] p-6 sm:p-10 mb-8 flex flex-col items-center backdrop-blur-md">
                 <h2 className="wedding-type-title text-[#252934] font-serif italic text-2xl sm:text-3xl font-bold mb-4">{submissionCopy.title}</h2>
                 <p className="wedding-type-body max-w-lg text-[#252934]/75 leading-relaxed whitespace-pre-line text-center">
                   {submissionCopy.body}
