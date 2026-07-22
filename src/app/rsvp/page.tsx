@@ -1115,7 +1115,7 @@ export default function RSVPPage() {
                       className="mb-6"
                     >
                       <div className="rounded-[1.6rem] border border-serenity/18 bg-white/80 p-4 sm:p-6 shadow-sm text-center">
-                        <p className="text-xs font-bold tracking-widest text-[#7a6a5d] uppercase mb-2">
+                        <p className="text-[0.82rem] sm:text-sm font-bold tracking-[0.15em] text-[#7a6a5d] uppercase mb-2">
                           LƯU TRÚ
                         </p>
                         <p className="text-sm sm:text-base font-normal text-[#252934]/80 mb-5 leading-relaxed max-w-xl mx-auto">
@@ -1299,7 +1299,7 @@ export default function RSVPPage() {
                     >
                       {/* Ghi chú */}
                       <div className="rounded-[1.6rem] border border-serenity/18 bg-white/80 p-5 shadow-sm text-left mb-6">
-                        <p className="text-xs font-bold tracking-widest text-[#7a6a5d] uppercase mb-4">
+                        <p className="text-[0.82rem] sm:text-sm font-bold tracking-[0.15em] text-[#7a6a5d] uppercase mb-4">
                           Ghi chú
                         </p>
                         <div className="grid gap-5">
