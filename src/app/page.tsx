@@ -86,7 +86,7 @@ export default function Home() {
         <div aria-hidden="true" className="hero-couture-shade absolute inset-0 opacity-55" />
         
         <div className="relative z-10 flex flex-col gap-8 md:gap-12 w-full">
-          {!hasRsvp && (
+          {(!hasRsvp || !guestIdentity.name) && (
             <RsvpSection config={config} guestIdentity={guestIdentity} transparentBg={true} />
           )}
           <ThankYouSection
