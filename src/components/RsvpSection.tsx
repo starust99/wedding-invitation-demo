@@ -72,10 +72,10 @@ export function RsvpSection({
                 onClick={() => navigateWithTransition(rsvpHref)}
                 onMouseEnter={() => prefetch(rsvpHref)}
                 onTouchStart={() => prefetch(rsvpHref)}
-                className="mt-8 inline-flex h-[3.5rem] sm:h-[4.2rem] w-full max-w-[13.5rem] sm:max-w-[16.5rem] items-center justify-center transition hover:-translate-y-0.5 save-date-watercolor-btn"
+                className="mt-6 inline-flex h-[2.75rem] sm:h-[3.0rem] items-center justify-center transition hover:-translate-y-0.5 save-date-watercolor-btn mx-auto min-w-[11rem] sm:min-w-[12.5rem]"
               >
-                <span className="save-date-btn-label font-sans">
-                  <HeartHandshake aria-hidden="true" size={18} />
+                <span className="save-date-btn-label">
+                  <HeartHandshake aria-hidden="true" className="w-4 h-4 sm:w-4.5 sm:h-4.5" />
                   <span>Gửi hồi đáp</span>
                 </span>
               </button>

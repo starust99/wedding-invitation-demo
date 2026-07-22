@@ -646,10 +646,10 @@ export function EventDetailsContent({
             href="https://www.google.com/maps/search/?api=1&query=Nh%C3%A0%20th%E1%BB%9D%20Gi%C3%A1o%20x%E1%BB%A9%20Tam%20H%E1%BA%A3i%20180%20Tam%20Ch%C3%A2u%20Tam%20B%C3%ACnh%20Th%E1%BB%A7%20%C4%90%E1%BB%A9c" 
             target="_blank" 
             rel="noreferrer" 
-            className="w-full max-w-[11.1rem] sm:max-w-[13.65rem] md:max-w-[15.62rem] h-[2.8rem] sm:h-[3.44rem] md:h-[3.81rem] save-date-watercolor-btn mt-1"
+            className="inline-flex h-[2.65rem] sm:h-[3.0rem] save-date-watercolor-btn mt-2 mx-auto min-w-[10.5rem] sm:min-w-[12rem]"
           >
-            <span className="save-date-btn-label flex items-center justify-center gap-1.5 font-sans text-[0.55rem] sm:text-[0.68rem] md:text-[0.75rem] font-bold tracking-[0.2em] text-[#3f4642]">
-              <MapPin className="w-3 h-3 sm:w-[0.92rem] sm:h-[0.92rem] md:w-[1.05rem] md:h-[1.05rem]" />
+            <span className="save-date-btn-label">
+              <MapPin className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#3f4642]" />
               <span>Chỉ đường</span>
             </span>
           </a>
@@ -705,10 +705,10 @@ export function EventDetailsContent({
               href={mapUrl} 
               target="_blank" 
               rel="noreferrer" 
-              className="w-full max-w-[11.1rem] sm:max-w-[13.65rem] md:max-w-[15.62rem] h-[2.8rem] sm:h-[3.44rem] md:h-[3.81rem] save-date-watercolor-btn mt-1 mb-6"
+              className="inline-flex h-[2.65rem] sm:h-[3.0rem] save-date-watercolor-btn mt-2 mb-6 mx-auto min-w-[10.5rem] sm:min-w-[12rem]"
             >
-              <span className="save-date-btn-label flex items-center justify-center gap-1.5 font-sans text-[0.55rem] sm:text-[0.68rem] md:text-[0.75rem] font-bold tracking-[0.2em] text-[#3f4642]">
-                <MapPin className="w-3 h-3 sm:w-[0.92rem] sm:h-[0.92rem] md:w-[1.05rem] md:h-[1.05rem]" />
+              <span className="save-date-btn-label">
+                <MapPin className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#3f4642]" />
                 <span>Chỉ đường</span>
               </span>
             </a>

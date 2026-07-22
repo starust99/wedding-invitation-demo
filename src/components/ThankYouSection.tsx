@@ -90,17 +90,17 @@ export function ThankYouSection({
                   {inviteCopy.signaturePrefix}
                 </p>
 
-                <div className="mx-auto mt-10 max-w-lg">
-                  <div className="flex flex-wrap items-center justify-center gap-3">
+                <div className="mx-auto mt-8 max-w-xl">
+                  <div className="flex flex-col sm:flex-row flex-wrap items-center justify-center gap-3 sm:gap-4">
                     {isPostWedding && galleryLink ? (
                        <a
                         href={galleryLink}
                         target="_blank"
                         rel="noreferrer"
-                        className="inline-flex h-[3.8rem] sm:h-[4.5rem] lg:h-[5rem] w-full max-w-[14.5rem] sm:max-w-[17.5rem] text-[1.02rem] sm:text-lg items-center justify-center transition hover:-translate-y-0.5 save-date-watercolor-btn"
+                        className="inline-flex h-[2.75rem] sm:h-[3.0rem] items-center justify-center transition hover:-translate-y-0.5 save-date-watercolor-btn min-w-[11rem] sm:min-w-[12.5rem]"
                       >
-                        <span className="save-date-btn-label font-sans">
-                          <ImageIcon aria-hidden="true" size={16} className="sm:w-[18px] sm:h-[18px]" />
+                        <span className="save-date-btn-label">
+                          <ImageIcon aria-hidden="true" className="w-4 h-4 sm:w-4.5 sm:h-4.5" />
                           <span>Xem ảnh tiệc cưới</span>
                         </span>
                       </a>
@@ -108,10 +108,10 @@ export function ThankYouSection({
                       <button
                         type="button"
                         onClick={() => navigateWithTransition(rsvpHref)}
-                        className="inline-flex h-[3.8rem] sm:h-[4.5rem] lg:h-[5rem] w-full max-w-[14.5rem] sm:max-w-[17.5rem] text-[1.02rem] sm:text-lg items-center justify-center transition hover:-translate-y-0.5 save-date-watercolor-btn"
+                        className="inline-flex h-[2.75rem] sm:h-[3.0rem] items-center justify-center transition hover:-translate-y-0.5 save-date-watercolor-btn min-w-[11rem] sm:min-w-[12.5rem]"
                       >
-                        <span className="save-date-btn-label font-sans">
-                          <HeartHandshake aria-hidden="true" size={16} className="sm:w-[18px] sm:h-[18px]" />
+                        <span className="save-date-btn-label">
+                          <HeartHandshake aria-hidden="true" className="w-4 h-4 sm:w-4.5 sm:h-4.5" />
                           <span>Chỉnh sửa hồi đáp</span>
                         </span>
                       </button>
@@ -122,12 +122,12 @@ export function ThankYouSection({
                         href={config.church?.mapUrl || config.venue.mapUrl}
                         target="_blank"
                         rel="noreferrer"
-                        className="inline-flex h-[3.8rem] sm:h-[4.5rem] lg:h-[5rem] w-full max-w-[14.5rem] sm:max-w-[17.5rem] text-[1.02rem] sm:text-lg items-center justify-center transition hover:-translate-y-0.5 save-date-watercolor-btn"
+                        className="inline-flex h-[2.75rem] sm:h-[3.0rem] items-center justify-center transition hover:-translate-y-0.5 save-date-watercolor-btn min-w-[10.5rem] sm:min-w-[12rem]"
                       >
-                        <span className="save-date-btn-label font-sans">
-                        <MapPin aria-hidden="true" size={16} className="sm:w-[18px] sm:h-[18px]" />
-                        <span>Đến Nhà thờ</span>
-                      </span>
+                        <span className="save-date-btn-label">
+                          <MapPin aria-hidden="true" className="w-4 h-4 sm:w-4.5 sm:h-4.5" />
+                          <span>Đến Nhà thờ</span>
+                        </span>
                       </a>
                     ) : null}
                     
@@ -137,12 +137,12 @@ export function ThankYouSection({
                         href={config.venue.mapUrl}
                         target="_blank"
                         rel="noreferrer"
-                        className="inline-flex h-[3.8rem] sm:h-[4.5rem] lg:h-[5rem] w-full max-w-[14.5rem] sm:max-w-[17.5rem] text-[1.02rem] sm:text-lg items-center justify-center transition hover:-translate-y-0.5 save-date-watercolor-btn"
+                        className="inline-flex h-[2.75rem] sm:h-[3.0rem] items-center justify-center transition hover:-translate-y-0.5 save-date-watercolor-btn min-w-[10.5rem] sm:min-w-[12rem]"
                       >
-                        <span className="save-date-btn-label font-sans">
-                        <MapPin aria-hidden="true" size={16} className="sm:w-[18px] sm:h-[18px]" />
-                        <span>{isBanquetOnly || isBoth ? "Đến Tiệc cưới" : "Chỉ đường"}</span>
-                      </span>
+                        <span className="save-date-btn-label">
+                          <MapPin aria-hidden="true" className="w-4 h-4 sm:w-4.5 sm:h-4.5" />
+                          <span>{isBanquetOnly || isBoth ? "Đến Tiệc cưới" : "Chỉ đường"}</span>
+                        </span>
                       </a>
                     ) : null}
                   </div>
