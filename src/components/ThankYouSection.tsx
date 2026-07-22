@@ -102,7 +102,7 @@ export function ThankYouSection({
                         href={galleryLink}
                         target="_blank"
                         rel="noreferrer"
-                        className="inline-flex h-[2.75rem] sm:h-[3.0rem] w-[14rem] sm:w-[15rem] items-center justify-center transition hover:-translate-y-0.5 save-date-watercolor-btn"
+                        className="inline-flex h-[2.75rem] sm:h-[3.0rem] w-[14rem] sm:w-[15rem] items-center justify-center transition hover:-translate-y-0.5 save-date-watercolor-btn save-date-btn-equal-width"
                       >
                         <span className="save-date-btn-label">
                           <ImageIcon aria-hidden="true" className="w-4 h-4 sm:w-4.5 sm:h-4.5" />
@@ -113,7 +113,7 @@ export function ThankYouSection({
                       <button
                         type="button"
                         onClick={() => navigateWithTransition(rsvpHref)}
-                        className="inline-flex h-[2.75rem] sm:h-[3.0rem] w-[14rem] sm:w-[15rem] items-center justify-center transition hover:-translate-y-0.5 save-date-watercolor-btn"
+                        className="inline-flex h-[2.75rem] sm:h-[3.0rem] w-[14rem] sm:w-[15rem] items-center justify-center transition hover:-translate-y-0.5 save-date-watercolor-btn save-date-btn-equal-width"
                       >
                         <span className="save-date-btn-label">
                           <HeartHandshake aria-hidden="true" className="w-4 h-4 sm:w-4.5 sm:h-4.5" />
@@ -131,7 +131,7 @@ export function ThankYouSection({
                             href={config.church?.mapUrl || config.venue.mapUrl}
                             target="_blank"
                             rel="noreferrer"
-                            className="inline-flex h-[2.75rem] sm:h-[3.0rem] w-[14rem] sm:w-[15rem] items-center justify-center transition hover:-translate-y-0.5 save-date-watercolor-btn"
+                            className="inline-flex h-[2.75rem] sm:h-[3.0rem] w-[14rem] sm:w-[15rem] items-center justify-center transition hover:-translate-y-0.5 save-date-watercolor-btn save-date-btn-equal-width"
                           >
                             <span className="save-date-btn-label">
                               <MapPin aria-hidden="true" className="w-4 h-4 sm:w-4.5 sm:h-4.5" />
@@ -146,7 +146,7 @@ export function ThankYouSection({
                             href={config.venue.mapUrl}
                             target="_blank"
                             rel="noreferrer"
-                            className="inline-flex h-[2.75rem] sm:h-[3.0rem] w-[14rem] sm:w-[15rem] items-center justify-center transition hover:-translate-y-0.5 save-date-watercolor-btn"
+                            className="inline-flex h-[2.75rem] sm:h-[3.0rem] w-[14rem] sm:w-[15rem] items-center justify-center transition hover:-translate-y-0.5 save-date-watercolor-btn save-date-btn-equal-width"
                           >
                             <span className="save-date-btn-label">
                               <MapPin aria-hidden="true" className="w-4 h-4 sm:w-4.5 sm:h-4.5" />
