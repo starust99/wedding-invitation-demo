@@ -748,7 +748,7 @@ export default function RSVPPage() {
           </p>
         ) : null}
 
-        <section className="glass-panel w-full overflow-hidden rounded-[2rem] text-center shadow-[0_24px_64px_rgba(37,41,52,0.06)] bg-[#fdfbf7]/80 backdrop-blur-[12px] border border-serenity/12 py-8 sm:py-12">
+        <section className="w-full text-center py-4">
           {isSubmitted ? (
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
