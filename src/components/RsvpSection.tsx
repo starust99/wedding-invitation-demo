@@ -37,7 +37,7 @@ export function RsvpSection({
           whileInView={{ opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }}
           viewport={{ once: false, margin: "-10% 0px -10% 0px" }}
           transition={{ duration: 0.8, ease: [0.25, 0.1, 0.25, 1] }}
-          className="glass-panel relative w-full max-w-3xl overflow-hidden rounded-[2.5rem] px-5 py-8 sm:px-10 sm:py-10 lg:px-12 lg:py-12"
+          className="glass-panel relative w-full max-w-3xl overflow-hidden rounded-[2.5rem] px-5 py-8 sm:px-10 sm:py-10 lg:px-12 lg:py-12 shadow-none"
         >
           <div className="relative z-10 mx-auto flex max-w-2xl flex-col items-center text-center">
             <h3 className="font-serif text-[1.12rem] sm:text-[1.25rem] md:text-[1.38rem] font-bold gold-foil-text uppercase leading-tight mt-0.5 mb-1">
