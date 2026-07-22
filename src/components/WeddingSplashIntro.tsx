@@ -93,19 +93,13 @@ export function WeddingSplashIntro({
       "/assets/preloader-logo.webp",
       "/assets/wedding/ui/splash-closed.png",
       "/assets/wedding/ui/splash-poster-mobile.jpg",
-      "/assets/hero-names-logo-v9-centered.png",
-      "/assets/hero-invite-heading-v5.png",
-      "/assets/hero-corner-left-v2.png",
-      "/assets/hero-corner-right-v3.png",
     ];
 
     const isMobile = window.innerWidth < 768;
     const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent) || 
                      /iPad|iPhone|iPod/.test(navigator.userAgent);
 
-    const mediaToLoad = [
-      isMobile ? "/assets/wedding/ui/splash-video-mobile.mp4" : "/assets/wedding/ui/splash-video.mp4",
-    ];
+    const mediaToLoad: string[] = [];
 
     let loadedCount = 0;
     const totalAssets = imagesToLoad.length + mediaToLoad.length;
