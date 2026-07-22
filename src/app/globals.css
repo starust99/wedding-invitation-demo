@@ -4089,13 +4089,13 @@ textarea {
 }
 
 /* 1. Base / Preparing state: Opacity 0 while splash envelope video is active */
-.hero-preparing .hero-logo-fade,
-.hero-preparing .hero-photo-fade,
-.hero-preparing .hero-ornament-fade-left,
-.hero-preparing .hero-ornament-fade-right,
-.hero-preparing .hero-text-fade,
-.hero-preparing .hero-text-fade-header,
-.hero-preparing .hero-text-fade-body {
+html:not(.splash-skipped) .hero-preparing .hero-logo-fade,
+html:not(.splash-skipped) .hero-preparing .hero-photo-fade,
+html:not(.splash-skipped) .hero-preparing .hero-ornament-fade-left,
+html:not(.splash-skipped) .hero-preparing .hero-ornament-fade-right,
+html:not(.splash-skipped) .hero-preparing .hero-text-fade,
+html:not(.splash-skipped) .hero-preparing .hero-text-fade-header,
+html:not(.splash-skipped) .hero-preparing .hero-text-fade-body {
   opacity: 0 !important;
   animation: none !important;
   transition: none !important;
