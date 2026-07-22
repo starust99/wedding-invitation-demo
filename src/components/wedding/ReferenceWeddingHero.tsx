@@ -42,31 +42,26 @@ export function ReferenceWeddingHero({ config, summary }: ReferenceWeddingHeroPr
       setImageLoaded(true);
     }
 
-    // If splash was already completed/skipped on initial load, do NOT attach introFinished listener
-    const isSkippedOnLoad = typeof window !== "undefined" && (
-      document.documentElement.classList.contains("splash-skipped") || checkIsIntroDone()
-    );
-
-    if (!isSkippedOnLoad) {
-      const handleIntroFinished = () => {
-        setIsHeroAnimated(true);
-      };
-      window.addEventListener("introFinished", handleIntroFinished);
-      return () => window.removeEventListener("introFinished", handleIntroFinished);
-    }
+    const handleIntroFinished = () => {
+      setIsHeroAnimated(true);
+    };
+    window.addEventListener("introFinished", handleIntroFinished);
+    return () => window.removeEventListener("introFinished", handleIntroFinished);
   }, []);
 
-  const isSkipped = typeof window !== "undefined" && checkIsIntroDone();
+  const isSkipped = typeof window !== "undefined" && (
+    document.documentElement.classList.contains("splash-skipped") || checkIsIntroDone()
+  );
 
-  // Determine motion class cleanly:
-  // 1. If skipped on load / return visit -> "hero-static" (100% static, never animates)
-  // 2. If envelope just unmounted in this session -> "hero-animating" (plays 1.8s-2.2s keyframes once)
-  // 3. Otherwise -> "hero-preparing" (opacity 0 while envelope is active)
+  // Precedence:
+  // 1. If introFinished event fired -> "hero-animating" (starts keyframes smoothly under dissolving envelope)
+  // 2. If splash skipped on reload / return -> "hero-static" (100% static instantly on frame 0)
+  // 3. Base preparing state -> "hero-preparing" (opacity 0 while splash video is active)
   let heroMotionClass = "hero-preparing";
-  if (isSkipped && !isHeroAnimated) {
-    heroMotionClass = "hero-static";
-  } else if (isHeroAnimated) {
+  if (isHeroAnimated) {
     heroMotionClass = "hero-animating";
+  } else if (isSkipped) {
+    heroMotionClass = "hero-static";
   }
 
   const isDone = heroMotionClass === "hero-static" || heroMotionClass === "hero-animating";

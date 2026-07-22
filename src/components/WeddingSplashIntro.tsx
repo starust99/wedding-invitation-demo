@@ -164,6 +164,8 @@ export function WeddingSplashIntro({
 
   const closeIntro = useCallback(() => {
     markSplashSeen(sessionKey);
+    document.documentElement.classList.add("splash-skipped");
+    window.dispatchEvent(new Event("introFinished"));
     setStatus("hidden");
   }, [sessionKey]);
 
@@ -195,13 +197,7 @@ export function WeddingSplashIntro({
   const opening = status === "opening";
 
   return (
-    <AnimatePresence
-      onExitComplete={() => {
-        markSplashSeen(sessionKey);
-        document.documentElement.classList.add("splash-skipped");
-        window.dispatchEvent(new Event("introFinished"));
-      }}
-    >
+    <AnimatePresence>
       {isVisible ? (
         <motion.div
           key="wedding-splash"
