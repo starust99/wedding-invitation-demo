@@ -92,7 +92,6 @@ export function ReferenceWeddingHero({ config, summary }: ReferenceWeddingHeroPr
       >
         <div
           className={`save-date-name-logo hero-logo-fade ${isHeroVisible ? "is-visible" : ""}`}
-          style={{ transitionDelay: isDone ? "0s" : "0.15s" }}
           aria-hidden="true"
         >
           <Image
@@ -109,7 +108,6 @@ export function ReferenceWeddingHero({ config, summary }: ReferenceWeddingHeroPr
         <div className="save-date-arch-wrapper">
           <div
             className={`hero-photo-fade ${isDone || (readyFromReveal && imageLoaded) ? "is-visible" : ""}`}
-            style={{ transitionDelay: isDone ? "0s" : "0.45s" }}
           >
             {/* Invisible img for preloading and onload detection outside figure */}
             <img
@@ -163,7 +161,6 @@ export function ReferenceWeddingHero({ config, summary }: ReferenceWeddingHeroPr
           {/* Left Ornament */}
           <div
             className={`save-date-hero-ornament save-date-hero-ornament-left hero-ornament-fade-left ${isHeroVisible ? "is-visible" : ""}`}
-            style={{ transitionDelay: isDone ? "0s" : "0.7s" }}
           >
             <Image
               src="/assets/hero-corner-left-v2.png"
@@ -178,7 +175,6 @@ export function ReferenceWeddingHero({ config, summary }: ReferenceWeddingHeroPr
           {/* Right Ornament */}
           <div
             className={`save-date-hero-ornament save-date-hero-ornament-right hero-ornament-fade-right ${isHeroVisible ? "is-visible" : ""}`}
-            style={{ transitionDelay: isDone ? "0s" : "0.85s" }}
           >
             <Image
               src="/assets/hero-corner-right-v3.png"
