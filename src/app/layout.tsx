@@ -76,9 +76,7 @@ export default function RootLayout({
   return (
     <html lang="vi" data-scroll-behavior="smooth" className={fontVariables} suppressHydrationWarning>
       <head>
-        <Script
-          id="splash-skip-init"
-          strategy="beforeInteractive"
+        <script
           dangerouslySetInnerHTML={{
             __html: `
               try {
