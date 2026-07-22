@@ -215,25 +215,6 @@ export function WeddingSplashIntro({
           exit={{ opacity: 0, scale: 1.03, filter: "blur(6px)" }}
           transition={{ duration: isImmediateClose ? 0 : 0.6, ease: [0.25, 1, 0.5, 1] }}
         >
-          {/* Synchronous script to immediately hide splash screen on mount if already seen to prevent flash */}
-          <script
-            dangerouslySetInnerHTML={{
-              __html: `
-                try {
-                  var key = "wedding-splash:" + "${storageKey}";
-                  var search = window.location.search || "";
-                  var href = window.location.href || "";
-                  var shouldForce = search.indexOf("intro=1") !== -1 || href.indexOf("intro=1") !== -1;
-                  if (window.localStorage.getItem(key) === "1" && !shouldForce) {
-                    var style = document.createElement('style');
-                    style.innerHTML = '#wedding-splash-screen { display: none !important; }';
-                    document.head.appendChild(style);
-                  }
-                } catch (e) {}
-              `,
-            }}
-          />
-          
           {/* THE VIDEO - responsive sources for mobile (9:16) and desktop (16:9) */}
           <div className="absolute inset-0 flex items-center justify-center overflow-hidden">
             {/* Desktop Splash Video */}

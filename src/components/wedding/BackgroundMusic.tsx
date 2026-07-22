@@ -188,75 +188,7 @@ export function BackgroundMusic() {
         preload="auto"
       />
 
-      <script dangerouslySetInnerHTML={{
-        __html: `
-          (function() {
-            var sessionKeyHome = "wedding-splash:home";
-            var sessionKeyPublic = "wedding-splash:public";
-            
-            var isIntroSkipped = false;
-            try {
-              var shouldForce = new URLSearchParams(window.location.search).get("intro") === "1";
-              if (!shouldForce) {
-                isIntroSkipped = sessionStorage.getItem(sessionKeyHome) === "1" || 
-                                 sessionStorage.getItem(sessionKeyPublic) === "1";
-              }
-            } catch (e) {}
 
-            var savedMuted = null;
-            try {
-              savedMuted = localStorage.getItem("wedding-music-muted");
-            } catch (e) {}
-
-            if (!isIntroSkipped || savedMuted === "1") return;
-
-            var audio = document.getElementById("wedding-audio");
-            if (!audio) return;
-
-            var playStarted = false;
-
-            var tryPlay = function() {
-              if (playStarted) return;
-              try {
-                if (localStorage.getItem("wedding-music-muted") === "1") return;
-              } catch (e) {}
-
-              audio.volume = 0.75;
-              audio.play()
-                .then(function() {
-                  playStarted = true;
-                  window.dispatchEvent(new CustomEvent("wedding-music-playing-native"));
-                  removeListeners();
-                })
-                .catch(function(err) {
-                  console.log("Autoplay deferred:", err);
-                });
-            };
-
-            var handleInteraction = function() {
-              tryPlay();
-            };
-
-            var removeListeners = function() {
-              document.removeEventListener("click", handleInteraction);
-              document.removeEventListener("touchstart", handleInteraction);
-              document.removeEventListener("mousedown", handleInteraction);
-              document.removeEventListener("keydown", handleInteraction);
-            };
-
-            document.addEventListener("click", handleInteraction);
-            document.addEventListener("touchstart", handleInteraction);
-            document.addEventListener("mousedown", handleInteraction);
-            document.addEventListener("keydown", handleInteraction);
-
-            if (audio.readyState >= 2) {
-              tryPlay();
-            } else {
-              audio.addEventListener("canplay", tryPlay, { once: true });
-            }
-          })();
-        `
-      }} />
 
       {showController && (
         <button

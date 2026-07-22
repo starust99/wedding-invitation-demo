@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import Script from "next/script";
 import { Cormorant_Garamond, Be_Vietnam_Pro, Dancing_Script } from "next/font/google";
 import "./globals.css";
 import { PageTransitionEffect } from "@/components/PageTransitionEffect";
@@ -73,9 +74,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="vi" data-scroll-behavior="smooth" className={fontVariables}>
+    <html lang="vi" data-scroll-behavior="smooth" className={fontVariables} suppressHydrationWarning>
       <head>
-        <script
+        <Script
+          id="splash-skip-init"
+          strategy="beforeInteractive"
           dangerouslySetInnerHTML={{
             __html: `
               try {

@@ -117,7 +117,6 @@ export function ReferenceWeddingHero({ config, summary }: ReferenceWeddingHeroPr
               <svg
                 viewBox="0 0 2000 1333"
                 width="100%"
-                height="auto"
                 className="save-date-arch-composite-svg"
                 style={{ display: "block", width: "100%", height: "auto" }}
               >
