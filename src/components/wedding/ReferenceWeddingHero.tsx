@@ -85,12 +85,32 @@ export function ReferenceWeddingHero({ config, summary }: ReferenceWeddingHeroPr
           className={`save-date-name-logo hero-logo-fade ${isDone ? "is-visible" : ""}`}
           aria-hidden="true"
         >
-          <Image
+          {/* Left Part: Long Nhật (clipped to keep left 40%) */}
+          <img
             src="/assets/hero-names-logo-v9-centered.png"
-            alt="Long Nhật † Anh Phương"
-            fill
-            priority
-            className="save-date-name-logo-img"
+            alt="Long Nhật"
+            className="absolute inset-0 w-full h-full object-contain pointer-events-none select-none"
+            style={{ clipPath: "inset(0 60% 0 0)" }}
+            draggable={false}
+          />
+          
+          {/* Middle Part: New Cross */}
+          <div className="save-date-new-cross-container">
+            <img
+              src="/assets/icon-cross-new.png"
+              alt="Thập giá"
+              className="save-date-new-cross pointer-events-none"
+              draggable={false}
+            />
+          </div>
+          
+          {/* Right Part: Anh Phương (clipped to keep right 40%) */}
+          <img
+            src="/assets/hero-names-logo-v9-centered.png"
+            alt="Anh Phương"
+            className="absolute inset-0 w-full h-full object-contain pointer-events-none select-none"
+            style={{ clipPath: "inset(0 0 0 60%)" }}
+            draggable={false}
           />
         </div>
       </div>
