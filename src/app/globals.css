@@ -4150,25 +4150,41 @@ html.splash-skipped body {
   overflow: auto !important;
 }
 
-/* 3. CASE 2: Reload (F5) or Return Navigation from /rsvp (.hero-static or html.splash-skipped) */
-/* When splash was ALREADY completed previously, force 100% opacity instantly with ZERO transition or keyframes */
-html.splash-skipped .save-date-hero:not(.hero-animating) .hero-logo-fade,
-html.splash-skipped .save-date-hero:not(.hero-animating) .hero-photo-fade,
-html.splash-skipped .save-date-hero:not(.hero-animating) .hero-ornament-fade-left,
-html.splash-skipped .save-date-hero:not(.hero-animating) .hero-ornament-fade-right,
-html.splash-skipped .save-date-hero:not(.hero-animating) .hero-text-fade,
-html.splash-skipped .save-date-hero:not(.hero-animating) .hero-text-fade-header,
-html.splash-skipped .save-date-hero:not(.hero-animating) .hero-text-fade-body,
-.save-date-hero.hero-static .hero-logo-fade,
-.save-date-hero.hero-static .hero-photo-fade,
-.save-date-hero.hero-static .hero-ornament-fade-left,
-.save-date-hero.hero-static .hero-ornament-fade-right,
-.save-date-hero.hero-static .hero-text-fade,
-.save-date-hero.hero-static .hero-text-fade-header,
+/* 3. CASE 2: Reload (F5) or Return Navigation from /rsvp (.hero-static) */
+/* Plays a faster, gentler animation sequence to avoid flash while remaining unhurried and soft */
+.save-date-hero.hero-static .hero-logo-fade {
+  opacity: 0;
+  animation: heroLogoKeyframes 1.1s cubic-bezier(0.22, 1, 0.36, 1) 0.05s forwards !important;
+  transition: none !important;
+}
+
+.save-date-hero.hero-static .hero-photo-fade {
+  opacity: 0;
+  animation: heroPhotoKeyframes 1.3s cubic-bezier(0.22, 1, 0.36, 1) 0.2s forwards !important;
+  transition: none !important;
+}
+
+.save-date-hero.hero-static .hero-ornament-fade-left {
+  opacity: 0;
+  animation: heroOrnamentLeftKeyframes 1.0s cubic-bezier(0.25, 1, 0.5, 1) 0.4s forwards !important;
+  transition: none !important;
+}
+
+.save-date-hero.hero-static .hero-ornament-fade-right {
+  opacity: 0;
+  animation: heroOrnamentRightKeyframes 1.0s cubic-bezier(0.25, 1, 0.5, 1) 0.5s forwards !important;
+  transition: none !important;
+}
+
+.save-date-hero.hero-static .hero-text-fade-header {
+  opacity: 0;
+  animation: heroTextKeyframes 1.0s cubic-bezier(0.25, 1, 0.5, 1) 0.6s forwards !important;
+  transition: none !important;
+}
+
 .save-date-hero.hero-static .hero-text-fade-body {
-  opacity: 1 !important;
-  transform: none !important;
-  animation: none !important;
+  opacity: 0;
+  animation: heroTextKeyframes 1.0s cubic-bezier(0.25, 1, 0.5, 1) 0.7s forwards !important;
   transition: none !important;
 }
 
