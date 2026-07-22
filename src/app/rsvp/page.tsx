@@ -22,6 +22,7 @@ import {
   countLodgingChildren,
   formatLodgingGuestLabel,
   saveRSVPResponse,
+  readRSVPResponses,
   type LodgingGuest,
   type RSVPResponse,
 } from "@/lib/rsvp-storage";
@@ -409,6 +410,41 @@ export default function RSVPPage() {
           : []);
     }
 
+    function applyResponseOnly(response: RSVPResponse) {
+      if (cancelled) return;
+      setValue("name", response.name || "", { shouldDirty: false });
+      setValue("phone", response.phone || "", { shouldDirty: false });
+      setValue("guestGroup", response.guestGroup || "", { shouldDirty: false });
+      setValue("guestCount", response.guestCount || 1, { shouldDirty: false });
+      setValue("attendingCeremony", normalizeBoolean(response.attendingCeremony), { shouldDirty: false });
+      setValue("attendingBanquet", normalizeBoolean(response.attendingBanquet), { shouldDirty: false });
+      setValue("attending", normalizeAttendanceForForm(response.attending), { shouldDirty: false });
+      setValue("dietaryNote", response.dietaryNote ?? "", { shouldDirty: false });
+      
+      let initialStayDecision: "25" | "26" | "both" | "none" = "none";
+      if (response.accommodationNeeded) {
+        const inDate = response.checkInDate;
+        const outDate = response.checkOutDate;
+        if (inDate === "2026-12-25" && outDate === "2026-12-27") {
+          initialStayDecision = "both";
+        } else if (inDate === "2026-12-25") {
+          initialStayDecision = "25";
+        } else if (inDate === "2026-12-26") {
+          initialStayDecision = "26";
+        } else {
+          initialStayDecision = "both";
+        }
+      }
+      setValue("accommodationNeeded", response.accommodationNeeded ?? false, { shouldDirty: false });
+      setValue("stayDecision", initialStayDecision, { shouldDirty: false });
+      setValue("notes", response.notes ?? "", { shouldDirty: false });
+      replace(response.lodgingGuests?.length
+        ? response.lodgingGuests
+        : initialStayDecision !== "none"
+          ? [createLodgingGuest("")]
+          : []);
+    }
+
     async function hydrateGuest() {
       const params = new URLSearchParams(window.location.search);
       let token = params.get("invite") ?? params.get("token") ?? "";
@@ -450,6 +486,13 @@ export default function RSVPPage() {
           }
         } catch {
           // Local fallback below.
+        }
+      } else {
+        const localResponses = readRSVPResponses();
+        if (localResponses.length > 0) {
+          applyResponseOnly(localResponses[0]);
+          finishHydration();
+          return;
         }
       }
 

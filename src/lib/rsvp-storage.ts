@@ -56,6 +56,9 @@ export function saveRSVPResponse(response: Omit<RSVPResponse, "id" | "submittedA
   const existing = responses.find((item) => {
     if (next.inviteeId && item.inviteeId === next.inviteeId) return true;
     if (next.inviteToken && item.inviteToken === next.inviteToken) return true;
+    if (!next.inviteeId && !next.inviteToken && !item.inviteeId && !item.inviteToken) {
+      return item.name === next.name && item.phone === next.phone;
+    }
     return false;
   });
   const saved = existing ? { ...existing, ...next, id: existing.id } : next;
