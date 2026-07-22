@@ -1221,21 +1221,28 @@ export default function RSVPPage() {
 
                                       {/* Input fields */}
                                       <div className="grid grid-cols-1 gap-3.5">
-                                        <div className="grid grid-cols-1 sm:grid-cols-12 gap-3.5 items-end">
-                                          <div className="sm:col-span-7 w-full">
-                                            <Field
-                                              label={<span className="text-xs font-bold tracking-wider text-[#252934]/68">Họ tên</span>}
-                                              error={guestErrors?.fullName?.message}
-                                            >
-                                              <input className={inputClass} placeholder="VD: Nguyễn Văn A" {...register(`lodgingGuests.${index}.fullName`)} />
-                                            </Field>
+                                        <div className="grid grid-cols-1 gap-1">
+                                          <div className="grid grid-cols-1 sm:grid-cols-12 gap-3.5 items-start">
+                                            <div className="sm:col-span-7 w-full">
+                                              <Field
+                                                label={<span className="text-xs font-bold tracking-wider text-[#252934]/68">Họ tên</span>}
+                                              >
+                                                <input className={inputClass} placeholder="VD: Nguyễn Văn A" {...register(`lodgingGuests.${index}.fullName`)} />
+                                              </Field>
+                                            </div>
+                                            <div className="sm:col-span-5 flex flex-col w-full h-full justify-end">
+                                              <span className="text-xs font-bold tracking-wider text-transparent select-none mb-2 hidden sm:block" aria-hidden="true">Spacer</span>
+                                              <label className="flex cursor-pointer items-center gap-2 rounded-xl border border-serenity/18 bg-white/70 px-3 py-2.5 text-xs font-semibold text-[#252934] transition hover:bg-white shadow-sm w-full justify-center h-13 shrink-0">
+                                                <input type="checkbox" className="h-4 w-4 rounded text-serenity accent-serenity focus:ring-serenity/30" {...register(`lodgingGuests.${index}.isChild`)} />
+                                                <span>Là trẻ em (dưới 11 tuổi)</span>
+                                              </label>
+                                            </div>
                                           </div>
-                                          <div className="sm:col-span-5 flex items-center justify-center sm:justify-start h-13">
-                                            <label className="flex cursor-pointer items-center gap-2 rounded-xl border border-serenity/18 bg-white/70 px-3 py-2.5 text-xs font-semibold text-[#252934] transition hover:bg-white shadow-sm w-full justify-center">
-                                              <input type="checkbox" className="h-4 w-4 rounded text-serenity accent-serenity focus:ring-serenity/30" {...register(`lodgingGuests.${index}.isChild`)} />
-                                              <span>Là trẻ em (dưới 11 tuổi)</span>
-                                            </label>
-                                          </div>
+                                          {guestErrors?.fullName?.message && (
+                                            <p className="text-xs font-bold text-[#9B4E5C] text-center sm:text-left mt-1 ml-1">
+                                              {guestErrors.fullName.message}
+                                            </p>
+                                          )}
                                         </div>
 
                                         {isChild && (
