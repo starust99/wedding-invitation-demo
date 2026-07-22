@@ -1280,13 +1280,6 @@ export default function RSVPPage() {
                                   <Plus className="h-4 w-4" /> THÊM NGƯỜI LƯU TRÚ
                                 </button>
                               </div>
-
-                              {terracottaNote ? (
-                                <div className="wedding-type-body grid justify-items-center gap-3 rounded-[1.2rem] border border-serenity/14 bg-white/75 p-4 text-[#252934]/62">
-                                  <CircleHelp className="mt-1 h-5 w-5 shrink-0 text-serenity" />
-                                  {terracottaNote}
-                                </div>
-                              ) : null}
                             </motion.div>
                           )}
                         </AnimatePresence>
