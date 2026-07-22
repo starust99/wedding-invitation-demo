@@ -1268,7 +1268,7 @@ export default function RSVPPage() {
                                 <button
                                   type="button"
                                   onClick={() => append(createLodgingGuest(""))}
-                                  className="wedding-type-button inline-flex min-h-11 items-center gap-2 rounded-full border border-serenity/24 bg-serenity/15 px-6 font-bold text-[#252934] transition hover:bg-serenity/25"
+                                  className="wedding-type-button inline-flex min-h-11 items-center gap-2 rounded-full border border-serenity/32 bg-serenity/30 px-6 font-bold text-[#252934] transition hover:bg-serenity/45"
                                 >
                                   <Plus className="h-4 w-4" /> THÊM NGƯỜI LƯU TRÚ
                                 </button>
