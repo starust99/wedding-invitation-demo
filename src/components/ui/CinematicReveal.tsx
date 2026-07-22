@@ -115,10 +115,7 @@ export function LineReveal({
 
   return (
     <div ref={ref} className={className}>
-      <div
-        className={`${fadeClass} is-visible`}
-        style={{ transitionDelay: isDone ? "0s" : `${delay}s` }}
-      >
+      <div className={fadeClass}>
         {children}
       </div>
     </div>
