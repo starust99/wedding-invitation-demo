@@ -26,7 +26,7 @@ export function RsvpSection({
   }, [prefetch, rsvpHref]);
 
   return (
-    <section id="rsvp" className="cinematic-stage editorial-band relative overflow-hidden px-5 py-24 text-ink sm:px-8 sm:py-28 lg:py-32">
+    <section id="rsvp" className="cinematic-stage editorial-band relative overflow-hidden px-5 py-12 text-ink sm:px-8 sm:py-16 lg:py-20">
       <SectionMediaLayers config={config} section="cta" className="opacity-[0.1]" />
       <div aria-hidden="true" className="paper-grain-luxury -z-10 opacity-20" />
       <div aria-hidden="true" className="hero-couture-shade absolute inset-0 opacity-55" />
@@ -37,11 +37,8 @@ export function RsvpSection({
           whileInView={{ opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }}
           viewport={{ once: false, margin: "-10% 0px -10% 0px" }}
           transition={{ duration: 0.8, ease: [0.25, 0.1, 0.25, 1] }}
-          className="glass-panel relative w-full max-w-4xl overflow-hidden rounded-[2.75rem] px-6 py-10 sm:px-10 sm:py-14 lg:px-16 lg:py-16"
+          className="glass-panel relative w-full max-w-3xl overflow-hidden rounded-[2.5rem] px-5 py-8 sm:px-10 sm:py-10 lg:px-12 lg:py-12"
         >
-          <div aria-hidden="true" className="absolute inset-x-8 top-5 h-px bg-[linear-gradient(90deg,transparent,rgba(212,175,55,0.42),transparent)] sm:inset-x-16 sm:top-7 lg:top-8" />
-          <div aria-hidden="true" className="absolute inset-x-8 bottom-5 h-px bg-[linear-gradient(90deg,transparent,rgba(212,175,55,0.3),transparent)] sm:inset-x-16 sm:bottom-7 lg:bottom-8" />
-
           <div className="relative z-10 mx-auto flex max-w-2xl flex-col items-center text-center">
             <h3 className="font-serif text-[1.12rem] sm:text-[1.25rem] md:text-[1.38rem] font-bold gold-foil-text uppercase leading-tight mt-0.5 mb-1">
               {config.sections.cta.eyebrow}
