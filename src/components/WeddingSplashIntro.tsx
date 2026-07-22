@@ -168,6 +168,7 @@ export function WeddingSplashIntro({
     setPreloading(false);
     setStatus("opening");
     window.dispatchEvent(new Event("playWeddingMusic"));
+    window.dispatchEvent(new Event("introFinished"));
     
     // Fallback timer just in case video onEnded fails or user is on low-power mode (increased for slow networks)
     closeTimer.current = window.setTimeout(closeIntro, 15000);
@@ -199,11 +200,12 @@ export function WeddingSplashIntro({
           aria-modal="true"
           aria-label="Mở thiệp cưới"
           id="wedding-splash-screen"
-          className="fixed inset-0 z-[80] grid min-h-dvh place-items-center overflow-hidden bg-[#FBF8F1] text-ink"
+          onClick={openIntro}
+          className="fixed inset-0 z-[80] grid min-h-dvh place-items-center overflow-hidden bg-[#FBF8F1] text-ink cursor-pointer"
           initial={{ opacity: 1 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0, scale: 1.05, filter: "blur(6px)" }}
-          transition={{ duration: isImmediateClose ? 0 : 0.5, ease: "easeInOut" }}
+          transition={{ duration: isImmediateClose ? 0 : 0.35, ease: "easeInOut" }}
           onAnimationComplete={() => {
             document.documentElement.classList.add("splash-skipped");
           }}

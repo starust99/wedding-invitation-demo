@@ -109,16 +109,14 @@ export function LineReveal({
   type?: "header" | "body";
 }) {
   const ref = useRef(null);
-  const ready = useRevealReady(true);
   const isDone = checkIsIntroDone();
-  const isVisible = ready || isDone;
 
   const fadeClass = type === "body" ? "hero-text-fade-body" : "hero-text-fade-header";
 
   return (
     <div ref={ref} className={className}>
       <div
-        className={`${fadeClass} ${isVisible ? "is-visible" : ""}`}
+        className={`${fadeClass} is-visible`}
         style={{ transitionDelay: isDone ? "0s" : `${delay}s` }}
       >
         {children}

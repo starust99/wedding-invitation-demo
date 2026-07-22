@@ -39,26 +39,23 @@ export function ReferenceWeddingHero({ config, summary }: ReferenceWeddingHeroPr
   const imgRef = useRef<HTMLImageElement>(null);
 
   useEffect(() => {
-    const updateVisibility = () => {
-      const isDone = checkIsIntroDone();
-      if (isDone || readyFromReveal) {
-        setIsHeroVisible(true);
-      }
-    };
-    updateVisibility();
+    const isDone = checkIsIntroDone();
+    if (isDone) {
+      setIsHeroVisible(true);
+    }
 
     if (imgRef.current && imgRef.current.complete) {
       setImageLoaded(true);
     }
 
     const handleIntroFinished = () => {
-      updateVisibility();
+      setIsHeroVisible(true);
       setIsAnimatedSequence(true);
     };
 
     window.addEventListener("introFinished", handleIntroFinished);
     return () => window.removeEventListener("introFinished", handleIntroFinished);
-  }, [readyFromReveal]);
+  }, []);
 
   const isDone = isHeroVisible;
 
@@ -69,7 +66,9 @@ export function ReferenceWeddingHero({ config, summary }: ReferenceWeddingHeroPr
   const textHeaderDelay = isDone ? 0 : 1.25;
   const textBodyDelay = isDone ? 0 : 1.4;
 
-  const heroMotionClass = (!isHeroVisible || isAnimatedSequence) ? "hero-animating" : "hero-static";
+  const heroMotionClass = isAnimatedSequence
+    ? "hero-animating"
+    : (isHeroVisible ? "hero-static" : "hero-preparing");
 
   return (
     <section id="home" className={`save-date-hero save-date-hero-arch ${heroMotionClass}`}>
