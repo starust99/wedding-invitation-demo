@@ -2197,9 +2197,9 @@ textarea {
   display: grid;
   justify-items: center;
   gap: 0.55rem;
-  border: 1px solid rgba(180, 151, 90, 0.25);
+  border: 1px solid rgba(180, 151, 90, 0.2);
   border-radius: 1.12rem;
-  background: rgba(253, 251, 247, 0.95);
+  background: rgba(253, 251, 247, 0.35);
   box-shadow: 0 12px 36px rgba(63, 70, 66, 0.08);
   padding: 0.95rem;
   backdrop-filter: blur(24px) saturate(140%);
