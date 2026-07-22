@@ -4088,7 +4088,7 @@ textarea {
   will-change: opacity, transform;
 }
 
-/* Hero preparation state while splash envelope is active */
+/* 1. Base / Preparing state: Opacity 0 while splash envelope video is active */
 .hero-preparing .hero-logo-fade,
 .hero-preparing .hero-photo-fade,
 .hero-preparing .hero-ornament-fade-left,
@@ -4098,40 +4098,48 @@ textarea {
 .hero-preparing .hero-text-fade-body {
   opacity: 0 !important;
   animation: none !important;
+  transition: none !important;
 }
 
-/* First envelope open cinematic staggered animation sequence - Romantic & Poetic Motion */
-.hero-animating .hero-logo-fade {
+/* 2. CASE 1: First-time Splash Screen Envelope Opening (.hero-animating) */
+/* Plays full romantic, staggered 1.8s - 2.2s keyframe sequence strictly AFTER splash dissolves! */
+.save-date-hero.hero-animating .hero-logo-fade {
   opacity: 0;
-  animation: heroLogoKeyframes 1.8s cubic-bezier(0.16, 1, 0.3, 1) 0.1s forwards;
+  animation: heroLogoKeyframes 1.8s cubic-bezier(0.16, 1, 0.3, 1) 0.1s forwards !important;
+  transition: none !important;
 }
 
-.hero-animating .hero-photo-fade {
+.save-date-hero.hero-animating .hero-photo-fade {
   opacity: 0;
-  animation: heroPhotoKeyframes 2.2s cubic-bezier(0.16, 1, 0.3, 1) 0.5s forwards;
+  animation: heroPhotoKeyframes 2.2s cubic-bezier(0.16, 1, 0.3, 1) 0.5s forwards !important;
+  transition: none !important;
 }
 
-.hero-animating .hero-ornament-fade-left {
+.save-date-hero.hero-animating .hero-ornament-fade-left {
   opacity: 0;
-  animation: heroOrnamentLeftKeyframes 1.8s cubic-bezier(0.34, 1.3, 0.64, 1) 0.9s forwards;
+  animation: heroOrnamentLeftKeyframes 1.8s cubic-bezier(0.34, 1.3, 0.64, 1) 0.9s forwards !important;
+  transition: none !important;
 }
 
-.hero-animating .hero-ornament-fade-right {
+.save-date-hero.hero-animating .hero-ornament-fade-right {
   opacity: 0;
-  animation: heroOrnamentRightKeyframes 1.8s cubic-bezier(0.34, 1.3, 0.64, 1) 1.2s forwards;
+  animation: heroOrnamentRightKeyframes 1.8s cubic-bezier(0.34, 1.3, 0.64, 1) 1.2s forwards !important;
+  transition: none !important;
 }
 
-.hero-animating .hero-text-fade-header {
+.save-date-hero.hero-animating .hero-text-fade-header {
   opacity: 0;
-  animation: heroTextKeyframes 1.8s cubic-bezier(0.16, 1, 0.3, 1) 1.5s forwards;
+  animation: heroTextKeyframes 1.8s cubic-bezier(0.16, 1, 0.3, 1) 1.5s forwards !important;
+  transition: none !important;
 }
 
-.hero-animating .hero-text-fade-body {
+.save-date-hero.hero-animating .hero-text-fade-body {
   opacity: 0;
-  animation: heroTextKeyframes 1.8s cubic-bezier(0.16, 1, 0.3, 1) 1.9s forwards;
+  animation: heroTextKeyframes 1.8s cubic-bezier(0.16, 1, 0.3, 1) 1.9s forwards !important;
+  transition: none !important;
 }
 
-/* Instant splash skip styles to prevent hydration flash when loading page after splash seen */
+/* Instant splash skip dialog hide styles */
 html.splash-skipped:not(.splash-active) [role="dialog"][aria-label="Mở thiệp cưới"] {
   display: none !important;
 }
@@ -4139,26 +4147,22 @@ html.splash-skipped body {
   overflow: auto !important;
 }
 
-/* Strict instant static rule: When returning to home (F5 / reload / back navigation from /rsvp), force 100% opacity instantly with ZERO transition or keyframes */
-html.splash-skipped .save-date-hero,
-.hero-static {
-  animation: none !important;
-}
-
-html.splash-skipped .hero-logo-fade,
-html.splash-skipped .hero-photo-fade,
-html.splash-skipped .hero-ornament-fade-left,
-html.splash-skipped .hero-ornament-fade-right,
-html.splash-skipped .hero-text-fade,
-html.splash-skipped .hero-text-fade-header,
-html.splash-skipped .hero-text-fade-body,
-.hero-static .hero-logo-fade,
-.hero-static .hero-photo-fade,
-.hero-static .hero-ornament-fade-left,
-.hero-static .hero-ornament-fade-right,
-.hero-static .hero-text-fade,
-.hero-static .hero-text-fade-header,
-.hero-static .hero-text-fade-body {
+/* 3. CASE 2: Reload (F5) or Return Navigation from /rsvp (.hero-static or html.splash-skipped) */
+/* When splash was ALREADY completed previously, force 100% opacity instantly with ZERO transition or keyframes */
+html.splash-skipped .save-date-hero:not(.hero-animating) .hero-logo-fade,
+html.splash-skipped .save-date-hero:not(.hero-animating) .hero-photo-fade,
+html.splash-skipped .save-date-hero:not(.hero-animating) .hero-ornament-fade-left,
+html.splash-skipped .save-date-hero:not(.hero-animating) .hero-ornament-fade-right,
+html.splash-skipped .save-date-hero:not(.hero-animating) .hero-text-fade,
+html.splash-skipped .save-date-hero:not(.hero-animating) .hero-text-fade-header,
+html.splash-skipped .save-date-hero:not(.hero-animating) .hero-text-fade-body,
+.save-date-hero.hero-static .hero-logo-fade,
+.save-date-hero.hero-static .hero-photo-fade,
+.save-date-hero.hero-static .hero-ornament-fade-left,
+.save-date-hero.hero-static .hero-ornament-fade-right,
+.save-date-hero.hero-static .hero-text-fade,
+.save-date-hero.hero-static .hero-text-fade-header,
+.save-date-hero.hero-static .hero-text-fade-body {
   opacity: 1 !important;
   transform: none !important;
   animation: none !important;

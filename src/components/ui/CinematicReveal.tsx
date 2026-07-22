@@ -27,6 +27,10 @@ export function checkIsIntroDone(): boolean {
       isIntroDone = false;
       return false;
     }
+    if (document.documentElement.classList.contains("splash-skipped")) {
+      isIntroDone = true;
+      return true;
+    }
   }
   if (isIntroDone) return true;
   if (checkLocalStorageIntro()) {

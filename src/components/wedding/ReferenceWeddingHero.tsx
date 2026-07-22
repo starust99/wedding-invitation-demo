@@ -32,36 +32,17 @@ function stripRepeatedHeroInvitePrefix(text: string) {
 
 export function ReferenceWeddingHero({ config, summary }: ReferenceWeddingHeroProps) {
   const readyFromReveal = useRevealReady(true);
-  const [isHeroVisible, setIsHeroVisible] = useState(() => {
-    if (typeof window !== "undefined") {
-      const search = window.location.search || "";
-      const href = window.location.href || "";
-      if (search.includes("intro=1") || href.includes("intro=1")) {
-        return false;
-      }
-      if (document.documentElement.classList.contains("splash-skipped")) {
-        return true;
-      }
-    }
-    return checkIsIntroDone();
-  });
   const [isAnimatedSequence, setIsAnimatedSequence] = useState(false);
 
   const [imageLoaded, setImageLoaded] = useState(false);
   const imgRef = useRef<HTMLImageElement>(null);
 
   useEffect(() => {
-    const isDone = checkIsIntroDone();
-    if (isDone) {
-      setIsHeroVisible(true);
-    }
-
     if (imgRef.current && imgRef.current.complete) {
       setImageLoaded(true);
     }
 
     const handleIntroFinished = () => {
-      setIsHeroVisible(true);
       setIsAnimatedSequence(true);
     };
 
@@ -69,7 +50,8 @@ export function ReferenceWeddingHero({ config, summary }: ReferenceWeddingHeroPr
     return () => window.removeEventListener("introFinished", handleIntroFinished);
   }, []);
 
-  const isDone = isHeroVisible;
+  const isDone = typeof window !== "undefined" ? checkIsIntroDone() : false;
+  const isHeroVisible = isDone || isAnimatedSequence;
 
   const invitationText = stripRepeatedHeroInvitePrefix(
     summary?.invitationLine || config.content.description,
