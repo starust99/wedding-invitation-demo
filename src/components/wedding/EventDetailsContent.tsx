@@ -8,6 +8,34 @@ import { motion } from "framer-motion";
 import type { Variants } from "framer-motion";
 import type { EventDetailsViewportMode, WeddingEventDetailsEditorConfig } from "@/lib/wedding/event-details-types";
 import { DressCodeSection, type DressColorId } from "./DressCodeSection";
+import SeamlessVideoPlayer from "@/components/SeamlessVideoPlayer";
+
+const timelinePathVideo = "/assets/timeline-path.mp4";
+const timelinePathWebm = "/assets/timeline-path-web.webm";
+
+function getTimelineIconPath(title: string): string | null {
+  const t = title.toLowerCase();
+  if (t.includes("đón khách")) return "/assets/wedding/timeline/icon-1730.png";
+  if (t.includes("khai mạc")) return "/assets/wedding/timeline/icon-1900.png";
+  if (t.includes("nghi lễ") || t.includes("nghi thức")) return "/assets/wedding/timeline/icon-1910.png";
+  if (t.includes("nâng ly") || t.includes("khai tiệc") || t.includes("dùng tiệc")) return "/assets/wedding/timeline/icon-1920.png";
+  if (t.includes("giao lưu")) return "/assets/wedding/timeline/icon-2000.png";
+  if (t.includes("chụp ảnh") || t.includes("chụp hình") || t.includes("cảm ơn") || t.includes("kỷ niệm")) return "/assets/wedding/timeline/icon-2050.png";
+  return null;
+}
+
+function TimelineIcon({ title, className }: { title: string; className?: string }) {
+  const iconPath = getTimelineIconPath(title);
+  if (!iconPath) return null;
+  return (
+    <img
+      src={iconPath}
+      alt={title}
+      className={className}
+      draggable={false}
+    />
+  );
+}
 
 type EventDetailsTimelineItem = {
   time: string;
@@ -211,16 +239,6 @@ function DateDisplayStack({ dateParsed, lunarText }: { dateParsed: { day: string
   );
 }
 
-function getTimelineIconPath(title: string): string | null {
-  const t = title.toLowerCase();
-  if (t.includes("đón khách")) return "/assets/wedding/timeline/icon-1730.png";
-  if (t.includes("khai mạc")) return "/assets/wedding/timeline/icon-1900.png";
-  if (t.includes("nghi lễ") || t.includes("nghi thức")) return "/assets/wedding/timeline/icon-1910.png";
-  if (t.includes("nâng ly") || t.includes("khai tiệc") || t.includes("dùng tiệc")) return "/assets/wedding/timeline/icon-1920.png";
-  if (t.includes("giao lưu")) return "/assets/wedding/timeline/icon-2000.png";
-  if (t.includes("chụp ảnh") || t.includes("chụp hình") || t.includes("cảm ơn") || t.includes("kỷ niệm")) return "/assets/wedding/timeline/icon-2050.png";
-  return null;
-}
 
 
 
@@ -715,7 +733,49 @@ export function EventDetailsContent({
           ) : null}
 
           {/* Divider */}
-          <div className="w-full border-t border-[#b4975a]/15 my-0" />
+          <div className="w-full border-t border-[#b4975a]/15 my-6" />
+
+          {/* Timeline Section wrapped inside Card 2 */}
+          {publicData?.timeline && publicData.timeline.length > 0 && (
+            <div className="w-full text-center">
+              <h5 className="font-serif text-[1.12rem] sm:text-[1.35rem] font-bold tracking-[0.14em] md:tracking-[0.18em] uppercase text-[#3f4642] mt-1 mb-5">
+                Chương trình
+              </h5>
+              
+              <div className="event-details-timeline-scene timeline-garden-path-scene w-full max-w-[28rem] sm:max-w-[34rem] md:max-w-[38rem] mx-auto min-h-[28rem] overflow-visible relative">
+                {/* Con đường: video nền đệm kép */}
+                <div className="timeline-garden-path-image timeline-path-video-wrap opacity-[0.85] absolute inset-0 pointer-events-none">
+                  <SeamlessVideoPlayer
+                    mp4Src={timelinePathVideo}
+                    webmSrc={timelinePathWebm}
+                    className="absolute inset-0 w-full h-full"
+                  />
+                </div>
+
+                {/* Các thẻ mốc thời gian — so le trái/phải */}
+                <ol className="event-details-timeline-list timeline-garden-list relative z-10 grid w-full gap-4 sm:gap-5 px-1">
+                  {publicData.timeline.map((item, index) => {
+                    const isRight = index % 2 === 0;
+                    return (
+                      <li
+                        key={index}
+                        className={`timeline-garden-node !m-0 flex w-full ${isRight ? "justify-end" : "justify-start"}`}
+                      >
+                        <div className="timeline-garden-card !py-3 !pl-4 !pr-14 !gap-1 shadow-[0_6px_16px_rgba(63,70,66,0.04)] text-left flex flex-col items-start justify-center bg-[#fdfbf7]/35 border border-[#b4975a]/20 backdrop-blur-md rounded-2xl relative overflow-hidden w-full min-w-[11rem]">
+                          <TimelineIcon title={item.title} className="!absolute !right-2.5 !top-1/2 !-translate-y-1/2 !w-11 !h-11 !m-0 opacity-85 pointer-events-none" />
+                          <p className="!text-[1.1rem] !font-bold text-[#8d713a] tracking-wider mb-0.5 relative z-10">{item.time}</p>
+                          <h3 className="!text-[1.1rem] !font-semibold text-[#2f3532] font-serif leading-snug relative z-10">{item.title}</h3>
+                        </div>
+                      </li>
+                    );
+                  })}
+                </ol>
+              </div>
+
+              {/* Divider */}
+              <div className="w-full border-t border-[#b4975a]/15 mt-8 mb-2" />
+            </div>
+          )}
 
           {/* Section 3: Dress Code */}
           <div className="py-6 w-full">

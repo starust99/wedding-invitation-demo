@@ -6,7 +6,7 @@ import { HeroSaveTheDate } from "@/components/HeroSaveTheDate";
 import { RsvpSection } from "@/components/RsvpSection";
 import { SceneProgress } from "@/components/SceneProgress";
 import { ThankYouSection } from "@/components/ThankYouSection";
-import { TimelineSection } from "@/components/TimelineSection";
+
 import { WeddingDetailsSection } from "@/components/WeddingDetailsSection";
 import { WeddingSplashIntro } from "@/components/WeddingSplashIntro";
 import { SectionMediaLayers } from "@/components/SectionMediaLayers";
@@ -96,7 +96,6 @@ export default function Home() {
       <SceneProgress />
       <HeroSaveTheDate config={config} guestIdentity={guestIdentity} />
       <WeddingDetailsSection config={config} guestIdentity={guestIdentity} />
-      <TimelineSection config={config} />
       <GallerySection config={config} />
       {/* Unified RSVP & Thank You section wrapper to eliminate the background seam */}
       <div className="cinematic-stage editorial-band relative overflow-hidden py-12 sm:py-16 lg:py-20">

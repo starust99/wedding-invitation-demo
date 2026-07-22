@@ -6,7 +6,7 @@ import { HeroSaveTheDate } from "@/components/HeroSaveTheDate";
 import { RsvpSection } from "@/components/RsvpSection";
 import { SceneProgress } from "@/components/SceneProgress";
 import { ThankYouSection } from "@/components/ThankYouSection";
-import { TimelineSection } from "@/components/TimelineSection";
+
 import { WeddingDetailsSection } from "@/components/WeddingDetailsSection";
 import { WeddingSplashIntro } from "@/components/WeddingSplashIntro";
 import { resolveGuestIdentity, type GuestIdentity } from "@/lib/guest-personalization";
@@ -170,7 +170,6 @@ export function InviteTokenPage({ token }: { token: string }) {
       <SceneProgress />
       <HeroSaveTheDate config={config} guestIdentity={guestIdentity} />
       <WeddingDetailsSection config={config} guestIdentity={guestIdentity} />
-      <TimelineSection config={config} />
       <GallerySection config={config} />
       {!shouldShowThankYou ? (
         <RsvpSection config={config} guestIdentity={guestIdentity} rsvpHref={rsvpHref} />
