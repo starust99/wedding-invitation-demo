@@ -397,7 +397,7 @@ export function EventDetailsContent({
   const venueLocation = publicData?.venueLocation || formatSchedule(publicData?.dateLabel || content.ceremonyTime, publicData?.welcomeTime || content.ceremonyLocation, content.mapText);
   const dressCodeTitle = publicData?.dressCodeTitle || content.dressCodeLabel;
   const dressCodeNote = publicData?.dressCodeNote || content.dressCodeText;
-  const dressCodeImageSrc = publicData?.dressCodeImageSrc || "/assets/dresscode-theme-v4.png";
+  const dressCodeImageSrc = publicData?.dressCodeImageSrc || "/assets/dresscode-theme-v4.jpg";
 
   return (
     <div
