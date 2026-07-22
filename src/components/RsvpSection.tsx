@@ -12,10 +12,12 @@ export function RsvpSection({
   config,
   guestIdentity,
   rsvpHref = "/rsvp",
+  transparentBg = false,
 }: {
   config: WeddingConfig;
   guestIdentity: GuestIdentity;
   rsvpHref?: string;
+  transparentBg?: boolean;
 }) {
   const inviteCopy = useMemo(() => buildInvitationCopy(guestIdentity), [guestIdentity]);
   const { navigateWithTransition, prefetch } = usePageTransition();
@@ -26,10 +28,14 @@ export function RsvpSection({
   }, [prefetch, rsvpHref]);
 
   return (
-    <section id="rsvp" className="cinematic-stage editorial-band relative overflow-hidden px-5 py-12 text-ink sm:px-8 sm:py-16 lg:py-20">
-      <SectionMediaLayers config={config} section="cta" className="opacity-[0.1]" />
-      <div aria-hidden="true" className="paper-grain-luxury -z-10 opacity-20" />
-      <div aria-hidden="true" className="hero-couture-shade absolute inset-0 opacity-55" />
+    <section id="rsvp" className={transparentBg ? "relative overflow-hidden px-5 py-2 text-ink sm:px-8" : "cinematic-stage editorial-band relative overflow-hidden px-5 py-12 text-ink sm:px-8 sm:py-16 lg:py-20"}>
+      {!transparentBg && (
+        <>
+          <SectionMediaLayers config={config} section="cta" className="opacity-[0.1]" />
+          <div aria-hidden="true" className="paper-grain-luxury -z-10 opacity-20" />
+          <div aria-hidden="true" className="hero-couture-shade absolute inset-0 opacity-55" />
+        </>
+      )}
 
       <div className="mx-auto flex max-w-7xl justify-center">
         <motion.div
