@@ -159,7 +159,7 @@ export function WeddingSplashIntro({
   const closeIntro = useCallback(() => {
     markSplashSeen(sessionKey);
     setStatus("hidden");
-    // Dispatch immediately so Hero animations run concurrently with the exit transition
+    // Dispatch when video finishes so Hero animations trigger right as Hero section is revealed
     window.dispatchEvent(new Event("introFinished"));
   }, [sessionKey]);
 
@@ -168,7 +168,6 @@ export function WeddingSplashIntro({
     setPreloading(false);
     setStatus("opening");
     window.dispatchEvent(new Event("playWeddingMusic"));
-    window.dispatchEvent(new Event("introFinished"));
     
     // Fallback timer just in case video onEnded fails or user is on low-power mode (increased for slow networks)
     closeTimer.current = window.setTimeout(closeIntro, 15000);
