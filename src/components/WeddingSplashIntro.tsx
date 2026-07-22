@@ -57,6 +57,7 @@ export function WeddingSplashIntro({
   const [isImmediateClose, setIsImmediateClose] = useState(false);
   const [viewport, setViewport] = useState<"desktop" | "mobile" | null>(null);
   const closeTimer = useRef<number | null>(null);
+  const animDispatchTimer = useRef<number | null>(null);
 
   useEffect(() => {
     const mediaQuery = window.matchMedia("(max-width: 767px)");
@@ -163,8 +164,10 @@ export function WeddingSplashIntro({
   }, [ready, sessionKey]);
 
   const closeIntro = useCallback(() => {
-    window.dispatchEvent(new Event("introFinished"));
     setStatus("hidden");
+    animDispatchTimer.current = window.setTimeout(() => {
+      window.dispatchEvent(new Event("introFinished"));
+    }, 900);
   }, []);
 
   const openIntro = useCallback(() => {
@@ -190,6 +193,7 @@ export function WeddingSplashIntro({
 
   useEffect(() => () => {
     if (closeTimer.current) window.clearTimeout(closeTimer.current);
+    if (animDispatchTimer.current) window.clearTimeout(animDispatchTimer.current);
   }, []);
 
   const opening = status === "opening";
