@@ -1315,7 +1315,7 @@ export default function RSVPPage() {
                             placeholder={
                               attending === "no"
                                 ? "Quý khách có thể để lại lời chúc mừng hoặc nhắn gửi cho Nhật & Phương"
-                                : "Quý khách có thể nhắn giờ đến dự kiến, yêu cầu ghế trẻ em, hỗ trợ đi lại hoặc hỗ trợ người lớn tuổi,..."
+                                : "Quý khách có thể nhắn giờ đến dự kiến, yêu cầu ghế trẻ em, hỗ trợ đi lại hoặc hỗ trợ người lớn tuổi,... nếu có"
                             }
                             {...register("notes")}
                           />
