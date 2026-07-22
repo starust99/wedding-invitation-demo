@@ -208,73 +208,85 @@ export function GallerySection({ config }: { config: WeddingConfig }) {
       <div aria-hidden="true" className="paper-grain-luxury gallery-mosaic-grain opacity-15" />
 
       <div className="gallery-mosaic-shell mx-auto max-w-7xl">
-        <motion.div
-          className="gallery-mosaic-intro grid max-w-4xl justify-items-center gap-5 pb-8 text-center lg:pb-10"
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, margin: "-10% 0px -10% 0px" }}
-          variants={galleryIntroVariant}
-        >
+        <div className="gallery-mosaic-stage mt-12 lg:mt-14">
+          {/* Header inside the card */}
+          <motion.div
+            className="flex flex-col items-center text-center w-full px-4 pt-6 pb-6 md:pt-8 md:pb-8"
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-10% 0px -10% 0px" }}
+            variants={galleryIntroVariant}
+          >
             <h3 className="font-serif text-[1.12rem] sm:text-[1.25rem] md:text-[1.38rem] font-bold gold-foil-text uppercase leading-tight mt-0.5 mb-1.5">
               {section.eyebrow}
             </h3>
-          {section.description && (
-            <p className="wedding-type-body font-serif mx-auto max-w-2xl text-center text-ink/62">
-              {section.description}
-            </p>
-          )}
-        </motion.div>
+            {section.description && (
+              <p className="wedding-type-body font-serif mx-auto max-w-2xl text-center text-ink/62">
+                {section.description}
+              </p>
+            )}
+            
+            {/* Custom Gold Star Divider */}
+            <div className="flex items-center justify-center gap-3.5 w-full max-w-[11rem] sm:max-w-[13rem] mt-3 select-none pointer-events-none" aria-hidden="true">
+              <div className="h-[1px] flex-grow bg-[#b4975a]/35" />
+              <svg viewBox="0 0 24 24" className="w-[11px] h-[11px] sm:w-3 sm:h-3 fill-[#b4975a] flex-shrink-0">
+                <path d="M12 2Q12 12 22 12Q12 12 12 22Q12 12 2 12Q12 12 12 2" />
+              </svg>
+              <div className="h-[1px] flex-grow bg-[#b4975a]/35" />
+            </div>
+          </motion.div>
 
-        <motion.div
-          className="gallery-mosaic-stage mt-12 lg:mt-14"
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, margin: "-10% 0px -10% 0px" }}
-          variants={galleryContainerVariant}
-        >
-          {tiles.map((tile, index) => {
-            const hasImage = Boolean(tile.src);
-            const style = {
-              gridColumn: tile.gridColumn,
-              gridRow: tile.gridRow,
-            } as CSSProperties;
+          <motion.div
+            className="gallery-mosaic-grid"
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-10% 0px -10% 0px" }}
+            variants={galleryContainerVariant}
+          >
+            {tiles.map((tile, index) => {
+              const hasImage = Boolean(tile.src);
+              const style = {
+                gridColumn: tile.gridColumn,
+                gridRow: tile.gridRow,
+              } as CSSProperties;
 
-            return (
-              <motion.figure
-                key={`${tile.src || "placeholder"}-${index}`}
-                className={`gallery-mosaic-tile ${tile.aspectClass} lg:aspect-auto`}
-                style={style}
-                suppressHydrationWarning
-                variants={galleryTileVariant}
-              >
-                <button
-                  type="button"
-                  className={`gallery-mosaic-tile-shell ${hasImage ? "gallery-mosaic-trigger" : ""}`}
-                  aria-label={hasImage ? `Mở ảnh cưới ${index + 1}` : undefined}
-                  onClick={hasImage ? () => setSelectedImageIndex(index) : undefined}
-                  disabled={!hasImage}
+              return (
+                <motion.figure
+                  key={`${tile.src || "placeholder"}-${index}`}
+                  className={`gallery-mosaic-tile ${tile.aspectClass} lg:aspect-auto`}
+                  style={style}
+                  suppressHydrationWarning
+                  variants={galleryTileVariant}
                 >
-                  {hasImage ? (
-                    <img
-                      src={tile.src}
-                      alt={`${section.imageAltPrefix} ${index + 1}`}
-                      className="gallery-mosaic-image absolute inset-0 w-full h-full object-cover"
-                      style={{ objectPosition: tile.objectPosition } as CSSProperties}
-                      loading="lazy"
-                      draggable={false}
-                    />
-                  ) : (
-                    <div
-                      aria-hidden="true"
-                      className="gallery-mosaic-placeholder"
-                      style={{ backgroundImage: tile.fallback }}
-                    />
-                  )}
-                </button>
-              </motion.figure>
-            );
-          })}
-        </motion.div>
+                  <button
+                    type="button"
+                    className={`gallery-mosaic-tile-shell ${hasImage ? "gallery-mosaic-trigger" : ""}`}
+                    aria-label={hasImage ? `Mở ảnh cưới ${index + 1}` : undefined}
+                    onClick={hasImage ? () => setSelectedImageIndex(index) : undefined}
+                    disabled={!hasImage}
+                  >
+                    {hasImage ? (
+                      <img
+                        src={tile.src}
+                        alt={`${section.imageAltPrefix} ${index + 1}`}
+                        className="gallery-mosaic-image absolute inset-0 w-full h-full object-cover"
+                        style={{ objectPosition: tile.objectPosition } as CSSProperties}
+                        loading="lazy"
+                        draggable={false}
+                      />
+                    ) : (
+                      <div
+                        aria-hidden="true"
+                        className="gallery-mosaic-placeholder"
+                        style={{ backgroundImage: tile.fallback }}
+                      />
+                    )}
+                  </button>
+                </motion.figure>
+              );
+            })}
+          </motion.div>
+        </div>
       </div>
 
       {lightboxHost && lightbox ? createPortal(lightbox, lightboxHost) : null}
