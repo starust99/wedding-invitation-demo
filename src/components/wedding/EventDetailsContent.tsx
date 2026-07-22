@@ -738,9 +738,18 @@ export function EventDetailsContent({
           {/* Timeline Section wrapped inside Card 2 */}
           {publicData?.timeline && publicData.timeline.length > 0 && (
             <div className="w-full text-center">
-              <h5 className="font-serif text-[1.12rem] sm:text-[1.35rem] font-bold tracking-[0.14em] md:tracking-[0.18em] uppercase text-[#3f4642] mt-1 mb-5">
-                Chương trình
+              <h5 className="font-sans text-[0.88rem] sm:text-[0.94rem] md:text-[1rem] font-bold tracking-[0.22em] text-[#7d7065] uppercase leading-none mt-2 mb-3">
+                Chương trình tiệc
               </h5>
+              
+              {/* Custom Gold Star Divider */}
+              <div className="flex items-center justify-center gap-3.5 w-full max-w-[11rem] sm:max-w-[13rem] mx-auto mb-6 select-none pointer-events-none" aria-hidden="true">
+                <div className="h-[1px] flex-grow bg-[#b4975a]/35" />
+                <svg viewBox="0 0 24 24" className="w-[11px] h-[11px] sm:w-3 sm:h-3 fill-[#b4975a] flex-shrink-0">
+                  <path d="M12 2Q12 12 22 12Q12 12 12 22Q12 12 2 12Q12 12 12 2" />
+                </svg>
+                <div className="h-[1px] flex-grow bg-[#b4975a]/35" />
+              </div>
               
               <div className="event-details-timeline-scene timeline-garden-path-scene w-full max-w-[28rem] sm:max-w-[34rem] md:max-w-[38rem] mx-auto min-h-[28rem] overflow-visible relative">
                 {/* Con đường: video nền đệm kép */}
