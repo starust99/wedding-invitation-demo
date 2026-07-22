@@ -164,7 +164,7 @@ export function DressCodeSection({
 
         {/* Color Selection Bar (moved below) */}
         <div
-          className="flex w-full bg-white/60 border border-white/50 shadow-[0_4px_24px_rgba(63,70,66,0.06)] rounded-full py-2.5 px-4.5 justify-between items-center z-10 mt-5"
+          className="flex w-full bg-white/25 border border-white/40 shadow-[0_4px_24px_rgba(63,70,66,0.06)] rounded-full py-2.5 px-4.5 justify-between items-center z-10 mt-5"
           style={{
             backdropFilter: "blur(16px)",
             WebkitBackdropFilter: "blur(16px)",
