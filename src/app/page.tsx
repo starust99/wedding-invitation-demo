@@ -26,7 +26,24 @@ export default function Home() {
     if ("scrollRestoration" in history) {
       history.scrollRestoration = "manual";
     }
-    window.scrollTo(0, 0);
+
+    let scrollInterval: number | undefined = undefined;
+
+    if (window.location.hash === "#thank-you") {
+      let attempts = 0;
+      scrollInterval = window.setInterval(() => {
+        const el = document.getElementById("thank-you");
+        if (el) {
+          el.scrollIntoView({ behavior: "smooth", block: "start" });
+          attempts++;
+          if (attempts >= 4) {
+            window.clearInterval(scrollInterval);
+          }
+        }
+      }, 150);
+    } else {
+      window.scrollTo(0, 0);
+    }
 
     const identity = resolveGuestIdentity(window.location.search);
     setGuestIdentity(identity);
@@ -63,9 +80,11 @@ export default function Home() {
 
     checkRsvp();
 
-    window.addEventListener("wedding-rsvp-updated", checkRsvp);
     return () => {
       window.removeEventListener("wedding-rsvp-updated", checkRsvp);
+      if (scrollInterval) {
+        window.clearInterval(scrollInterval);
+      }
     };
   }, []);
 

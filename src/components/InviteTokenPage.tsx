@@ -140,16 +140,25 @@ export function InviteTokenPage({ token }: { token: string }) {
   const shouldShowThankYou = Boolean(invitee?.rsvp);
 
   useEffect(() => {
-    if (!shouldShowThankYou || window.location.hash !== "#thank-you") return;
+    if (loading) return;
+    if (window.location.hash !== "#thank-you") return;
 
-    const scrollTimer = window.setTimeout(() => {
-      document.getElementById("thank-you")?.scrollIntoView({ block: "start" });
-    }, 80);
+    let attempts = 0;
+    const interval = window.setInterval(() => {
+      const el = document.getElementById("thank-you");
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth", block: "start" });
+        attempts++;
+        if (attempts >= 4) {
+          window.clearInterval(interval);
+        }
+      }
+    }, 150);
 
     return () => {
-      window.clearTimeout(scrollTimer);
+      window.clearInterval(interval);
     };
-  }, [shouldShowThankYou]);
+  }, [loading]);
 
   if (!loading && !invitee && fetchStatus === "not-found") {
     return <InviteAccessGate variant="invalid-token" />;
