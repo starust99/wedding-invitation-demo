@@ -764,13 +764,16 @@ export default function RSVPPage() {
               </div>
 
               {submissionCopy.showCalendar ? (
-                <div className="mt-10 grid gap-4 w-full max-w-md">
-                  <div className="flex flex-col sm:flex-row justify-center gap-4">
+                <div className="rounded-[1.6rem] border border-serenity/18 bg-white/80 p-5 shadow-sm text-center w-full max-w-md mx-auto mb-6">
+                  <p className="text-[0.82rem] sm:text-sm font-bold tracking-[0.15em] text-[#7a6a5d] uppercase mb-4">
+                    Thêm vào lịch
+                  </p>
+                  <div className="flex flex-row justify-center gap-3.5 flex-wrap">
                     {hasCeremony && (
                       <button
                         type="button"
                         onClick={() => openCalendar(ceremonyIcsUrl, ceremonyGcalUrl, "thanh-le-nhat-phuong.ics")}
-                        className="wedding-type-button inline-flex h-12 items-center justify-center gap-2 rounded-full border border-serenity/30 bg-white/80 px-8 font-semibold text-[#252934] transition hover:bg-white hover:shadow-sm"
+                        className="wedding-type-button inline-flex h-11 items-center justify-center gap-2 rounded-full border border-serenity/24 bg-white/80 px-6 text-xs sm:text-sm font-bold text-[#252934] transition hover:bg-white hover:shadow-sm min-w-[130px]"
                       >
                         <CalendarDays className="w-4 h-4" /> THÁNH LỄ
                       </button>
@@ -779,7 +782,7 @@ export default function RSVPPage() {
                       <button
                         type="button"
                         onClick={() => openCalendar(banquetIcsUrl, banquetGcalUrl, "tiec-cuoi-nhat-phuong.ics")}
-                        className="wedding-type-button inline-flex h-12 items-center justify-center gap-2 rounded-full border border-serenity/30 bg-white/80 px-8 font-semibold text-[#252934] transition hover:bg-white hover:shadow-sm"
+                        className="wedding-type-button inline-flex h-11 items-center justify-center gap-2 rounded-full border border-serenity/24 bg-white/80 px-6 text-xs sm:text-sm font-bold text-[#252934] transition hover:bg-white hover:shadow-sm min-w-[130px]"
                       >
                         <CalendarDays className="w-4 h-4" /> TIỆC CƯỚI
                       </button>
@@ -787,7 +790,7 @@ export default function RSVPPage() {
                   </div>
                 </div>
               ) : null}
-              <div className="mt-12">
+              <div className="mt-6">
                 <button
                   type="button"
                   onClick={() => redirectToInvitePage(inviteToken, "#thank-you")}
