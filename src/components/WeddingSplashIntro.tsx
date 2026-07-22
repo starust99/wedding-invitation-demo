@@ -203,8 +203,8 @@ export function WeddingSplashIntro({
           className="fixed inset-0 z-[80] grid min-h-dvh place-items-center overflow-hidden bg-[#FBF8F1] text-ink cursor-pointer"
           initial={{ opacity: 1 }}
           animate={{ opacity: 1 }}
-          exit={{ opacity: 0, scale: 1.05, filter: "blur(6px)" }}
-          transition={{ duration: isImmediateClose ? 0 : 0.35, ease: "easeInOut" }}
+          exit={{ opacity: 0, scale: 1.04, filter: "blur(8px)" }}
+          transition={{ duration: isImmediateClose ? 0 : 1.2, ease: [0.25, 1, 0.5, 1] }}
           onAnimationComplete={() => {
             document.documentElement.classList.add("splash-skipped");
           }}
