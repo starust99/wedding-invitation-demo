@@ -770,10 +770,10 @@ export function EventDetailsContent({
                         key={index}
                         className={`timeline-garden-node !m-0 flex w-full ${isRight ? "justify-end" : "justify-start"}`}
                       >
-                        <div className="timeline-garden-card !py-3 !pl-4 !pr-14 !gap-1 shadow-[0_6px_16px_rgba(63,70,66,0.04)] text-left flex flex-col items-start justify-center bg-[#fdfbf7]/35 border border-[#b4975a]/20 backdrop-blur-md rounded-2xl relative overflow-hidden w-full min-w-[11rem]">
-                          <TimelineIcon title={item.title} className="!absolute !right-2.5 !top-1/2 !-translate-y-1/2 !w-11 !h-11 !m-0 opacity-85 pointer-events-none" />
-                          <p className="!text-[1.1rem] !font-bold text-[#8d713a] tracking-wider mb-0.5 relative z-10">{item.time}</p>
-                          <h3 className="!text-[1.1rem] !font-semibold text-[#2f3532] font-serif leading-snug relative z-10">{item.title}</h3>
+                        <div className="timeline-garden-card !py-3 !pl-3.5 !pr-11 sm:!pl-4 sm:!pr-14 !gap-1 shadow-[0_6px_16px_rgba(63,70,66,0.04)] text-left flex flex-col items-start justify-center bg-[#fdfbf7]/35 border border-[#b4975a]/20 backdrop-blur-md rounded-2xl relative overflow-hidden w-full min-w-[11rem]">
+                          <TimelineIcon title={item.title} className="!absolute !right-2 sm:!right-2.5 !top-1/2 !-translate-y-1/2 !w-9 !h-9 sm:!w-11 sm:!h-11 !m-0 opacity-85 pointer-events-none" />
+                          <p className="!text-[0.95rem] sm:!text-[1.1rem] !font-bold text-[#8d713a] tracking-wider mb-0.5 relative z-10">{item.time}</p>
+                          <h3 className="!text-[0.9rem] sm:!text-[1.1rem] !font-semibold text-[#2f3532] font-serif leading-snug relative z-10">{item.title}</h3>
                         </div>
                       </li>
                     );
