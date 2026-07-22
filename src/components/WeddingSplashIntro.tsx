@@ -43,11 +43,20 @@ export function WeddingSplashIntro({
   storageKey?: string;
   ready?: boolean;
 }) {
-  const [preloading, setPreloading] = useState(true);
+  const sessionKey = `wedding-splash:${storageKey}`;
+
+  const [status, setStatus] = useState<SplashStatus>(() => {
+    if (typeof window === "undefined") return "checking";
+    const shouldForce = readForceIntro();
+    if (shouldForce) return "closed";
+    if (hasSeenSplash(sessionKey)) return "hidden";
+    return "closed";
+  });
+  const [preloading, setPreloading] = useState(() => status !== "hidden");
   const [progress, setProgress] = useState(0);
-  const [status, setStatus] = useState<SplashStatus>("checking");
   const [isImmediateClose, setIsImmediateClose] = useState(false);
   const [viewport, setViewport] = useState<"desktop" | "mobile" | null>(null);
+  const closeTimer = useRef<number | null>(null);
 
   useEffect(() => {
     const mediaQuery = window.matchMedia("(max-width: 767px)");
@@ -56,8 +65,6 @@ export function WeddingSplashIntro({
     mediaQuery.addEventListener("change", syncViewport);
     return () => mediaQuery.removeEventListener("change", syncViewport);
   }, []);
-  const closeTimer = useRef<number | null>(null);
-  const sessionKey = `wedding-splash:${storageKey}`;
 
   if (typeof window !== "undefined" && readForceIntro()) {
     document.documentElement.classList.remove("splash-skipped");
