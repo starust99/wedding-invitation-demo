@@ -54,7 +54,7 @@ export function ThankYouSection({
   }
 
   return (
-    <section id="thank-you" className="cinematic-stage editorial-band relative overflow-hidden px-5 py-24 text-center text-ink sm:px-8 sm:py-28 lg:py-32">
+    <section id="thank-you" className="cinematic-stage editorial-band relative overflow-hidden px-5 py-12 text-center text-ink sm:px-8 sm:py-16 lg:py-20">
       <SectionMediaLayers config={config} section="cta" className="opacity-[0.1]" />
       <div aria-hidden="true" className="hero-couture-shade absolute inset-0 opacity-80" />
       <div aria-hidden="true" className="paper-grain-luxury absolute inset-0 opacity-22" />
@@ -65,22 +65,20 @@ export function ThankYouSection({
           whileInView={{ opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }}
           viewport={{ once: false, margin: "-10% 0px -10% 0px" }}
           transition={{ duration: 0.8, ease: [0.25, 0.1, 0.25, 1] }}
-          className="glass-panel relative w-full max-w-4xl overflow-hidden rounded-[2.8rem] px-5 py-7 sm:px-8 sm:py-8 lg:px-10 lg:py-10"
+          className="glass-panel relative w-full max-w-3xl overflow-hidden rounded-[2.5rem] px-5 py-8 sm:px-10 sm:py-10 lg:px-12 lg:py-12"
         >
-
-
-          <div className="relative z-10 grid min-h-[24rem] place-items-start py-4 text-center sm:min-h-[30rem] sm:place-items-center sm:py-8 lg:min-h-[34rem]">
-            <div className="flex w-full max-w-2xl flex-col items-center justify-between gap-8 text-center sm:gap-10">
+          <div className="relative z-10 flex flex-col items-center justify-center py-2 text-center">
+            <div className="flex w-full max-w-2xl flex-col items-center justify-between gap-5 text-center sm:gap-6">
               <div>
                 <h3 className="font-serif text-[1.12rem] sm:text-[1.25rem] md:text-[1.38rem] font-bold gold-foil-text uppercase leading-tight mt-0.5 mb-1.5">
                   Phản hồi đã được ghi nhận
                 </h3>
-                <div className="mt-6 flex items-center justify-center gap-3">
+                <div className="mt-3.5 flex items-center justify-center gap-3">
                   <span className="h-px w-16 bg-[rgba(212,175,55,0.46)] sm:w-20" />
                   <span className="h-2 w-2 rounded-full border border-[rgba(212,175,55,0.48)] bg-white/76" />
                   <span className="h-px w-16 bg-[rgba(212,175,55,0.46)] sm:w-20" />
                 </div>
-                <p suppressHydrationWarning className="wedding-type-body font-sans mx-auto mt-6 max-w-xl text-ink/66">
+                <p suppressHydrationWarning className="wedding-type-body font-sans mx-auto mt-4 max-w-xl text-ink/66">
                   {thankYouMessage}
                 </p>
               </div>
@@ -90,8 +88,8 @@ export function ThankYouSection({
                   {inviteCopy.signaturePrefix}
                 </p>
 
-                <div className="mx-auto mt-8 w-full max-w-2xl">
-                  <div className="flex flex-col items-center justify-center gap-3.5 sm:gap-4">
+                <div className="mx-auto mt-5 w-full max-w-2xl">
+                  <div className="flex flex-col items-center justify-center gap-3 sm:gap-3.5">
                     {/* Primary Action */}
                     {isPostWedding && galleryLink ? (
                        <a
@@ -120,7 +118,7 @@ export function ThankYouSection({
 
                     {/* Navigation Buttons: Đến Nhà thờ & Đến Tiệc cưới - Side-by-side on same row */}
                     {((isCeremonyOnly || isBoth) || (isBanquetOnly || isBoth || isDefault)) && (
-                      <div className="flex flex-row flex-wrap items-center justify-center gap-2.5 sm:gap-4 w-full">
+                      <div className="flex flex-row flex-wrap items-center justify-center gap-2.5 sm:gap-3.5 w-full">
                         {(isCeremonyOnly || isBoth) ? (
                           <a
                             suppressHydrationWarning
