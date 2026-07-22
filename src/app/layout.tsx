@@ -84,8 +84,18 @@ export default function RootLayout({
                 var isForce = search.indexOf("intro=1") !== -1 || href.indexOf("intro=1") !== -1;
                 if (isForce) {
                   document.documentElement.classList.remove('splash-skipped');
-                } else if (localStorage.getItem('wedding-splash:home') === '1') {
-                  document.documentElement.classList.add('splash-skipped');
+                } else {
+                  var hasSeen = false;
+                  for (var i = 0; i < localStorage.length; i++) {
+                    var k = localStorage.key(i);
+                    if (k && k.indexOf('wedding-splash:') === 0 && localStorage.getItem(k) === '1') {
+                      hasSeen = true;
+                      break;
+                    }
+                  }
+                  if (hasSeen) {
+                    document.documentElement.classList.add('splash-skipped');
+                  }
                 }
               } catch (e) {}
             `

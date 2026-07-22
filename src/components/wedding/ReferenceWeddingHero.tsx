@@ -32,7 +32,19 @@ function stripRepeatedHeroInvitePrefix(text: string) {
 
 export function ReferenceWeddingHero({ config, summary }: ReferenceWeddingHeroProps) {
   const readyFromReveal = useRevealReady(true);
-  const [isHeroVisible, setIsHeroVisible] = useState(() => checkIsIntroDone());
+  const [isHeroVisible, setIsHeroVisible] = useState(() => {
+    if (typeof window !== "undefined") {
+      const search = window.location.search || "";
+      const href = window.location.href || "";
+      if (search.includes("intro=1") || href.includes("intro=1")) {
+        return false;
+      }
+      if (document.documentElement.classList.contains("splash-skipped")) {
+        return true;
+      }
+    }
+    return checkIsIntroDone();
+  });
   const [isAnimatedSequence, setIsAnimatedSequence] = useState(false);
 
   const [imageLoaded, setImageLoaded] = useState(false);

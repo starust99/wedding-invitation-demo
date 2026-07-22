@@ -4139,7 +4139,19 @@ html.splash-skipped body {
   overflow: auto !important;
 }
 
-/* Fail-safe CSS rule: When hero is in static mode (reload / F5 / return navigation), force 100% opacity instantly */
+/* Strict instant static rule: When returning to home (F5 / reload / back navigation from /rsvp), force 100% opacity instantly with ZERO transition or keyframes */
+html.splash-skipped .save-date-hero,
+.hero-static {
+  animation: none !important;
+}
+
+html.splash-skipped .hero-logo-fade,
+html.splash-skipped .hero-photo-fade,
+html.splash-skipped .hero-ornament-fade-left,
+html.splash-skipped .hero-ornament-fade-right,
+html.splash-skipped .hero-text-fade,
+html.splash-skipped .hero-text-fade-header,
+html.splash-skipped .hero-text-fade-body,
 .hero-static .hero-logo-fade,
 .hero-static .hero-photo-fade,
 .hero-static .hero-ornament-fade-left,
@@ -4150,6 +4162,7 @@ html.splash-skipped body {
   opacity: 1 !important;
   transform: none !important;
   animation: none !important;
+  transition: none !important;
 }
 
 /* Watercolor illustration blending styles */
