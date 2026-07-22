@@ -892,7 +892,7 @@ export default function RSVPPage() {
                                   {g.age ? <span className="text-[#252934]/60 text-[11px] ml-1">({g.age} tuổi)</span> : null}
                                 </span>
                                 {g.isChild && (
-                                  <span className="text-[10px] font-semibold bg-amber-100/80 text-amber-900 px-2.5 py-0.5 rounded-md">
+                                  <span className="text-[10px] font-semibold bg-[#e6d8f2] text-black px-2.5 py-0.5 rounded-md">
                                     Trẻ em (&lt;11 tuổi)
                                   </span>
                                 )}
