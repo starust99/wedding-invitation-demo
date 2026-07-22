@@ -164,7 +164,6 @@ export function WeddingSplashIntro({
 
   const closeIntro = useCallback(() => {
     markSplashSeen(sessionKey);
-    document.documentElement.classList.add("splash-skipped");
     window.dispatchEvent(new Event("introFinished"));
     setStatus("hidden");
   }, [sessionKey]);
