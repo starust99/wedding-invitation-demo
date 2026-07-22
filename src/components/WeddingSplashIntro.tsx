@@ -163,10 +163,8 @@ export function WeddingSplashIntro({
   }, [ready, sessionKey]);
 
   const closeIntro = useCallback(() => {
-    markSplashSeen(sessionKey);
-    window.dispatchEvent(new Event("introFinished"));
     setStatus("hidden");
-  }, [sessionKey]);
+  }, []);
 
   const openIntro = useCallback(() => {
     if (!ready || status === "opening") return;
@@ -196,7 +194,13 @@ export function WeddingSplashIntro({
   const opening = status === "opening";
 
   return (
-    <AnimatePresence>
+    <AnimatePresence
+      onExitComplete={() => {
+        markSplashSeen(sessionKey);
+        document.documentElement.classList.add("splash-skipped");
+        window.dispatchEvent(new Event("introFinished"));
+      }}
+    >
       {isVisible ? (
         <motion.div
           key="wedding-splash"
@@ -208,8 +212,8 @@ export function WeddingSplashIntro({
           className="fixed inset-0 z-[80] grid min-h-dvh place-items-center overflow-hidden bg-[#FBF8F1] text-ink cursor-pointer"
           initial={{ opacity: 1 }}
           animate={{ opacity: 1 }}
-          exit={{ opacity: 0, scale: 1.04, filter: "blur(8px)" }}
-          transition={{ duration: isImmediateClose ? 0 : 1.8, ease: [0.25, 1, 0.5, 1] }}
+          exit={{ opacity: 0, scale: 1.03, filter: "blur(6px)" }}
+          transition={{ duration: isImmediateClose ? 0 : 0.6, ease: [0.25, 1, 0.5, 1] }}
         >
           {/* Synchronous script to immediately hide splash screen on mount if already seen to prevent flash */}
           <script
