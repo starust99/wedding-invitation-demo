@@ -173,7 +173,7 @@ export function ReferenceWeddingHero({ config, summary }: ReferenceWeddingHeroPr
             className={`save-date-hero-ornament save-date-hero-ornament-left hero-ornament-fade-left ${isDone ? "is-visible" : ""}`}
           >
             <Image
-              src="/assets/hero-corner-new.png"
+              src="/assets/hero-corner-left-v2.png"
               alt=""
               width={250}
               height={250}
@@ -187,13 +187,12 @@ export function ReferenceWeddingHero({ config, summary }: ReferenceWeddingHeroPr
             className={`save-date-hero-ornament save-date-hero-ornament-right hero-ornament-fade-right ${isDone ? "is-visible" : ""}`}
           >
             <Image
-              src="/assets/hero-corner-new.png"
+              src="/assets/hero-corner-right-v3.png"
               alt=""
               width={250}
               height={250}
               priority
               className="object-contain pointer-events-none"
-              style={{ transform: "scaleX(-1)" }}
             />
           </div>
         </div>
