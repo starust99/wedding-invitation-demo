@@ -1,6 +1,11 @@
 import type { Metadata } from "next";
 import { InviteTokenPage } from "@/components/InviteTokenPage";
 import { getSupabaseServerClient, hasSupabaseEnv } from "@/lib/supabase-server";
+import { mapInviteeRow } from "@/lib/invite-mapper";
+import { mapInviteSupplementRow } from "@/lib/invite-mapper";
+import { mapRSVPRow } from "@/lib/rsvp-mapper";
+import type { InviteeDatabaseRow, InviteSupplementDatabaseRow } from "@/lib/invite-mapper";
+import type { RSVPDatabaseRow } from "@/lib/rsvp-mapper";
 
 const ogImage = {
   url: "/assets/og-image.png",
@@ -8,6 +13,35 @@ const ogImage = {
   height: 941,
   alt: "Nhật & Phương Wedding Thumbnail",
 };
+
+async function fetchInviteeDataFromServer(token: string) {
+  if (!hasSupabaseEnv()) return null;
+  try {
+    const supabase = getSupabaseServerClient();
+    const { data: inviteeRow } = await supabase
+      .from("invitees")
+      .select("*")
+      .eq("token", token)
+      .maybeSingle();
+
+    if (!inviteeRow) return null;
+
+    const invitee = inviteeRow as InviteeDatabaseRow;
+    const [supplementResult, rsvpResult] = await Promise.all([
+      supabase.from("invite_supplements").select("*").eq("invitee_id", invitee.id).maybeSingle(),
+      supabase.from("rsvp_responses").select("*").or(`invite_token.eq.${token},invitee_id.eq.${invitee.id}`).order("submitted_at", { ascending: false }).limit(1).maybeSingle(),
+    ]);
+
+    const supplement = supplementResult.data
+      ? mapInviteSupplementRow(supplementResult.data as InviteSupplementDatabaseRow)
+      : undefined;
+    const rsvp = rsvpResult.data ? mapRSVPRow(rsvpResult.data as RSVPDatabaseRow) : undefined;
+    return mapInviteeRow(invitee, supplement, rsvp);
+  } catch (err) {
+    console.error("Error fetching invitee on server:", err);
+    return null;
+  }
+}
 
 export async function generateMetadata({ params }: { params: Promise<{ token: string }> }): Promise<Metadata> {
   const { token } = await params;
@@ -54,5 +88,6 @@ export async function generateMetadata({ params }: { params: Promise<{ token: st
 
 export default async function TokenInviteRoute({ params }: { params: Promise<{ token: string }> }) {
   const { token } = await params;
-  return <InviteTokenPage token={token} />;
+  const initialInvitee = await fetchInviteeDataFromServer(token);
+  return <InviteTokenPage token={token} initialInvitee={initialInvitee ?? undefined} />;
 }

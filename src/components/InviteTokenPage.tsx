@@ -40,23 +40,29 @@ function toGuestIdentity(invitee?: Invitee): GuestIdentity {
   };
 }
 
-export function InviteTokenPage({ token }: { token: string }) {
+export function InviteTokenPage({ token, initialInvitee }: { token: string; initialInvitee?: Invitee }) {
   const publishedSettings = usePublishedSettings();
   const config = applyTheme(publishedSettings.content, publishedSettings.themeKey);
-  const [payload, setPayload] = useState<InvitePayload>({ backend: "local" });
-  const [loading, setLoading] = useState(true);
-  const [fetchStatus, setFetchStatus] = useState<"idle" | "ok" | "not-found">("idle");
+  const [payload, setPayload] = useState<InvitePayload>({
+    backend: initialInvitee ? "supabase" : "local",
+    invitee: initialInvitee,
+  });
+  const [loading, setLoading] = useState(!initialInvitee);
+  const [fetchStatus, setFetchStatus] = useState<"idle" | "ok" | "not-found">(initialInvitee ? "ok" : "idle");
 
   useEffect(() => {
     let cancelled = false;
 
     async function loadInvite() {
-      setLoading(true);
-      setFetchStatus("idle");
+      if (!initialInvitee) {
+        setLoading(true);
+      }
+      // Keep "ok" if we have initialInvitee, otherwise "idle"
+      setFetchStatus((prev) => (prev === "ok" ? "ok" : "idle"));
 
       const localInvitee = readLocalInvitees().find((item) => item.token === token);
       if (!cancelled) {
-        setPayload(localInvitee ? { backend: "local", invitee: localInvitee } : { backend: "local" });
+        setPayload(localInvitee ? { backend: "local", invitee: localInvitee } : { backend: initialInvitee ? "supabase" : "local", invitee: localInvitee || initialInvitee });
         if (localInvitee) {
           setFetchStatus("ok");
         }
