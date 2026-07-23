@@ -147,13 +147,15 @@ function buildSubmissionCopy(
   attendingBanquet: RSVPFormInput["attendingBanquet"],
   inviteCopy: InvitationCopy
 ) {
-  const host = inviteCopy.hostSubject;
-  const recipient = inviteCopy.shortRecipientLabel;
+  const recipient = inviteCopy.kinshipPronoun === "quý khách"
+    ? "Quý khách"
+    : inviteCopy.kinshipPronoun.charAt(0).toUpperCase() + inviteCopy.kinshipPronoun.slice(1);
+  const recipientLower = inviteCopy.kinshipPronoun;
 
   if (attending === "no") {
     return {
       title: "Đã xác nhận",
-      body: `Cảm ơn ${recipient} đã phản hồi.\n\nDù rất tiếc không thể chung vui trực tiếp, ${host} vẫn luôn trân trọng tình cảm của ${recipient} và hẹn gặp lại vào một dịp sớm nhất.`,
+      body: `Cảm ơn ${recipient} đã phản hồi.\n\nDù rất tiếc không thể chung vui trực tiếp, nhưng những tình cảm ấm áp và lời chúc gửi trao vẫn luôn được trân trọng vô cùng. Hẹn gặp lại ${recipient} vào một dịp sớm nhất!`,
       showCalendar: false,
     };
   }
@@ -161,7 +163,7 @@ function buildSubmissionCopy(
   if (attendingCeremony === "yes" && attendingBanquet === "yes") {
     return {
       title: "Đã xác nhận",
-      body: `Lời hồi đáp đã được gửi thành công!\n\nThật hạnh phúc khi biết ${recipient} sẽ có mặt ở cả Thánh lễ Hôn phối lẫn Tiệc cưới để chung vui cùng Nhật & Phương.\n\nSự hiện diện của ${recipient} chính là món quà ý nghĩa nhất. Chân thành cảm ơn!`,
+      body: `Lời hồi đáp đã được gửi thành công!\n\nThật hạnh phúc khi biết ${recipientLower} sẽ có mặt ở cả Thánh lễ Hôn phối lẫn Tiệc cưới để chung vui cùng Nhật & Phương.\n\nSự hiện diện của ${recipientLower} chính là món quà ý nghĩa nhất. Chân thành cảm ơn!`,
       showCalendar: true,
     };
   }
@@ -169,7 +171,7 @@ function buildSubmissionCopy(
   if (attendingCeremony === "yes" && attendingBanquet === "no") {
     return {
       title: "Đã xác nhận",
-      body: `Lời hồi đáp đã được gửi thành công!\n\nCảm ơn ${recipient} đã sắp xếp thời gian đến chứng kiến và hiệp thông trong Thánh lễ Hôn phối của Nhật & Phương.\n\nDù rất tiếc không thể đồng hành cùng ${recipient} trong buổi Tiệc cưới, sự hiện diện của ${recipient} tại Nhà thờ đã là niềm hạnh phúc vô cùng lớn đối với ${inviteCopy.tone === "parents_host" ? "gia đình" : "hai bên gia đình"}.`,
+      body: `Lời hồi đáp đã được gửi thành công!\n\nCảm ơn ${recipient} đã sắp xếp thời gian đến chứng kiến và hiệp thông trong Thánh lễ Hôn phối của Nhật & Phương.\n\nDù rất tiếc không thể đồng hành trong buổi Tiệc cưới, sự hiện diện và lời cầu nguyện của ${recipientLower} tại Thánh đường đã là món quà vô cùng trân quý.`,
       showCalendar: true,
     };
   }
@@ -177,7 +179,7 @@ function buildSubmissionCopy(
   if (attendingCeremony === "no" && attendingBanquet === "yes") {
     return {
       title: "Đã xác nhận",
-      body: `Lời hồi đáp đã được gửi thành công!\n\nCảm ơn ${recipient} đã sắp xếp thời gian đến chung vui tại Tiệc cưới của Nhật & Phương, sự hiện diện của ${recipient} tại buổi tiệc là niềm hạnh phúc vô cùng lớn đối với ${inviteCopy.tone === "parents_host" ? "gia đình" : "hai bên gia đình"}.\n\nHẹn sớm gặp ${recipient} tại Đà Lạt!`,
+      body: `Lời hồi đáp đã được gửi thành công!\n\nCảm ơn ${recipient} đã sắp xếp thời gian đến chung vui tại Tiệc cưới của Nhật & Phương.\n\nSự đồng hành của ${recipientLower} chắc chắn sẽ giúp ngày vui thêm trọn vẹn và đong đầy ý nghĩa. Hẹn sớm gặp tại Đà Lạt!`,
       showCalendar: true,
     };
   }
