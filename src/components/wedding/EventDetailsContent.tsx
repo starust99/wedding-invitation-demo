@@ -194,12 +194,12 @@ function DateDisplayStack({ dateParsed, lunarText }: { dateParsed: { day: string
 
           {/* Middle Column: Day */}
           {dateParsed.day.trim().length === 2 ? (
-            <div className="flex items-center justify-center font-serif text-[4.2rem] sm:text-[6.77rem] md:text-[7.63rem] font-light leading-none text-[#b4975a] select-none translate-y-[-0.03em] mx-1 sm:mx-2 md:mx-3">
+            <div className="flex items-center justify-center font-serif text-[4.2rem] sm:text-[6.77rem] md:text-[7.63rem] font-light leading-none text-[#b4975a] select-none translate-y-[-0.09em] mx-1 sm:mx-2 md:mx-3">
               <span className="w-[1.9rem] sm:w-[3.08rem] md:w-[3.57rem] text-right">{dateParsed.day.trim()[0]}</span>
               <span className="w-[1.9rem] sm:w-[3.08rem] md:w-[3.57rem] text-left">{dateParsed.day.trim()[1]}</span>
             </div>
           ) : (
-            <div className="font-serif text-[4.2rem] sm:text-[6.77rem] md:text-[7.63rem] font-light leading-none text-[#b4975a] text-center translate-y-[-0.03em] min-w-[3.8rem] sm:min-w-[6.15rem] md:min-w-[7.13rem] mx-1 sm:mx-2 md:mx-3">
+            <div className="font-serif text-[4.2rem] sm:text-[6.77rem] md:text-[7.63rem] font-light leading-none text-[#b4975a] text-center translate-y-[-0.09em] min-w-[3.8rem] sm:min-w-[6.15rem] md:min-w-[7.13rem] mx-1 sm:mx-2 md:mx-3">
               {dateParsed.day}
             </div>
           )}
