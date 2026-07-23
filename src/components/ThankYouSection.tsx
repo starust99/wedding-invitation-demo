@@ -44,7 +44,7 @@ export function ThankYouSection({
 
   let thankYouMessage = "";
   if (rsvpAttending === "no") {
-    thankYouMessage = `Xin chân thành cảm ơn ${recipient}. Rất hy vọng sẽ có dịp được đón tiếp ${recipient} vào một dịp khác.`;
+    thankYouMessage = `Xin chân thành cảm ơn! Rất hy vọng sẽ có dịp được đón tiếp ${recipient} vào một dịp khác.`;
   } else if (rsvpAttendingBanquet === false) {
     thankYouMessage = `Xin chân thành cảm ơn! Hẹn gặp ${recipient} tại Thánh lễ Hôn phối.`;
   } else if (rsvpAttendingCeremony === true && rsvpAttendingBanquet === true) {
