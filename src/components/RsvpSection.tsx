@@ -55,13 +55,13 @@ export function RsvpSection({
               <span className="h-px w-16 bg-[rgba(212,175,55,0.5)] sm:w-20" />
             </div>
             <p suppressHydrationWarning className="wedding-type-meta font-sans mt-3.5 max-w-xl text-ink/62 uppercase tracking-wider" style={{ fontSize: "1.09em" }}>
-              {inviteCopy.greeting.toUpperCase()},
+              QUÝ KHÁCH THÂN MẾN,
             </p>
             <p className="wedding-type-body font-sans mt-4 max-w-2xl text-ink/68">
-              Sự hiện diện của {inviteCopy.presenceSubject === "quý khách" ? "Quý khách" : inviteCopy.presenceSubject.charAt(0).toUpperCase() + inviteCopy.presenceSubject.slice(1)} là niềm vinh hạnh lớn nhất của hai gia đình.
+              Sự hiện diện của Quý khách là niềm vinh hạnh lớn nhất của hai gia đình.
             </p>
             <p className="wedding-type-body font-sans mt-3.5 max-w-2xl text-ink/68">
-              Để công tác đón tiếp được chuẩn bị chu đáo, xin {inviteCopy.kinshipPronoun === "quý khách" ? "Quý khách" : inviteCopy.kinshipPronoun.charAt(0).toUpperCase() + inviteCopy.kinshipPronoun.slice(1)} vui lòng xác nhận thông tin tham dự trước ngày <strong className="font-bold text-ink/90">{config.rsvp.deadline}</strong>.
+              Để công tác đón tiếp được chuẩn bị chu đáo, xin Quý khách vui lòng xác nhận thông tin tham dự trước ngày <strong className="font-bold text-ink/90">{config.rsvp.deadline}</strong>.
             </p>
             <p className="wedding-type-body font-sans mt-3.5 max-w-xl text-ink/68">
               Xin bấm nút "Gửi hồi đáp" để điền thông tin.
