@@ -2,7 +2,6 @@
 
 import Image from "next/image";
 import { MapPin } from "lucide-react";
-import type { ReactNode } from "react";
 import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import type { Variants } from "framer-motion";
@@ -65,84 +64,8 @@ type EventDetailsContentProps = {
   publicData?: EventDetailsPublicData;
 };
 
-const defaultTimelineFallback: EventDetailsTimelineItem[] = [
-  { time: "17:30", title: "Đón khách", description: "Gia đình đón khách, chụp ảnh lưu niệm và mời khách ổn định chỗ ngồi." },
-  { time: "19:00", title: "Khai mạc", description: "Bắt đầu buổi tiệc tối ấm cúng." },
-  { time: "19:10", title: "Nghi lễ", description: "Các nghi thức cưới chính thức của Nhật & Phương." },
-  { time: "19:20", title: "Nâng ly khai tiệc", description: "Cùng nâng ly và dùng bữa tối ấm cúng." },
-  { time: "20:00", title: "Giao lưu", description: "Âm nhạc, trò chuyện và những khoảnh khắc thân tình." },
-  { time: "20:50", title: "Chụp ảnh kỷ niệm", description: "Chụp hình lưu niệm cùng cô dâu chú rể." },
-];
 
-const defaultColorsFallback = ["#d39a9c", "#9bb4c5", "#e8c691", "#a9bc99", "#f5e9d2", "#ddd1be", "#b3967d"];
 
-function formatDateLabel(dateLabel?: string) {
-  if (!dateLabel) return "";
-
-  const dateMatch = dateLabel.match(/(\d{1,2})\.(\d{1,2})\.(\d{4})/);
-  if (!dateMatch) return dateLabel.trim();
-
-  return `Ngày ${dateMatch[1]} tháng ${dateMatch[2]} năm ${dateMatch[3]}`;
-}
-
-function formatWelcomeTime(timeLabel?: string) {
-  if (!timeLabel) return "";
-
-  const normalized = timeLabel.trim().replace(/\s+/g, " ");
-  if (/^vào lúc/i.test(normalized)) return normalized;
-
-  const timeMatch = normalized.match(/(\d{1,2}:\d{2})/);
-  return timeMatch ? `Vào lúc ${timeMatch[1]}` : normalized;
-}
-
-function formatSchedule(dateLabel?: string, welcomeTime?: string, fallback = "") {
-  const dateText = formatDateLabel(dateLabel);
-  const timeText = formatWelcomeTime(welcomeTime);
-
-  if (dateText && timeText) {
-    return (
-      <>
-        {timeText}, Thứ 7
-        <br />
-        {dateText}
-        <br />
-        <span style={{ fontSize: '0.9em', fontStyle: 'italic', opacity: 0.85 }}>
-          (nhằm ngày 18 tháng 11 năm Bính Ngọ)
-        </span>
-      </>
-    );
-  }
-  return dateText || timeText || fallback;
-}
-
-function formatChurchSchedule(dateLabel?: string, timeLabel?: string) {
-  const dateText = formatDateLabel(dateLabel);
-  const timeText = formatWelcomeTime(timeLabel);
-
-  let dayOfWeek = "Thứ 7";
-  if (dateLabel && dateLabel.includes(",")) {
-    const parts = dateLabel.split(",");
-    if (parts.length > 1) {
-      dayOfWeek = parts[1].trim();
-      dayOfWeek = dayOfWeek.charAt(0).toUpperCase() + dayOfWeek.slice(1);
-    }
-  }
-
-  if (dateText && timeText) {
-    return (
-      <>
-        {timeText}, {dayOfWeek},
-        <br />
-        {dateText.toLowerCase()}
-        <br />
-        <span style={{ fontSize: '0.9em', fontStyle: 'italic', opacity: 0.85 }}>
-          (nhằm ngày 12 tháng 11 năm Bính Ngọ)
-        </span>
-      </>
-    );
-  }
-  return dateLabel && timeLabel ? `${dateLabel} · ${timeLabel}` : dateLabel || timeLabel || "";
-}
 
 function parseChurchDate(churchDate?: string) {
   if (!churchDate) {
@@ -302,16 +225,6 @@ const familyItemVariant: Variants = {
   },
 };
 
-function GlassPanel({ area, children, className = "", variants }: { area: string; children: ReactNode; className?: string; variants?: Variants }) {
-  return (
-    <motion.article 
-      className={`details-glass-panel details-${area} ${className}`}
-      variants={variants}
-    >
-      {children}
-    </motion.article>
-  );
-}
 
 function VenueMapImage({ className = "" }: { className?: string }) {
   return (
@@ -410,12 +323,8 @@ export function EventDetailsContent({
     year: "2026",
     weekday: "THỨ BẢY",
   };
-  const venueName = publicData?.venueName || content.receptionLocation;
-  const venueArea = publicData?.venueArea || content.receptionTime;
-  const venueLocation = publicData?.venueLocation || formatSchedule(publicData?.dateLabel || content.ceremonyTime, publicData?.welcomeTime || content.ceremonyLocation, content.mapText);
   const dressCodeTitle = publicData?.dressCodeTitle || content.dressCodeLabel;
   const dressCodeNote = publicData?.dressCodeNote || content.dressCodeText;
-  const dressCodeImageSrc = publicData?.dressCodeImageSrc || "/assets/dresscode-theme-v4.jpg";
 
   return (
     <div

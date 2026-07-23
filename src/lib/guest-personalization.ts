@@ -792,20 +792,11 @@ export function buildInvitationCopy(input?: InvitationCopyInput): InvitationCopy
   const recipientLine = resolveInviteRecipient(address, input);
   const isWarmPeer = tone === "peer" || tone === "junior";
   const isFormal = !isWarmPeer;
-  const inviteVerb = isWarmPeer ? "mời" : "trân trọng kính mời";
   const envelopePrefix = isWarmPeer ? "Mời" : "Kính mời";
   const coupleDisplayName = cleanString(input?.coupleDisplayName) || "Nhật & Phương";
-  const venueDisplayName = cleanString(input?.venueDisplayName) || "Terracotta Đà Lạt";
   const coupleReference = resolveCoupleReference(input, tone, hostPronoun);
 
-  const formatRepetitiveFamily = (host: string, recipient: string) => {
-    if (host.toLowerCase() === "gia đình" && /^gia (đình|dinh)\s+/i.test(recipient)) {
-      const namePart = recipient.replace(/^gia (đình|dinh)\s+/i, "");
-      if (!namePart) return recipient;
-      return `${namePart} cùng gia đình`;
-    }
-    return recipient;
-  };
+
 
   const ensureGiaDinhHost = (subject: string) => {
     const s = subject.toLowerCase();
@@ -816,9 +807,7 @@ export function buildInvitationCopy(input?: InvitationCopyInput): InvitationCopy
   };
 
   const familyHostSubject = ensureGiaDinhHost(hostPronoun);
-  const inviteRecipientLine = formatRepetitiveFamily(hostSubject, recipientLine);
   const presenceSubject = resolvePresenceSubject(address, input);
-  const coupleInviteOwner = tone === "parents_host" ? `${coupleReference} ${coupleDisplayName}` : hostPronoun;
   const envelopeRecipientLine = resolveEnvelopeRecipient(address, input);
   const isFamily = isFamilyInvite(input) || includesFamilyLabel(guestLabel);
   const relationshipText = resolveRelationshipText(input);

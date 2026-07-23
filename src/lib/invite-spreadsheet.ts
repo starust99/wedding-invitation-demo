@@ -184,12 +184,6 @@ function getOptionColumns(coupleDisplayName: string): Record<OptionKey, string[]
   };
 }
 
-const defaultRowValues: Record<OptionKey, string> = {
-  salutationCluster: "Bạn",
-  guestGroup: "[Nhà Trai] Họ nội",
-  inviteOwner: "Nhật & Phương",
-};
-
 const legacyFallbackRowValues: LegacyRowValues = {
   guestName: "",
   hostRelationship: "bạn",
@@ -378,7 +372,7 @@ function findInviteOwnerDefinition(value: string) {
   return inviteOwnerDefinitions.find((item) => normalizeText(item.label) === normalized);
 }
 
-function resolveParentsCoupleReference(hostRelationship: string) {
+function resolveParentsCoupleReference() {
   return "hai cháu";
 }
 
@@ -393,7 +387,7 @@ function inferTemplateValues(values: TemplateRowValues): InferredTemplateValues 
     hostRelationship: salutation.hostRelationship,
     invitedBy: inviteOwner.invitedBy,
     hostPronoun: inviteOwner.invitedBy === "parents" ? salutation.parentsHostPronoun : salutation.coupleHostPronoun,
-    coupleReference: inviteOwner.invitedBy === "parents" ? salutation.parentsCoupleReference ?? resolveParentsCoupleReference(salutation.hostRelationship) : salutation.coupleHostPronoun,
+    coupleReference: inviteOwner.invitedBy === "parents" ? salutation.parentsCoupleReference ?? resolveParentsCoupleReference() : salutation.coupleHostPronoun,
     relationship: salutation.relationship,
     householdMode: salutation.householdMode,
     guestGroup: guestGroup.label,
@@ -412,14 +406,6 @@ function equalsAny(cell: string, values: readonly string[]) {
 
 function nestedExactIf(cell: string, entries: readonly (readonly [string, string])[], fallback: string) {
   return entries.reduceRight((current, [value, result]) => `IF(${cell}=${excelText(value)},${result},${current})`, fallback);
-}
-
-function startsWithAnyExpression(cell: string, prefixes: readonly string[]) {
-  return `OR(${prefixes.map((prefix) => `LEFT(LOWER(${cell}),${prefix.length})=${excelText(prefix)}`).join(",")})`;
-}
-
-function pairNameAlreadyLooksLikePairExpression(guestCell: string) {
-  return `OR(ISNUMBER(SEARCH(${excelText("vợ chồng")},LOWER(${guestCell}))),ISNUMBER(SEARCH(${excelText("ông bà")},LOWER(${guestCell}))),ISNUMBER(SEARCH(${excelText("bố mẹ")},LOWER(${guestCell}))),ISNUMBER(SEARCH(${excelText("ba mẹ")},LOWER(${guestCell}))),ISNUMBER(SEARCH(${excelText("cha mẹ")},LOWER(${guestCell}))),ISNUMBER(SEARCH(${excelText("anh chị")},LOWER(${guestCell}))),ISNUMBER(SEARCH(${excelText("cô chú")},LOWER(${guestCell}))),ISNUMBER(SEARCH(${excelText("chú thím")},LOWER(${guestCell}))),ISNUMBER(SEARCH(${excelText("dì dượng")},LOWER(${guestCell}))),ISNUMBER(SEARCH(${excelText("cậu mợ")},LOWER(${guestCell}))))`;
 }
 
 function quoteSheetName(sheetName: string) {
@@ -462,9 +448,6 @@ function ownerLookupRange() {
   return `${quoteSheetName(guideSheetName)}!$${start}$2:$${end}$${inviteOwnerDefinitions.length + 1}`;
 }
 
-function sentenceCaseFormula(cell: string) {
-  return `UPPER(LEFT((${cell}),1))&MID((${cell}),2,200)`;
-}
 
 function rowPreview(values: TemplateRowValues, options: ReturnType<typeof resolveSpreadsheetOptions>) {
   const inferred = inferTemplateValues(values);
@@ -561,7 +544,6 @@ function helperHostSubjectFormula(rowIndex: number) {
   const guestCell = `$H${rowIndex}`;
   const householdCell = `$N${rowIndex}`;
   const invitedByCell = `$J${rowIndex}`;
-  const hostPronounCell = `$K${rowIndex}`;
 
   const isFamilyCell = `OR(${householdCell}=${excelText(householdModeLabels.family)},ISNUMBER(SEARCH(${excelText("gia đình")},LOWER(${guestCell}))),ISNUMBER(SEARCH(${excelText("cả nhà")},LOWER(${guestCell}))))`;
 
@@ -610,67 +592,6 @@ function inviteScopeExpression(rowIndex: number) {
     excelText(" cùng gia đình"),
   );
   return `IF(${nameAlreadyIncludesFamily},"",IF(${householdCell}=${excelText(householdModeLabels.family)},${excelText(" và gia đình")},IF(${householdCell}=${excelText(householdModeLabels.couple)},${coupleScope},"")))`;
-}
-
-function hostSubjectExpression(rowIndex: number) {
-  return sentenceCaseFormula(`$K${rowIndex}`);
-}
-
-function recipientLineExpression(rowIndex: number, scopeExpression = inviteScopeExpression(rowIndex)) {
-  const guestCell = `$H${rowIndex}`;
-  const hostRelationshipCell = `$I${rowIndex}`;
-  const invitedByCell = `$J${rowIndex}`;
-
-  return `IF(${invitedByCell}=${excelText(invitedByLabels.parents)},${guestCell}&${scopeExpression},IF(OR(${equalsAny(hostRelationshipCell, ["bạn", "bạn thân", "đồng nghiệp"])}),${excelText("bạn")}&${scopeExpression},IF(OR(${equalsAny(hostRelationshipCell, ["em", "cháu"])}),${excelText("em")}&${scopeExpression},IF(${hostRelationshipCell}=${excelText("anh")},${excelText("anh")}&${scopeExpression},IF(${hostRelationshipCell}=${excelText("chị")},${excelText("chị")}&${scopeExpression},${guestCell}&${scopeExpression})))))`;
-}
-
-function coupleInviteRecipientExpression(rowIndex: number) {
-  const guestCell = `$H${rowIndex}`;
-  const hostRelationshipCell = `$I${rowIndex}`;
-  const isHaiBanGuest = `OR(LEFT(LOWER(${guestCell}),7)=${excelText("hai bạn")},LEFT(LOWER(${guestCell}),7)=${excelText("hai ban")})`;
-  return nestedExactIf(
-    hostRelationshipCell,
-    [
-      ["ông bà", guestCell],
-      ["bố mẹ", guestCell],
-      ["ba mẹ", guestCell],
-      ["cha mẹ", guestCell],
-      ["bố", `${guestCell}&${excelText(" cùng Mẹ")}`],
-      ["mẹ", `${guestCell}&${excelText(" cùng Bố")}`],
-      ["vợ chồng anh chị", guestCell],
-      ["vợ chồng anh", guestCell],
-      ["vợ chồng chị", guestCell],
-      ["vợ chồng em", guestCell],
-      ["vợ chồng cháu", guestCell],
-      ["vợ chồng bạn", guestCell],
-      ["vợ chồng đồng nghiệp", guestCell],
-      ["vợ chồng bác", guestCell],
-      ["vợ chồng cô chú", guestCell],
-      ["vợ chồng chú thím", guestCell],
-      ["vợ chồng dì dượng", guestCell],
-      ["vợ chồng cậu mợ", guestCell],
-      ["vợ chồng cô dượng", guestCell],
-      ["anh chị", excelText("anh chị")],
-      ["anh", excelText("Anh cùng vợ")],
-      ["chị", excelText("Chị cùng chồng")],
-      ["bạn", `IF(${isHaiBanGuest},${excelText("hai bạn")},${excelText("Vợ chồng bạn")})`],
-      ["bạn thân", `IF(${isHaiBanGuest},${excelText("hai bạn")},${excelText("Vợ chồng bạn")})`],
-      ["đồng nghiệp", `IF(${isHaiBanGuest},${excelText("hai bạn")},${excelText("Vợ chồng bạn")})`],
-      ["em", excelText("Hai em")],
-      ["cháu", excelText("Hai em")],
-      ["bác", `${guestCell}&${excelText(" cùng gia đình")}`],
-      ["chú", `${guestCell}&${excelText(" cùng cô")}`],
-      ["cô", `${guestCell}&${excelText(" cùng chú")}`],
-      ["dì", `${guestCell}&${excelText(" cùng dượng")}`],
-      ["cậu", `${guestCell}&${excelText(" cùng mợ")}`],
-      ["mợ", `${guestCell}&${excelText(" cùng cậu")}`],
-      ["thím", `${guestCell}&${excelText(" cùng chú")}`],
-      ["dượng", `${guestCell}&${excelText(" cùng dì")}`],
-      ["ông", `${guestCell}&${excelText(" cùng bà")}`],
-      ["bà", `${guestCell}&${excelText(" cùng ông")}`],
-      ],
-    `${guestCell}&${excelText(" cùng gia đình")}`,
-  );
 }
 
 function coupleEnvelopeRecipientExpression(rowIndex: number) {
@@ -857,28 +778,6 @@ function deriveExpectedGuestCount(householdMode: HouseholdMode) {
 function deriveHonorific(hostRelationship: string) {
   const titleRelationships = new Set(["ông", "bà", "bác", "cô", "chú", "dì", "cậu", "mợ", "thím", "anh", "chị", "em", "cháu"]);
   return titleRelationships.has(hostRelationship.toLowerCase()) ? hostRelationship : "";
-}
-
-function formatHeaderRow(worksheet: ExcelJS.Worksheet) {
-  const headerRow = worksheet.getRow(1);
-  headerRow.height = 28;
-  headerRow.eachCell((cell) => {
-    cell.font = { bold: true, color: { argb: "FFFFFFFF" } };
-    cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FF5F6F4E" } };
-    cell.alignment = { vertical: "middle", horizontal: "center", wrapText: true };
-    cell.border = {
-      top: { style: "thin", color: { argb: "FFD7C6A8" } },
-      left: { style: "thin", color: { argb: "FFD7C6A8" } },
-      bottom: { style: "thin", color: { argb: "FFD7C6A8" } },
-      right: { style: "thin", color: { argb: "FFD7C6A8" } },
-    };
-  });
-
-  columns.forEach((column, index) => {
-    const cell = worksheet.getCell(1, index + 1);
-    const note = headerNotes[column.key];
-    if (note) cell.note = note;
-  });
 }
 
 function styleInputCell(cell: ExcelJS.Cell, isDropdown: boolean) {
@@ -1107,7 +1006,7 @@ function buildGuideSheet(workbook: ExcelJS.Workbook, options: ReturnType<typeof 
     worksheet.getCell(targetRow, termLookupStartColumn + 4).value = item.needsName;
     worksheet.getCell(targetRow, termLookupStartColumn + 5).value = item.coupleHostPronoun;
     worksheet.getCell(targetRow, termLookupStartColumn + 6).value = item.parentsHostPronoun;
-    worksheet.getCell(targetRow, termLookupStartColumn + 7).value = item.parentsCoupleReference ?? resolveParentsCoupleReference(item.hostRelationship);
+    worksheet.getCell(targetRow, termLookupStartColumn + 7).value = item.parentsCoupleReference ?? resolveParentsCoupleReference();
     worksheet.getCell(targetRow, termLookupStartColumn + 8).value = displayPrefixForSalutation(item);
   });
 

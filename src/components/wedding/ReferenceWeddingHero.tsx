@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
-import { motion } from "framer-motion";
 import { ChevronDown } from "lucide-react";
 import { LineReveal, useRevealReady, checkIsIntroDone } from "@/components/ui/CinematicReveal";
 import type { WeddingHeroEditorConfig } from "@/lib/wedding/hero-types";
@@ -24,7 +23,6 @@ export type ReferenceWeddingHeroSummary = {
 };
 
 const heroCompositeSrc = "/assets/wedding/hero/hero-arch-composite.webp";
-const heroCompositeAlt = "Ảnh cưới Nhật và Phương trong khung thiệp";
 
 function stripRepeatedHeroInvitePrefix(text: string) {
   return text.replace(/^trân trọng kính mời\s+/i, "");
