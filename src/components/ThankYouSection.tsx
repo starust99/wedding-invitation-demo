@@ -38,9 +38,9 @@ export function ThankYouSection({
   const isBoth = rsvpAttendingCeremony === true && rsvpAttendingBanquet === true;
   const isDefault = !isDeclined && !isCeremonyOnly && !isBanquetOnly && !isBoth;
 
-  const recipient = inviteCopy.shortRecipientLabel === "quý khách"
+  const recipient = inviteCopy.kinshipPronoun === "quý khách"
     ? "Quý khách"
-    : inviteCopy.shortRecipientLabel.charAt(0).toUpperCase() + inviteCopy.shortRecipientLabel.slice(1);
+    : inviteCopy.kinshipPronoun.charAt(0).toUpperCase() + inviteCopy.kinshipPronoun.slice(1);
 
   let thankYouMessage = "";
   if (rsvpAttending === "no") {
