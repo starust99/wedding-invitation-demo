@@ -456,17 +456,20 @@ export function EventDetailsContent({
         <img 
           src="/assets/corner_ornament.png" 
           alt="corner ornament" 
-          className="absolute top-0 left-0 sm:top-6 sm:left-6 w-[92px] h-[92px] sm:w-28 sm:h-28 rotate-90 object-contain pointer-events-none select-none block z-20"
+          className="absolute top-0 left-0 sm:top-6 sm:left-6 w-[92px] h-[92px] sm:w-28 sm:h-28 object-contain pointer-events-none select-none block z-20"
+          style={{ transform: "scaleY(-1)" }}
         />
         <img 
           src="/assets/corner_ornament.png" 
           alt="corner ornament" 
-          className="absolute top-0 right-0 sm:top-6 sm:right-6 w-[92px] h-[92px] sm:w-28 sm:h-28 rotate-180 object-contain pointer-events-none select-none block z-20"
+          className="absolute top-0 right-0 sm:top-6 sm:right-6 w-[92px] h-[92px] sm:w-28 sm:h-28 object-contain pointer-events-none select-none block z-20"
+          style={{ transform: "scale(-1, -1)" }}
         />
         <img 
           src="/assets/corner_ornament.png" 
           alt="corner ornament" 
-          className="absolute bottom-0 right-0 sm:bottom-6 sm:right-6 w-[92px] h-[92px] sm:w-28 sm:h-28 -rotate-90 object-contain pointer-events-none select-none block z-20"
+          className="absolute bottom-0 right-0 sm:bottom-6 sm:right-6 w-[92px] h-[92px] sm:w-28 sm:h-28 object-contain pointer-events-none select-none block z-20"
+          style={{ transform: "scaleX(-1)" }}
         />
         <img 
           src="/assets/corner_ornament.png" 
