@@ -65,6 +65,7 @@ const galleryIntroVariant: Variants = {
 export function GallerySection({ config }: { config: WeddingConfig }) {
   const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(null);
   const lightboxRef = useRef<HTMLDivElement>(null);
+  const constraintsRef = useRef<HTMLElement>(null);
   const section = config.sections.gallery;
   const lightboxHost = typeof document === "undefined" ? null : document.body;
 
@@ -187,6 +188,7 @@ export function GallerySection({ config }: { config: WeddingConfig }) {
           </button>
 
           <motion.figure
+            ref={constraintsRef}
             key={`lightbox-img-${selectedImageIndex}`}
             className={`gallery-lightbox-frame ${activeFrameClass}`}
             onClick={(event) => event.stopPropagation()}
@@ -206,6 +208,7 @@ export function GallerySection({ config }: { config: WeddingConfig }) {
                 y: scale === 1 ? 0 : undefined
               }}
               drag={scale > 1}
+              dragConstraints={constraintsRef}
               dragElastic={0.15}
               draggable={false}
             />
