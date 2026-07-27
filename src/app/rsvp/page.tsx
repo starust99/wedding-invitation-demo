@@ -686,6 +686,11 @@ export default function RSVPPage() {
         return;
       }
       
+      const isSafari = /Safari/i.test(userAgent) && !/Chrome|CriOS|FxiOS|OPiOS|mercury/i.test(userAgent);
+      if (!isSafari) {
+        alert("Trên trình duyệt Chrome/Firefox của iPhone, vui lòng nhấn 'Lưu' tệp lịch tải về, sau đó nhấp vào tệp đó để thêm vào ứng dụng Lịch của máy. Để thêm tự động nhanh chóng hơn, bạn hãy mở link thiệp bằng trình duyệt Safari nhé!");
+      }
+      
       const blob = new Blob([icsContent], { type: "text/calendar;charset=utf-8" });
       const blobUrl = URL.createObjectURL(blob);
       
