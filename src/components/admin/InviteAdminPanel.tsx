@@ -860,13 +860,25 @@ export function InviteAdminPanel() {
     });
   }, [responses, attendingFilter, accommodationFilter, groupFilter]);
 
-  const totalGuests = useMemo(() => responses.filter((response) => response.attending === "yes").reduce((sum, response) => sum + response.guestCount, 0), [responses]);
   const notAttending = useMemo(() => responses.filter((response) => response.attending === "no").length, [responses]);
+  const ceremonyGuests = useMemo(() => responses.filter((response) => response.attending === "yes" && response.attendingCeremony).reduce((sum, response) => sum + response.guestCount, 0), [responses]);
+  const banquetGuests = useMemo(() => responses.filter((response) => response.attending === "yes" && response.attendingBanquet).reduce((sum, response) => sum + response.guestCount, 0), [responses]);
   const stayingGuests = useMemo(() => responses.reduce((sum, response) => sum + (response.stayingGuestCount ?? response.lodgingGuests?.length ?? 0), 0), [responses]);
   const accommodationRequests = useMemo(() => responses.filter((response) => response.accommodationNeeded).length, [responses]);
-  const estimatedRooms = useMemo(() => responses.reduce((sum, response) => sum + Math.ceil((response.stayingGuestCount ?? response.lodgingGuests?.length ?? 0) / 2), 0), [responses]);
   const childrenStaying = useMemo(() => responses.reduce((sum, response) => sum + response.childrenCount, 0), [responses]);
-  const elderlySupport = useMemo(() => responses.filter((response) => response.elderlySupportNeeded).length, [responses]);
+
+  const stayingDec25 = useMemo(() => responses.reduce((sum, response) => {
+    const isDec25 = response.checkInDate === "2026-12-25" || (response as any).stayDecision === "25" || (response as any).stayDecision === "both";
+    return sum + (isDec25 ? (response.stayingGuestCount ?? response.lodgingGuests?.length ?? 0) : 0);
+  }, 0), [responses]);
+
+  const stayingDec26 = useMemo(() => responses.reduce((sum, response) => {
+    const checkIn = response.checkInDate;
+    const checkOut = response.checkOutDate;
+    const isDec26 = (checkIn === "2026-12-26") || (checkIn === "2026-12-25" && checkOut === "2026-12-27") || (response as any).stayDecision === "26" || (response as any).stayDecision === "both";
+    return sum + (isDec26 ? (response.stayingGuestCount ?? response.lodgingGuests?.length ?? 0) : 0);
+  }, 0), [responses]);
+
   const allVisibleSelected = filteredResponses.length > 0 && filteredResponses.every((response) => selectedResponseIds.has(response.id));
   const selectedResponses = useMemo(() => responses.filter((response) => selectedResponseIds.has(response.id)), [responses, selectedResponseIds]);
   const selectedCount = selectedResponses.length;
@@ -993,14 +1005,7 @@ export function InviteAdminPanel() {
     setResponses([]);
   }
 
-  function mostCommon(values: Array<string | undefined>) {
-    const counts = new Map<string, number>();
-    for (const value of values) {
-      if (!value) continue;
-      counts.set(value, (counts.get(value) ?? 0) + 1);
-    }
-    return [...counts.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] ?? "—";
-  }
+
 
   return (
     <div className="flex flex-col gap-6">
@@ -1068,16 +1073,14 @@ export function InviteAdminPanel() {
       {tab === "rsvps" && (
         <div className="space-y-6">
           {/* Bento Grid Stats */}
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {[
-              { icon: UsersRound, label: "Tổng lời hồi đáp", value: responses.length, hint: "Số form khách đã gửi về", color: "bg-[#5F6F4E]/10 text-[#5F6F4E]" },
-              { icon: CheckSquare, label: "Khách xác nhận", value: totalGuests, hint: "Tổng số người sẽ tham dự", color: "bg-emerald-500/10 text-emerald-700" },
-              { icon: Square, label: "Không tham dự", value: notAttending, hint: "Số lời từ chối lịch sự", color: "bg-rose-500/10 text-rose-700" },
-              { icon: Hotel, label: "Cần hỗ trợ lưu trú", value: accommodationRequests, hint: "Số lời hồi đáp cần ở lại", color: "bg-[#b4975a]/10 text-[#6e5949]" },
-              { icon: Database, label: "Người ở lại", value: stayingGuests, hint: "Tổng số người cần bố trí phòng", color: "bg-[#5F6F4E]/10 text-[#5F6F4E]" },
-              { icon: ClipboardList, label: "Số phòng ước tính", value: estimatedRooms, hint: "Tạm tính 2 người/phòng", color: "bg-[#b4975a]/10 text-[#6e5949]" },
-              { icon: UsersRound, label: "Trẻ em cần lưu ý", value: childrenStaying, hint: "Dùng khi gửi resort/hotel", color: "bg-blue-500/10 text-blue-700" },
-              { icon: UsersRound, label: "Người lớn tuổi cần hỗ trợ", value: elderlySupport, hint: "Ưu tiên sắp xếp phù hợp", color: "bg-amber-500/10 text-amber-700" },
+              { icon: UsersRound, label: "Tổng lời phản hồi", value: responses.length, hint: "Số form khách gửi về", color: "bg-[#5F6F4E]/10 text-[#5F6F4E]" },
+              { icon: CheckSquare, label: "Khách dự tiệc cưới", value: banquetGuests, hint: "Tổng số người dự tiệc cưới", color: "bg-emerald-500/10 text-emerald-700" },
+              { icon: ClipboardList, label: "Khách dự Thánh lễ", value: ceremonyGuests, hint: "Tham dự Thánh lễ Hôn phối", color: "bg-blue-500/10 text-blue-700" },
+              { icon: Square, label: "Khách không tham dự", value: notAttending, hint: "Số lời từ chối báo về", color: "bg-rose-500/10 text-rose-700" },
+              { icon: Hotel, label: "Số người lưu trú", value: stayingGuests, hint: "Cần bố trí phòng ngủ", color: "bg-[#b4975a]/10 text-[#6e5949]" },
+              { icon: UsersRound, label: "Trẻ em lưu trú", value: childrenStaying, hint: "Dưới 12 tuổi trong đoàn ở lại", color: "bg-amber-500/10 text-amber-700" },
             ].map(({ icon: Icon, label, value, hint, color }) => (
               <div key={label} className="p-1 rounded-[1.8rem] bg-white border border-[#E8DDCC] shadow-[0_4px_20px_rgba(63,70,66,0.02)] hover:shadow-md transition duration-300">
                 <div className="relative p-5 rounded-[calc(1.8rem-0.25rem)] bg-[#FCFAF4] border border-[#b4975a]/10 flex flex-col justify-between h-full min-h-[140px]">
@@ -1171,7 +1174,7 @@ export function InviteAdminPanel() {
 
               {/* Data Table */}
               <div className="overflow-x-auto rounded-xl border border-[#E8DDCC]">
-                <table className="w-full min-w-[980px] text-left text-sm">
+                <table className="w-full min-w-[900px] text-left text-sm">
                   <thead className="bg-[#F8F3EA] text-[#8A8178] border-b border-[#E8DDCC]">
                     <tr>
                       <th className="w-12 p-4 text-center">
@@ -1184,7 +1187,6 @@ export function InviteAdminPanel() {
                       <th className="p-4">Phản hồi</th>
                       <th className="p-4">Số người</th>
                       <th className="p-4">Nhóm</th>
-                      <th className="p-4">Di chuyển</th>
                       <th className="p-4">Lưu trú</th>
                       <th className="p-4">Người lưu trú</th>
                       <th className="p-4">Lưu ý</th>
@@ -1193,7 +1195,7 @@ export function InviteAdminPanel() {
                   <tbody className="divide-y divide-[#E8DDCC]">
                     {filteredResponses.length === 0 ? (
                       <tr>
-                        <td colSpan={10} className="p-8 text-center text-[#8A8178] bg-[#FCFAF4]/30">
+                        <td colSpan={9} className="p-8 text-center text-[#8A8178] bg-[#FCFAF4]/30">
                           Chưa có lời hồi đáp phù hợp.
                         </td>
                       </tr>
@@ -1216,7 +1218,6 @@ export function InviteAdminPanel() {
                         <td className="p-4 text-xs font-semibold">{attendingLabel(response.attending)}</td>
                         <td className="p-4 text-xs">{response.guestCount}</td>
                         <td className="p-4 text-xs">{response.guestGroup}</td>
-                        <td className="p-4 text-xs">{response.transportNeeded ? "Có" : "Không"}</td>
                         <td className="p-4 text-xs">{response.accommodationNeeded ? `${response.stayingGuestCount ?? response.lodgingGuests?.length ?? 0} người` : "Không"}</td>
                         <td className="p-4 text-xs max-w-[200px] truncate text-[#665d54]">{response.accommodationNeeded ? (response.lodgingGuests?.length ? summarizeLodgingGuests(response.lodgingGuests) : "Chưa có danh sách") : "Không"}</td>
                         <td className="p-4 text-xs max-w-[220px] truncate text-[#665d54]">{response.dietaryNote || response.notes || "—"}</td>
@@ -1227,27 +1228,23 @@ export function InviteAdminPanel() {
               </div>
 
               {/* Lodging Summary Card Footer */}
-              <div className="mt-6 p-4 rounded-2xl bg-[#FCFAF4] border border-[#E8DDCC] grid gap-4 sm:grid-cols-2 lg:grid-cols-5 text-xs text-[#665d54]">
+              <div className="mt-6 p-4 rounded-2xl bg-[#FCFAF4] border border-[#E8DDCC] grid gap-4 sm:grid-cols-2 lg:grid-cols-4 text-xs text-[#665d54]">
                 <div className="flex flex-col gap-1.5 p-3 rounded-xl bg-white border border-[#E8DDCC]">
                   <span className="text-[#8A8178] font-semibold">TỔNG KHÁCH Ở LẠI</span>
                   <b className="text-lg text-[#5F6F4E]">{stayingGuests} người</b>
                 </div>
                 <div className="flex flex-col gap-1.5 p-3 rounded-xl bg-white border border-[#E8DDCC]">
-                  <span className="text-[#8A8178] font-semibold">CHECK-IN PHỔ BIẾN</span>
-                  <b className="text-lg text-[#2E2A25]">{mostCommon(responses.map((response) => response.checkInDate))}</b>
+                  <span className="text-[#8A8178] font-semibold">LƯU TRÚ ĐÊM 25/12</span>
+                  <b className="text-lg text-[#2E2A25]">{stayingDec25} người</b>
                 </div>
                 <div className="flex flex-col gap-1.5 p-3 rounded-xl bg-white border border-[#E8DDCC]">
-                  <span className="text-[#8A8178] font-semibold">CHECK-OUT PHỔ BIẾN</span>
-                  <b className="text-lg text-[#2E2A25]">{mostCommon(responses.map((response) => response.checkOutDate))}</b>
+                  <span className="text-[#8A8178] font-semibold">LƯU TRÚ ĐÊM 26/12</span>
+                  <b className="text-lg text-[#2E2A25]">{stayingDec26} người</b>
                 </div>
-                <div className="flex flex-col gap-1.5 p-3 rounded-xl bg-white border border-[#E8DDCC]">
-                  <span className="text-[#8A8178] font-semibold">PHÒNG PHỔ BIẾN</span>
-                  <b className="text-lg text-[#2E2A25] truncate">{mostCommon(responses.map((response) => response.roomType))}</b>
-                </div>
-                <div className="flex flex-col justify-between p-3 rounded-xl bg-white border border-[#E8DDCC]">
-                  <span className="text-[#8A8178] font-semibold">BÁO CÁO RESORT</span>
+                <div className="flex flex-col justify-between p-3 rounded-xl bg-white border border-[#E8DDCC] min-h-[64px]">
+                  <span className="text-[#8A8178] font-semibold">DANH SÁCH LƯU TRÚ</span>
                   <button type="button" onClick={() => void exportRsvpWorkbook("lodging")} className="inline-flex items-center gap-1.5 text-xs font-bold text-[#5F6F4E] hover:underline" disabled={accommodationRequests === 0}>
-                    <Hotel className="w-3.5 h-3.5" /> Xuất danh sách
+                    <Hotel className="w-3.5 h-3.5" /> Xuất Excel resort
                   </button>
                 </div>
               </div>
