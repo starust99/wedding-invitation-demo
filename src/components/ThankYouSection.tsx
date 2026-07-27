@@ -28,6 +28,8 @@ export function ThankYouSection({
   const inviteCopy = buildInvitationCopy(guestIdentity);
   const { navigateWithTransition } = usePageTransition();
 
+  if (!rsvpAttending) return null;
+
   const { postWeddingGallery } = config;
   const isPostWedding = postWeddingGallery?.enabled && new Date() >= new Date(postWeddingGallery.availableAfter);
   const galleryLink = postWeddingGallery?.groupLinks[guestIdentity.group || ""] || postWeddingGallery?.defaultUrl;
