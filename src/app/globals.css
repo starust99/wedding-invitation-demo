@@ -2642,20 +2642,20 @@ textarea {
 }
 
 .gallery-lightbox-frame-landscape {
-  width: min(92vw, 72rem, 98vh);
-  width: min(92vw, 72rem, 98dvh);
+  width: min(92vw, 72rem, 90vh);
+  width: min(92vw, 72rem, 90dvh);
   aspect-ratio: 4 / 3;
 }
 
 .gallery-lightbox-frame-wide {
-  width: min(92vw, 74rem, 118vh);
-  width: min(92vw, 74rem, 118dvh);
+  width: min(92vw, 74rem, 110vh);
+  width: min(92vw, 74rem, 110dvh);
   aspect-ratio: 5 / 3;
 }
 
 .gallery-lightbox-frame-portrait {
-  width: min(88vw, 36rem, 56vh);
-  width: min(88vw, 36rem, 56dvh);
+  width: min(88vw, 34rem, 50vh);
+  width: min(88vw, 34rem, 50dvh);
   aspect-ratio: 3 / 4;
 }
 
@@ -2690,6 +2690,8 @@ textarea {
 }
 
 .gallery-lightbox-controls {
+  position: absolute;
+  bottom: clamp(1rem, 3.5vh, 2.5rem);
   display: flex;
   align-items: center;
   gap: clamp(0.6rem, 1.5vw, 1.2rem);
@@ -2840,14 +2842,14 @@ textarea {
 
   .gallery-lightbox-frame-landscape,
   .gallery-lightbox-frame-wide {
-    width: min(92vw, 70vh);
-    width: min(92vw, 70dvh);
+    width: min(92vw, 65vh);
+    width: min(92vw, 65dvh);
     aspect-ratio: 4 / 3;
   }
 
   .gallery-lightbox-frame-portrait {
-    width: min(86vw, 58vh);
-    width: min(86vw, 58dvh);
+    width: min(86vw, 48vh);
+    width: min(86vw, 48dvh);
   }
 }
 
