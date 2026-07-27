@@ -682,13 +682,13 @@ export default function RSVPPage() {
 
     if (isApple) {
       if (isInAppBrowser) {
-        alert("Trình duyệt tích hợp (Zalo/Facebook) chặn tải file lịch trực tiếp. Vui lòng chọn biểu tượng ba chấm ở góc trên màn hình và chọn 'Mở bằng trình duyệt' (Safari) để lưu lịch.");
+        alert("Trình duyệt này chặn tải lịch. Vui lòng nhấn dấu ba chấm ở góc trên màn hình và chọn 'Mở bằng trình duyệt' (Safari) để lưu lịch.");
         return;
       }
       
       const isSafari = /Safari/i.test(userAgent) && !/Chrome|CriOS|FxiOS|OPiOS|mercury/i.test(userAgent);
       if (!isSafari) {
-        alert("Trên trình duyệt Chrome/Firefox của iPhone, vui lòng nhấn 'Lưu' tệp lịch tải về, sau đó nhấp vào tệp đó để thêm vào ứng dụng Lịch của máy. Để thêm tự động nhanh chóng hơn, bạn hãy mở link thiệp bằng trình duyệt Safari nhé!");
+        alert("Để lưu lịch tự động trên thiết bị Apple, vui lòng mở link bằng Safari. Nếu dùng Chrome/Firefox, hãy nhấn mở file vừa tải về nhé!");
       }
       
       const blob = new Blob([icsContent], { type: "text/calendar;charset=utf-8" });
