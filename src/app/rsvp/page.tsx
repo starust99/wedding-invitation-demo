@@ -668,16 +668,14 @@ export default function RSVPPage() {
   const ceremonyCalDesc = `Thánh lễ Hôn phối của ${weddingConfig.couple.displayName}.\nThời gian: 10:00 ngày 20/12/2026.\nĐịa điểm: ${ceremonyCalLocation}.`;
   const ceremonyGcalUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(ceremonyCalTitle)}&dates=20261220T030000Z/20261220T043000Z&details=${encodeURIComponent(ceremonyCalDesc)}&location=${encodeURIComponent(ceremonyCalLocation)}`;
   const ceremonyIcsContent = `BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//Wedding//EN\nCALSCALE:GREGORIAN\nBEGIN:VEVENT\nDTSTART:20261220T030000Z\nDTEND:20261220T043000Z\nSUMMARY:${ceremonyCalTitle}\nLOCATION:${ceremonyCalLocation}\nDESCRIPTION:${ceremonyCalDesc}\nEND:VEVENT\nEND:VCALENDAR`;
-  const ceremonyIcsUrl = `data:text/calendar;charset=utf8,${encodeURIComponent(ceremonyIcsContent)}`;
 
   const banquetCalTitle = `Tiệc cưới ${weddingConfig.couple.displayName}`;
   const banquetCalLocation = `${weddingConfig.venue.name} (${weddingConfig.venue.address})`;
   const banquetCalDesc = `Tiệc cưới của ${weddingConfig.couple.displayName}.\nThời gian: 17:30 ngày 26/12/2026.\nĐịa điểm: ${banquetCalLocation}.`;
   const banquetGcalUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(banquetCalTitle)}&dates=20261226T103000Z/20261226T140000Z&details=${encodeURIComponent(banquetCalDesc)}&location=${encodeURIComponent(banquetCalLocation)}`;
   const banquetIcsContent = `BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//Wedding//EN\nCALSCALE:GREGORIAN\nBEGIN:VEVENT\nDTSTART:20261226T103000Z\nDTEND:20261226T140000Z\nSUMMARY:${banquetCalTitle}\nLOCATION:${banquetCalLocation}\nDESCRIPTION:${banquetCalDesc}\nEND:VEVENT\nEND:VCALENDAR`;
-  const banquetIcsUrl = `data:text/calendar;charset=utf8,${encodeURIComponent(banquetIcsContent)}`;
 
-  const openCalendar = (icsUrl: string, gcalUrl: string, fileName: string) => {
+  const openCalendar = (icsContent: string, gcalUrl: string, fileName: string) => {
     const userAgent = navigator.userAgent || navigator.vendor || (window as any).opera;
     const isApple = /iPad|iPhone|iPod|Mac/i.test(userAgent) && !(window as any).MSStream;
     const isInAppBrowser = /Zalo|FBAN|FBAV|Instagram|Line|TikTok/i.test(userAgent);
@@ -687,12 +685,18 @@ export default function RSVPPage() {
         alert("Trình duyệt tích hợp (Zalo/Facebook) chặn tải file lịch trực tiếp. Vui lòng chọn biểu tượng ba chấm ở góc trên màn hình và chọn 'Mở bằng trình duyệt' (Safari) để lưu lịch.");
         return;
       }
+      
+      const blob = new Blob([icsContent], { type: "text/calendar;charset=utf-8" });
+      const blobUrl = URL.createObjectURL(blob);
+      
       const link = document.createElement("a");
-      link.href = icsUrl;
+      link.href = blobUrl;
       link.download = fileName;
       document.body.appendChild(link);
       link.click();
+      
       document.body.removeChild(link);
+      setTimeout(() => URL.revokeObjectURL(blobUrl), 100);
     } else {
       window.open(gcalUrl, "_blank");
     }
@@ -814,7 +818,7 @@ export default function RSVPPage() {
                     {hasCeremony && (
                       <button
                         type="button"
-                        onClick={() => openCalendar(ceremonyIcsUrl, ceremonyGcalUrl, "thanh-le-nhat-phuong.ics")}
+                        onClick={() => openCalendar(ceremonyIcsContent, ceremonyGcalUrl, "thanh-le-nhat-phuong.ics")}
                         className="wedding-type-button inline-flex h-11 items-center justify-center gap-2 rounded-full border border-serenity/24 bg-white/80 px-6 text-xs sm:text-sm font-bold text-[#252934] transition hover:bg-white hover:shadow-sm min-w-[130px]"
                       >
                         <CalendarDays className="w-4 h-4" /> THÁNH LỄ
@@ -823,7 +827,7 @@ export default function RSVPPage() {
                     {hasBanquet && (
                       <button
                         type="button"
-                        onClick={() => openCalendar(banquetIcsUrl, banquetGcalUrl, "tiec-cuoi-nhat-phuong.ics")}
+                        onClick={() => openCalendar(banquetIcsContent, banquetGcalUrl, "tiec-cuoi-nhat-phuong.ics")}
                         className="wedding-type-button inline-flex h-11 items-center justify-center gap-2 rounded-full border border-serenity/24 bg-white/80 px-6 text-xs sm:text-sm font-bold text-[#252934] transition hover:bg-white hover:shadow-sm min-w-[130px]"
                       >
                         <CalendarDays className="w-4 h-4" /> TIỆC CƯỚI
