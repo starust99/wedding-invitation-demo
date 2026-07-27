@@ -678,7 +678,7 @@ export default function RSVPPage() {
   const openCalendar = (icsContent: string, gcalUrl: string, fileName: string) => {
     const userAgent = navigator.userAgent || navigator.vendor || (window as any).opera;
     const isApple = /iPad|iPhone|iPod|Mac/i.test(userAgent) && !(window as any).MSStream;
-    const isInAppBrowser = /Zalo|FBAN|FBAV|Instagram|Line|TikTok/i.test(userAgent);
+    const isInAppBrowser = /Zalo|FBAN|FBAV|Instagram|Line|TikTok|Messenger/i.test(userAgent);
 
     if (isApple) {
       if (isInAppBrowser) {
