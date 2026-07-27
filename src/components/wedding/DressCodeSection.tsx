@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
+import { Sparkles } from "lucide-react";
 
 export type DressColorId = "pink" | "blue" | "yellow" | "green" | "cream" | "beige" | "brown";
 
@@ -23,19 +24,19 @@ const DRESS_COLORS: DressCodeColor[] = [
   },
   {
     id: "blue",
-    name: "Xanh biển",
+    name: "Xanh biển nhạt",
     hex: "#9bb4c5",
     imgSrc: "/assets/dresscode-blue-v3.jpg",
   },
   {
     id: "yellow",
-    name: "Vàng",
+    name: "Vàng nhạt",
     hex: "#e8c691",
     imgSrc: "/assets/dresscode-yellow-v3.jpg",
   },
   {
     id: "green",
-    name: "Xanh lá",
+    name: "Xanh lá nhạt",
     hex: "#a9bc99",
     imgSrc: "/assets/dresscode-green-v4.jpg",
   },
@@ -53,7 +54,7 @@ const DRESS_COLORS: DressCodeColor[] = [
   },
   {
     id: "brown",
-    name: "Nâu",
+    name: "Nâu nhạt",
     hex: "#b3967d",
     imgSrc: "/assets/dresscode-brown-v3.jpg",
   },
@@ -71,6 +72,16 @@ export function DressCodeSection({
   setSelectedColorId: (id: DressColorId | null) => void;
 }) {
   const selectedColor = DRESS_COLORS.find((c) => c.id === selectedColorId) || null;
+
+  const badgeBg = selectedColor
+    ? `linear-gradient(90deg, rgba(255, 255, 255, 0.05) 0%, ${selectedColor.hex}${
+        selectedColor.id === "cream" || selectedColor.id === "beige" ? "4c" : "28"
+      } 100%)`
+    : "linear-gradient(90deg, rgba(255, 255, 255, 0.10) 0%, rgba(255, 255, 255, 0.12) 100%)";
+
+  const badgeBorder = selectedColor
+    ? `${selectedColor.hex}${selectedColor.id === "cream" || selectedColor.id === "beige" ? "5c" : "3b"}`
+    : "rgba(255, 255, 255, 0.3)";
 
   // Preload all dress code images to make color transitions instantaneous
   useEffect(() => {
@@ -97,6 +108,38 @@ export function DressCodeSection({
     if (legacyIndex !== -1) {
       invitationText = note.substring(0, legacyIndex).trim();
       weatherAlertText = note.substring(legacyIndex).trim();
+    }
+  }
+
+  // Split weatherAlertText for Option 2 styling without changing/removing words
+  let parsedAlert = null;
+  if (weatherAlertText) {
+    let cleanAlert = weatherAlertText;
+    let prefix = "";
+    if (cleanAlert.startsWith("Lưu ý:")) {
+      prefix = "Lưu ý";
+      cleanAlert = cleanAlert.substring("Lưu ý:".length).trim();
+    } else if (cleanAlert.startsWith("Lưu ý thời tiết:")) {
+      prefix = "Lưu ý thời tiết";
+      cleanAlert = cleanAlert.substring("Lưu ý thời tiết:".length).trim();
+    } else if (cleanAlert.startsWith("Lưu ý thời tiết")) {
+      prefix = "Lưu ý thời tiết";
+      cleanAlert = cleanAlert.substring("Lưu ý thời tiết".length).trim();
+    }
+
+    const commaIndex = cleanAlert.indexOf(", Quý khách");
+    if (commaIndex !== -1) {
+      parsedAlert = {
+        prefix: prefix || "Lưu ý",
+        part1: cleanAlert.substring(0, commaIndex + 1).trim(),
+        part2: cleanAlert.substring(commaIndex + 1).trim(),
+      };
+    } else {
+      parsedAlert = {
+        prefix: prefix || "Lưu ý",
+        part1: cleanAlert,
+        part2: "",
+      };
     }
   }
 
@@ -175,64 +218,135 @@ export function DressCodeSection({
           {DRESS_COLORS.map((color) => {
             const isSelected = selectedColorId === color.id;
             return (
-              <button
+              <motion.button
                 key={color.id}
                 type="button"
                 aria-pressed={isSelected}
                 aria-label={`Xem gợi ý phối đồ màu ${color.name}`}
                 onClick={() => setSelectedColorId(isSelected ? null : color.id)}
-                className="w-[2.1rem] h-[2.1rem] xs:w-[2.45rem] xs:h-[2.45rem] rounded-full flex-shrink-0 transition-all duration-300 relative flex items-center justify-center focus-visible:outline-none border-[2.2px] border-white cursor-pointer hover:scale-105 active:scale-95"
+                className="w-[2.1rem] h-[2.1rem] xs:w-[2.45rem] xs:h-[2.45rem] rounded-full flex-shrink-0 relative flex items-center justify-center focus-visible:outline-none border-[2.2px] cursor-pointer"
+                animate={{
+                  scale: isSelected ? 1.12 : 1.0,
+                  borderColor: isSelected ? color.hex : "rgba(255, 255, 255, 1)",
+                  boxShadow: isSelected 
+                    ? `0 0 14px 3px ${color.hex}60` 
+                    : "0 2px 5px rgba(0,0,0,0.05), inset 0 1px 2px rgba(255, 255, 255, 0.25), 0 0 0 0.5px rgba(63, 70, 66, 0.08)"
+                }}
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.92 }}
                 style={{
                   backgroundColor: color.hex,
-                  boxShadow: isSelected 
-                    ? `0 0 12px 1px ${color.hex}c0, inset 0 1.5px 3px rgba(0,0,0,0.15)` 
-                    : "0 2px 5px rgba(0,0,0,0.08), inset 0 1px 2px rgba(255,255,255,0.2)",
-                  transform: isSelected ? "scale(1.12)" : "scale(1.0)",
                 }}
               >
+                {/* Floating glass ring */}
                 {isSelected && (
-                  <svg viewBox="0 0 24 24" className="w-3.5 h-3.5 xs:w-4.2 xs:h-4.2 text-white fill-none stroke-current" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round">
-                    <polyline points="20 6 9 17 4 12" />
-                  </svg>
+                  <motion.div
+                    layoutId="activeColorRing"
+                    className="absolute -inset-1.5 rounded-full border-[1.8px] border-white/80 bg-white/15 shadow-[0_2.5px_6px_rgba(63,70,66,0.08),_inset_0_1px_1px_rgba(255,255,255,0.4)] pointer-events-none"
+                    transition={{ type: "spring", stiffness: 320, damping: 26 }}
+                  />
                 )}
-              </button>
+              </motion.button>
             );
           })}
         </div>
 
-        {/* Selected Color Name below Swatches */}
-        <div className="flex items-center justify-center gap-2 mt-4 text-[#7d7065] select-none min-h-[1.75rem]">
-          <span className="text-[#b4975a] text-[0.8rem] font-bold">✦</span>
-          {selectedColor ? (
-            <span className="font-sans text-[1.02rem] font-medium tracking-wide text-[#3f4642]">
-              {selectedColor.name}
-            </span>
-          ) : (
-            <motion.span
-              animate={{
-                opacity: [0.75, 1, 0.75],
-                scale: [0.99, 1.01, 0.99],
-              }}
-              transition={{
-                duration: 2,
-                repeat: Infinity,
-                ease: "easeInOut",
-              }}
-              className="font-sans text-[0.98rem] font-medium tracking-wide text-[#b4975a]"
-            >
-              Chạm vào màu để xem gợi ý
-            </motion.span>
-          )}
-          <span className="text-[#b4975a] text-[0.8rem] font-bold">✦</span>
+        {/* Glassmorphic Badge below Swatches */}
+        <div className="flex justify-center mt-5 select-none min-h-[2.2rem]">
+          <motion.div
+            layout
+            className="inline-flex items-center gap-2.5 px-4.5 py-1.5 rounded-full border shadow-[0_4px_16px_rgba(63,70,66,0.04)] backdrop-blur-[8px] origin-center"
+            animate={{
+              background: badgeBg,
+              borderColor: badgeBorder
+            }}
+            transition={{
+              type: "spring",
+              stiffness: 300,
+              damping: 30
+            }}
+          >
+            <AnimatePresence mode="wait">
+              {selectedColor ? (
+                <motion.div
+                  key={selectedColor.id}
+                  initial={{ opacity: 0, x: 8 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -8 }}
+                  transition={{ duration: 0.2 }}
+                  className="flex items-center justify-center"
+                >
+                  <span className="font-sans text-[0.88rem] sm:text-[0.92rem] font-medium tracking-wide text-[#3f4642] leading-none whitespace-nowrap">
+                    {selectedColor.name}
+                  </span>
+                </motion.div>
+              ) : (
+                <motion.div
+                  key="instruction"
+                  initial={{ opacity: 0, x: 8 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -8 }}
+                  transition={{ duration: 0.2 }}
+                  className="flex items-center gap-2.5"
+                >
+                  {/* Slow glowing/breathing Sparkles icon */}
+                  <motion.div
+                    animate={{
+                      opacity: [0.5, 1, 0.5],
+                    }}
+                    transition={{
+                      duration: 3,
+                      repeat: Infinity,
+                      ease: "easeInOut",
+                    }}
+                    className="flex-shrink-0"
+                  >
+                    <Sparkles className="w-3.5 h-3.5 text-[#b4975a]/85" />
+                  </motion.div>
+                  <span className="font-sans text-[0.82rem] sm:text-[0.85rem] font-medium tracking-[0.02em] text-[#8e8072] leading-none whitespace-nowrap">
+                    Chọn màu để xem gợi ý
+                  </span>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </motion.div>
         </div>
       </div>
 
       {/* Weather Alert */}
-      {weatherAlertText && (
-        <div className="flex mt-4 p-4.5 rounded-[1.2rem] bg-[#b4975a]/5 border border-[#b4975a]/12 text-center w-full max-w-[24rem] sm:max-w-[26rem] md:max-w-[27rem] mx-auto">
-          <p className="font-sans text-[#6e5949] text-[0.85rem] leading-relaxed font-normal">
-            {weatherAlertText}
-          </p>
+      {parsedAlert && (
+        <div className="w-full max-w-[26rem] sm:max-w-[29rem] md:max-w-[31rem] mx-auto mt-7">
+          {/* Double-Bezel outer tray */}
+          <div className="p-2 rounded-[2.2rem] bg-[#b4975a]/3 border border-[#b4975a]/10 shadow-[0_12px_34px_rgba(180,151,90,0.06)] relative overflow-hidden">
+            {/* Fine paper-grain inside the tray */}
+            <div aria-hidden="true" className="paper-grain-luxury absolute inset-0 opacity-[0.06] pointer-events-none" />
+            
+            {/* Inner core card */}
+            <div className="relative p-6 sm:p-7.5 rounded-[calc(2.2rem-0.5rem)] bg-[#fdfbf7] border border-[#b4975a]/15 shadow-[inset_0_1.5px_2px_rgba(255,255,255,0.85)] flex flex-col items-center text-center">
+              
+              {/* Header Label: LƯU Ý THỜI TIẾT */}
+              <span className="font-sans text-[0.8rem] sm:text-[0.86rem] font-bold tracking-[0.24em] text-[#b4975a] uppercase mb-3 flex items-center gap-1.5 leading-none">
+                {parsedAlert.prefix.toUpperCase()} THỜI TIẾT
+              </span>
+
+              {/* Separator Line */}
+              <div className="w-10 h-[0.5px] bg-[#b4975a]/25 mb-4.5" />
+
+              {/* Content body split into 2 paragraphs */}
+              <div className="flex flex-col gap-4 font-serif">
+                {/* Part 1 (Vibe context): Italicized, slightly lighter, elegant color */}
+                <p className="text-[#655a50] text-[0.95rem] sm:text-[1rem] md:text-[1.04rem] leading-[1.7] italic font-medium">
+                  {parsedAlert.part1}
+                </p>
+                
+                {/* Part 2 (Action): Normal text, slightly darker, clear instruction */}
+                <p className="text-[#3f4642] text-[0.95rem] sm:text-[1rem] md:text-[1.04rem] leading-[1.7] font-semibold">
+                  {parsedAlert.part2}
+                </p>
+              </div>
+
+            </div>
+          </div>
         </div>
       )}
     </div>
