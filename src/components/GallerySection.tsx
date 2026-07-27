@@ -3,7 +3,7 @@
 import type { CSSProperties } from "react";
 import { useCallback, useEffect, useMemo, useState, useRef } from "react";
 
-import { ChevronLeft, ChevronRight, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, X, ZoomIn, ZoomOut } from "lucide-react";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence, Variants } from "framer-motion";
 import { SectionMediaLayers } from "@/components/SectionMediaLayers";
@@ -98,6 +98,20 @@ export function GallerySection({ config }: { config: WeddingConfig }) {
       ? "gallery-lightbox-frame-wide"
       : "gallery-lightbox-frame-landscape";
 
+  const [scale, setScale] = useState(1);
+
+  useEffect(() => {
+    setScale(1);
+  }, [selectedImageIndex]);
+
+  const handleZoomIn = useCallback(() => {
+    setScale((prev) => Math.min(prev + 0.5, 3.5));
+  }, []);
+
+  const handleZoomOut = useCallback(() => {
+    setScale((prev) => Math.max(prev - 0.5, 1));
+  }, []);
+
   const closeLightbox = useCallback(() => setSelectedImageIndex(null), []);
 
   const showPrevious = useCallback(() => {
@@ -172,33 +186,6 @@ export function GallerySection({ config }: { config: WeddingConfig }) {
             <X aria-hidden="true" size={22} />
           </button>
 
-          {availableImageIndexes.length > 1 ? (
-            <>
-              <button
-                type="button"
-                className="gallery-lightbox-nav gallery-lightbox-nav-prev"
-                aria-label="Ảnh trước"
-                onClick={(event) => {
-                  event.stopPropagation();
-                  showPrevious();
-                }}
-              >
-                <ChevronLeft aria-hidden="true" size={24} />
-              </button>
-              <button
-                type="button"
-                className="gallery-lightbox-nav gallery-lightbox-nav-next"
-                aria-label="Ảnh sau"
-                onClick={(event) => {
-                  event.stopPropagation();
-                  showNext();
-                }}
-              >
-                <ChevronRight aria-hidden="true" size={24} />
-              </button>
-            </>
-          ) : null}
-
           <motion.figure
             key={`lightbox-img-${selectedImageIndex}`}
             className={`gallery-lightbox-frame ${activeFrameClass}`}
@@ -208,14 +195,69 @@ export function GallerySection({ config }: { config: WeddingConfig }) {
             exit={{ opacity: 0, scale: 0.95, y: 10, transition: { duration: 0.2 } }}
             transition={{ type: "spring", stiffness: 260, damping: 25 }}
           >
-            <img
+            <motion.img
               src={activeImage}
               alt={activeAlt}
-              className="gallery-lightbox-image absolute inset-0 w-full h-full object-cover"
-              style={{ objectPosition: selectedImageIndex !== null ? positions[selectedImageIndex] : "center center" } as CSSProperties}
+              className="gallery-lightbox-image absolute inset-0 w-full h-full object-cover origin-center"
+              style={{ objectPosition: selectedImageIndex !== null ? positions[selectedImageIndex] : "center center" } as any}
+              animate={{ 
+                scale: scale,
+                x: scale === 1 ? 0 : undefined,
+                y: scale === 1 ? 0 : undefined
+              }}
+              drag={scale > 1}
+              dragElastic={0.15}
               draggable={false}
             />
           </motion.figure>
+
+          {/* Unified controls panel at the bottom */}
+          <div 
+            className="gallery-lightbox-controls"
+            onClick={(event) => event.stopPropagation()}
+          >
+            {availableImageIndexes.length > 1 ? (
+              <button
+                type="button"
+                className="gallery-lightbox-btn"
+                aria-label="Ảnh trước"
+                onClick={showPrevious}
+              >
+                <ChevronLeft aria-hidden="true" size={20} />
+              </button>
+            ) : null}
+
+            <button
+              type="button"
+              className="gallery-lightbox-btn"
+              aria-label="Thu nhỏ"
+              disabled={scale <= 1}
+              onClick={handleZoomOut}
+            >
+              <ZoomOut aria-hidden="true" size={20} />
+            </button>
+
+            <button
+              type="button"
+              className="gallery-lightbox-btn"
+              aria-label="Phóng to"
+              disabled={scale >= 3.5}
+              onClick={handleZoomIn}
+            >
+              <ZoomIn aria-hidden="true" size={20} />
+            </button>
+
+            {availableImageIndexes.length > 1 ? (
+              <button
+                type="button"
+                className="gallery-lightbox-btn"
+                aria-label="Ảnh sau"
+                onClick={showNext}
+              >
+                <ChevronRight aria-hidden="true" size={20} />
+              </button>
+            ) : null}
+          </div>
         </motion.div>
       )}
     </AnimatePresence>
