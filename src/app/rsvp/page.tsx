@@ -264,6 +264,12 @@ export default function RSVPPage() {
   const [guestRsvpLocked, setGuestRsvpLocked] = useState(false);
   const [isAdminBypassed, setIsAdminBypassed] = useState(false);
   const [adminLoginError, setAdminLoginError] = useState("");
+  const [activeCalModal, setActiveCalModal] = useState<{
+    title: string;
+    gcalUrl: string;
+    icsUrl: string;
+    fileName: string;
+  } | null>(null);
   const { navigateWithTransition, prefetch } = usePageTransition();
 
   // Prefetch home page / on mount for instant return navigation
@@ -664,38 +670,26 @@ export default function RSVPPage() {
   const hasBanquet = formValues.attendingBanquet === "yes";
   
   const ceremonyCalTitle = `Thánh lễ Hôn phối ${weddingConfig.couple.displayName}`;
-  const ceremonyCalLocation = weddingConfig.church?.address || "Nhà Thờ Giáo Xứ Tam Hải";
-  const ceremonyCalDesc = `Thánh lễ Hôn phối của ${weddingConfig.couple.displayName}.`;
-  const ceremonyGcalUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(ceremonyCalTitle)}&dates=20261220T080000Z/20261220T093000Z&details=${encodeURIComponent(ceremonyCalDesc)}&location=${encodeURIComponent(ceremonyCalLocation)}`;
-  const ceremonyIcsContent = `BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//Wedding//EN\nBEGIN:VEVENT\nDTSTART:20261220T080000Z\nDTEND:20261220T093000Z\nSUMMARY:${ceremonyCalTitle}\nLOCATION:${ceremonyCalLocation}\nDESCRIPTION:${ceremonyCalDesc}\nEND:VEVENT\nEND:VCALENDAR`;
+  const ceremonyCalLocation = `${weddingConfig.church?.name || "Nhà Thờ Giáo Xứ Tam Hải"} (${weddingConfig.church?.address || "180 Đ. Tam Châu, Tam Bình, Hồ Chí Minh"})`;
+  const ceremonyCalDesc = `Thánh lễ Hôn phối của ${weddingConfig.couple.displayName}.\nThời gian: 10:00 ngày 20/12/2026.\nĐịa điểm: ${ceremonyCalLocation}.`;
+  const ceremonyGcalUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(ceremonyCalTitle)}&dates=20261220T030000Z/20261220T043000Z&details=${encodeURIComponent(ceremonyCalDesc)}&location=${encodeURIComponent(ceremonyCalLocation)}`;
+  const ceremonyIcsContent = `BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//Wedding//EN\nCALSCALE:GREGORIAN\nBEGIN:VEVENT\nDTSTART:20261220T030000Z\nDTEND:20261220T043000Z\nSUMMARY:${ceremonyCalTitle}\nLOCATION:${ceremonyCalLocation}\nDESCRIPTION:${ceremonyCalDesc}\nEND:VEVENT\nEND:VCALENDAR`;
   const ceremonyIcsUrl = `data:text/calendar;charset=utf8,${encodeURIComponent(ceremonyIcsContent)}`;
 
   const banquetCalTitle = `Tiệc cưới ${weddingConfig.couple.displayName}`;
-  const banquetCalLocation = weddingConfig.venue.address;
-  const banquetCalDesc = `Tiệc cưới ngày chung đôi của ${weddingConfig.couple.displayName}.`;
+  const banquetCalLocation = `${weddingConfig.venue.name} (${weddingConfig.venue.address})`;
+  const banquetCalDesc = `Tiệc cưới của ${weddingConfig.couple.displayName}.\nThời gian: 17:30 ngày 26/12/2026.\nĐịa điểm: ${banquetCalLocation}.`;
   const banquetGcalUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(banquetCalTitle)}&dates=20261226T103000Z/20261226T140000Z&details=${encodeURIComponent(banquetCalDesc)}&location=${encodeURIComponent(banquetCalLocation)}`;
-  const banquetIcsContent = `BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//Wedding//EN\nBEGIN:VEVENT\nDTSTART:20261226T103000Z\nDTEND:20261226T140000Z\nSUMMARY:${banquetCalTitle}\nLOCATION:${banquetCalLocation}\nDESCRIPTION:${banquetCalDesc}\nEND:VEVENT\nEND:VCALENDAR`;
+  const banquetIcsContent = `BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//Wedding//EN\nCALSCALE:GREGORIAN\nBEGIN:VEVENT\nDTSTART:20261226T103000Z\nDTEND:20261226T140000Z\nSUMMARY:${banquetCalTitle}\nLOCATION:${banquetCalLocation}\nDESCRIPTION:${banquetCalDesc}\nEND:VEVENT\nEND:VCALENDAR`;
   const banquetIcsUrl = `data:text/calendar;charset=utf8,${encodeURIComponent(banquetIcsContent)}`;
 
-  const openCalendar = (icsUrl: string, gcalUrl: string, fileName: string) => {
-    const userAgent = navigator.userAgent || navigator.vendor || (window as any).opera;
-    const isApple = /iPad|iPhone|iPod|Mac/i.test(userAgent) && !(window as any).MSStream;
-    const isInAppBrowser = /Zalo|FBAN|FBAV|Instagram|Line|TikTok/i.test(userAgent);
-
-    if (isApple) {
-      if (isInAppBrowser) {
-        alert("Trình duyệt tích hợp này chặn tải file lịch. Vui lòng nhấn biểu tượng dấu 3 chấm góc trên và chọn 'Mở bằng trình duyệt' (Safari) để lưu lịch.");
-        return;
-      }
-      const link = document.createElement("a");
-      link.href = icsUrl;
-      link.download = fileName;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    } else {
-      window.open(gcalUrl, "_blank");
-    }
+  const openCalendar = (title: string, icsUrl: string, gcalUrl: string, fileName: string) => {
+    setActiveCalModal({
+      title,
+      icsUrl,
+      gcalUrl,
+      fileName
+    });
   };
 
   if (missingInviteToken && tokenGateChecked && !isAdminBypassed) {
@@ -814,7 +808,7 @@ export default function RSVPPage() {
                     {hasCeremony && (
                       <button
                         type="button"
-                        onClick={() => openCalendar(ceremonyIcsUrl, ceremonyGcalUrl, "thanh-le-nhat-phuong.ics")}
+                        onClick={() => openCalendar("Thánh lễ Hôn phối", ceremonyIcsUrl, ceremonyGcalUrl, "thanh-le-nhat-phuong.ics")}
                         className="wedding-type-button inline-flex h-11 items-center justify-center gap-2 rounded-full border border-serenity/24 bg-white/80 px-6 text-xs sm:text-sm font-bold text-[#252934] transition hover:bg-white hover:shadow-sm min-w-[130px]"
                       >
                         <CalendarDays className="w-4 h-4" /> THÁNH LỄ
@@ -823,7 +817,7 @@ export default function RSVPPage() {
                     {hasBanquet && (
                       <button
                         type="button"
-                        onClick={() => openCalendar(banquetIcsUrl, banquetGcalUrl, "tiec-cuoi-nhat-phuong.ics")}
+                        onClick={() => openCalendar("Tiệc cưới", banquetIcsUrl, banquetGcalUrl, "tiec-cuoi-nhat-phuong.ics")}
                         className="wedding-type-button inline-flex h-11 items-center justify-center gap-2 rounded-full border border-serenity/24 bg-white/80 px-6 text-xs sm:text-sm font-bold text-[#252934] transition hover:bg-white hover:shadow-sm min-w-[130px]"
                       >
                         <CalendarDays className="w-4 h-4" /> TIỆC CƯỚI
@@ -1393,6 +1387,86 @@ export default function RSVPPage() {
           )}
         </section>
       </div>
+
+      {/* Glassmorphic Calendar Platform Selector Modal */}
+      <AnimatePresence>
+        {activeCalModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-md">
+            {/* Backdrop click to close */}
+            <div className="absolute inset-0" onClick={() => setActiveCalModal(null)} />
+            
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 15 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 15 }}
+              transition={{ type: "spring", stiffness: 300, damping: 28 }}
+              className="relative w-full max-w-sm rounded-[2.2rem] bg-[#fdfbf7] border border-[#b4975a]/15 p-6 text-center shadow-[0_24px_56px_rgba(63,70,66,0.16)] z-10 overflow-hidden"
+            >
+              {/* Fine paper-grain inside the tray */}
+              <div aria-hidden="true" className="paper-grain-luxury absolute inset-0 opacity-[0.06] pointer-events-none rounded-[2.2rem]" />
+              
+              <button
+                onClick={() => setActiveCalModal(null)}
+                className="absolute top-4 right-4 text-[#252934]/40 hover:text-[#252934]/70 p-1.5 rounded-full hover:bg-[#252934]/5 transition"
+              >
+                <X className="w-5 h-5" />
+              </button>
+
+              <span className="font-sans text-[0.76rem] font-bold tracking-[0.2em] text-[#b4975a] uppercase mb-1.5 block leading-none">
+                THÊM VÀO LỊCH
+              </span>
+              <h3 className="font-serif italic font-bold text-xl sm:text-2xl text-[#252934] mb-5">
+                {activeCalModal.title}
+              </h3>
+
+              <div className="flex flex-col gap-3.5 mt-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    window.open(activeCalModal.gcalUrl, "_blank");
+                    setActiveCalModal(null);
+                  }}
+                  className="inline-flex h-12 items-center justify-center gap-2.5 rounded-full bg-white border border-[#b4975a]/15 text-[0.92rem] font-semibold text-[#252934] shadow-[0_4px_12px_rgba(63,70,66,0.04)] hover:bg-[#b4975a]/5 transition"
+                >
+                  <img src="https://www.google.com/calendar/images/calendar_2020q4_color_2x.png" className="w-4.5 h-4.5 object-contain" alt="Google" />
+                  Google Calendar (Android)
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    const userAgent = navigator.userAgent || navigator.vendor || (window as any).opera;
+                    const isInAppBrowser = /Zalo|FBAN|FBAV|Instagram|Line|TikTok/i.test(userAgent);
+                    const isApple = /iPad|iPhone|iPod|Mac/i.test(userAgent) && !(window as any).MSStream;
+                    
+                    if (isApple && isInAppBrowser) {
+                      alert("Trình duyệt tích hợp này chặn tải file lịch. Vui lòng nhấn biểu tượng dấu 3 chấm góc trên và chọn 'Mở bằng trình duyệt' (Safari) để lưu lịch.");
+                      return;
+                    }
+                    
+                    const link = document.createElement("a");
+                    link.href = activeCalModal.icsUrl;
+                    link.download = activeCalModal.fileName;
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    
+                    setActiveCalModal(null);
+                  }}
+                  className="inline-flex h-12 items-center justify-center gap-2.5 rounded-full bg-white border border-[#b4975a]/15 text-[0.92rem] font-semibold text-[#252934] shadow-[0_4px_12px_rgba(63,70,66,0.04)] hover:bg-[#b4975a]/5 transition"
+                >
+                  <img src="https://upload.wikimedia.org/wikipedia/commons/e/e3/Calendar_icon_OS_X.svg" className="w-4.5 h-4.5 object-contain" alt="Apple" />
+                  Apple / Outlook Calendar (.ics)
+                </button>
+              </div>
+              
+              <p className="text-[0.72rem] text-[#252934]/50 mt-4.5 leading-relaxed font-sans px-2">
+                Chọn Google Calendar nếu dùng thiết bị Android/Gmail, chọn Apple Calendar nếu dùng iPhone/iPad.
+              </p>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </main>
   );
 }
