@@ -100,10 +100,46 @@ export function GallerySection({ config }: { config: WeddingConfig }) {
       : "gallery-lightbox-frame-landscape";
 
   const [scale, setScale] = useState(1);
+  const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
 
   useEffect(() => {
     setScale(1);
+    setDimensions({ width: 0, height: 0 });
   }, [selectedImageIndex]);
+
+  useEffect(() => {
+    if (!activeImage) return;
+
+    const updateDimensions = () => {
+      if (constraintsRef.current) {
+        const rect = constraintsRef.current.getBoundingClientRect();
+        setDimensions({ width: rect.width, height: rect.height });
+      }
+    };
+
+    updateDimensions();
+    const timer = setTimeout(updateDimensions, 100);
+
+    window.addEventListener("resize", updateDimensions);
+    return () => {
+      window.removeEventListener("resize", updateDimensions);
+      clearTimeout(timer);
+    };
+  }, [activeImage, selectedImageIndex]);
+
+  const dragConstraints = useMemo(() => {
+    if (scale <= 1 || dimensions.width === 0) {
+      return { left: 0, right: 0, top: 0, bottom: 0 };
+    }
+    const overflowX = (dimensions.width * (scale - 1)) / 2;
+    const overflowY = (dimensions.height * (scale - 1)) / 2;
+    return {
+      left: -overflowX,
+      right: overflowX,
+      top: -overflowY,
+      bottom: overflowY,
+    };
+  }, [scale, dimensions]);
 
   const handleZoomIn = useCallback(() => {
     setScale((prev) => Math.min(prev + 0.5, 3.5));
@@ -208,7 +244,7 @@ export function GallerySection({ config }: { config: WeddingConfig }) {
                 y: scale === 1 ? 0 : undefined
               }}
               drag={scale > 1}
-              dragConstraints={constraintsRef}
+              dragConstraints={dragConstraints}
               dragElastic={0.15}
               draggable={false}
             />
