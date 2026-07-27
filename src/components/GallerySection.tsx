@@ -1,7 +1,7 @@
 "use client";
 
 import type { CSSProperties } from "react";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState, useRef } from "react";
 
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
 import { createPortal } from "react-dom";
@@ -64,6 +64,7 @@ const galleryIntroVariant: Variants = {
 
 export function GallerySection({ config }: { config: WeddingConfig }) {
   const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(null);
+  const lightboxRef = useRef<HTMLDivElement>(null);
   const section = config.sections.gallery;
   const lightboxHost = typeof document === "undefined" ? null : document.body;
 
@@ -136,10 +137,28 @@ export function GallerySection({ config }: { config: WeddingConfig }) {
     };
   }, [activeImage, closeLightbox, showNext, showPrevious]);
 
+  useEffect(() => {
+    if (!activeImage) return;
+
+    const element = lightboxRef.current;
+    if (!element) return;
+
+    const handleTouchMove = (event: TouchEvent) => {
+      event.preventDefault();
+    };
+
+    element.addEventListener("touchmove", handleTouchMove, { passive: false });
+
+    return () => {
+      element.removeEventListener("touchmove", handleTouchMove);
+    };
+  }, [activeImage]);
+
   const lightbox = (
     <AnimatePresence>
       {activeImage && (
         <motion.div
+          ref={lightboxRef}
           className="gallery-lightbox"
           role="dialog"
           aria-modal="true"

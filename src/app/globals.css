@@ -2612,6 +2612,7 @@ textarea {
     rgba(47, 58, 53, 0.78);
   backdrop-filter: blur(22px) saturate(118%);
   -webkit-backdrop-filter: blur(22px) saturate(118%);
+  touch-action: none;
 }
 
 .gallery-lightbox-frame {
