@@ -161,7 +161,7 @@ export function WeddingSplashIntro({
     setStatus("hidden");
     animDispatchTimer.current = window.setTimeout(() => {
       window.dispatchEvent(new Event("introFinished"));
-    }, 400);
+    }, 1500);
   }, []);
 
   const openIntro = useCallback(() => {
