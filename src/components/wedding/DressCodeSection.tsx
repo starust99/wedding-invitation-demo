@@ -81,7 +81,7 @@ export function DressCodeSection({
 
   const badgeBorder = selectedColor
     ? `${selectedColor.hex}${selectedColor.id === "cream" || selectedColor.id === "beige" ? "5c" : "3b"}`
-    : "rgba(180, 151, 90, 0.25)";
+    : "rgba(255, 255, 255, 0.3)";
 
   // Preload all dress code images to make color transitions instantaneous
   useEffect(() => {
