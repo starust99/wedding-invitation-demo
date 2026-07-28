@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
-import { Sparkles, X, ZoomIn } from "lucide-react";
+import { Sparkles } from "lucide-react";
 
 export type DressColorId = "pink" | "blue" | "yellow" | "green" | "cream" | "beige" | "brown";
 
@@ -71,7 +71,6 @@ export function DressCodeSection({
   selectedColorId: DressColorId | null;
   setSelectedColorId: (id: DressColorId | null) => void;
 }) {
-  const [isZoomed, setIsZoomed] = useState(false);
   const selectedColor = DRESS_COLORS.find((c) => c.id === selectedColorId) || null;
 
   const badgeBg = selectedColor
@@ -192,10 +191,7 @@ export function DressCodeSection({
       {/* Unified Interactive Card Container */}
       <div className="w-full max-w-[26rem] sm:max-w-[29rem] md:max-w-[32rem] mx-auto p-3 sm:p-4 rounded-[2.2rem] bg-white/20 shadow-[0_6px_24px_rgba(63,70,66,0.02)] backdrop-blur-[6px] flex flex-col items-center">
         {/* Card containing image */}
-        <div 
-          onClick={() => setIsZoomed(true)}
-          className="relative w-full aspect-[3/4] rounded-[1.6rem] overflow-hidden border border-white/20 shadow-sm cursor-zoom-in group"
-        >
+        <div className="relative w-full aspect-[3/4] rounded-[1.6rem] overflow-hidden border border-white/20 shadow-sm">
           <div className="w-full h-full overflow-hidden relative">
             <AnimatePresence mode="popLayout">
               <motion.div
@@ -211,18 +207,11 @@ export function DressCodeSection({
                   alt={selectedColor ? `Gợi ý phối đồ màu ${selectedColor.name}` : "Gợi ý phối đồ theo bảng màu vườn xuân"}
                   fill
                   unoptimized
-                  className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+                  className="object-cover"
                   priority
                 />
               </motion.div>
             </AnimatePresence>
-
-            {/* Hover overlay with Zoom icon */}
-            <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center pointer-events-none">
-              <div className="p-3 rounded-full bg-white/25 backdrop-blur-md border border-white/40 shadow-lg text-white">
-                <ZoomIn className="w-5 h-5" />
-              </div>
-            </div>
           </div>
         </div>
 
@@ -348,57 +337,7 @@ export function DressCodeSection({
         </div>
       </div>
 
-      {/* Zoom Lightbox Modal */}
-      <AnimatePresence>
-        {isZoomed && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={() => setIsZoomed(false)}
-            className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-black/75 backdrop-blur-[12px] p-4 cursor-zoom-out select-none"
-          >
-            {/* Close button at top right */}
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                setIsZoomed(false);
-              }}
-              className="absolute top-4 right-4 sm:top-6 sm:right-6 p-2.5 rounded-full bg-white/10 hover:bg-white/20 border border-white/20 text-white transition-all cursor-pointer shadow-lg flex items-center justify-center"
-              aria-label="Đóng xem ảnh lớn"
-            >
-              <X className="w-5 h-5 sm:w-6 sm:h-6" />
-            </button>
 
-            {/* Animated Large Image Container */}
-            <motion.div
-              initial={{ scale: 0.95, y: 15 }}
-              animate={{ scale: 1, y: 0 }}
-              exit={{ scale: 0.95, y: 15 }}
-              transition={{ type: "spring", stiffness: 300, damping: 25 }}
-              className="relative w-full max-w-[92vw] h-[80vh] sm:h-[84vh] flex items-center justify-center"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <img
-                src={selectedColor ? `${selectedColor.imgSrc}?v=8` : "/assets/dresscode-theme-v4.jpg?v=9"}
-                alt={selectedColor ? `Gợi ý phối đồ màu ${selectedColor.name}` : "Gợi ý phối đồ theo bảng màu vườn xuân"}
-                className="max-w-full max-h-full object-contain rounded-2xl border border-white/15 shadow-2xl"
-              />
-            </motion.div>
-
-            {/* Tap to close helper text */}
-            <motion.span
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 0.7, y: 0 }}
-              exit={{ opacity: 0 }}
-              transition={{ delay: 0.2 }}
-              className="mt-4 text-[0.8rem] sm:text-[0.88rem] tracking-wide text-white/80 font-sans pointer-events-none text-center"
-            >
-              Chạm vào vùng trống hoặc bấm nút đóng để thoát
-            </motion.span>
-          </motion.div>
-        )}
-      </AnimatePresence>
 
       {/* Weather Alert */}
       {parsedAlert && (
