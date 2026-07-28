@@ -145,17 +145,12 @@ export function DressCodeSection({
 
   return (
     <div className="w-full flex flex-col gap-6 items-center relative">
-      {/* 7 Dress Code Colors SVG Gradient definitions for icons */}
+      {/* 2-Color Pink & Blue Pastel SVG Gradient definitions for icons */}
       <svg width="0" height="0" className="absolute pointer-events-none" aria-hidden="true">
         <defs>
           <linearGradient id="dresscode-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
             <stop offset="0%" stopColor="#d39a9c" />
-            <stop offset="16.6%" stopColor="#9bb4c5" />
-            <stop offset="33.3%" stopColor="#e8c691" />
-            <stop offset="50%" stopColor="#a9bc99" />
-            <stop offset="66.6%" stopColor="#e6ceaa" />
-            <stop offset="83.3%" stopColor="#ddd1be" />
-            <stop offset="100%" stopColor="#b3967d" />
+            <stop offset="100%" stopColor="#9bb4c5" />
           </linearGradient>
         </defs>
       </svg>
@@ -320,7 +315,7 @@ export function DressCodeSection({
                   <span 
                     className="font-sans text-[0.82rem] sm:text-[0.85rem] font-semibold tracking-[0.02em] leading-none whitespace-nowrap"
                     style={{
-                      background: "linear-gradient(to right, #d39a9c, #9bb4c5, #e8c691, #a9bc99, #e6ceaa, #ddd1be, #b3967d)",
+                      background: "linear-gradient(to right, #d39a9c, #9bb4c5)",
                       WebkitBackgroundClip: "text",
                       WebkitTextFillColor: "transparent",
                       backgroundClip: "text",
