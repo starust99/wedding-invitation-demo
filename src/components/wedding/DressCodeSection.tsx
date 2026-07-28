@@ -313,8 +313,8 @@ export function DressCodeSection({
                     <Sparkles className="w-3.5 h-3.5" style={{ stroke: "url(#dresscode-gradient)" }} />
                   </motion.div>
 
-                  <span className="font-sans text-[0.82rem] sm:text-[0.85rem] font-bold tracking-[0.06em] leading-normal whitespace-nowrap uppercase text-[#3f4642]">
-                    CHỌN MÀU ĐỂ XEM GỢI Ý
+                  <span className="font-sans text-[0.82rem] sm:text-[0.85rem] font-semibold tracking-[0.02em] leading-normal whitespace-nowrap text-[#3f4642]">
+                    Chọn màu để xem gợi ý
                   </span>
 
                   {/* Right Sparkles icon */}
