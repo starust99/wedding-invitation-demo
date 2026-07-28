@@ -158,12 +158,12 @@ export function DressCodeSection({
           {title}
         </span>
 
-        <p className="font-sans text-[#4e443c]/90 font-normal text-[0.92rem] sm:text-[0.98rem] md:text-[1.02rem] leading-relaxed max-w-[28rem] mx-auto whitespace-pre-line mb-3.5">
+        <p className="font-sans text-[#4e443c]/90 font-normal text-[0.96rem] sm:text-[1.04rem] md:text-[1.1rem] leading-relaxed max-w-[30rem] mx-auto whitespace-pre-line mb-3">
           {invitationText}
         </p>
 
         {weatherAlertText && (
-          <p className="font-serif italic text-[#6e5021] text-[0.94rem] sm:text-[1rem] md:text-[1.04rem] leading-relaxed max-w-[31rem] mx-auto">
+          <p className="font-serif italic text-[#6e5021] text-[1.02rem] sm:text-[1.12rem] md:text-[1.18rem] leading-relaxed max-w-[33rem] mx-auto mt-1">
             {weatherAlertText}
           </p>
         )}
