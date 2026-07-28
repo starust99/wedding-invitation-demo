@@ -95,22 +95,27 @@ export function DressCodeSection({
     });
   }, []);
 
-  // Combine invitation text and weather note into a single cohesive paragraph
-  let combinedText = note;
+  // Split invitation text and weather note dynamically for beautiful layout contrast
+  let invitationText = note;
+  let weatherAlertText = "";
+
   const weatherIndex = note.indexOf("Lưu ý:");
   if (weatherIndex !== -1) {
-    const mainText = note.substring(0, weatherIndex).trim().replace(/:\s*$/, "");
-    let alertText = note.substring(weatherIndex).trim();
-    if (alertText.startsWith("Lưu ý:")) {
-      alertText = `(Lưu ý: ${alertText.substring(6).trim()})`;
+    invitationText = note.substring(0, weatherIndex).trim().replace(/:\s*$/, ":");
+    weatherAlertText = note.substring(weatherIndex).trim();
+    if (weatherAlertText.startsWith("Lưu ý:")) {
+      weatherAlertText = weatherAlertText.substring(6).trim();
     }
-    combinedText = `${mainText} ${alertText}`;
   } else {
     const legacyIndex = note.indexOf("Lưu ý thời tiết");
     if (legacyIndex !== -1) {
-      const mainText = note.substring(0, legacyIndex).trim().replace(/:\s*$/, "");
-      const alertText = note.substring(legacyIndex).trim();
-      combinedText = `${mainText} (${alertText})`;
+      invitationText = note.substring(0, legacyIndex).trim().replace(/:\s*$/, ":");
+      weatherAlertText = note.substring(legacyIndex).trim();
+      if (weatherAlertText.startsWith("Lưu ý thời tiết:")) {
+        weatherAlertText = weatherAlertText.substring("Lưu ý thời tiết:".length).trim();
+      } else if (weatherAlertText.startsWith("Lưu ý thời tiết")) {
+        weatherAlertText = weatherAlertText.substring("Lưu ý thời tiết".length).trim();
+      }
     }
   }
 
@@ -153,9 +158,15 @@ export function DressCodeSection({
           {title}
         </span>
 
-        <p className="font-sans text-[#4e443c]/90 font-normal text-[0.92rem] sm:text-[0.98rem] md:text-[1.02rem] leading-relaxed max-w-[34rem] mx-auto whitespace-pre-line">
-          {combinedText}
+        <p className="font-sans text-[#4e443c]/90 font-normal text-[0.92rem] sm:text-[0.98rem] md:text-[1.02rem] leading-relaxed max-w-[28rem] mx-auto whitespace-pre-line mb-3.5">
+          {invitationText}
         </p>
+
+        {weatherAlertText && (
+          <p className="font-serif italic text-[#8d713a] text-[0.88rem] sm:text-[0.94rem] leading-relaxed max-w-[27rem] mx-auto opacity-95">
+            * {weatherAlertText} *
+          </p>
+        )}
       </div>
 
       {/* Interactive Illustration Image */}
