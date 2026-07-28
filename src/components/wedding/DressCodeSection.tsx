@@ -264,7 +264,7 @@ export function DressCodeSection({
         <div className="flex justify-center mt-5 select-none min-h-[2.2rem]">
           <motion.div
             layout
-            className="flex w-[19.2rem] sm:w-[20.5rem] items-center justify-center gap-2.5 px-4.5 py-1.5 rounded-full border shadow-[0_4px_16px_rgba(63,70,66,0.04)] backdrop-blur-[8px] origin-center"
+            className="flex w-[19.2rem] sm:w-[20.5rem] h-[2.4rem] sm:h-[2.6rem] items-center justify-center gap-2.5 px-4.5 rounded-full border shadow-[0_4px_16px_rgba(63,70,66,0.04)] backdrop-blur-[8px] origin-center"
             animate={{
               background: badgeBg,
               borderColor: badgeBorder
@@ -285,7 +285,7 @@ export function DressCodeSection({
                   transition={{ duration: 0.2 }}
                   className="flex items-center justify-center"
                 >
-                  <span className="font-sans text-[0.88rem] sm:text-[0.92rem] font-medium tracking-wide text-[#3f4642] leading-none whitespace-nowrap">
+                  <span className="font-sans text-[0.88rem] sm:text-[0.92rem] font-medium tracking-wide text-[#3f4642] leading-normal whitespace-nowrap">
                     {selectedColor.name}
                   </span>
                 </motion.div>
@@ -314,7 +314,7 @@ export function DressCodeSection({
                   </motion.div>
 
                   <span 
-                    className="font-sans text-[0.82rem] sm:text-[0.85rem] font-bold tracking-[0.06em] leading-relaxed whitespace-nowrap uppercase py-1"
+                    className="font-sans text-[0.82rem] sm:text-[0.85rem] font-bold tracking-[0.06em] leading-normal whitespace-nowrap uppercase"
                     style={{
                       background: "linear-gradient(to right, #d39a9c, #9bb4c5)",
                       WebkitBackgroundClip: "text",
