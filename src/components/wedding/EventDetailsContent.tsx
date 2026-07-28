@@ -617,7 +617,7 @@ export function EventDetailsContent({
           whileInView="visible"
           viewport={{ once: true, margin: "-80px" }}
           variants={cardVariant}
-          className="w-full luxury-wedding-stationery-card px-6 pt-10 pb-10 sm:px-10 sm:pt-14 sm:pb-14 md:px-12 md:pt-16 md:pb-16 flex flex-col items-center text-center relative"
+          className="w-full luxury-wedding-stationery-card px-6 pt-10 pb-6 sm:px-10 sm:pt-14 sm:pb-8 md:px-12 md:pt-16 md:pb-10 flex flex-col items-center text-center relative"
         >
 
           {/* Main Title */}
@@ -735,7 +735,7 @@ export function EventDetailsContent({
           )}
 
           {/* Section 3: Dress Code */}
-          <motion.div variants={cardItemVariant} className="py-6 w-full">
+          <motion.div variants={cardItemVariant} className="pt-6 pb-0 w-full">
             <DressCodeSection
               title={dressCodeTitle}
               note={dressCodeNote}
