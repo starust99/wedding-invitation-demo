@@ -180,10 +180,10 @@ const cardVariant: Variants = {
     scale: 1,
     filter: "blur(0px)",
     transition: {
-      duration: 1.8,
+      duration: 1.55,
       ease: [0.22, 1, 0.36, 1],
-      staggerChildren: 0.28,
-      delayChildren: 0.45,
+      staggerChildren: 0.24,
+      delayChildren: 0.38,
     },
   },
 };
@@ -195,7 +195,7 @@ const cardItemVariant: Variants = {
     y: 0,
     filter: "blur(0px)",
     transition: {
-      duration: 1.5,
+      duration: 1.3,
       ease: [0.22, 1, 0.36, 1],
     },
   },
@@ -207,7 +207,7 @@ const headerVariant: Variants = {
     opacity: 1,
     y: 0,
     transition: {
-      duration: 0.6,
+      duration: 0.52,
       ease: "easeOut",
     },
   },
@@ -226,10 +226,10 @@ const familyPanelVariant: Variants = {
     scale: 1,
     filter: "blur(0px)",
     transition: {
-      duration: 1.6,
+      duration: 1.38,
       ease: [0.22, 1, 0.36, 1],
-      staggerChildren: 0.22,
-      delayChildren: 0.35,
+      staggerChildren: 0.19,
+      delayChildren: 0.3,
     },
   },
 };
@@ -241,7 +241,7 @@ const familyItemVariant: Variants = {
     y: 0,
     filter: "blur(0px)",
     transition: {
-      duration: 1.4,
+      duration: 1.2,
       ease: [0.22, 1, 0.36, 1],
     },
   },
