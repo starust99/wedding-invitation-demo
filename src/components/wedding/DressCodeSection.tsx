@@ -234,15 +234,17 @@ export function DressCodeSection({
                 className="w-[2.1rem] h-[2.1rem] xs:w-[2.45rem] xs:h-[2.45rem] rounded-full flex-shrink-0 relative flex items-center justify-center focus-visible:outline-none border-[2.2px] cursor-pointer"
                 animate={{
                   scale: isSelected ? 1.12 : 1.0,
-                  borderColor: isSelected ? color.hex : "rgba(255, 255, 255, 1)",
+                  borderColor: isSelected ? "rgba(255, 255, 255, 0.95)" : "rgba(255, 255, 255, 0.4)",
                   boxShadow: isSelected 
-                    ? `0 0 14px 3px ${color.hex}60` 
-                    : "0 2px 5px rgba(0,0,0,0.05), inset 0 1px 2px rgba(255, 255, 255, 0.25), 0 0 0 0.5px rgba(63, 70, 66, 0.08)"
+                    ? `0 0 14px 4px ${color.hex}55, inset 0 2px 3px rgba(255, 255, 255, 0.6), 0 3px 8px rgba(0,0,0,0.06)` 
+                    : "inset 0 1px 2px rgba(255, 255, 255, 0.45), 0 1.5px 3px rgba(63, 70, 66, 0.05)"
                 }}
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.92 }}
                 style={{
-                  backgroundColor: color.hex,
+                  background: `radial-gradient(circle at 35% 35%, ${color.hex}44 0%, ${color.hex}d0 100%)`,
+                  backdropFilter: "blur(4px)",
+                  WebkitBackdropFilter: "blur(4px)",
                 }}
               >
                 {/* Floating glass ring */}
