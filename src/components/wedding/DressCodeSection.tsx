@@ -95,51 +95,22 @@ export function DressCodeSection({
     });
   }, []);
 
-  // Split the note into invitation text and weather alert text
-  let invitationText = note;
-  let weatherAlertText = "";
-
+  // Combine invitation text and weather note into a single cohesive paragraph
+  let combinedText = note;
   const weatherIndex = note.indexOf("Lưu ý:");
   if (weatherIndex !== -1) {
-    invitationText = note.substring(0, weatherIndex).trim();
-    weatherAlertText = note.substring(weatherIndex).trim();
+    const mainText = note.substring(0, weatherIndex).trim().replace(/:\s*$/, "");
+    let alertText = note.substring(weatherIndex).trim();
+    if (alertText.startsWith("Lưu ý:")) {
+      alertText = `(Lưu ý: ${alertText.substring(6).trim()})`;
+    }
+    combinedText = `${mainText} ${alertText}`;
   } else {
     const legacyIndex = note.indexOf("Lưu ý thời tiết");
     if (legacyIndex !== -1) {
-      invitationText = note.substring(0, legacyIndex).trim();
-      weatherAlertText = note.substring(legacyIndex).trim();
-    }
-  }
-
-  // Split weatherAlertText for Option 2 styling without changing/removing words
-  let parsedAlert = null;
-  if (weatherAlertText) {
-    let cleanAlert = weatherAlertText;
-    let prefix = "";
-    if (cleanAlert.startsWith("Lưu ý:")) {
-      prefix = "Lưu ý";
-      cleanAlert = cleanAlert.substring("Lưu ý:".length).trim();
-    } else if (cleanAlert.startsWith("Lưu ý thời tiết:")) {
-      prefix = "Lưu ý thời tiết";
-      cleanAlert = cleanAlert.substring("Lưu ý thời tiết:".length).trim();
-    } else if (cleanAlert.startsWith("Lưu ý thời tiết")) {
-      prefix = "Lưu ý thời tiết";
-      cleanAlert = cleanAlert.substring("Lưu ý thời tiết".length).trim();
-    }
-
-    const commaIndex = cleanAlert.indexOf(", Quý khách");
-    if (commaIndex !== -1) {
-      parsedAlert = {
-        prefix: prefix || "Lưu ý",
-        part1: cleanAlert.substring(0, commaIndex + 1).trim(),
-        part2: cleanAlert.substring(commaIndex + 1).trim(),
-      };
-    } else {
-      parsedAlert = {
-        prefix: prefix || "Lưu ý",
-        part1: cleanAlert,
-        part2: "",
-      };
+      const mainText = note.substring(0, legacyIndex).trim().replace(/:\s*$/, "");
+      const alertText = note.substring(legacyIndex).trim();
+      combinedText = `${mainText} (${alertText})`;
     }
   }
 
@@ -182,8 +153,8 @@ export function DressCodeSection({
           {title}
         </span>
 
-        <p className="font-sans text-[#4e443c]/90 font-normal text-[0.92rem] sm:text-[0.98rem] md:text-[1.02rem] leading-relaxed max-w-[28rem] mx-auto whitespace-pre-line">
-          {invitationText}
+        <p className="font-sans text-[#4e443c]/90 font-normal text-[0.92rem] sm:text-[0.98rem] md:text-[1.02rem] leading-relaxed max-w-[34rem] mx-auto whitespace-pre-line">
+          {combinedText}
         </p>
       </div>
 
@@ -336,45 +307,6 @@ export function DressCodeSection({
           </motion.div>
         </div>
       </div>
-
-
-
-      {/* Weather Alert */}
-      {parsedAlert && (
-        <div className="w-full max-w-[26rem] sm:max-w-[29rem] md:max-w-[31rem] mx-auto mt-7">
-          {/* Double-Bezel outer tray */}
-          <div className="p-2 rounded-[2.2rem] bg-[#b4975a]/3 border border-[#b4975a]/10 shadow-[0_12px_34px_rgba(180,151,90,0.06)] relative overflow-hidden">
-            {/* Fine paper-grain inside the tray */}
-            <div aria-hidden="true" className="paper-grain-luxury absolute inset-0 opacity-[0.06] pointer-events-none" />
-            
-            {/* Inner core card */}
-            <div className="relative p-6 sm:p-7.5 rounded-[calc(2.2rem-0.5rem)] bg-[#fdfbf7] border border-[#b4975a]/15 shadow-[inset_0_1.5px_2px_rgba(255,255,255,0.85)] flex flex-col items-center text-center">
-              
-              {/* Header Label: LƯU Ý THỜI TIẾT */}
-              <span className="font-sans text-[0.8rem] sm:text-[0.86rem] font-bold tracking-[0.24em] text-[#b4975a] uppercase mb-3 flex items-center gap-1.5 leading-none">
-                {parsedAlert.prefix.toUpperCase()} THỜI TIẾT
-              </span>
-
-              {/* Separator Line */}
-              <div className="w-10 h-[0.5px] bg-[#b4975a]/25 mb-4.5" />
-
-              {/* Content body split into 2 paragraphs */}
-              <div className="flex flex-col gap-4 font-serif">
-                {/* Part 1 (Vibe context): Italicized, slightly lighter, elegant color */}
-                <p className="text-[#655a50] text-[0.95rem] sm:text-[1rem] md:text-[1.04rem] leading-[1.7] italic font-medium">
-                  {parsedAlert.part1}
-                </p>
-                
-                {/* Part 2 (Action): Normal text, slightly darker, clear instruction */}
-                <p className="text-[#3f4642] text-[0.95rem] sm:text-[1rem] md:text-[1.04rem] leading-[1.7] font-semibold">
-                  {parsedAlert.part2}
-                </p>
-              </div>
-
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
