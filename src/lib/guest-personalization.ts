@@ -243,7 +243,6 @@ export type InvitationCopy = {
   invitedGuestLine: string;
   inviteScope: string;
   greeting: string;
-  heroGreeting: string;
   heroInvitationLine: string;
   envelopeLine: string;
   insideInviteLine: string;
@@ -794,7 +793,6 @@ export function buildInvitationCopy(input?: InvitationCopyInput): InvitationCopy
   const shortRecipientLabel = address.shortRecipientLabel;
   const recipientLine = resolveInviteRecipient(address, input);
   const isWarmPeer = tone === "peer" || tone === "junior";
-  const isFormal = !isWarmPeer;
   const envelopePrefix = isWarmPeer ? "Mời" : "Kính mời";
   const coupleDisplayName = cleanString(input?.coupleDisplayName) || "Nhật & Phương";
   const coupleReference = resolveCoupleReference(input, tone, hostPronoun);
@@ -892,11 +890,6 @@ export function buildInvitationCopy(input?: InvitationCopyInput): InvitationCopy
     invitedGuestLine,
     inviteScope,
     greeting: `${guestLabel === "quý khách" ? "Quý khách" : guestLabel} thân mến`,
-    heroGreeting: guestFullName === "quý khách"
-      ? "Trân trọng kính mời quý khách"
-      : isFormal
-        ? `Kính gửi ${guestFullName}`
-        : `Gửi ${guestFullName}`,
     heroInvitationLine,
     envelopeLine: `${isCoupleInvite(input) || isOpenCompanionInvite(input) ? "Kính mời" : envelopePrefix}: ${envelopeRecipientLine}`,
     insideInviteLine,

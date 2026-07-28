@@ -145,12 +145,18 @@ function buildSubmissionCopy(
   attending: RSVPFormInput["attending"],
   attendingCeremony: RSVPFormInput["attendingCeremony"],
   attendingBanquet: RSVPFormInput["attendingBanquet"],
-  inviteCopy: InvitationCopy
+  inviteCopy: InvitationCopy,
+  guestIdentity?: GuestIdentity
 ) {
-  const recipient = inviteCopy.kinshipPronoun === "quý khách"
-    ? "Quý khách"
-    : inviteCopy.kinshipPronoun.charAt(0).toUpperCase() + inviteCopy.kinshipPronoun.slice(1);
-  const recipientLower = inviteCopy.kinshipPronoun;
+  const rawHonorific = guestIdentity?.honorific?.trim();
+  const recipient = rawHonorific
+    ? rawHonorific.charAt(0).toUpperCase() + rawHonorific.slice(1)
+    : (inviteCopy.kinshipPronoun === "quý khách"
+      ? "Quý khách"
+      : inviteCopy.kinshipPronoun.charAt(0).toUpperCase() + inviteCopy.kinshipPronoun.slice(1));
+  const recipientLower = rawHonorific
+    ? rawHonorific.toLowerCase()
+    : inviteCopy.kinshipPronoun;
 
   if (attending === "no") {
     return {
@@ -201,55 +207,7 @@ function normalizeBoolean(value: boolean | undefined): "yes" | "no" | null {
   return null;
 }
 
-function getRecapText(
-  attendingCeremony: "yes" | "no" | null,
-  attendingBanquet: "yes" | "no" | null,
-  stayDecision: "25" | "26" | "both" | "none",
-  lodgingGuests: Array<{ fullName?: string; isChild?: boolean }>,
-  inviteCopy: InvitationCopy
-) {
-  if (attendingCeremony === null && attendingBanquet === null) {
-    return "Vui lòng chọn phản hồi tham dự của bạn.";
-  }
 
-  const recipient = inviteCopy.recipientPronoun
-    ? inviteCopy.recipientPronoun.charAt(0).toUpperCase() + inviteCopy.recipientPronoun.slice(1)
-    : "Khách mời";
-
-  if (attendingCeremony === "no" && attendingBanquet === "no") {
-    return `${recipient} rất tiếc không thể tham dự ngày vui.`;
-  }
-
-  const events: string[] = [];
-  if (attendingCeremony === "yes") events.push("Thánh lễ Hôn phối");
-  if (attendingBanquet === "yes") events.push("Tiệc cưới");
-
-  const eventText = events.join(" và ");
-  let stayText = "";
-
-  if (attendingBanquet === "yes" && stayDecision !== "none") {
-    const adults = lodgingGuests.filter((g) => !g.isChild && g.fullName?.trim()).length;
-    const children = lodgingGuests.filter((g) => g.isChild && g.fullName?.trim()).length;
-
-    let nightLabel = "";
-    if (stayDecision === "25") nightLabel = "đêm 25/12";
-    else if (stayDecision === "26") nightLabel = "đêm 26/12";
-    else if (stayDecision === "both") nightLabel = "cả hai đêm 25 và 26/12";
-
-    const peopleParts: string[] = [];
-    if (adults > 0) peopleParts.push(`${adults} người lớn`);
-    if (children > 0) peopleParts.push(`${children} trẻ em`);
-    const peopleText = peopleParts.join(" và ");
-
-    if (peopleText) {
-      stayText = `, nghỉ lại ${nightLabel} cho ${peopleText} tại Resort Terracotta`;
-    } else {
-      stayText = `, nghỉ lại ${nightLabel} tại Resort Terracotta`;
-    }
-  }
-
-  return `${recipient} sẽ tham dự ${eventText}${stayText}.`;
-}
 
 export default function RSVPPage() {
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -332,7 +290,7 @@ export default function RSVPPage() {
   const returnHref = inviteToken ? `/i/${encodeURIComponent(inviteToken)}` : "/";
 
   const inviteCopy = useMemo(() => buildInvitationCopy(inviteeContext ?? guestIdentity), [guestIdentity, inviteeContext]);
-  const submissionCopy = useMemo(() => buildSubmissionCopy(attending, attendingCeremony, attendingBanquet, inviteCopy), [attending, attendingCeremony, attendingBanquet, inviteCopy]);
+  const submissionCopy = useMemo(() => buildSubmissionCopy(attending, attendingCeremony, attendingBanquet, inviteCopy, inviteeContext ?? guestIdentity), [attending, attendingCeremony, attendingBanquet, inviteCopy, guestIdentity, inviteeContext]);
   const lodgingGuests = normalizeLodgingGuests((watchedLodgingGuests ?? []) as Array<Partial<LodgingGuestForm> | undefined>);
   const terracottaNote = buildTerracottaNote(lodgingGuests);
   const canRegisterStay = attending !== "no";

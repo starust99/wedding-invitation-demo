@@ -35,8 +35,6 @@ export function HeroSaveTheDate({ config, guestIdentity }: { config: WeddingConf
       mode="public"
       viewport={viewport}
       summary={{
-        guestName: hasGuestIdentity ? formatGuestName(guestIdentity) : undefined,
-        guestGreeting: hasGuestIdentity ? inviteCopy.heroGreeting : undefined,
         invitationLine: hasGuestIdentity ? inviteCopy.heroInvitationLine : undefined,
         venueName: config.venue.name,
         venueArea: config.venue.area,

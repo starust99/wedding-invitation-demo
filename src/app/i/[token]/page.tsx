@@ -52,12 +52,14 @@ export async function generateMetadata({ params }: { params: Promise<{ token: st
       const supabase = getSupabaseServerClient();
       const { data } = await supabase
         .from("invitees")
-        .select("display_label, guest_name")
+        .select("honorific, guest_name")
         .eq("token", token)
         .maybeSingle();
 
       if (data) {
-        guestName = data.display_label || data.guest_name || "bạn";
+        const honorific = data.honorific?.trim();
+        const guestNameVal = data.guest_name?.trim();
+        guestName = [honorific, guestNameVal].filter(Boolean).join(" ") || "bạn";
       }
     } catch {
       // Fallback to "bạn" if DB fails
@@ -65,8 +67,7 @@ export async function generateMetadata({ params }: { params: Promise<{ token: st
   }
 
   const title = `Thiệp mời: ${guestName} | Nhật & Phương`;
-  const guestPrefix = guestName.charAt(0).toUpperCase() + guestName.slice(1);
-  const description = `${guestPrefix} đến chung vui và ghi dấu những khoảnh khắc đáng nhớ cùng Nhật & Phương, 26.12.2026.`;
+  const description = `Mời ${guestName} cùng đến chung vui trong ngày trọng đại của Nhật & Phương.`;
 
   return {
     title,

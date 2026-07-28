@@ -165,24 +165,38 @@ function DateDisplayStack({ dateParsed, lunarText }: { dateParsed: { day: string
 
 
 
-const staggerContainer: Variants = {
-  hidden: { opacity: 0 },
+
+
+const cardVariant: Variants = {
+  hidden: { 
+    opacity: 0, 
+    y: 15, 
+    scale: 0.97, 
+    filter: "blur(16px)" 
+  },
   visible: {
     opacity: 1,
+    y: 0,
+    scale: 1,
+    filter: "blur(0px)",
     transition: {
-      staggerChildren: 0.15,
+      duration: 1.8,
+      ease: [0.22, 1, 0.36, 1],
+      staggerChildren: 0.28,
+      delayChildren: 0.45,
     },
   },
 };
 
-const cardVariant: Variants = {
-  hidden: { opacity: 0, y: 40 },
+const cardItemVariant: Variants = {
+  hidden: { opacity: 0, y: 15, filter: "blur(6px)" },
   visible: {
     opacity: 1,
     y: 0,
+    filter: "blur(0px)",
     transition: {
-      duration: 0.7,
-      ease: [0.25, 0.1, 0.25, 1],
+      duration: 1.5,
+      ease: [0.22, 1, 0.36, 1],
     },
   },
 };
@@ -200,27 +214,35 @@ const headerVariant: Variants = {
 };
 
 const familyPanelVariant: Variants = {
-  hidden: { opacity: 0, y: 20 },
+  hidden: { 
+    opacity: 0, 
+    y: 12, 
+    scale: 0.98, 
+    filter: "blur(12px)" 
+  },
   visible: {
     opacity: 1,
     y: 0,
+    scale: 1,
+    filter: "blur(0px)",
     transition: {
-      duration: 0.5,
-      ease: [0.16, 1, 0.3, 1],
-      staggerChildren: 0.05,
-      delayChildren: 0.05,
+      duration: 1.6,
+      ease: [0.22, 1, 0.36, 1],
+      staggerChildren: 0.22,
+      delayChildren: 0.35,
     },
   },
 };
 
 const familyItemVariant: Variants = {
-  hidden: { opacity: 0, y: 10 },
+  hidden: { opacity: 0, y: 10, filter: "blur(4px)" },
   visible: {
     opacity: 1,
     y: 0,
+    filter: "blur(0px)",
     transition: {
-      duration: 0.4,
-      ease: [0.16, 1, 0.3, 1],
+      duration: 1.4,
+      ease: [0.22, 1, 0.36, 1],
     },
   },
 };
@@ -506,36 +528,33 @@ export function EventDetailsContent({
       </motion.div>
 
       {/* Unified Vertical Scrolling Layout for Mobile, Tablet, and Desktop */}
-      <motion.div
-        className="flex flex-col gap-6 md:gap-8 w-full max-w-4xl mx-auto relative z-10 px-1 md:px-0"
-        initial="hidden"
-        whileInView="visible"
-        viewport={{ once: false, margin: "-10% 0px -10% 0px" }}
-        variants={staggerContainer}
-      >
+      <div className="flex flex-col gap-6 md:gap-8 w-full max-w-4xl mx-auto relative z-10 px-1 md:px-0">
         {/* Card 1: Thánh lễ Hôn phối */}
         <motion.div 
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: "-80px" }}
           variants={cardVariant}
           className="w-full luxury-wedding-stationery-card px-6 pt-10 pb-10 sm:px-10 sm:pt-14 sm:pb-14 md:px-12 md:pt-16 md:pb-16 flex flex-col items-center text-center relative"
         >
 
           {/* Main Title */}
-          <h4 className="font-serif text-[1.2rem] sm:text-[1.35rem] font-bold tracking-[0.14em] md:tracking-[0.18em] uppercase text-[#3f4642] mt-1 mb-1.5 leading-tight">
+          <motion.h4 variants={cardItemVariant} className="font-serif text-[1.2rem] sm:text-[1.35rem] font-bold tracking-[0.14em] md:tracking-[0.18em] uppercase text-[#3f4642] mt-1 mb-1.5 leading-tight">
             Thánh lễ hôn phối
-          </h4>
+          </motion.h4>
 
           {/* Decorative Divider */}
-          <div className="w-full flex justify-center mt-1 mb-5">
+          <motion.div variants={cardItemVariant} className="w-full flex justify-center mt-1 mb-5">
             <img 
               src="/assets/divider_cards.png" 
               alt="decorative divider" 
               className="w-[90%] sm:w-[95%] max-w-[33.7rem] h-auto opacity-95 select-none object-contain pointer-events-none"
               style={{ filter: "brightness(0.85) saturate(1.3) contrast(1.05)" }}
             />
-          </div>
+          </motion.div>
 
           {/* Church Image */}
-          <div className="watercolor-blend-container relative w-full max-w-[38rem] mx-auto aspect-[4/3] rounded-[1.5rem] overflow-hidden shadow-[0_4px_14px_rgba(63,70,66,0.05)] border border-[#b4975a]/12 mb-6">
+          <motion.div variants={cardItemVariant} className="watercolor-blend-container relative w-full max-w-[38rem] mx-auto aspect-[4/3] rounded-[1.5rem] overflow-hidden shadow-[0_4px_14px_rgba(63,70,66,0.05)] border border-[#b4975a]/12 mb-6">
             {content.churchImageUrl ? (
               <Image
                 src={content.churchImageUrl}
@@ -551,28 +570,35 @@ export function EventDetailsContent({
                 <span className="font-serif italic text-xs text-[#3f4642]/40">Ảnh</span>
               </div>
             )}
-          </div>
+          </motion.div>
 
-          <DateDisplayStack dateParsed={churchDateParsed} lunarText="Nhằm ngày 12 tháng 11 năm Bính Ngọ" />
+          <motion.div variants={cardItemVariant} className="w-full flex flex-col items-center">
+            <DateDisplayStack dateParsed={churchDateParsed} lunarText="Nhằm ngày 12 tháng 11 năm Bính Ngọ" />
+          </motion.div>
 
           {/* Time Display */}
-          <span className="font-sans text-[0.82rem] sm:text-[1.01rem] md:text-[1.08rem] tracking-[0.18em] font-bold text-[#7d7065] uppercase mb-1">
-            Cử Hành
-          </span>
-          <div className="font-serif text-[2.35rem] sm:text-[2.89rem] md:text-[3.32rem] font-light text-[#3f4642] tracking-wider leading-none mb-3">
-            {content.churchTime || "10:00"}
-          </div>
+          <motion.div variants={cardItemVariant} className="w-full flex flex-col items-center">
+            <span className="font-sans text-[0.82rem] sm:text-[1.01rem] md:text-[1.08rem] tracking-[0.18em] font-bold text-[#7d7065] uppercase mb-1">
+              Cử Hành
+            </span>
+            <div className="font-serif text-[2.35rem] sm:text-[2.89rem] md:text-[3.32rem] font-light text-[#3f4642] tracking-wider leading-none mb-3">
+              {content.churchTime || "10:00"}
+            </div>
+          </motion.div>
 
           {/* Location */}
-          <p className="font-serif text-[#3f4642] text-[1.2rem] sm:text-[1.48rem] md:text-[1.70rem] font-semibold leading-snug mb-0.5">
-            {content.churchLocation || "Nhà Thờ Giáo Xứ Tam Hải"}
-          </p>
-          <p className="font-serif text-[#6e5949] text-[1.02rem] sm:text-[1.25rem] md:text-[1.41rem] italic leading-snug mb-5">
-            180 Đ. Tam Châu, Tam Bình, Thủ Đức
-          </p>
+          <motion.div variants={cardItemVariant} className="w-full flex flex-col items-center">
+            <p className="font-serif text-[#3f4642] text-[1.2rem] sm:text-[1.48rem] md:text-[1.70rem] font-semibold leading-snug mb-0.5">
+              {content.churchLocation || "Nhà Thờ Giáo Xứ Tam Hải"}
+            </p>
+            <p className="font-serif text-[#6e5949] text-[1.02rem] sm:text-[1.25rem] md:text-[1.41rem] italic leading-snug mb-5">
+              180 Đ. Tam Châu, Tam Bình, Thủ Đức
+            </p>
+          </motion.div>
 
           {/* Map Pin link */}
-          <a 
+          <motion.a 
+            variants={cardItemVariant}
             href="https://www.google.com/maps/search/?api=1&query=Nh%C3%A0%20th%E1%BB%9D%20Gi%C3%A1o%20x%E1%BB%A9%20Tam%20H%E1%BA%A3i%20180%20Tam%20Ch%C3%A2u%20Tam%20B%C3%ACnh%20Th%E1%BB%A7%20%C4%90%E1%BB%A9c" 
             target="_blank" 
             rel="noreferrer" 
@@ -582,56 +608,66 @@ export function EventDetailsContent({
               <MapPin className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#3f4642]" />
               <span>Chỉ đường</span>
             </span>
-          </a>
+          </motion.a>
         </motion.div>
 
         {/* Card 2: Tiệc Cưới Thân Mật (Unified Card) */}
         <motion.div 
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: "-80px" }}
           variants={cardVariant}
           className="w-full luxury-wedding-stationery-card px-6 pt-10 pb-10 sm:px-10 sm:pt-14 sm:pb-14 md:px-12 md:pt-16 md:pb-16 flex flex-col items-center text-center relative"
         >
 
           {/* Main Title */}
-          <h4 className="font-serif text-[1.2rem] sm:text-[1.35rem] font-bold tracking-[0.14em] md:tracking-[0.18em] uppercase text-[#3f4642] mt-1 mb-1.5 leading-tight">
+          <motion.h4 variants={cardItemVariant} className="font-serif text-[1.2rem] sm:text-[1.35rem] font-bold tracking-[0.14em] md:tracking-[0.18em] uppercase text-[#3f4642] mt-1 mb-1.5 leading-tight">
             Tiệc cưới
-          </h4>
+          </motion.h4>
 
           {/* Decorative Divider */}
-          <div className="w-full flex justify-center mt-1 mb-5">
+          <motion.div variants={cardItemVariant} className="w-full flex justify-center mt-1 mb-5">
             <img 
               src="/assets/divider_cards.png" 
               alt="decorative divider" 
               className="w-[90%] sm:w-[95%] max-w-[33.7rem] h-auto opacity-95 select-none object-contain pointer-events-none"
               style={{ filter: "brightness(0.85) saturate(1.3) contrast(1.05)" }}
             />
-          </div>
+          </motion.div>
 
           {/* Venue Image */}
-          <div className="relative w-full max-w-[38rem] mx-auto aspect-[4/3] rounded-[1.5rem] overflow-hidden shadow-[0_4px_14px_rgba(63,70,66,0.05)] border border-[#b4975a]/12 mb-6">
+          <motion.div variants={cardItemVariant} className="relative w-full max-w-[38rem] mx-auto aspect-[4/3] rounded-[1.5rem] overflow-hidden shadow-[0_4px_14px_rgba(63,70,66,0.05)] border border-[#b4975a]/12 mb-6">
             <VenueMapImage className="w-full h-full !aspect-auto !rounded-none" />
-          </div>
+          </motion.div>
 
-          <DateDisplayStack dateParsed={banquetDateParsed} lunarText="Nhằm ngày 18 tháng 11 năm Bính Ngọ" />
+          <motion.div variants={cardItemVariant} className="w-full flex flex-col items-center">
+            <DateDisplayStack dateParsed={banquetDateParsed} lunarText="Nhằm ngày 18 tháng 11 năm Bính Ngọ" />
+          </motion.div>
 
           {/* Time Display */}
-          <span className="font-sans text-[0.82rem] sm:text-[1.01rem] md:text-[1.08rem] tracking-[0.18em] font-bold text-[#7d7065] uppercase mb-1">
-            Đón Khách
-          </span>
-          <div className="font-serif text-[2.35rem] sm:text-[2.89rem] md:text-[3.32rem] font-light text-[#3f4642] tracking-wider leading-none mb-3">
-            17:30
-          </div>
+          <motion.div variants={cardItemVariant} className="w-full flex flex-col items-center">
+            <span className="font-sans text-[0.82rem] sm:text-[1.01rem] md:text-[1.08rem] tracking-[0.18em] font-bold text-[#7d7065] uppercase mb-1">
+              Đón Khách
+            </span>
+            <div className="font-serif text-[2.35rem] sm:text-[2.89rem] md:text-[3.32rem] font-light text-[#3f4642] tracking-wider leading-none mb-3">
+              17:30
+            </div>
+          </motion.div>
 
           {/* Location */}
-          <p className="font-serif text-[#3f4642] text-[1.2rem] sm:text-[1.48rem] md:text-[1.70rem] font-semibold leading-snug mb-0.5">
-            Terracotta Hotel & Resort Đà Lạt
-          </p>
-          <p className="font-serif text-[#6e5949] text-[1.02rem] sm:text-[1.25rem] md:text-[1.41rem] italic leading-snug mb-5">
-            Quảng trường Terrace Montagne
-          </p>
+          <motion.div variants={cardItemVariant} className="w-full flex flex-col items-center">
+            <p className="font-serif text-[#3f4642] text-[1.2rem] sm:text-[1.48rem] md:text-[1.70rem] font-semibold leading-snug mb-0.5">
+              Terracotta Hotel & Resort Đà Lạt
+            </p>
+            <p className="font-serif text-[#6e5949] text-[1.02rem] sm:text-[1.25rem] md:text-[1.41rem] italic leading-snug mb-5">
+              Quảng trường Terrace Montagne
+            </p>
+          </motion.div>
 
           {/* Map Link */}
           {mapUrl ? (
-            <a 
+            <motion.a 
+              variants={cardItemVariant}
               href={mapUrl} 
               target="_blank" 
               rel="noreferrer" 
@@ -641,15 +677,15 @@ export function EventDetailsContent({
                 <MapPin className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#3f4642]" />
                 <span>Chỉ đường</span>
               </span>
-            </a>
+            </motion.a>
           ) : null}
 
           {/* Divider */}
-          <div className="w-full border-t border-[#b4975a]/15 my-6" />
+          <motion.div variants={cardItemVariant} className="w-full border-t border-[#b4975a]/15 my-6" />
 
           {/* Timeline Section wrapped inside Card 2 */}
           {publicData?.timeline && publicData.timeline.length > 0 && (
-            <div className="w-full text-center">
+            <motion.div variants={cardItemVariant} className="w-full text-center">
               <h5 className="font-sans text-[0.88rem] sm:text-[0.94rem] md:text-[1rem] font-bold tracking-[0.22em] text-[#7d7065] uppercase leading-none mt-2 mb-3">
                 Chương trình tiệc
               </h5>
@@ -695,20 +731,20 @@ export function EventDetailsContent({
 
               {/* Divider */}
               <div className="w-full border-t border-[#b4975a]/15 mt-8 mb-2" />
-            </div>
+            </motion.div>
           )}
 
           {/* Section 3: Dress Code */}
-          <div className="py-6 w-full">
+          <motion.div variants={cardItemVariant} className="py-6 w-full">
             <DressCodeSection
               title={dressCodeTitle}
               note={dressCodeNote}
               selectedColorId={selectedColorId}
               setSelectedColorId={setSelectedColorId}
             />
-          </div>
+          </motion.div>
         </motion.div>
-      </motion.div>
+      </div>
 
     </div>
   );

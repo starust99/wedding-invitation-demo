@@ -40,9 +40,12 @@ export function ThankYouSection({
   const isBoth = rsvpAttendingCeremony === true && rsvpAttendingBanquet === true;
   const isDefault = !isDeclined && !isCeremonyOnly && !isBanquetOnly && !isBoth;
 
-  const recipient = inviteCopy.kinshipPronoun === "quý khách"
-    ? "Quý khách"
-    : inviteCopy.kinshipPronoun.charAt(0).toUpperCase() + inviteCopy.kinshipPronoun.slice(1);
+  const rawHonorific = guestIdentity.honorific?.trim();
+  const recipient = rawHonorific
+    ? rawHonorific.charAt(0).toUpperCase() + rawHonorific.slice(1)
+    : (inviteCopy.kinshipPronoun === "quý khách"
+      ? "Quý khách"
+      : inviteCopy.kinshipPronoun.charAt(0).toUpperCase() + inviteCopy.kinshipPronoun.slice(1));
 
   let thankYouMessage = "";
   if (rsvpAttending === "no") {
@@ -69,10 +72,10 @@ export function ThankYouSection({
 
       <div className="mx-auto flex max-w-7xl justify-center">
         <motion.div
-          initial={{ opacity: 0, y: 40, scale: 0.95, filter: "blur(10px)" }}
+          initial={{ opacity: 0, y: 15, scale: 0.97, filter: "blur(16px)" }}
           whileInView={{ opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }}
-          viewport={{ once: false, margin: "-10% 0px -10% 0px" }}
-          transition={{ duration: 0.8, ease: [0.25, 0.1, 0.25, 1] }}
+          viewport={{ once: true, margin: "-50px" }}
+          transition={{ duration: 1.8, ease: [0.22, 1, 0.36, 1] }}
           className="glass-panel relative w-full max-w-3xl overflow-hidden rounded-[2.5rem] px-5 py-8 sm:px-10 sm:py-10 lg:px-12 lg:py-12 shadow-none"
         >
           <div className="relative z-10 flex flex-col items-center justify-center py-2 text-center">

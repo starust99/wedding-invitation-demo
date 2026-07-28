@@ -13,7 +13,6 @@ type ReferenceWeddingHeroProps = {
 
 export type ReferenceWeddingHeroSummary = {
   guestName?: string;
-  guestGreeting?: string;
   invitationLine?: string;
   venueName?: string;
   venueArea?: string;
@@ -197,7 +196,7 @@ export function ReferenceWeddingHero({ config, summary }: ReferenceWeddingHeroPr
 
         <article className="save-date-hero-copy-block">
           <LineReveal delay={textHeaderDelay} type="header" className="w-full">
-            <div className="save-date-invite-heading-image" aria-label={summary?.guestGreeting || "Trân trọng thân mời"}>
+            <div className="save-date-invite-heading-image" aria-label="Trân trọng kính mời">
               <Image
                 src="/assets/hero-invite-heading-v5.png"
                 alt=""
