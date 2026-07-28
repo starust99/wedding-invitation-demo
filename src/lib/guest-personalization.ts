@@ -772,6 +772,9 @@ export function buildInvitationCopy(input?: InvitationCopyInput): InvitationCopy
     invitationName: input?.invitationName,
   });
 
+  const guestNameVal = input?.guestName ?? input?.name ?? "";
+  const guestFullName = [input?.honorific, guestNameVal].filter(Boolean).join(" ") || "quý khách";
+
   const explicitHostPronoun = cleanString(input?.hostPronoun);
   const hostPronouns: Record<InvitationTone, string> = {
     parents_host: resolveParentsHostPronoun(input),
@@ -856,8 +859,8 @@ export function buildInvitationCopy(input?: InvitationCopyInput): InvitationCopy
   const personalInviteOwner = isParentsHost ? parentInviteOwner : normalizeInviteOwnerPronoun(hostPronoun);
   const personalInviteLine = `${guestLabel} đến dự Thánh Lễ Hôn Phối & tiệc cưới của ${personalInviteOwner}.`;
   const insideInviteLine = `${personalInviteHeading}\n${personalInviteLine}`;
-  const guestLabelPrefix = guestLabel.charAt(0).toUpperCase() + guestLabel.slice(1);
-  const heroInvitationLine = `${guestLabelPrefix} đến chung vui và ghi dấu những khoảnh khắc đáng nhớ cùng Nhật & Phương.`;
+  const guestFullNamePrefix = guestFullName.charAt(0).toUpperCase() + guestFullName.slice(1);
+  const heroInvitationLine = `${guestFullNamePrefix} đến chung vui và ghi dấu những khoảnh khắc đáng nhớ cùng Nhật & Phương.`;
   const rsvpLead = tone === "parents_host"
     ? `${hostSubject} mong nhận được lời hồi đáp để chuẩn bị đón tiếp chu đáo`
     : tone === "elder"
@@ -889,11 +892,11 @@ export function buildInvitationCopy(input?: InvitationCopyInput): InvitationCopy
     invitedGuestLine,
     inviteScope,
     greeting: `${guestLabel === "quý khách" ? "Quý khách" : guestLabel} thân mến`,
-    heroGreeting: guestLabel === "quý khách"
+    heroGreeting: guestFullName === "quý khách"
       ? "Trân trọng kính mời quý khách"
       : isFormal
-        ? `Kính gửi ${guestLabel}`
-        : `Gửi ${guestLabel}`,
+        ? `Kính gửi ${guestFullName}`
+        : `Gửi ${guestFullName}`,
     heroInvitationLine,
     envelopeLine: `${isCoupleInvite(input) || isOpenCompanionInvite(input) ? "Kính mời" : envelopePrefix}: ${envelopeRecipientLine}`,
     insideInviteLine,
