@@ -264,7 +264,7 @@ export function DressCodeSection({
         <div className="flex justify-center mt-5 select-none min-h-[2.2rem]">
           <motion.div
             layout
-            className="inline-flex items-center gap-2.5 px-4.5 py-1.5 rounded-full border shadow-[0_4px_16px_rgba(63,70,66,0.04)] backdrop-blur-[8px] origin-center"
+            className="flex w-[19.2rem] sm:w-[20.5rem] items-center justify-center gap-2.5 px-4.5 py-1.5 rounded-full border shadow-[0_4px_16px_rgba(63,70,66,0.04)] backdrop-blur-[8px] origin-center"
             animate={{
               background: badgeBg,
               borderColor: badgeBorder
