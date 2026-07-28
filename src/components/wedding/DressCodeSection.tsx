@@ -170,10 +170,9 @@ export function DressCodeSection({
       </div>
 
       {/* Interactive Illustration Image */}
-      {/* Unified Interactive Card Container */}
-      <div className="w-full max-w-[26rem] sm:max-w-[29rem] md:max-w-[32rem] mx-auto p-3 sm:p-4 rounded-[2.2rem] bg-white/20 shadow-[0_6px_24px_rgba(63,70,66,0.02)] backdrop-blur-[6px] flex flex-col items-center">
+      <div className="w-full max-w-[26rem] sm:max-w-[29rem] md:max-w-[32rem] mx-auto flex flex-col items-center">
         {/* Card containing image */}
-        <div className="relative w-full aspect-[3/4] rounded-[1.6rem] overflow-hidden border border-white/20 shadow-sm">
+        <div className="relative w-full aspect-[3/4] rounded-[2.2rem] overflow-hidden shadow-[0_6px_20px_rgba(0,0,0,0.05)] bg-white/50 border border-white/20">
           <div className="w-full h-full overflow-hidden relative">
             <AnimatePresence mode="popLayout">
               <motion.div
@@ -198,9 +197,13 @@ export function DressCodeSection({
         </div>
 
         {/* Color Selection Bar (moved below) */}
-        {/* Color Selection Bar (integrated inside card) */}
+        {/* Color Selection Bar (moved below) */}
         <div
-          className="flex w-full justify-between items-center z-10 mt-3.5 px-1 sm:px-2"
+          className="flex w-full bg-white/25 border border-white/40 shadow-[0_4px_24px_rgba(63,70,66,0.06)] rounded-full py-2.5 px-4.5 justify-between items-center z-10 mt-5"
+          style={{
+            backdropFilter: "blur(16px)",
+            WebkitBackdropFilter: "blur(16px)",
+          }}
           role="group"
           aria-label="Chọn màu trang phục"
         >
@@ -241,10 +244,10 @@ export function DressCodeSection({
         </div>
 
         {/* Glassmorphic Badge below Swatches */}
-        <div className="flex justify-center mt-3.5 select-none min-h-[2.2rem]">
+        <div className="flex justify-center mt-5 select-none min-h-[2.2rem]">
           <motion.div
             layout
-            className="flex w-[19.2rem] sm:w-[20.5rem] h-[2.4rem] sm:h-[2.6rem] items-center justify-center gap-2.5 px-4.5 rounded-full border shadow-sm backdrop-blur-[4px] origin-center"
+            className="flex w-[19.2rem] sm:w-[20.5rem] h-[2.4rem] sm:h-[2.6rem] items-center justify-center gap-2.5 px-4.5 rounded-full border shadow-[0_4px_16px_rgba(63,70,66,0.04)] backdrop-blur-[8px] origin-center"
             animate={{
               background: badgeBg,
               borderColor: badgeBorder
