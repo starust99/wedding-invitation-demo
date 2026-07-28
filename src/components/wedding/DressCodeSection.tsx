@@ -163,7 +163,7 @@ export function DressCodeSection({
         </p>
 
         {weatherAlertText && (
-          <p className="font-serif italic text-[#8d713a] text-[0.88rem] sm:text-[0.94rem] leading-relaxed max-w-[27rem] mx-auto opacity-95">
+          <p className="font-serif italic text-[#8d713a] text-[0.94rem] sm:text-[1rem] md:text-[1.04rem] leading-relaxed max-w-[31rem] mx-auto">
             * {weatherAlertText} *
           </p>
         )}
