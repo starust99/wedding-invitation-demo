@@ -313,16 +313,7 @@ export function DressCodeSection({
                     <Sparkles className="w-3.5 h-3.5" style={{ stroke: "url(#dresscode-gradient)" }} />
                   </motion.div>
 
-                  <span 
-                    className="font-sans text-[0.82rem] sm:text-[0.85rem] font-bold tracking-[0.06em] leading-normal whitespace-nowrap uppercase"
-                    style={{
-                      background: "linear-gradient(to right, #d39a9c, #9bb4c5)",
-                      WebkitBackgroundClip: "text",
-                      WebkitTextFillColor: "transparent",
-                      backgroundClip: "text",
-                      color: "transparent",
-                    }}
-                  >
+                  <span className="font-sans text-[0.82rem] sm:text-[0.85rem] font-bold tracking-[0.06em] leading-normal whitespace-nowrap uppercase text-[#3f4642]">
                     CHỌN MÀU ĐỂ XEM GỢI Ý
                   </span>
 
