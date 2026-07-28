@@ -298,7 +298,7 @@ export function DressCodeSection({
                   transition={{ duration: 0.2 }}
                   className="flex items-center gap-2.5"
                 >
-                  {/* Slow glowing/breathing Sparkles icon */}
+                  {/* Left Sparkles icon */}
                   <motion.div
                     animate={{
                       opacity: [0.5, 1, 0.5],
@@ -312,8 +312,9 @@ export function DressCodeSection({
                   >
                     <Sparkles className="w-3.5 h-3.5" style={{ stroke: "url(#dresscode-gradient)" }} />
                   </motion.div>
+
                   <span 
-                    className="font-sans text-[0.82rem] sm:text-[0.85rem] font-semibold tracking-[0.02em] leading-none whitespace-nowrap"
+                    className="font-sans text-[0.82rem] sm:text-[0.85rem] font-semibold tracking-[0.06em] leading-none whitespace-nowrap uppercase"
                     style={{
                       background: "linear-gradient(to right, #d39a9c, #9bb4c5)",
                       WebkitBackgroundClip: "text",
@@ -322,8 +323,24 @@ export function DressCodeSection({
                       color: "transparent",
                     }}
                   >
-                    Chọn màu để xem gợi ý
+                    CHỌN MÀU ĐỂ XEM GỢI Ý
                   </span>
+
+                  {/* Right Sparkles icon */}
+                  <motion.div
+                    animate={{
+                      opacity: [0.5, 1, 0.5],
+                    }}
+                    transition={{
+                      duration: 3,
+                      repeat: Infinity,
+                      ease: "easeInOut",
+                      delay: 0.5,
+                    }}
+                    className="flex-shrink-0"
+                  >
+                    <Sparkles className="w-3.5 h-3.5" style={{ stroke: "url(#dresscode-gradient)" }} />
+                  </motion.div>
                 </motion.div>
               )}
             </AnimatePresence>
