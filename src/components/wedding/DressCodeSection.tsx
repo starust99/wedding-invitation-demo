@@ -77,11 +77,11 @@ export function DressCodeSection({
     ? `linear-gradient(90deg, rgba(255, 255, 255, 0.05) 0%, ${selectedColor.hex}${
         selectedColor.id === "cream" || selectedColor.id === "beige" ? "4c" : "28"
       } 100%)`
-    : "linear-gradient(90deg, rgba(255, 255, 255, 0.10) 0%, rgba(255, 255, 255, 0.12) 100%)";
+    : "rgba(244, 238, 230, 0.65)";
 
   const badgeBorder = selectedColor
     ? `${selectedColor.hex}${selectedColor.id === "cream" || selectedColor.id === "beige" ? "5c" : "3b"}`
-    : "rgba(255, 255, 255, 0.3)";
+    : "rgba(180, 151, 90, 0.25)";
 
   // Preload all dress code images to make color transitions instantaneous
   useEffect(() => {
