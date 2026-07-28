@@ -189,9 +189,9 @@ export function DressCodeSection({
 
       {/* Interactive Illustration Image */}
       {/* Unified Interactive Card Container */}
-      <div className="w-full max-w-[24rem] sm:max-w-[26rem] md:max-w-[27rem] mx-auto p-4 sm:p-5 rounded-[2.5rem] bg-white/30 border border-white/40 shadow-[0_8px_32px_rgba(63,70,66,0.03)] backdrop-blur-[8px] flex flex-col items-center">
+      <div className="w-full max-w-[24rem] sm:max-w-[26rem] md:max-w-[27rem] mx-auto p-3 sm:p-4 rounded-[2.2rem] bg-white/20 shadow-[0_6px_24px_rgba(63,70,66,0.02)] backdrop-blur-[6px] flex flex-col items-center">
         {/* Card containing image */}
-        <div className="relative w-full aspect-[3/4] rounded-[1.8rem] overflow-hidden border border-white/20 shadow-sm">
+        <div className="relative w-full aspect-[3/4] rounded-[1.6rem] overflow-hidden border border-white/20 shadow-sm">
           <div className="w-full h-full overflow-hidden relative">
             <AnimatePresence mode="popLayout">
               <motion.div
@@ -218,7 +218,7 @@ export function DressCodeSection({
         {/* Color Selection Bar (moved below) */}
         {/* Color Selection Bar (integrated inside card) */}
         <div
-          className="flex w-full justify-between items-center z-10 mt-5 px-1 sm:px-2"
+          className="flex w-full justify-between items-center z-10 mt-3.5 px-1 sm:px-2"
           role="group"
           aria-label="Chọn màu trang phục"
         >
@@ -259,7 +259,7 @@ export function DressCodeSection({
         </div>
 
         {/* Glassmorphic Badge below Swatches */}
-        <div className="flex justify-center mt-5 select-none min-h-[2.2rem]">
+        <div className="flex justify-center mt-3.5 select-none min-h-[2.2rem]">
           <motion.div
             layout
             className="flex w-[19.2rem] sm:w-[20.5rem] h-[2.4rem] sm:h-[2.6rem] items-center justify-center gap-2.5 px-4.5 rounded-full border shadow-sm backdrop-blur-[4px] origin-center"
