@@ -314,7 +314,7 @@ export function DressCodeSection({
                   </motion.div>
 
                   <span 
-                    className="font-sans text-[0.82rem] sm:text-[0.85rem] font-semibold tracking-[0.06em] leading-none whitespace-nowrap uppercase"
+                    className="font-sans text-[0.82rem] sm:text-[0.85rem] font-bold tracking-[0.06em] leading-relaxed whitespace-nowrap uppercase py-1"
                     style={{
                       background: "linear-gradient(to right, #d39a9c, #9bb4c5)",
                       WebkitBackgroundClip: "text",
