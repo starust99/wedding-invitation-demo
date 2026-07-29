@@ -1,12 +1,7 @@
 "use client";
 
-import { motion } from "framer-motion";
 import { SectionMediaLayers } from "@/components/SectionMediaLayers";
 import type { WeddingConfig } from "@/lib/site-settings";
-const timelinePathVideo = "/assets/timeline-path.mp4";
-const timelinePathWebm = "/assets/timeline-path-web.webm";
-
-import SeamlessVideoPlayer from "@/components/SeamlessVideoPlayer";
 
 function getTimelineIconPath(title: string): string | null {
   const t = title.toLowerCase();
@@ -51,13 +46,12 @@ export function TimelineSection({ config }: { config: WeddingConfig }) {
         </div>
 
         <div className="event-details-timeline-scene timeline-garden-path-scene w-full max-w-[28rem] sm:max-w-[34rem] md:max-w-[38rem] mx-auto min-h-[28rem] overflow-visible relative">
-          {/* Con đường: video nền đệm kép (Double Buffering) */}
+          {/* Static image + CSS motion keeps this decorative scene WebView-safe. */}
           <div className="timeline-garden-path-image timeline-path-video-wrap opacity-[0.85] absolute inset-0 pointer-events-none">
-            <SeamlessVideoPlayer
-              mp4Src={timelinePathVideo}
-              webmSrc={timelinePathWebm}
-              className="absolute inset-0 w-full h-full"
-            />
+            <picture>
+              <source media="(min-width: 640px)" srcSet="/assets/timeline-garden-path-desktop.webp" />
+              <img className="timeline-path-video h-full w-full object-contain" src="/assets/timeline-garden-path-mobile.jpg" alt="" />
+            </picture>
           </div>
 
           {/* Các thẻ mốc thời gian — so le trái/phải */}

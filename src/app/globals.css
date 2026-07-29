@@ -4317,10 +4317,56 @@ html.splash-skipped body {
   image-rendering: -webkit-optimize-contrast;
 }
 
+.wedding-rings-animation {
+  overflow: visible;
+  transform: translateZ(0);
+}
+
+.wedding-ring--left {
+  transform-origin: 67px 83px;
+  animation: wedding-ring-left 5s ease-in-out infinite;
+}
+
+.wedding-ring--right {
+  transform-origin: 93px 77px;
+  animation: wedding-ring-right 5s ease-in-out infinite;
+}
+
+.wedding-rings-sparkle {
+  transform-origin: 122px 51px;
+  animation: wedding-ring-sparkle 2.5s ease-in-out infinite;
+}
+
+.wedding-rings-sparkle--small {
+  transform-origin: 39px 60px;
+  animation-delay: 1.25s;
+}
+
+@keyframes wedding-ring-left {
+  0%, 100% { transform: translate(-2px, 1px) rotate(-25deg); }
+  50% { transform: translate(1px, -2px) rotate(-20deg); }
+}
+
+@keyframes wedding-ring-right {
+  0%, 100% { transform: translate(2px, -1px) rotate(25deg); }
+  50% { transform: translate(-1px, 2px) rotate(20deg); }
+}
+
+@keyframes wedding-ring-sparkle {
+  0%, 30%, 100% { opacity: .25; transform: scale(.65); }
+  55% { opacity: 1; transform: scale(1.08); }
+}
+
 .timeline-path-video-wrap {
   background-image: none !important;
   position: absolute;
   isolation: isolate;
+}
+
+.timeline-path-video-wrap > picture {
+  position: absolute;
+  inset: 0;
+  display: block;
 }
 
 .timeline-path-video {
@@ -4335,6 +4381,20 @@ html.splash-skipped body {
   mix-blend-mode: normal;
   filter: saturate(1.35) contrast(1.12) brightness(1.03);
   opacity: 1;
+  animation: timeline-path-breathe 7s ease-in-out infinite alternate;
+}
+
+@keyframes timeline-path-breathe {
+  from { transform: scale(1) translate3d(0, 0, 0); }
+  to { transform: scale(1.025) translate3d(0, -0.5%, 0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wedding-ring,
+  .wedding-rings-sparkle,
+  .timeline-path-video {
+    animation: none !important;
+  }
 }
 
 .timeline-path-video-wrap::before,
@@ -4483,6 +4543,4 @@ html.splash-skipped body {
     transform: rotate(2.5deg);
   }
 }
-
-
 
