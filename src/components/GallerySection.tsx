@@ -313,6 +313,7 @@ export function GallerySection({ config }: { config: WeddingConfig }) {
           <motion.div
             className="flex flex-col items-center text-center w-full px-4 pt-6 pb-6 md:pt-8 md:pb-8"
             initial="visible"
+            animate="visible"
             whileInView="visible"
             viewport={{ once: true, amount: 0.01 }}
             variants={galleryIntroVariant}
@@ -331,6 +332,7 @@ export function GallerySection({ config }: { config: WeddingConfig }) {
           <motion.div
             className="gallery-mosaic-grid"
             initial="visible"
+            animate="visible"
             whileInView="visible"
             viewport={{ once: true, amount: 0.01 }}
             variants={galleryContainerVariant}
@@ -343,12 +345,11 @@ export function GallerySection({ config }: { config: WeddingConfig }) {
               } as CSSProperties;
 
               return (
-                <motion.figure
+                <figure
                   key={`${tile.src || "placeholder"}-${index}`}
                   className={`gallery-mosaic-tile ${tile.aspectClass} lg:aspect-auto`}
                   style={style}
                   suppressHydrationWarning
-                  variants={galleryTileVariant}
                 >
                   <button
                     type="button"
@@ -363,7 +364,8 @@ export function GallerySection({ config }: { config: WeddingConfig }) {
                         alt={`${section.imageAltPrefix} ${index + 1}`}
                         className="gallery-mosaic-image absolute inset-0 w-full h-full object-cover"
                         style={{ objectPosition: tile.objectPosition } as CSSProperties}
-                        loading="lazy"
+                        loading="eager"
+                        decoding="async"
                         draggable={false}
                       />
                     ) : (
@@ -374,7 +376,7 @@ export function GallerySection({ config }: { config: WeddingConfig }) {
                       />
                     )}
                   </button>
-                </motion.figure>
+                </figure>
               );
             })}
           </motion.div>
