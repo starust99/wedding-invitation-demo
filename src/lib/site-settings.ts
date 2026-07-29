@@ -196,7 +196,7 @@ export function normalizeSettings(settings: SettingsInput | null): SiteSettings 
 
   // Migration v7: Replace the entire old default text to fix location and repetition issues
   if ((settings.schemaVersion ?? 0) < 7) {
-    const exactNewString = "Trân trọng kính mời quý khách cùng chia vui trong ngày chung đôi của Nhật & Phương.";
+    const exactNewString = "Trân trọng kính mời quý khách cùng chia vui trong lễ cưới thân mật của Nhật & Phương.";
     const isOldDefault = (text: string) => /chung vui|lễ cưới|tiệc cưới/i.test(text);
 
     const invMsg = content.invitation?.message ?? "";

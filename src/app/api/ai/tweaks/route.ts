@@ -17,7 +17,7 @@ function patchFor(key: AiTweakKey, content: WeddingConfig): { summary: string; p
       summary: "Làm lời mời trang trọng hơn và giảm cảm giác quá casual.",
       patch: [
         { op: "replace", path: "invitation.title", value: "Trân trọng kính mời" },
-        { op: "replace", path: "invitation.message", value: `Trân trọng kính mời quý khách cùng chia vui trong ngày chung đôi thân mật tại ${content.venue.name}.` },
+        { op: "replace", path: "invitation.message", value: `Trân trọng kính mời quý khách cùng chia vui trong lễ cưới thân mật tại ${content.venue.name}.` },
         { op: "replace", path: "invitation.closing", value: "Sự hiện diện của quý khách là niềm vinh hạnh và niềm vui rất lớn với gia đình." },
       ],
     };
@@ -128,7 +128,7 @@ function patchFor(key: AiTweakKey, content: WeddingConfig): { summary: string; p
   return {
     summary: "Rút ngắn lời mời, giữ sự ấm áp và dễ đọc trên mobile.",
     patch: [
-      { op: "replace", path: "invitation.message", value: `Gia đình rất mong được đón khách mời cùng chia vui trong ngày chung đôi thân mật tại ${content.venue.name}, giữa không khí Đà Lạt ấm áp và gần gũi.` },
+      { op: "replace", path: "invitation.message", value: `Gia đình rất mong được đón khách mời cùng chia vui trong lễ cưới thân mật tại ${content.venue.name}, giữa không khí Đà Lạt ấm áp và gần gũi.` },
       { op: "replace", path: "sections.guestNotes.description", value: "Một vài ghi chú nhỏ để khách mời chuẩn bị thoải mái cho buổi tối ngoài trời ở Đà Lạt." },
       { op: "replace", path: "sections.cta.description", value: "Xin xác nhận tham dự để gia đình chuẩn bị chỗ ngồi và hỗ trợ lưu trú chu đáo hơn." },
     ],

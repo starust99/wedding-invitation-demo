@@ -145,7 +145,7 @@ const directions = [
       content: {
         invitation: {
           title: "Trân trọng kính mời",
-          message: "Trân trọng kính mời quý khách cùng chia vui trong ngày chung đôi thân mật tại Đà Lạt.",
+          message: "Trân trọng kính mời quý khách cùng chia vui trong lễ cưới thân mật tại Đà Lạt.",
           closing: "Sự hiện diện của quý khách là niềm vinh hạnh và niềm vui rất lớn với gia đình.",
         },
         sections: {
