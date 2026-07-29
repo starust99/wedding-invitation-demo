@@ -42,7 +42,6 @@ export function CanvasVideo({
     const video = videoRef.current;
     if (!video) return;
 
-    // Determine target play state
     const targetPlay = isPlaying !== undefined ? isPlaying : autoPlay;
 
     if (targetPlay) {
@@ -93,11 +92,12 @@ export function CanvasVideo({
   }, [src]);
 
   return (
-    <div className={`relative overflow-hidden ${className}`} style={style}>
-      {/* Hidden Video element (completely invisible to prevent native hijack) */}
+    <div className={`relative overflow-hidden ${className}`} style={{ ...style, width: "100%", height: "100%" }}>
+      {/* Hidden Video element (made 100% size, low opacity, covered by canvas to force mobile playback) */}
       <video
         ref={videoRef}
         src={src}
+        autoPlay={autoPlay}
         muted
         playsInline
         loop={loop}
@@ -113,11 +113,11 @@ export function CanvasVideo({
           position: "absolute",
           top: 0,
           left: 0,
-          width: "1px",
-          height: "1px",
-          opacity: 0,
+          width: "100%",
+          height: "100%",
+          opacity: 0.001,
           pointerEvents: "none",
-          zIndex: -1,
+          zIndex: 1, // Behind the poster and canvas
           ...videoStyle,
         }}
         preload={preload}
@@ -125,26 +125,34 @@ export function CanvasVideo({
         {children}
       </video>
       
-      {/* Visible Canvas rendering the video frames */}
+      {/* Poster Image shown underneath the canvas */}
+      {poster && (
+        <img
+          src={poster}
+          alt=""
+          className="absolute inset-0 w-full h-full"
+          style={{
+            objectFit,
+            zIndex: 2,
+            opacity: hasStartedPlaying ? 0 : 1,
+            transition: "opacity 300ms ease-in-out",
+            pointerEvents: "none",
+          }}
+        />
+      )}
+
+      {/* Visible Canvas rendering the video frames (always visible to prevent rendering lag) */}
       <canvas
         ref={canvasRef}
         className="w-full h-full"
         style={{
           objectFit,
-          display: hasStartedPlaying ? "block" : "none",
+          position: "relative",
+          zIndex: 3,
+          background: "transparent",
           ...canvasStyle,
         }}
       />
-
-      {/* Poster Image shown before video starts */}
-      {!hasStartedPlaying && poster && (
-        <img
-          src={poster}
-          alt=""
-          className="absolute inset-0 w-full h-full"
-          style={{ objectFit }}
-        />
-      )}
     </div>
   );
 }

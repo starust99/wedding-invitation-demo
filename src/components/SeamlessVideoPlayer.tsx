@@ -22,7 +22,6 @@ export default function SeamlessVideoPlayer({
   
   // Opacity of the active top video
   const [topOpacity, setTopOpacity] = useState(1);
-  const [hasStarted, setHasStarted] = useState(false);
 
   useEffect(() => {
     const videoA = videoRefA.current;
@@ -129,9 +128,10 @@ export default function SeamlessVideoPlayer({
 
   return (
     <div className={`relative w-full h-full overflow-hidden ${className}`}>
-      {/* Hidden Video Elements to bypass hijack */}
+      {/* Hidden Video Elements (set to 100% size, low opacity, covered by canvas to force mobile playback) */}
       <video
         ref={videoRefA}
+        autoPlay
         muted
         playsInline
         webkit-playsinline="true"
@@ -140,16 +140,15 @@ export default function SeamlessVideoPlayer({
         x5-video-orientation="portrait"
         disablePictureInPicture
         disableRemotePlayback
-        onPlay={() => setHasStarted(true)}
         style={{
           position: "absolute",
           top: 0,
           left: 0,
-          width: "1px",
-          height: "1px",
-          opacity: 0,
+          width: "100%",
+          height: "100%",
+          opacity: 0.001,
           pointerEvents: "none",
-          zIndex: -1,
+          zIndex: 1,
         }}
       >
         {webmSrc && <source src={webmSrc} type="video/webm" />}
@@ -158,6 +157,7 @@ export default function SeamlessVideoPlayer({
 
       <video
         ref={videoRefB}
+        autoPlay
         muted
         playsInline
         webkit-playsinline="true"
@@ -170,25 +170,26 @@ export default function SeamlessVideoPlayer({
           position: "absolute",
           top: 0,
           left: 0,
-          width: "1px",
-          height: "1px",
-          opacity: 0,
+          width: "100%",
+          height: "100%",
+          opacity: 0.001,
           pointerEvents: "none",
-          zIndex: -1,
+          zIndex: 1,
         }}
       >
         {webmSrc && <source src={webmSrc} type="video/webm" />}
         <source src={mp4Src} type="video/mp4" />
       </video>
 
-      {/* Single visible Canvas */}
+      {/* Single visible Canvas (placed on top with zIndex 2) */}
       <canvas
         ref={canvasRef}
         className="w-full h-full"
         style={{
           objectFit: "contain",
           backgroundColor: "var(--wedding-cream, #f7f2ea)",
-          display: hasStarted ? "block" : "none",
+          position: "relative",
+          zIndex: 2,
         }}
       />
     </div>
