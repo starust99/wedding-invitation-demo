@@ -433,21 +433,14 @@ export function EventDetailsContent({
               />
             </div>
             
-            {/* Video of wedding rings in the middle */}
+            {/* Animated WebP of wedding rings in the middle */}
             <div className="w-[7.2rem] h-[7.2rem] sm:w-[9.2rem] sm:h-[9.2rem] relative flex items-center justify-center overflow-visible select-none mt-[-2.2rem] mb-[-2.2rem] sm:mt-[-2.6rem] sm:mb-[-2.6rem] pointer-events-none z-10">
-              <CanvasVideo
-                autoPlay
-                loop
-                className="w-full h-full"
-                canvasStyle={{ objectFit: "contain" }}
-                objectFit="contain"
-                preload="auto"
-              >
-                {/* Safari/iOS: HEVC with Alpha */}
-                <source src="/assets/wedding-rings.mov?v=8" type="video/quicktime; codecs=hvc1" />
-                {/* Chrome/Android/Firefox: VP9 with Alpha */}
-                <source src="/assets/wedding-rings.webm?v=8" type="video/webm; codecs=vp9" />
-              </CanvasVideo>
+              <img
+                src="/assets/wedding-rings.webp"
+                alt="Cặp nhẫn cưới"
+                className="w-full h-full object-contain"
+                draggable={false}
+              />
             </div>
 
             {/* Bottom Name (Teresa Nguyễn Anh Phương) - Cropped from original image */}
@@ -636,12 +629,14 @@ export function EventDetailsContent({
               </div>
               
               <div className="event-details-timeline-scene timeline-garden-path-scene w-full max-w-[28rem] sm:max-w-[34rem] md:max-w-[38rem] mx-auto min-h-[28rem] overflow-visible relative">
-                {/* Con đường: video nền đệm kép */}
+                {/* Con đường: Animated WebP ảnh động hòa hợp nền */}
                 <div className="timeline-garden-path-image timeline-path-video-wrap opacity-[0.85] absolute inset-0 pointer-events-none">
-                  <SeamlessVideoPlayer
-                    mp4Src={timelinePathVideo}
-                    webmSrc={timelinePathWebm}
-                    className="absolute inset-0 w-full h-full"
+                  <img
+                    src="/assets/timeline-path.webp"
+                    alt="Con đường tiệc cưới"
+                    className="timeline-path-video w-full h-full object-contain"
+                    style={{ backgroundColor: "var(--wedding-cream, #f7f2ea)" }}
+                    draggable={false}
                   />
                 </div>
 
