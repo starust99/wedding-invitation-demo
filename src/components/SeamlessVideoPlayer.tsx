@@ -85,8 +85,26 @@ export default function SeamlessVideoPlayer({
 
     const intervalId = setInterval(checkLoopTransition, 50);
 
+    const playActive = () => {
+      const activeEl = activeVideo === "A" ? videoA : videoB;
+      if (activeEl && activeEl.paused) {
+        activeEl.play().catch(() => {});
+      }
+    };
+
+    playActive();
+
+    videoA.addEventListener("canplay", playActive);
+    videoA.addEventListener("loadeddata", playActive);
+    videoB.addEventListener("canplay", playActive);
+    videoB.addEventListener("loadeddata", playActive);
+
     return () => {
       clearInterval(intervalId);
+      videoA.removeEventListener("canplay", playActive);
+      videoA.removeEventListener("loadeddata", playActive);
+      videoB.removeEventListener("canplay", playActive);
+      videoB.removeEventListener("loadeddata", playActive);
       window.removeEventListener("unlockVideos", handleUnlock);
       window.removeEventListener("touchstart", handleUnlock);
       window.removeEventListener("click", handleUnlock);

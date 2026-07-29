@@ -44,17 +44,29 @@ export function CanvasVideo({
 
     const targetPlay = isPlaying !== undefined ? isPlaying : autoPlay;
 
-    if (targetPlay) {
-      if (video.paused) {
-        video.play().catch((err) => {
-          if (err.name !== "AbortError") console.error("CanvasVideo play error:", err);
-        });
+    const handlePlayState = () => {
+      if (targetPlay) {
+        if (video.paused) {
+          video.play().catch((err) => {
+            if (err.name !== "AbortError") console.error("CanvasVideo play error:", err);
+          });
+        }
+      } else {
+        if (!video.paused) {
+          video.pause();
+        }
       }
-    } else {
-      if (!video.paused) {
-        video.pause();
-      }
-    }
+    };
+
+    handlePlayState();
+
+    video.addEventListener("canplay", handlePlayState);
+    video.addEventListener("loadeddata", handlePlayState);
+
+    return () => {
+      video.removeEventListener("canplay", handlePlayState);
+      video.removeEventListener("loadeddata", handlePlayState);
+    };
   }, [isPlaying, autoPlay, src]);
 
   // Unlock playback on user gesture or unlockVideos event (specifically for Zalo/Safari)
@@ -139,7 +151,7 @@ export function CanvasVideo({
       {/* Hidden Video element (made 100% size, low opacity, covered by canvas to force mobile playback) */}
       <video
         ref={videoRef}
-        src={src}
+        {...(src ? { src } : {})}
         autoPlay={autoPlay}
         muted
         playsInline
