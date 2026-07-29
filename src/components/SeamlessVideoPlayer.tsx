@@ -107,13 +107,21 @@ export default function SeamlessVideoPlayer({
 
           ctx.clearRect(0, 0, w, h);
 
-          // Draw the background video first (always opacity 1)
-          ctx.globalAlpha = 1.0;
-          ctx.drawImage(bottomVideo, 0, 0, w, h);
+          try {
+            // Draw the background video first (always opacity 1)
+            if (bottomVideo.readyState >= 2) {
+              ctx.globalAlpha = 1.0;
+              ctx.drawImage(bottomVideo, 0, 0, w, h);
+            }
 
-          // Draw the top video with transition opacity
-          ctx.globalAlpha = topOpacity;
-          ctx.drawImage(topVideo, 0, 0, w, h);
+            // Draw the top video with transition opacity
+            if (topVideo.readyState >= 2) {
+              ctx.globalAlpha = topOpacity;
+              ctx.drawImage(topVideo, 0, 0, w, h);
+            }
+          } catch (e) {
+            // Ignore InvalidStateError in strict WebViews (e.g., Zalo)
+          }
         }
       }
       animationFrameId = requestAnimationFrame(render);

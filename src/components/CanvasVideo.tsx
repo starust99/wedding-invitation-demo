@@ -57,6 +57,19 @@ export function CanvasVideo({
     }
   }, [isPlaying, autoPlay, src]);
 
+  // Monitor timeupdate to safely hide poster only when actual video frames are being rendered
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+    const handleTimeUpdate = () => {
+      if (video.currentTime > 0.1 && video.readyState >= 2) {
+        setHasStartedPlaying(true);
+      }
+    };
+    video.addEventListener("timeupdate", handleTimeUpdate);
+    return () => video.removeEventListener("timeupdate", handleTimeUpdate);
+  }, []);
+
   // Frame-by-frame drawing on Canvas to bypass native player hijack (Zalo, etc.)
   useEffect(() => {
     const video = videoRef.current;
@@ -78,8 +91,14 @@ export function CanvasVideo({
             canvas.height = videoHeight;
           }
           
-          ctx.clearRect(0, 0, canvas.width, canvas.height);
-          ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+          try {
+            if (video.readyState >= 2) { // HAVE_CURRENT_DATA
+              ctx.clearRect(0, 0, canvas.width, canvas.height);
+              ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            }
+          } catch (e) {
+            // Ignore InvalidStateError in some strict webviews
+          }
         }
       }
       animationFrameId = requestAnimationFrame(renderFrame);
@@ -109,7 +128,7 @@ export function CanvasVideo({
         disablePictureInPicture
         disableRemotePlayback
         onEnded={onEnded}
-        onPlay={() => setHasStartedPlaying(true)}
+        // Removed onPlay to rely on timeupdate instead for more accurate poster hiding
         style={{
           position: "absolute",
           top: 0,
