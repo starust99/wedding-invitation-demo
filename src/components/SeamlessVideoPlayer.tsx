@@ -15,9 +15,8 @@ export default function SeamlessVideoPlayer({
 }: SeamlessVideoPlayerProps) {
   const videoRefA = useRef<HTMLVideoElement>(null);
   const videoRefB = useRef<HTMLVideoElement>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
 
-  // activeVideo determines which video element is on top
+  // activeVideo determines which video element is on top (zIndex: 2)
   const [activeVideo, setActiveVideo] = useState<"A" | "B">("A");
   
   // Opacity of the active top video
@@ -57,13 +56,13 @@ export default function SeamlessVideoPlayer({
       ) {
         isTransitioning = true;
 
-        // Reset and play the background video
+        // Reset and play the background video (which is underneath with opacity 1)
         nextVideoEl.currentTime = 0;
         nextVideoEl.play().then(() => {
           // Fade out the top video
           setTopOpacity(0);
 
-          // Once the opacity transition is complete (450ms)
+          // Once the opacity transition is complete (400ms)
           setTimeout(() => {
             // Swap active video to make nextVideoEl the top video
             setActiveVideo(activeVideo === "A" ? "B" : "A");
@@ -71,7 +70,7 @@ export default function SeamlessVideoPlayer({
             // Instantly restore opacity of the top video to 1
             setTopOpacity(1);
 
-            // Pause and reset the old video
+            // Pause and reset the old video (now underneath)
             activeVideoEl.pause();
             activeVideoEl.currentTime = 0;
             
@@ -111,64 +110,17 @@ export default function SeamlessVideoPlayer({
     };
   }, [activeVideo]);
 
-  // Frame-by-frame canvas drawing to bypass native player hijack
-  useEffect(() => {
-    const videoA = videoRefA.current;
-    const videoB = videoRefB.current;
-    const canvas = canvasRef.current;
-    if (!videoA || !videoB || !canvas) return;
-
-    let animationFrameId: number;
-    const ctx = canvas.getContext("2d");
-
-    const render = () => {
-      if (ctx) {
-        const topVideo = activeVideo === "A" ? videoA : videoB;
-        const bottomVideo = activeVideo === "A" ? videoB : videoA;
-
-        const w = topVideo.videoWidth || bottomVideo.videoWidth;
-        const h = topVideo.videoHeight || bottomVideo.videoHeight;
-
-        if (w && h) {
-          if (canvas.width !== w || canvas.height !== h) {
-            canvas.width = w;
-            canvas.height = h;
-          }
-
-          ctx.clearRect(0, 0, w, h);
-
-          try {
-            // Draw the background video first (always opacity 1)
-            if (bottomVideo.readyState >= 2) {
-              ctx.globalAlpha = 1.0;
-              ctx.drawImage(bottomVideo, 0, 0, w, h);
-            }
-
-            // Draw the top video with transition opacity
-            if (topVideo.readyState >= 2) {
-              ctx.globalAlpha = topOpacity;
-              ctx.drawImage(topVideo, 0, 0, w, h);
-            }
-          } catch (e) {
-            // Ignore InvalidStateError in strict WebViews (e.g., Zalo)
-          }
-        }
-      }
-      animationFrameId = requestAnimationFrame(render);
-    };
-
-    render();
-
-    return () => {
-      cancelAnimationFrame(animationFrameId);
-    };
-  }, [activeVideo, topOpacity]);
-
   return (
     <div className={`relative w-full h-full overflow-hidden ${className}`}>
-      {/* Hidden Video Elements (set to 100% size, low opacity, covered by canvas to force mobile playback) */}
       <video
         ref={videoRefA}
+        className="timeline-path-video absolute inset-0 w-full h-full object-contain pointer-events-none"
+        style={{
+          zIndex: activeVideo === "A" ? 2 : 1,
+          opacity: activeVideo === "A" ? topOpacity : 1,
+          transition: "opacity 400ms ease-in-out",
+          backgroundColor: "var(--wedding-cream, #f7f2ea)"
+        }}
         autoPlay
         muted
         playsInline
@@ -179,23 +131,19 @@ export default function SeamlessVideoPlayer({
         t7-video-player-type="inline"
         disablePictureInPicture
         disableRemotePlayback
-        style={{
-          position: "absolute",
-          top: 0,
-          left: 0,
-          width: "100%",
-          height: "100%",
-          opacity: 0.05,
-          pointerEvents: "none",
-          zIndex: 1,
-        }}
       >
         {webmSrc && <source src={webmSrc} type="video/webm" />}
         <source src={mp4Src} type="video/mp4" />
       </video>
-
       <video
         ref={videoRefB}
+        className="timeline-path-video absolute inset-0 w-full h-full object-contain pointer-events-none"
+        style={{
+          zIndex: activeVideo === "B" ? 2 : 1,
+          opacity: activeVideo === "B" ? topOpacity : 1,
+          transition: "opacity 400ms ease-in-out",
+          backgroundColor: "var(--wedding-cream, #f7f2ea)"
+        }}
         autoPlay
         muted
         playsInline
@@ -206,32 +154,10 @@ export default function SeamlessVideoPlayer({
         t7-video-player-type="inline"
         disablePictureInPicture
         disableRemotePlayback
-        style={{
-          position: "absolute",
-          top: 0,
-          left: 0,
-          width: "100%",
-          height: "100%",
-          opacity: 0.05,
-          pointerEvents: "none",
-          zIndex: 1,
-        }}
       >
         {webmSrc && <source src={webmSrc} type="video/webm" />}
         <source src={mp4Src} type="video/mp4" />
       </video>
-
-      {/* Single visible Canvas (placed on top with zIndex 2) */}
-      <canvas
-        ref={canvasRef}
-        className="timeline-path-video w-full h-full"
-        style={{
-          objectFit: "contain",
-          backgroundColor: "var(--wedding-cream, #f7f2ea)",
-          position: "relative",
-          zIndex: 2,
-        }}
-      />
     </div>
   );
 }
