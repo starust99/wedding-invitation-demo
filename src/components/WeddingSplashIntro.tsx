@@ -240,6 +240,7 @@ export function WeddingSplashIntro({
             <CanvasVideo 
               className="hidden md:block h-full w-full pointer-events-none scale-[1.08] md:scale-100"
               isPlaying={status === "opening" && viewport === "desktop"}
+              loop={false}
               onEnded={closeIntro}
               poster="/assets/wedding/ui/splash-closed.png"
               src="/assets/wedding/ui/splash-video.mp4"
@@ -249,6 +250,7 @@ export function WeddingSplashIntro({
             <CanvasVideo 
               className="block md:hidden h-full w-full pointer-events-none scale-[1.08]"
               isPlaying={status === "opening" && viewport === "mobile"}
+              loop={false}
               onEnded={closeIntro}
               poster="/assets/wedding/ui/splash-poster-mobile.jpg"
               src="/assets/wedding/ui/splash-video-mobile.mp4"
