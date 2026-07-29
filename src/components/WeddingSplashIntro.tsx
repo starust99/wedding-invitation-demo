@@ -73,8 +73,12 @@ export function WeddingSplashIntro({
 
   const isVisible = status !== "hidden";
 
+  const readyRef = useRef(ready);
   useEffect(() => {
-    if (!ready) return;
+    readyRef.current = ready;
+  }, [ready]);
+
+  useEffect(() => {
     const shouldForce = readForceIntro();
     if (shouldForce) {
       document.documentElement.classList.remove("splash-skipped");
@@ -88,18 +92,26 @@ export function WeddingSplashIntro({
       return;
     }
 
-    // Essential assets required before showing "Chạm để mở"
+    const isMobile = window.innerWidth < 768;
+
+    // Expand to load all critical graphic/media elements on the hero and details views
     const imagesToLoad = [
       "/assets/preloader-logo.webp",
       "/assets/wedding/ui/splash-closed.png",
       "/assets/wedding/ui/splash-poster-mobile.jpg",
+      "/assets/wedding/hero/hero-arch-composite.webp",
+      "/assets/hero-names-logo-v9-centered.png",
+      "/assets/music-icon.png",
+      "/assets/hero-corner-left-v2.png",
+      "/assets/hero-corner-right-v3.png",
+      "/assets/icon-cross-new.png",
+      "/assets/hero-invite-heading-v5.png",
     ];
 
-    const isMobile = window.innerWidth < 768;
-    const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent) || 
-                     /iPad|iPhone|iPod/.test(navigator.userAgent);
-
-    const mediaToLoad: string[] = [];
+    const mediaToLoad = [
+      "/assets/audio/co-chut-ngot-ngao.mp3",
+      isMobile ? "/assets/wedding/ui/splash-video-mobile.mp4" : "/assets/wedding/ui/splash-video.mp4",
+    ];
 
     let loadedCount = 0;
     const totalAssets = imagesToLoad.length + mediaToLoad.length;
@@ -111,27 +123,34 @@ export function WeddingSplashIntro({
     }
 
     let isCancelled = false;
+    let checkReadyInterval: NodeJS.Timeout | null = null;
 
+    // Safe fallback limit for slow connections
     const maxPreloadTimer = setTimeout(() => {
       if (!isCancelled) {
         setPreloading(false);
         setStatus("closed");
       }
-    }, 1500);
+    }, 15000);
 
     const checkComplete = () => {
-      loadedCount++;
+      loadedCount += 1;
       if (!isCancelled) {
         const percent = Math.min(100, Math.round((loadedCount / totalAssets) * 100));
         setProgress(percent);
         if (loadedCount >= totalAssets) {
           clearTimeout(maxPreloadTimer);
-          setTimeout(() => {
-            if (!isCancelled) {
-              setPreloading(false);
-              setStatus("closed");
+          checkReadyInterval = setInterval(() => {
+            if (readyRef.current && !isCancelled) {
+              if (checkReadyInterval) clearInterval(checkReadyInterval);
+              setTimeout(() => {
+                if (!isCancelled) {
+                  setPreloading(false);
+                  setStatus("closed");
+                }
+              }, 150);
             }
-          }, 150);
+          }, 50);
         }
       }
     };
@@ -148,14 +167,15 @@ export function WeddingSplashIntro({
     mediaToLoad.forEach((src) => {
       fetch(src)
         .then(() => checkComplete())
-        .catch(() => checkComplete()); // fallback so it doesn't block the site if request fails
+        .catch(() => checkComplete());
     });
 
     return () => {
       isCancelled = true;
       clearTimeout(maxPreloadTimer);
+      if (checkReadyInterval) clearInterval(checkReadyInterval);
     };
-  }, [ready, sessionKey]);
+  }, [sessionKey]);
 
   const closeIntro = useCallback(() => {
     setStatus("hidden");

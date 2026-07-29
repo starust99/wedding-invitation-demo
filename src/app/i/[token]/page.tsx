@@ -15,7 +15,21 @@ const ogImage = {
 };
 
 async function fetchInviteeDataFromServer(token: string) {
-  if (!hasSupabaseEnv()) return null;
+  if (!hasSupabaseEnv()) {
+    try {
+      const fs = require("fs");
+      const path = require("path");
+      const cachePath = path.join(process.cwd(), "invitees-cache.json");
+      if (fs.existsSync(cachePath)) {
+        const raw = fs.readFileSync(cachePath, "utf8");
+        const invitees = JSON.parse(raw) as any[];
+        return invitees.find((item) => item.token === token) || null;
+      }
+    } catch {
+      return null;
+    }
+    return null;
+  }
   try {
     const supabase = getSupabaseServerClient();
     const { data: inviteeRow } = await supabase
@@ -63,6 +77,24 @@ export async function generateMetadata({ params }: { params: Promise<{ token: st
       }
     } catch {
       // Fallback to "bạn" if DB fails
+    }
+  } else {
+    try {
+      const fs = require("fs");
+      const path = require("path");
+      const cachePath = path.join(process.cwd(), "invitees-cache.json");
+      if (fs.existsSync(cachePath)) {
+        const raw = fs.readFileSync(cachePath, "utf8");
+        const invitees = JSON.parse(raw) as any[];
+        const match = invitees.find((item) => item.token === token);
+        if (match) {
+          const honorific = match.honorific?.trim();
+          const guestNameVal = match.guestName?.trim() || match.displayLabel?.trim();
+          guestName = [honorific, guestNameVal].filter(Boolean).join(" ") || "bạn";
+        }
+      }
+    } catch {
+      // Fallback to "bạn"
     }
   }
 

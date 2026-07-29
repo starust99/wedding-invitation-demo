@@ -15,6 +15,26 @@ import { getSupabaseServerClient, hasSupabaseEnv } from "@/lib/supabase-server";
 
 export async function GET(_request: Request, { params }: { params: Promise<{ token: string }> }) {
   if (!hasSupabaseEnv()) {
+    try {
+      const fs = require("fs");
+      const path = require("path");
+      const cachePath = path.join(process.cwd(), "invitees-cache.json");
+      if (fs.existsSync(cachePath)) {
+        const raw = fs.readFileSync(cachePath, "utf8");
+        const invitees = JSON.parse(raw) as any[];
+        const invitee = invitees.find((item) => item.token === token);
+        if (invitee) {
+          return NextResponse.json({
+            backend: "local-cache",
+            invitee,
+            albumRules: defaultAlbumRules,
+            mediaAssets: [],
+          });
+        }
+      }
+    } catch (err) {
+      console.error("Failed to read invitees cache:", err);
+    }
     return NextResponse.json({ error: "Supabase is not configured" }, { status: 503 });
   }
 

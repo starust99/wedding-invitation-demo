@@ -258,11 +258,6 @@ export type InvitationCopy = {
 };
 
 const personalInviteHeading = "TRÂN TRỌNG & THÂN MỜI";
-const parentHostElderInviteOwnerKeywords = [
-  "ông", "ong", "bà", "ba", "bố", "bo", "mẹ", "me", "cụ", "cu",
-  "bác", "bac", "cô", "co", "chú", "chu", "dì", "di", "dượng", "duong",
-  "cậu", "cau", "mợ", "mo", "thím", "thim",
-];
 
 type GuestAudience = "grand_elder" | "elder" | "senior" | "peer" | "junior" | "formal" | "neutral";
 
@@ -372,23 +367,6 @@ function resolveParentsHostPronoun(input?: InvitationCopyInput) {
   if (includesAny(relationshipText, peerKeywords) || includesAny(relationshipText, formalKeywords)) return "gia đình chúng tôi";
   if (includesAny(relationshipText, juniorKeywords)) return "anh chị";
   return "gia đình chúng con";
-}
-
-function resolveCoupleReference(input: InvitationCopyInput | undefined, tone: InvitationTone, hostPronoun: string) {
-  const explicit = cleanString(input?.coupleReference);
-  const relationshipText = [
-    input?.hostRelationship,
-    input?.relationship,
-    input?.invitationName,
-    input?.guestName,
-    input?.displayLabel,
-  ].filter(Boolean).join(" ");
-
-  if (tone === "parents_host" && includesAny(relationshipText, ["chau", "cháu"])) {
-    return explicit && explicit !== "hai cháu" ? explicit : "hai em";
-  }
-
-  return explicit || (tone === "parents_host" ? "hai cháu" : hostPronoun);
 }
 
 function resolveRecipientPronoun(input: InvitationCopyInput | undefined, tone: InvitationTone, guestLabel: string, audience = resolveGuestAudience(input)) {
@@ -772,7 +750,27 @@ export function buildInvitationCopy(input?: InvitationCopyInput): InvitationCopy
   });
 
   const guestNameVal = input?.guestName ?? input?.name ?? "";
-  const guestFullName = [input?.honorific, guestNameVal].filter(Boolean).join(" ") || "quý khách";
+  const guestFullName = (() => {
+    const cleanName = guestNameVal.trim();
+    if (!cleanName) return "quý khách";
+    const cleanHonorific = input?.honorific?.trim() ?? "";
+    if (!cleanHonorific) return cleanName;
+
+    const lowerName = cleanName.toLowerCase();
+    const lowerHonorific = cleanHonorific.toLowerCase();
+
+    if (
+      lowerName.startsWith(lowerHonorific) ||
+      lowerName.startsWith("gia đình") ||
+      lowerName.startsWith("gia dinh") ||
+      lowerName.startsWith("vợ chồng") ||
+      lowerName.startsWith("vo chong")
+    ) {
+      return cleanName;
+    }
+
+    return `${cleanHonorific} ${cleanName}`;
+  })().trim();
 
   const explicitHostPronoun = cleanString(input?.hostPronoun);
   const hostPronouns: Record<InvitationTone, string> = {
@@ -795,8 +793,6 @@ export function buildInvitationCopy(input?: InvitationCopyInput): InvitationCopy
   const isWarmPeer = tone === "peer" || tone === "junior";
   const envelopePrefix = isWarmPeer ? "Mời" : "Kính mời";
   const coupleDisplayName = cleanString(input?.coupleDisplayName) || "Nhật & Phương";
-  const coupleReference = resolveCoupleReference(input, tone, hostPronoun);
-
 
 
   const ensureGiaDinhHost = (subject: string) => {
@@ -843,22 +839,10 @@ export function buildInvitationCopy(input?: InvitationCopyInput): InvitationCopy
     ? familyHostSubject
     : sentenceCase(cleanHostPronoun);
 
-  const normalizeInviteOwnerPronoun = (value: string): string => value.replace(/^tụi\s+/i, "chúng ");
-  const parentInviteOwner = (() => {
-    const parentRelationshipText = `${relationshipText} ${guestLabel}`;
-    if (includesAny(parentRelationshipText, parentHostElderInviteOwnerKeywords)) {
-      return `hai cháu ${coupleDisplayName}`;
-    }
-    if (isChauRelation) {
-      return `${coupleReference} ${coupleDisplayName}`;
-    }
-    return "con chúng tôi";
-  })();
-  const personalInviteOwner = isParentsHost ? parentInviteOwner : normalizeInviteOwnerPronoun(hostPronoun);
-  const personalInviteLine = `${guestLabel} đến dự Thánh Lễ Hôn Phối & tiệc cưới của ${personalInviteOwner}.`;
+  const personalInviteLine = `${guestLabel} đến chung vui và ghi dấu những khoảnh khắc đáng nhớ cùng ${coupleDisplayName}.`;
   const insideInviteLine = `${personalInviteHeading}\n${personalInviteLine}`;
   const guestFullNamePrefix = guestFullName.charAt(0).toUpperCase() + guestFullName.slice(1);
-  const heroInvitationLine = `${guestFullNamePrefix} đến chung vui và ghi dấu những khoảnh khắc đáng nhớ cùng Nhật & Phương.`;
+  const heroInvitationLine = `${guestFullNamePrefix} đến chung vui và ghi dấu những khoảnh khắc đáng nhớ cùng ${coupleDisplayName}.`;
   const rsvpLead = tone === "parents_host"
     ? `${hostSubject} mong nhận được lời hồi đáp để chuẩn bị đón tiếp chu đáo`
     : tone === "elder"

@@ -5,14 +5,25 @@ import { useRef, useSyncExternalStore, useState, useEffect } from "react";
 
 export let isIntroDone = false;
 
+function getCurrentStorageKey(): string {
+  if (typeof window === "undefined") return "home";
+  const pathname = window.location.pathname;
+  if (pathname === "/") return "home";
+  if (pathname.startsWith("/i/")) {
+    const parts = pathname.split("/");
+    return parts[parts.length - 1] || "home";
+  }
+  return "home";
+}
+
 function checkLocalStorageIntro(): boolean {
   if (typeof window === "undefined") return false;
   try {
     const search = window.location.search || "";
     const href = window.location.href || "";
     const shouldForce = search.includes("intro=1") || href.includes("intro=1");
-    const keys = Object.keys(window.localStorage);
-    const hasSeen = keys.some(key => key.startsWith("wedding-splash:") && window.localStorage.getItem(key) === "1");
+    const key = getCurrentStorageKey();
+    const hasSeen = window.localStorage.getItem(`wedding-splash:${key}`) === "1";
     return hasSeen && !shouldForce;
   } catch {
     return false;

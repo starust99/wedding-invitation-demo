@@ -54,6 +54,7 @@ harness.db-shm
 scripts/bin/harness-cli
 scripts/bin/harness-cli.exe
 wedding.db
+invitees-cache.json
 
 # agent metadata and temporary workspace files
 .agents/

@@ -26,6 +26,16 @@ export async function POST(request: Request) {
     coupleDisplayName: typeof coupleDisplayName === "string" ? coupleDisplayName : undefined,
   });
 
+  // Save to a local cache file for dev/incognito testing without Supabase
+  try {
+    const fs = require("fs");
+    const path = require("path");
+    const cachePath = path.join(process.cwd(), "invitees-cache.json");
+    fs.writeFileSync(cachePath, JSON.stringify(parsed.invitees, null, 2), "utf8");
+  } catch (err) {
+    console.error("Failed to write invitees cache:", err);
+  }
+
   const warnings: string[] = [];
   for (const invitee of parsed.invitees) {
     const runtime = buildInvitationCopy({
