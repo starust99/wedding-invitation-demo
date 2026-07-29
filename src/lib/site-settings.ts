@@ -41,7 +41,7 @@ type SettingsInput = Partial<Omit<SiteSettings, "content">> & {
 
 export const draftStorageKey = "wedding-demo-draft-settings";
 export const publishedStorageKey = "wedding-demo-published-settings";
-export const settingsSchemaVersion = 16;
+export const settingsSchemaVersion = 17;
 
 export const defaultSettings: SiteSettings = {
   schemaVersion: settingsSchemaVersion,
@@ -432,6 +432,25 @@ export function normalizeSettings(settings: SettingsInput | null): SiteSettings 
         dressCode: {
           ...content.dressCode,
           note: replaceText(content.dressCode.note),
+        },
+      };
+    }
+  }
+
+  // Migration v17: Replace old legacy hero description text ("ngày chung đôi")
+  if ((settings.schemaVersion ?? 0) < 17) {
+    const newDescription = "Quý khách đến chung vui và ghi dấu những khoảnh khắc đáng nhớ cùng Nhật & Phương.";
+    const heroDesc = (content as any).heroEditorConfig?.content?.description ?? "";
+    
+    if (heroDesc.includes("ngày chung đôi") || heroDesc.toLowerCase().startsWith("quý khách cùng chung vui")) {
+      content = {
+        ...content,
+        heroEditorConfig: {
+          ...(content as any).heroEditorConfig,
+          content: {
+            ...(content as any).heroEditorConfig?.content,
+            description: newDescription,
+          },
         },
       };
     }
