@@ -191,8 +191,8 @@ export function WeddingSplashIntro({
     window.dispatchEvent(new Event("playWeddingMusic"));
     window.dispatchEvent(new Event("unlockVideos"));
     
-    // Play full splash animation for 5.5 seconds, then transition cleanly into hero
-    closeTimer.current = window.setTimeout(closeIntro, 5500);
+    // Play full splash animation for exact 6.0 seconds, then transition cleanly into hero
+    closeTimer.current = window.setTimeout(closeIntro, 6000);
   }, [closeIntro, status, ready]);
 
   useEffect(() => {
