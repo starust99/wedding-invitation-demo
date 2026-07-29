@@ -191,8 +191,8 @@ export function WeddingSplashIntro({
     window.dispatchEvent(new Event("playWeddingMusic"));
     window.dispatchEvent(new Event("unlockVideos"));
     
-    // Fallback timer just in case video onEnded fails or user is on low-power mode (increased for slow networks)
-    closeTimer.current = window.setTimeout(closeIntro, 15000);
+    // Play splash animation for exactly 3.5 seconds, then transition cleanly into hero
+    closeTimer.current = window.setTimeout(closeIntro, 3500);
   }, [closeIntro, status, ready]);
 
   useEffect(() => {
@@ -234,28 +234,39 @@ export function WeddingSplashIntro({
           exit={{ opacity: 0, scale: 1.03, filter: "blur(6px)" }}
           transition={{ duration: isImmediateClose ? 0 : 1.6, ease: [0.16, 1, 0.3, 1] }}
         >
-          {/* THE VIDEO - responsive sources for mobile (9:16) and desktop (16:9) */}
-          <div className="absolute inset-0 flex items-center justify-center overflow-hidden">
-            {/* Desktop Splash Video */}
-            <CanvasVideo 
-              className="hidden md:block h-full w-full pointer-events-none scale-[1.08] md:scale-100"
-              isPlaying={status === "opening" && viewport === "desktop"}
-              loop={false}
-              onEnded={closeIntro}
-              poster="/assets/wedding/ui/splash-closed.png"
-              src="/assets/wedding/ui/splash-video.mp4"
-              preload="auto"
-            />
-            {/* Mobile Splash Video */}
-            <CanvasVideo 
-              className="block md:hidden h-full w-full pointer-events-none scale-[1.08]"
-              isPlaying={status === "opening" && viewport === "mobile"}
-              loop={false}
-              onEnded={closeIntro}
-              poster="/assets/wedding/ui/splash-poster-mobile.jpg"
-              src="/assets/wedding/ui/splash-video-mobile.mp4"
-              preload="auto"
-            />
+          {/* THE SPLASH ANIMATION - Animated WebP (100% reliable on Zalo / Mobile WebViews) */}
+          <div className="absolute inset-0 flex items-center justify-center overflow-hidden pointer-events-none">
+            {status === "opening" ? (
+              <>
+                {/* Desktop Splash WebP */}
+                <img 
+                  src="/assets/wedding/ui/splash-video.webp"
+                  alt=""
+                  className="hidden md:block h-full w-full object-cover scale-[1.08] md:scale-100"
+                />
+                {/* Mobile Splash WebP */}
+                <img 
+                  src="/assets/wedding/ui/splash-video-mobile.webp"
+                  alt=""
+                  className="block md:hidden h-full w-full object-cover scale-[1.08]"
+                />
+              </>
+            ) : (
+              <>
+                {/* Desktop Poster */}
+                <img 
+                  src="/assets/wedding/ui/splash-closed.png"
+                  alt=""
+                  className="hidden md:block h-full w-full object-cover scale-[1.08] md:scale-100"
+                />
+                {/* Mobile Poster */}
+                <img 
+                  src="/assets/wedding/ui/splash-poster-mobile.jpg"
+                  alt=""
+                  className="block md:hidden h-full w-full object-cover scale-[1.08]"
+                />
+              </>
+            )}
           </div>
 
           {/* CLICKABLE OVERLAY */}
