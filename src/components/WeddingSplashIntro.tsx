@@ -179,10 +179,10 @@ export function WeddingSplashIntro({
 
   const closeIntro = useCallback(() => {
     setStatus("hidden");
-    // Dispatch introFinished immediately to create a dreamlike cross-dissolve with the hero
+    // Dispatch introFinished at 600ms so hero animations begin right as splash becomes translucent
     animDispatchTimer.current = window.setTimeout(() => {
       window.dispatchEvent(new Event("introFinished"));
-    }, 150);
+    }, 600);
   }, []);
 
   const openIntro = useCallback(() => {
@@ -232,8 +232,8 @@ export function WeddingSplashIntro({
           className="fixed inset-0 z-[80] grid min-h-dvh place-items-center overflow-hidden bg-[#FBF8F1] text-ink cursor-pointer"
           initial={{ opacity: 1 }}
           animate={{ opacity: 1 }}
-          exit={{ opacity: 0, scale: 1.05, filter: "blur(12px)" }}
-          transition={{ duration: isImmediateClose ? 0 : 2.4, ease: [0.25, 1, 0.5, 1] }}
+          exit={{ opacity: 0, scale: 1.02, filter: "blur(6px)" }}
+          transition={{ duration: isImmediateClose ? 0 : 1.2, ease: [0.25, 1, 0.5, 1] }}
         >
           {/* THE SPLASH ANIMATION - Animated WebP (100% reliable on Zalo / Mobile WebViews) */}
           <div className="absolute inset-0 flex items-center justify-center overflow-hidden pointer-events-none">
