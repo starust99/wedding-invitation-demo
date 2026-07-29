@@ -1,26 +1,51 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 type CanvasVideoProps = {
   src?: string;
   poster?: string;
-  isPlaying?: boolean;
+  isPlaying?: boolean; // If provided, controls play/pause manually
+  autoPlay?: boolean;
+  loop?: boolean;
   onEnded?: () => void;
   className?: string;
+  style?: React.CSSProperties;
+  videoStyle?: React.CSSProperties;
+  canvasStyle?: React.CSSProperties;
   objectFit?: "cover" | "contain";
   preload?: "auto" | "metadata" | "none";
+  children?: React.ReactNode; // To support multiple <source> tags
 };
 
-export function CanvasVideo({ src, poster, isPlaying, onEnded, className = "", objectFit = "cover", preload = "auto" }: CanvasVideoProps) {
+export function CanvasVideo({
+  src,
+  poster,
+  isPlaying,
+  autoPlay = true,
+  loop = true,
+  onEnded,
+  className = "",
+  style,
+  videoStyle,
+  canvasStyle,
+  objectFit = "cover",
+  preload = "auto",
+  children,
+}: CanvasVideoProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
   const [hasStartedPlaying, setHasStartedPlaying] = useState(false);
 
+  // Play/pause based on manual isPlaying prop or autoPlay
   useEffect(() => {
     const video = videoRef.current;
-    if (!video || !src) return;
+    if (!video) return;
 
-    if (isPlaying) {
+    // Determine target play state
+    const targetPlay = isPlaying !== undefined ? isPlaying : autoPlay;
+
+    if (targetPlay) {
       if (video.paused) {
         video.play().catch((err) => {
           if (err.name !== "AbortError") console.error("CanvasVideo play error:", err);
@@ -31,24 +56,95 @@ export function CanvasVideo({ src, poster, isPlaying, onEnded, className = "", o
         video.pause();
       }
     }
-  }, [isPlaying, src]);
+  }, [isPlaying, autoPlay, src]);
+
+  // Frame-by-frame drawing on Canvas to bypass native player hijack (Zalo, etc.)
+  useEffect(() => {
+    const video = videoRef.current;
+    const canvas = canvasRef.current;
+    if (!video || !canvas) return;
+
+    let animationFrameId: number;
+    const ctx = canvas.getContext("2d");
+
+    const renderFrame = () => {
+      if (video && !video.paused && !video.ended && ctx) {
+        const videoWidth = video.videoWidth;
+        const videoHeight = video.videoHeight;
+        
+        if (videoWidth && videoHeight) {
+          if (canvas.width !== videoWidth || canvas.height !== videoHeight) {
+            canvas.width = videoWidth;
+            canvas.height = videoHeight;
+          }
+          
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        }
+      }
+      animationFrameId = requestAnimationFrame(renderFrame);
+    };
+
+    renderFrame();
+
+    return () => {
+      cancelAnimationFrame(animationFrameId);
+    };
+  }, [src]);
 
   return (
-    <div className={`relative overflow-hidden ${className}`}>
+    <div className={`relative overflow-hidden ${className}`} style={style}>
+      {/* Hidden Video element (completely invisible to prevent native hijack) */}
       <video
         ref={videoRef}
         src={src}
-        poster={poster}
         muted
         playsInline
+        loop={loop}
+        webkit-playsinline="true"
+        x5-video-player-type="h5-page"
+        x5-video-player-fullscreen="true"
+        x5-video-orientation="portrait"
         disablePictureInPicture
         disableRemotePlayback
         onEnded={onEnded}
         onPlay={() => setHasStartedPlaying(true)}
-        className="w-full h-full"
-        style={{ objectFit }}
+        style={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          width: "1px",
+          height: "1px",
+          opacity: 0,
+          pointerEvents: "none",
+          zIndex: -1,
+          ...videoStyle,
+        }}
         preload={preload}
+      >
+        {children}
+      </video>
+      
+      {/* Visible Canvas rendering the video frames */}
+      <canvas
+        ref={canvasRef}
+        className="w-full h-full"
+        style={{
+          objectFit,
+          display: hasStartedPlaying ? "block" : "none",
+          ...canvasStyle,
+        }}
       />
+
+      {/* Poster Image shown before video starts */}
+      {!hasStartedPlaying && poster && (
+        <img
+          src={poster}
+          alt=""
+          className="absolute inset-0 w-full h-full"
+          style={{ objectFit }}
+        />
+      )}
     </div>
   );
 }

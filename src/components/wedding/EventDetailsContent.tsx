@@ -2,12 +2,13 @@
 
 import Image from "next/image";
 import { MapPin } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { motion } from "framer-motion";
 import type { Variants } from "framer-motion";
 import type { EventDetailsViewportMode, WeddingEventDetailsEditorConfig } from "@/lib/wedding/event-details-types";
 import { DressCodeSection, type DressColorId } from "./DressCodeSection";
 import SeamlessVideoPlayer from "@/components/SeamlessVideoPlayer";
+import { CanvasVideo } from "@/components/CanvasVideo";
 
 const timelinePathVideo = "/assets/timeline-path.mp4";
 const timelinePathWebm = "/assets/timeline-path-web.webm";
@@ -273,70 +274,6 @@ export function EventDetailsContent({
   const compact = mode === "preview";
   const mobilePreview = compact && viewport === "mobile";
   const [selectedColorId, setSelectedColorId] = useState<DressColorId | null>(null);
-  const ringsVideoRef = useRef<HTMLVideoElement>(null);
-
-  useEffect(() => {
-    const video = ringsVideoRef.current;
-    if (!video) return;
-
-    // Synchronously enforce autoplay attributes for Mobile WebKit / Safari
-    video.muted = true;
-    video.defaultMuted = true;
-    video.playsInline = true;
-
-    const safePlay = () => {
-      if (video && video.paused) {
-        const playPromise = video.play();
-        if (playPromise !== undefined) {
-          playPromise.catch(() => {
-            // Silently swallow browser autoplay/power-saver rejections
-          });
-        }
-      }
-    };
-
-    // 1. Play immediately if video buffer is already ready
-    if (video.readyState >= 2) {
-      safePlay();
-    }
-
-    // 2. Listen to native media load events
-    const handleCanPlay = () => safePlay();
-
-    // 3. Tab visibility / Page show handler (app switcher / wake up)
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === "visible") {
-        safePlay();
-      }
-    };
-
-    // 4. Touch / scroll fallback (guarantees playback on first user gesture)
-    const handleUserGesture = () => {
-      safePlay();
-    };
-
-    video.addEventListener("canplay", handleCanPlay);
-    video.addEventListener("loadeddata", handleCanPlay);
-    document.addEventListener("visibilitychange", handleVisibilityChange);
-    window.addEventListener("pageshow", handleVisibilityChange);
-    window.addEventListener("touchstart", handleUserGesture, { passive: true, once: true });
-    window.addEventListener("scroll", handleUserGesture, { passive: true, once: true });
-
-    // Initial rAF trigger for smooth mounting
-    const rafId = requestAnimationFrame(() => {
-      safePlay();
-    });
-
-    return () => {
-      cancelAnimationFrame(rafId);
-      video.removeEventListener("canplay", handleCanPlay);
-      video.removeEventListener("loadeddata", handleCanPlay);
-      document.removeEventListener("visibilitychange", handleVisibilityChange);
-      window.removeEventListener("pageshow", handleVisibilityChange);
-      window.removeEventListener("touchstart", handleUserGesture);
-      window.removeEventListener("scroll", handleUserGesture);
-    };
-  }, []);
   const content = config.content;
   const churchDateParsed = parseChurchDate(content.churchDate);
   const banquetDateParsed = {
@@ -498,20 +435,19 @@ export function EventDetailsContent({
             
             {/* Video of wedding rings in the middle */}
             <div className="w-[7.2rem] h-[7.2rem] sm:w-[9.2rem] sm:h-[9.2rem] relative flex items-center justify-center overflow-visible select-none mt-[-2.2rem] mb-[-2.2rem] sm:mt-[-2.6rem] sm:mb-[-2.6rem] pointer-events-none z-10">
-              <video
-                ref={ringsVideoRef}
+              <CanvasVideo
                 autoPlay
                 loop
-                muted
-                playsInline
+                className="w-full h-full"
+                canvasStyle={{ objectFit: "contain" }}
+                objectFit="contain"
                 preload="auto"
-                className="w-full h-full object-contain rings-video-optimize"
               >
                 {/* Safari/iOS: HEVC with Alpha */}
                 <source src="/assets/wedding-rings.mov?v=8" type="video/quicktime; codecs=hvc1" />
                 {/* Chrome/Android/Firefox: VP9 with Alpha */}
                 <source src="/assets/wedding-rings.webm?v=8" type="video/webm; codecs=vp9" />
-              </video>
+              </CanvasVideo>
             </div>
 
             {/* Bottom Name (Teresa Nguyễn Anh Phương) - Cropped from original image */}
