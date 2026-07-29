@@ -184,7 +184,7 @@ export default function SeamlessVideoPlayer({
       {/* Single visible Canvas (placed on top with zIndex 2) */}
       <canvas
         ref={canvasRef}
-        className="w-full h-full"
+        className="timeline-path-video w-full h-full"
         style={{
           objectFit: "contain",
           backgroundColor: "var(--wedding-cream, #f7f2ea)",
