@@ -62,11 +62,11 @@ export function RoadSequencePlayer({
         let blurPx = 0;
         if (isEndWindow && "filter" in ctx) {
           const progress = (frameIndex - (TOTAL_FRAMES - GHOST_WINDOW)) / GHOST_WINDOW;
-          blurPx = progress * 4.0; // 0px to 4px soft ghost blur
+          blurPx = progress * 1.2; // 0px to 1.2px ultra-subtle ghost blur
           ctx.filter = `blur(${blurPx.toFixed(1)}px)`;
         } else if (isStartWindow && "filter" in ctx) {
           const progress = 1.0 - (frameIndex / GHOST_WINDOW);
-          blurPx = progress * 4.0; // 4px to 0px soft unblur
+          blurPx = progress * 1.2; // 1.2px to 0px ultra-subtle unblur
           ctx.filter = `blur(${blurPx.toFixed(1)}px)`;
         } else if ("filter" in ctx) {
           ctx.filter = "none";
