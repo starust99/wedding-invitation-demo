@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef } from "react";
+import { GlobalImageCache } from "@/lib/global-image-cache";
 
 const TOTAL_FRAMES = 108;
 const FRAME_RATE = 12; // 12 frames per second
@@ -18,13 +19,20 @@ export function RoadSequencePlayer({
   const imagesRef = useRef<HTMLImageElement[]>([]);
 
   useEffect(() => {
-    // 1. Preload image sequence into memory
+    // 1. Get pre-decoded images from GlobalImageCache or fallback load
     const images: HTMLImageElement[] = [];
     for (let i = 1; i <= TOTAL_FRAMES; i++) {
-      const img = new Image();
       const numStr = String(i).padStart(3, "0");
-      img.src = `/assets/timeline-frames/frame_${numStr}.webp`;
-      images.push(img);
+      const src = `/assets/timeline-frames/frame_${numStr}.webp`;
+      const cached = GlobalImageCache.get(src);
+      if (cached) {
+        images.push(cached);
+      } else {
+        const img = new Image();
+        img.src = src;
+        images.push(img);
+        GlobalImageCache.preload(src);
+      }
     }
     imagesRef.current = images;
 

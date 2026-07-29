@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { SplashSequencePlayer } from "./SplashSequencePlayer";
+import { GlobalImageCache } from "@/lib/global-image-cache";
 import type { GuestIdentity } from "@/lib/guest-personalization";
 import type { WeddingConfig } from "@/lib/site-settings";
 import { CanvasVideo } from "./CanvasVideo";
@@ -94,9 +95,10 @@ export function WeddingSplashIntro({
     }
 
     const isMobile = window.innerWidth < 768;
+    const splashFolder = isMobile ? "splash-frames-mobile" : "splash-frames-desktop";
 
-    // Expand to load all critical graphic/media elements on the hero and details views
-    const imagesToLoad = [
+    // 1. Critical static images
+    const staticImages = [
       "/assets/preloader-logo.webp",
       "/assets/wedding/ui/splash-closed.png",
       "/assets/wedding/ui/splash-poster-mobile.jpg",
@@ -109,19 +111,22 @@ export function WeddingSplashIntro({
       "/assets/hero-invite-heading-v5.png",
     ];
 
-    const mediaToLoad = [
-      "/assets/audio/co-chut-ngot-ngao.mp3",
-      isMobile ? "/assets/wedding/ui/splash-video-mobile.mp4" : "/assets/wedding/ui/splash-video.mp4",
-    ];
-
-    let loadedCount = 0;
-    const totalAssets = imagesToLoad.length + mediaToLoad.length;
-
-    if (totalAssets === 0) {
-      setPreloading(false);
-      setStatus("closed");
-      return;
+    // 2. All 109 Splash sequence frames for current device
+    const splashFrames: string[] = [];
+    for (let i = 1; i <= 109; i++) {
+      const numStr = String(i).padStart(3, "0");
+      splashFrames.push(`/assets/${splashFolder}/frame_${numStr}.webp`);
     }
+
+    // 3. All 108 Timeline Road sequence frames
+    const roadFrames: string[] = [];
+    for (let i = 1; i <= 108; i++) {
+      const numStr = String(i).padStart(3, "0");
+      roadFrames.push(`/assets/timeline-frames/frame_${numStr}.webp`);
+    }
+
+    const allImagesToLoad = [...staticImages, ...splashFrames, ...roadFrames];
+    const mediaToLoad = ["/assets/audio/co-chut-ngot-ngao.mp3"];
 
     let isCancelled = false;
     let checkReadyInterval: NodeJS.Timeout | null = null;
@@ -132,43 +137,50 @@ export function WeddingSplashIntro({
         setPreloading(false);
         setStatus("closed");
       }
-    }, 15000);
+    }, 20000);
 
-    const checkComplete = () => {
-      loadedCount += 1;
+    const onAllComplete = () => {
       if (!isCancelled) {
-        const percent = Math.min(100, Math.round((loadedCount / totalAssets) * 100));
-        setProgress(percent);
-        if (loadedCount >= totalAssets) {
-          clearTimeout(maxPreloadTimer);
-          checkReadyInterval = setInterval(() => {
-            if (readyRef.current && !isCancelled) {
-              if (checkReadyInterval) clearInterval(checkReadyInterval);
-              setTimeout(() => {
-                if (!isCancelled) {
-                  setPreloading(false);
-                  setStatus("closed");
-                }
-              }, 150);
-            }
-          }, 50);
-        }
+        clearTimeout(maxPreloadTimer);
+        checkReadyInterval = setInterval(() => {
+          if (readyRef.current && !isCancelled) {
+            if (checkReadyInterval) clearInterval(checkReadyInterval);
+            setTimeout(() => {
+              if (!isCancelled) {
+                setPreloading(false);
+                setStatus("closed");
+              }
+            }, 150);
+          }
+        }, 50);
       }
     };
 
-    // Load images
-    imagesToLoad.forEach((src) => {
-      const img = new Image();
-      img.src = src;
-      img.onload = checkComplete;
-      img.onerror = checkComplete;
-    });
+    // Preload & decode ALL 227 image assets into GPU memory with true percentage tracking
+    let totalLoadedCount = 0;
+    const totalAssets = allImagesToLoad.length + mediaToLoad.length;
 
-    // Load media (videos & audio) via fetch to populate browser HTTP cache
-    mediaToLoad.forEach((src) => {
-      fetch(src)
-        .then(() => checkComplete())
-        .catch(() => checkComplete());
+    GlobalImageCache.preloadBatch(allImagesToLoad, (loadedCount) => {
+      if (!isCancelled) {
+        totalLoadedCount = loadedCount;
+        const percent = Math.min(100, Math.round((totalLoadedCount / totalAssets) * 100));
+        setProgress(percent);
+      }
+    }).then(() => {
+      // Audio preloading
+      Promise.all(
+        mediaToLoad.map((src) =>
+          fetch(src)
+            .then(() => {
+              totalLoadedCount++;
+              if (!isCancelled) {
+                const percent = Math.min(100, Math.round((totalLoadedCount / totalAssets) * 100));
+                setProgress(percent);
+              }
+            })
+            .catch(() => {})
+        )
+      ).then(onAllComplete);
     });
 
     return () => {

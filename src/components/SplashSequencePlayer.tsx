@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef } from "react";
+import { GlobalImageCache } from "@/lib/global-image-cache";
 
 const TOTAL_FRAMES = 109;
 const FRAME_RATE = 18; // 18 frames per second (exact 6.05s video duration)
@@ -26,15 +27,22 @@ export function SplashSequencePlayer({
   const hasEndedRef = useRef(false);
 
   useEffect(() => {
-    // 1. Preload image sequence into memory
+    // 1. Get pre-decoded images from GlobalImageCache or fallback load
     const images: HTMLImageElement[] = [];
     const folder = variant === "mobile" ? "splash-frames-mobile" : "splash-frames-desktop";
 
     for (let i = 1; i <= TOTAL_FRAMES; i++) {
-      const img = new Image();
       const numStr = String(i).padStart(3, "0");
-      img.src = `/assets/${folder}/frame_${numStr}.webp`;
-      images.push(img);
+      const src = `/assets/${folder}/frame_${numStr}.webp`;
+      const cached = GlobalImageCache.get(src);
+      if (cached) {
+        images.push(cached);
+      } else {
+        const img = new Image();
+        img.src = src;
+        images.push(img);
+        GlobalImageCache.preload(src);
+      }
     }
     imagesRef.current = images;
 
