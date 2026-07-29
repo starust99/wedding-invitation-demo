@@ -28,35 +28,35 @@ const galleryBlurSvg = `
 const galleryBlurDataUrl = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(galleryBlurSvg)}`;
 
 const galleryContainerVariant: Variants = {
-  hidden: { opacity: 0 },
+  hidden: { opacity: 1 },
   visible: {
     opacity: 1,
     transition: {
-      staggerChildren: 0.15,
-      delayChildren: 0.1,
+      staggerChildren: 0.1,
+      delayChildren: 0.05,
     },
   },
 };
 
 const galleryTileVariant: Variants = {
-  hidden: { opacity: 0, y: 30 },
+  hidden: { opacity: 1, y: 0 },
   visible: {
     opacity: 1,
     y: 0,
     transition: {
-      duration: 0.6,
+      duration: 0.5,
       ease: [0.25, 0.1, 0.25, 1],
     },
   },
 };
 
 const galleryIntroVariant: Variants = {
-  hidden: { opacity: 0, y: 20 },
+  hidden: { opacity: 1, y: 0 },
   visible: {
     opacity: 1,
     y: 0,
     transition: {
-      duration: 0.8,
+      duration: 0.5,
       ease: "easeOut",
     },
   },
@@ -312,9 +312,9 @@ export function GallerySection({ config }: { config: WeddingConfig }) {
           {/* Header inside the card */}
           <motion.div
             className="flex flex-col items-center text-center w-full px-4 pt-6 pb-6 md:pt-8 md:pb-8"
-            initial="hidden"
+            initial="visible"
             whileInView="visible"
-            viewport={{ once: true, margin: "-10% 0px -10% 0px" }}
+            viewport={{ once: true, amount: 0.01 }}
             variants={galleryIntroVariant}
           >
             <h3 className="font-serif text-[1.12rem] sm:text-[1.25rem] md:text-[1.38rem] font-bold gold-foil-text uppercase leading-tight mt-0.5 mb-1.5">
@@ -330,9 +330,9 @@ export function GallerySection({ config }: { config: WeddingConfig }) {
 
           <motion.div
             className="gallery-mosaic-grid"
-            initial="hidden"
+            initial="visible"
             whileInView="visible"
-            viewport={{ once: true, margin: "-10% 0px -10% 0px" }}
+            viewport={{ once: true, amount: 0.01 }}
             variants={galleryContainerVariant}
           >
             {tiles.map((tile, index) => {
