@@ -4,8 +4,8 @@ import React, { useEffect, useRef } from "react";
 
 const TOTAL_FRAMES = 108;
 const FRAME_RATE = 12; // 12 frames per second
-const FRAME_DURATION = 1000 / FRAME_RATE; // 83.33ms per frame
-const CYCLE_STEPS = (TOTAL_FRAMES - 1) * 2; // 214 steps for continuous forward-reverse boomerang cycle
+const FRAME_DURATION = 1000 / FRAME_RATE; // 83.33ms per frame for full 9.0s duration
+const GHOST_WINDOW = 12; // 12 frames (1.0s) ghost shadow blur window at loop junction
 
 export function RoadSequencePlayer({
   className = "",
@@ -28,7 +28,7 @@ export function RoadSequencePlayer({
     }
     imagesRef.current = images;
 
-    // 2. High-performance Boomerang Canvas Loop (0 -> 107 -> 0) with Ghost Blur Turnaround
+    // 2. Pure Forward Canvas Loop (0 -> 107 -> 0) with Ghost Shadow Blur Loop Transition
     let animId: number;
     let startTime: number | null = null;
     const canvas = canvasRef.current;
@@ -40,9 +40,9 @@ export function RoadSequencePlayer({
       if (!startTime) startTime = timestamp;
       const elapsed = timestamp - startTime;
 
-      // Calculate boomerang cycle step (0 -> 214)
-      const step = Math.floor(elapsed / FRAME_DURATION) % CYCLE_STEPS;
-      const frameIndex = step < TOTAL_FRAMES ? step : CYCLE_STEPS - step;
+      // 100% Forward direction always (0 -> 107 -> 0)
+      const exactFrame = (elapsed / FRAME_DURATION) % TOTAL_FRAMES;
+      const frameIndex = Math.floor(exactFrame);
       const currentImg = imagesRef.current[frameIndex];
 
       if (currentImg && currentImg.complete && currentImg.naturalWidth > 0) {
@@ -53,29 +53,37 @@ export function RoadSequencePlayer({
 
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        // Turnaround ghost blur effect near endpoints (frames 102..107 and 0..5)
-        const distFromTurnaround = Math.min(frameIndex, TOTAL_FRAMES - 1 - frameIndex);
-        const isTurnaround = distFromTurnaround <= 6;
+        // Calculate ghost shadow blur factor near loop junction
+        // End window: frames (TOTAL_FRAMES - GHOST_WINDOW)..107
+        // Start window: frames 0..GHOST_WINDOW
+        const isEndWindow = frameIndex >= TOTAL_FRAMES - GHOST_WINDOW;
+        const isStartWindow = frameIndex <= GHOST_WINDOW;
 
-        if (isTurnaround && "filter" in ctx) {
-          const blurAmount = ((6 - distFromTurnaround) / 6) * 2.5; // 0px to 2.5px dreamlike soft ghost blur
-          ctx.filter = `blur(${blurAmount.toFixed(1)}px)`;
+        let blurPx = 0;
+        if (isEndWindow && "filter" in ctx) {
+          const progress = (frameIndex - (TOTAL_FRAMES - GHOST_WINDOW)) / GHOST_WINDOW;
+          blurPx = progress * 4.0; // 0px to 4px soft ghost blur
+          ctx.filter = `blur(${blurPx.toFixed(1)}px)`;
+        } else if (isStartWindow && "filter" in ctx) {
+          const progress = 1.0 - (frameIndex / GHOST_WINDOW);
+          blurPx = progress * 4.0; // 4px to 0px soft unblur
+          ctx.filter = `blur(${blurPx.toFixed(1)}px)`;
         } else if ("filter" in ctx) {
           ctx.filter = "none";
         }
 
-        // Draw current frame
+        // Base layer: draw current frame
         ctx.globalAlpha = 1.0;
         ctx.drawImage(currentImg, 0, 0, canvas.width, canvas.height);
 
-        // Add soft ghost shadow layer during turnaround for ultra-poetic morphing
-        if (isTurnaround) {
-          const ghostAlpha = ((6 - distFromTurnaround) / 6) * 0.3;
-          const ghostFrameIndex = frameIndex > 50 ? TOTAL_FRAMES - 1 : 0;
-          const ghostImg = imagesRef.current[ghostFrameIndex];
-          if (ghostImg && ghostImg.complete) {
-            ctx.globalAlpha = ghostAlpha;
-            ctx.drawImage(ghostImg, 0, 0, canvas.width, canvas.height);
+        // Ghost shadow overlay blending at the end of cycle (blends frame 0 over frame 96..107)
+        if (isEndWindow) {
+          const progress = (frameIndex - (TOTAL_FRAMES - GHOST_WINDOW)) / GHOST_WINDOW;
+          const smoothAlpha = progress * progress * (3 - 2 * progress); // Smoothstep S-curve
+          const firstImg = imagesRef.current[0];
+          if (firstImg && firstImg.complete) {
+            ctx.globalAlpha = smoothAlpha;
+            ctx.drawImage(firstImg, 0, 0, canvas.width, canvas.height);
           }
         }
 
