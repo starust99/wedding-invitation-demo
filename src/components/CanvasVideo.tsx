@@ -67,7 +67,8 @@ export function CanvasVideo({
     const ctx = canvas.getContext("2d");
 
     const renderFrame = () => {
-      if (video && !video.paused && !video.ended && ctx) {
+      // Force draw if readyState is at least HAVE_CURRENT_DATA or playing
+      if (video && ctx) {
         const videoWidth = video.videoWidth;
         const videoHeight = video.videoHeight;
         
