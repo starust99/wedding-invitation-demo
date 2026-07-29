@@ -4348,7 +4348,7 @@ html.splash-skipped body {
 
 /* Blur mềm 4 cạnh video để hoà vào background */
 .timeline-path-video-wrap::before {
-  backdrop-filter: blur(28px) saturate(0.75);
+  backdrop-filter: none;
   -webkit-mask-image:
     linear-gradient(to right, black 0%, black 12%, rgba(0,0,0,0.8) 22%, rgba(0,0,0,0.2) 32%, transparent 40%, transparent 60%, rgba(0,0,0,0.2) 68%, rgba(0,0,0,0.8) 78%, black 88%, black 100%),
     linear-gradient(to bottom, black 0%, rgba(0,0,0,0.9) 10%, transparent 22%, transparent 78%, rgba(0,0,0,0.9) 90%, black 100%);
@@ -4376,7 +4376,7 @@ html.splash-skipped body {
   }
 
   .timeline-path-video-wrap::before {
-    backdrop-filter: blur(40px) saturate(0.7);
+    backdrop-filter: none;
     -webkit-mask-image:
       linear-gradient(to right, black 0%, black 18%, rgba(0,0,0,0.8) 26%, rgba(0,0,0,0.2) 34%, transparent 38%, transparent 62%, rgba(0,0,0,0.2) 66%, rgba(0,0,0,0.8) 74%, black 82%, black 100%),
       linear-gradient(to bottom, black 0%, rgba(0,0,0,0.9) 12%, transparent 26%, transparent 74%, rgba(0,0,0,0.9) 88%, black 100%);

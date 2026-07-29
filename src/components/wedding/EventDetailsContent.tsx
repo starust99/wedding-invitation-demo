@@ -631,7 +631,7 @@ export function EventDetailsContent({
               
               <div className="event-details-timeline-scene timeline-garden-path-scene w-full max-w-[28rem] sm:max-w-[34rem] md:max-w-[38rem] mx-auto min-h-[28rem] overflow-visible relative">
                 {/* Con đường: High-performance 60fps Canvas Frame Sequence Player (Zero RAM Lag on Zalo) */}
-                <div className="timeline-garden-path-image timeline-path-video-wrap opacity-[0.85] absolute inset-0 pointer-events-none">
+                <div className="timeline-garden-path-image timeline-path-video-wrap opacity-100 absolute inset-0 pointer-events-none">
                   <RoadSequencePlayer
                     className="timeline-path-video w-full h-full object-contain"
                     style={{ backgroundColor: "var(--wedding-cream, #f7f2ea)" }}
