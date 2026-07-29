@@ -2226,7 +2226,7 @@ textarea {
   display: grid;
   justify-items: center;
   gap: 0.55rem;
-  border: 1.5px solid rgba(255, 255, 255, 0.88);
+  border: 1px solid rgba(255, 255, 255, 0.75);
   border-radius: 1.12rem;
   background: rgba(253, 251, 247, 0.45);
   box-shadow: 0 12px 36px rgba(63, 70, 66, 0.06);
@@ -4424,8 +4424,8 @@ html.splash-skipped body {
   align-items: center !important;
   justify-content: center !important;
   text-align: center !important;
-  border: 1.5px solid rgba(255, 255, 255, 0.92) !important;
-  box-shadow: 0 10px 30px rgba(63, 70, 66, 0.05), inset 0 0 0 1px rgba(255, 255, 255, 0.5) !important;
+  border: 1px solid rgba(255, 255, 255, 0.75) !important;
+  box-shadow: 0 10px 30px rgba(63, 70, 66, 0.05) !important;
 }
 
 .event-details-timeline-scene .timeline-garden-card p {
