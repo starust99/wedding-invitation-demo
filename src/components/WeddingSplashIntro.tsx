@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
+import { SplashSequencePlayer } from "./SplashSequencePlayer";
 import type { GuestIdentity } from "@/lib/guest-personalization";
 import type { WeddingConfig } from "@/lib/site-settings";
 import { CanvasVideo } from "./CanvasVideo";
@@ -235,20 +236,22 @@ export function WeddingSplashIntro({
           exit={{ opacity: 0, scale: 1.02, filter: "blur(6px)" }}
           transition={{ duration: isImmediateClose ? 0 : 1.2, ease: [0.25, 1, 0.5, 1] }}
         >
-          {/* THE SPLASH ANIMATION - Animated WebP (100% reliable on Zalo / Mobile WebViews) */}
+          {/* THE SPLASH ANIMATION - 60FPS Canvas Frame Sequence Player (Zero RAM Lag / No Zalo Bypass) */}
           <div className="absolute inset-0 flex items-center justify-center overflow-hidden pointer-events-none">
             {status === "opening" ? (
               <>
-                {/* Desktop Splash WebP */}
-                <img 
-                  src="/assets/wedding/ui/splash-video.webp"
-                  alt=""
+                {/* Desktop Splash Sequence Canvas Player */}
+                <SplashSequencePlayer
+                  variant="desktop"
+                  isPlaying={status === "opening"}
+                  onEnded={closeIntro}
                   className="hidden md:block h-full w-full object-cover scale-[1.08] md:scale-100"
                 />
-                {/* Mobile Splash WebP */}
-                <img 
-                  src="/assets/wedding/ui/splash-video-mobile.webp"
-                  alt=""
+                {/* Mobile Splash Sequence Canvas Player */}
+                <SplashSequencePlayer
+                  variant="mobile"
+                  isPlaying={status === "opening"}
+                  onEnded={closeIntro}
                   className="block md:hidden h-full w-full object-cover scale-[1.08]"
                 />
               </>
