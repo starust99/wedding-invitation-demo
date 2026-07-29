@@ -5,7 +5,7 @@ import React, { useEffect, useRef } from "react";
 const TOTAL_FRAMES = 108;
 const FRAME_RATE = 12; // 12 frames per second
 const FRAME_DURATION = 1000 / FRAME_RATE; // 83.33ms per frame
-const CROSSFADE_FRAMES = 20; // 20 frames = 1.66s ultra-smooth realtime alpha blend at loop junction
+const CROSSFADE_FRAMES = 36; // 36 frames = 3.0s ultra-long smooth cosine S-curve crossfade
 
 export function RoadSequencePlayer({
   className = "",
@@ -56,15 +56,20 @@ export function RoadSequencePlayer({
         ctx.globalAlpha = 1.0;
         ctx.drawImage(currentImg, 0, 0, canvas.width, canvas.height);
 
-        // Realtime Alpha Crossfade near loop junction (frames 88..107 -> frames 0..19)
+        // Cosine Ease-In-Out S-Curve Crossfade near loop junction (3.0s window: frames 72..107 -> frames 0..35)
         const fadeStartFrame = TOTAL_FRAMES - CROSSFADE_FRAMES;
         if (frameIndex >= fadeStartFrame) {
-          const fadeProgress = (frameIndex - fadeStartFrame) / CROSSFADE_FRAMES;
+          const rawProgress = (frameIndex - fadeStartFrame) / (CROSSFADE_FRAMES - 1);
+          const t = Math.min(1.0, Math.max(0.0, rawProgress));
+          
+          // Cosine S-Curve Easing (Derivative is 0 at t=0 and t=1, eliminating all velocity steps)
+          const smoothAlpha = 0.5 - 0.5 * Math.cos(t * Math.PI);
+          
           const nextFrameIndex = frameIndex - fadeStartFrame;
           const nextImg = imagesRef.current[nextFrameIndex];
 
           if (nextImg && nextImg.complete && nextImg.naturalWidth > 0) {
-            ctx.globalAlpha = Math.min(1.0, Math.max(0.0, fadeProgress));
+            ctx.globalAlpha = smoothAlpha;
             ctx.drawImage(nextImg, 0, 0, canvas.width, canvas.height);
           }
         }
