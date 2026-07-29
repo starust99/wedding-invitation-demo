@@ -76,10 +76,14 @@ export default function RootLayout({
   return (
     <html lang="vi" data-scroll-behavior="smooth" className={fontVariables} suppressHydrationWarning>
       <head>
+        <link rel="preload" href="/assets/timeline-path.webp" as="image" type="image/webp" />
+        <link rel="preload" href="/assets/wedding-rings.webp" as="image" type="image/webp" />
         <script
           dangerouslySetInnerHTML={{
             __html: `
               try {
+                var p1 = new Image(); p1.src = "/assets/timeline-path.webp";
+                var p2 = new Image(); p2.src = "/assets/wedding-rings.webp";
                 var href = window.location.href || "";
                 var search = window.location.search || "";
                 var isForce = search.indexOf("intro=1") !== -1 || href.indexOf("intro=1") !== -1;
