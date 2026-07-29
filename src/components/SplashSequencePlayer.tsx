@@ -112,7 +112,7 @@ export function SplashSequencePlayer({
       ref={canvasRef}
       className={className}
       style={{
-        objectFit: "contain",
+        objectFit: "cover",
         pointerEvents: "none",
         width: "100%",
         height: "100%",
