@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useMemo } from "react";
+import { AssetStore } from "@/lib/assetStore";
 
 type CanvasVideoProps = {
   src?: string;
@@ -36,6 +37,14 @@ export function CanvasVideo({
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [hasStartedPlaying, setHasStartedPlaying] = useState(false);
+  const [forceRender, setForceRender] = useState(0);
+
+  useEffect(() => {
+    return AssetStore.subscribe(() => setForceRender(prev => prev + 1));
+  }, []);
+
+  // Resolve Blob URL if available
+  const finalSrc = useMemo(() => src ? AssetStore.get(src) : undefined, [src, forceRender]);
 
   // Play/pause based on manual isPlaying prop or autoPlay
   useEffect(() => {
@@ -115,8 +124,9 @@ export function CanvasVideo({
     <div className={`relative overflow-hidden ${className}`} style={{ ...style, width: "100%", height: "100%" }}>
       {/* Hidden Video element (made 100% size, low opacity, covered by canvas to force mobile playback) */}
       <video
+        key={forceRender}
         ref={videoRef}
-        src={src}
+        src={finalSrc}
         autoPlay={autoPlay}
         muted
         playsInline

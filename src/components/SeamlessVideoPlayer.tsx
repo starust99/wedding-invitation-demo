@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useRef, useEffect, useState } from "react";
+import React, { useRef, useEffect, useState, useMemo } from "react";
+import { AssetStore } from "@/lib/assetStore";
 
 interface SeamlessVideoPlayerProps {
   mp4Src: string;
@@ -22,6 +23,15 @@ export default function SeamlessVideoPlayer({
   
   // Opacity of the active top video
   const [topOpacity, setTopOpacity] = useState(1);
+  const [forceRender, setForceRender] = useState(0);
+
+  useEffect(() => {
+    return AssetStore.subscribe(() => setForceRender(prev => prev + 1));
+  }, []);
+
+  // Resolve Blob URLs
+  const finalMp4Src = useMemo(() => AssetStore.get(mp4Src), [mp4Src, forceRender]);
+  const finalWebmSrc = useMemo(() => webmSrc ? AssetStore.get(webmSrc) : undefined, [webmSrc, forceRender]);
 
   useEffect(() => {
     const videoA = videoRefA.current;
@@ -138,6 +148,7 @@ export default function SeamlessVideoPlayer({
     <div className={`relative w-full h-full overflow-hidden ${className}`}>
       {/* Hidden Video Elements (set to 100% size, low opacity, covered by canvas to force mobile playback) */}
       <video
+        key={`videoA-${forceRender}`}
         ref={videoRefA}
         autoPlay
         muted
@@ -159,11 +170,12 @@ export default function SeamlessVideoPlayer({
           zIndex: 1,
         }}
       >
-        {webmSrc && <source src={webmSrc} type="video/webm" />}
-        <source src={mp4Src} type="video/mp4" />
+        {finalWebmSrc && <source src={finalWebmSrc} type="video/webm" />}
+        <source src={finalMp4Src} type="video/mp4" />
       </video>
 
       <video
+        key={`videoB-${forceRender}`}
         ref={videoRefB}
         autoPlay
         muted
@@ -185,8 +197,8 @@ export default function SeamlessVideoPlayer({
           zIndex: 1,
         }}
       >
-        {webmSrc && <source src={webmSrc} type="video/webm" />}
-        <source src={mp4Src} type="video/mp4" />
+        {finalWebmSrc && <source src={finalWebmSrc} type="video/webm" />}
+        <source src={finalMp4Src} type="video/mp4" />
       </video>
 
       {/* Single visible Canvas (placed on top with zIndex 2) */}

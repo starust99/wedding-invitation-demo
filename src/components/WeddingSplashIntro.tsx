@@ -5,6 +5,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import type { GuestIdentity } from "@/lib/guest-personalization";
 import type { WeddingConfig } from "@/lib/site-settings";
 import { CanvasVideo } from "./CanvasVideo";
+import { AssetStore } from "@/lib/assetStore";
 
 type SplashStatus = "checking" | "closed" | "opening" | "hidden";
 
@@ -111,6 +112,9 @@ export function WeddingSplashIntro({
     const mediaToLoad = [
       "/assets/audio/co-chut-ngot-ngao.mp3",
       isMobile ? "/assets/wedding/ui/splash-video-mobile.mp4" : "/assets/wedding/ui/splash-video.mp4",
+      "/assets/timeline-path.mp4",
+      "/assets/wedding-rings.mov?v=8",
+      "/assets/wedding-rings.webm?v=8"
     ];
 
     let loadedCount = 0;
@@ -163,11 +167,21 @@ export function WeddingSplashIntro({
       img.onerror = checkComplete;
     });
 
-    // Load media (videos & audio) via fetch to populate browser HTTP cache
+    // Load media (videos & audio) via fetch and store as Object URLs to bypass Webview cache restrictions
     mediaToLoad.forEach((src) => {
       fetch(src)
-        .then(() => checkComplete())
-        .catch(() => checkComplete());
+        .then((res) => res.blob())
+        .then((blob) => {
+          const url = URL.createObjectURL(blob);
+          AssetStore.set(src, url);
+          // Also set without the query param just in case
+          const srcWithoutQuery = src.split("?")[0];
+          if (srcWithoutQuery !== src) {
+            AssetStore.set(srcWithoutQuery, url);
+          }
+          checkComplete();
+        })
+        .catch(() => checkComplete()); // Fallback gracefully if fetch fails
     });
 
     return () => {

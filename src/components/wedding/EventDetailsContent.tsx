@@ -2,13 +2,14 @@
 
 import Image from "next/image";
 import { MapPin } from "lucide-react";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { motion } from "framer-motion";
 import type { Variants } from "framer-motion";
 import type { EventDetailsViewportMode, WeddingEventDetailsEditorConfig } from "@/lib/wedding/event-details-types";
 import { DressCodeSection, type DressColorId } from "./DressCodeSection";
 import SeamlessVideoPlayer from "@/components/SeamlessVideoPlayer";
 import { CanvasVideo } from "@/components/CanvasVideo";
+import { AssetStore } from "@/lib/assetStore";
 
 const timelinePathVideo = "/assets/timeline-path.mp4";
 const timelinePathWebm = "/assets/timeline-path-web.webm";
@@ -274,6 +275,13 @@ export function EventDetailsContent({
   const compact = mode === "preview";
   const mobilePreview = compact && viewport === "mobile";
   const [selectedColorId, setSelectedColorId] = useState<DressColorId | null>(null);
+
+  // Subscription for reactive blob URLs
+  const [forceRender, setForceRender] = useState(0);
+  useEffect(() => {
+    return AssetStore.subscribe(() => setForceRender(prev => prev + 1));
+  }, []);
+
   const content = config.content;
   const churchDateParsed = parseChurchDate(content.churchDate);
   const banquetDateParsed = {
@@ -444,9 +452,9 @@ export function EventDetailsContent({
                 preload="auto"
               >
                 {/* Safari/iOS: HEVC with Alpha */}
-                <source src="/assets/wedding-rings.mov?v=8" type="video/quicktime; codecs=hvc1" />
+                <source src={AssetStore.get("/assets/wedding-rings.mov?v=8")} type="video/quicktime; codecs=hvc1" />
                 {/* Chrome/Android/Firefox: VP9 with Alpha */}
-                <source src="/assets/wedding-rings.webm?v=8" type="video/webm; codecs=vp9" />
+                <source src={AssetStore.get("/assets/wedding-rings.webm?v=8")} type="video/webm; codecs=vp9" />
               </CanvasVideo>
             </div>
 
