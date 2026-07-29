@@ -22,7 +22,7 @@ export function CanvasVideo({
   src,
   poster,
   isPlaying,
-  autoPlay = true,
+  autoPlay = false,
   loop = true,
   onEnded,
   className = "",
@@ -55,6 +55,7 @@ export function CanvasVideo({
         if (!video.paused) {
           video.pause();
         }
+        video.currentTime = 0;
       }
     };
 
@@ -152,7 +153,7 @@ export function CanvasVideo({
       <video
         ref={videoRef}
         {...(src ? { src } : {})}
-        autoPlay={autoPlay}
+        autoPlay={isPlaying !== undefined ? isPlaying : autoPlay}
         muted
         playsInline
         loop={loop}

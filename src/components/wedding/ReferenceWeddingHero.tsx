@@ -115,7 +115,7 @@ export function ReferenceWeddingHero({ config, summary }: ReferenceWeddingHeroPr
       <div className="save-date-arch-shell">
         <div className="save-date-arch-wrapper">
           <div
-            className={`hero-photo-fade ${isDone || (readyFromReveal && imageLoaded) ? "is-visible" : ""}`}
+            className={`hero-photo-fade ${isDone ? "is-visible" : ""}`}
           >
             {/* Invisible img for preloading and onload detection outside figure */}
             <img
