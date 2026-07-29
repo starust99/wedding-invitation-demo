@@ -5,7 +5,7 @@ import React, { useEffect, useRef } from "react";
 const TOTAL_FRAMES = 108;
 const FRAME_RATE = 12; // 12 frames per second
 const FRAME_DURATION = 1000 / FRAME_RATE; // 83.33ms per frame
-const CROSSFADE_FRAMES = 36; // 36 frames = 3.0s ultra-long smooth cosine S-curve crossfade
+const CYCLE_STEPS = (TOTAL_FRAMES - 1) * 2; // 214 steps for continuous forward-reverse boomerang cycle
 
 export function RoadSequencePlayer({
   className = "",
@@ -28,7 +28,7 @@ export function RoadSequencePlayer({
     }
     imagesRef.current = images;
 
-    // 2. High-performance requestAnimationFrame Canvas Loop
+    // 2. High-performance Boomerang Canvas Loop (0 -> 107 -> 0) with Ghost Blur Turnaround
     let animId: number;
     let startTime: number | null = null;
     const canvas = canvasRef.current;
@@ -40,8 +40,9 @@ export function RoadSequencePlayer({
       if (!startTime) startTime = timestamp;
       const elapsed = timestamp - startTime;
 
-      const exactFrame = (elapsed / FRAME_DURATION) % TOTAL_FRAMES;
-      const frameIndex = Math.floor(exactFrame);
+      // Calculate boomerang cycle step (0 -> 214)
+      const step = Math.floor(elapsed / FRAME_DURATION) % CYCLE_STEPS;
+      const frameIndex = step < TOTAL_FRAMES ? step : CYCLE_STEPS - step;
       const currentImg = imagesRef.current[frameIndex];
 
       if (currentImg && currentImg.complete && currentImg.naturalWidth > 0) {
@@ -52,26 +53,34 @@ export function RoadSequencePlayer({
 
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        // Base layer: draw current frame
+        // Turnaround ghost blur effect near endpoints (frames 102..107 and 0..5)
+        const distFromTurnaround = Math.min(frameIndex, TOTAL_FRAMES - 1 - frameIndex);
+        const isTurnaround = distFromTurnaround <= 6;
+
+        if (isTurnaround && "filter" in ctx) {
+          const blurAmount = ((6 - distFromTurnaround) / 6) * 2.5; // 0px to 2.5px dreamlike soft ghost blur
+          ctx.filter = `blur(${blurAmount.toFixed(1)}px)`;
+        } else if ("filter" in ctx) {
+          ctx.filter = "none";
+        }
+
+        // Draw current frame
         ctx.globalAlpha = 1.0;
         ctx.drawImage(currentImg, 0, 0, canvas.width, canvas.height);
 
-        // Cosine Ease-In-Out S-Curve Crossfade near loop junction (3.0s window: frames 72..107 -> frames 0..35)
-        const fadeStartFrame = TOTAL_FRAMES - CROSSFADE_FRAMES;
-        if (frameIndex >= fadeStartFrame) {
-          const rawProgress = (frameIndex - fadeStartFrame) / (CROSSFADE_FRAMES - 1);
-          const t = Math.min(1.0, Math.max(0.0, rawProgress));
-          
-          // Cosine S-Curve Easing (Derivative is 0 at t=0 and t=1, eliminating all velocity steps)
-          const smoothAlpha = 0.5 - 0.5 * Math.cos(t * Math.PI);
-          
-          const nextFrameIndex = frameIndex - fadeStartFrame;
-          const nextImg = imagesRef.current[nextFrameIndex];
-
-          if (nextImg && nextImg.complete && nextImg.naturalWidth > 0) {
-            ctx.globalAlpha = smoothAlpha;
-            ctx.drawImage(nextImg, 0, 0, canvas.width, canvas.height);
+        // Add soft ghost shadow layer during turnaround for ultra-poetic morphing
+        if (isTurnaround) {
+          const ghostAlpha = ((6 - distFromTurnaround) / 6) * 0.3;
+          const ghostFrameIndex = frameIndex > 50 ? TOTAL_FRAMES - 1 : 0;
+          const ghostImg = imagesRef.current[ghostFrameIndex];
+          if (ghostImg && ghostImg.complete) {
+            ctx.globalAlpha = ghostAlpha;
+            ctx.drawImage(ghostImg, 0, 0, canvas.width, canvas.height);
           }
+        }
+
+        if ("filter" in ctx) {
+          ctx.filter = "none";
         }
         ctx.globalAlpha = 1.0;
       }
