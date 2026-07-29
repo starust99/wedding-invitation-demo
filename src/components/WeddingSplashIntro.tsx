@@ -189,6 +189,7 @@ export function WeddingSplashIntro({
     setPreloading(false);
     setStatus("opening");
     window.dispatchEvent(new Event("playWeddingMusic"));
+    window.dispatchEvent(new Event("unlockVideos"));
     
     // Fallback timer just in case video onEnded fails or user is on low-power mode (increased for slow networks)
     closeTimer.current = window.setTimeout(closeIntro, 15000);

@@ -57,6 +57,29 @@ export function CanvasVideo({
     }
   }, [isPlaying, autoPlay, src]);
 
+  // Unlock playback on user gesture or unlockVideos event (specifically for Zalo/Safari)
+  useEffect(() => {
+    const handleUnlock = () => {
+      const video = videoRef.current;
+      if (video && video.paused) {
+        const targetPlay = isPlaying !== undefined ? isPlaying : autoPlay;
+        if (targetPlay) {
+          video.play().catch(() => {});
+        }
+      }
+    };
+
+    window.addEventListener("unlockVideos", handleUnlock);
+    window.addEventListener("touchstart", handleUnlock, { once: true });
+    window.addEventListener("click", handleUnlock, { once: true });
+
+    return () => {
+      window.removeEventListener("unlockVideos", handleUnlock);
+      window.removeEventListener("touchstart", handleUnlock);
+      window.removeEventListener("click", handleUnlock);
+    };
+  }, [isPlaying, autoPlay]);
+
   // Monitor timeupdate to safely hide poster only when actual video frames are being rendered
   useEffect(() => {
     const video = videoRef.current;
@@ -122,20 +145,20 @@ export function CanvasVideo({
         playsInline
         loop={loop}
         webkit-playsinline="true"
+        x5-playsinline="true"
         x5-video-player-type="h5-page"
-        x5-video-player-fullscreen="true"
-        x5-video-orientation="portrait"
+        x5-video-player-inline="true"
+        t7-video-player-type="inline"
         disablePictureInPicture
         disableRemotePlayback
         onEnded={onEnded}
-        // Removed onPlay to rely on timeupdate instead for more accurate poster hiding
         style={{
           position: "absolute",
           top: 0,
           left: 0,
           width: "100%",
           height: "100%",
-          opacity: 0.001,
+          opacity: 0.05, // Keep low non-zero opacity so iOS/Zalo never suspends video decoding!
           pointerEvents: "none",
           zIndex: 1, // Behind the poster and canvas
           ...videoStyle,

@@ -33,6 +33,15 @@ export default function SeamlessVideoPlayer({
       videoA.play().catch(() => {});
     }
 
+    const handleUnlock = () => {
+      if (videoA && videoA.paused) videoA.play().catch(() => {});
+      if (videoB && videoB.paused) videoB.play().catch(() => {});
+    };
+
+    window.addEventListener("unlockVideos", handleUnlock);
+    window.addEventListener("touchstart", handleUnlock, { once: true });
+    window.addEventListener("click", handleUnlock, { once: true });
+
     let isTransitioning = false;
 
     const checkLoopTransition = () => {
@@ -78,6 +87,9 @@ export default function SeamlessVideoPlayer({
 
     return () => {
       clearInterval(intervalId);
+      window.removeEventListener("unlockVideos", handleUnlock);
+      window.removeEventListener("touchstart", handleUnlock);
+      window.removeEventListener("click", handleUnlock);
     };
   }, [activeVideo]);
 
@@ -143,9 +155,10 @@ export default function SeamlessVideoPlayer({
         muted
         playsInline
         webkit-playsinline="true"
+        x5-playsinline="true"
         x5-video-player-type="h5-page"
-        x5-video-player-fullscreen="true"
-        x5-video-orientation="portrait"
+        x5-video-player-inline="true"
+        t7-video-player-type="inline"
         disablePictureInPicture
         disableRemotePlayback
         style={{
@@ -154,7 +167,7 @@ export default function SeamlessVideoPlayer({
           left: 0,
           width: "100%",
           height: "100%",
-          opacity: 0.001,
+          opacity: 0.05,
           pointerEvents: "none",
           zIndex: 1,
         }}
@@ -169,9 +182,10 @@ export default function SeamlessVideoPlayer({
         muted
         playsInline
         webkit-playsinline="true"
+        x5-playsinline="true"
         x5-video-player-type="h5-page"
-        x5-video-player-fullscreen="true"
-        x5-video-orientation="portrait"
+        x5-video-player-inline="true"
+        t7-video-player-type="inline"
         disablePictureInPicture
         disableRemotePlayback
         style={{
@@ -180,7 +194,7 @@ export default function SeamlessVideoPlayer({
           left: 0,
           width: "100%",
           height: "100%",
-          opacity: 0.001,
+          opacity: 0.05,
           pointerEvents: "none",
           zIndex: 1,
         }}
