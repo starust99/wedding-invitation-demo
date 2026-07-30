@@ -78,10 +78,12 @@ export async function GET() {
       responsesByKey.get(`name:${invitee.guestName.trim().toLowerCase()}`);
     return response ? { ...invitee, rsvp: mapRSVPRow(response) } : invitee;
   });
+  const rawResponses = ((responsesResult.data ?? []) as RSVPDatabaseRow[]).map(mapRSVPRow);
 
   return NextResponse.json({
     backend: "supabase",
     invitees,
+    responses: rawResponses,
     mediaAssets: (mediaResult.data ?? []).map((row) => mapMediaAssetRow(row as MediaAssetDatabaseRow)),
     albumRules: (albumRulesResult.data ?? []).map((row) => mapAlbumRuleRow(row as AlbumRuleDatabaseRow)),
   });

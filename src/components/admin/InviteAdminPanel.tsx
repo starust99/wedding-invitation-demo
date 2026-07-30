@@ -192,8 +192,8 @@ export function InviteAdminPanel() {
     async function refresh() {
       try {
         const [inviteResponse, rsvpResponse] = await Promise.all([
-          fetch("/api/admin/invites"),
-          fetch("/api/rsvp"),
+          fetch("/api/admin/invites", { cache: "no-store" }),
+          fetch("/api/rsvp", { cache: "no-store" }),
         ]);
 
         if (inviteResponse.status === 401 || rsvpResponse.status === 401) {
@@ -213,19 +213,29 @@ export function InviteAdminPanel() {
         let nextResponses = localResponses;
 
         if (inviteResponse.ok) {
-          const result = await inviteResponse.json() as InviteAdminApiResponse;
+          const result = await inviteResponse.json() as InviteAdminApiResponse & { responses?: RSVPResponse[] };
           if (result.backend === "supabase") {
             nextBackend = "supabase";
             nextInvitees = result.invitees ?? [];
             nextMediaAssets = result.mediaAssets ?? [];
             nextAlbumRules = result.albumRules?.length ? result.albumRules : defaultAlbumRules;
+            if (result.responses && result.responses.length > 0) {
+              nextResponses = result.responses;
+            }
           }
         }
 
         if (rsvpResponse.ok) {
           const result = await rsvpResponse.json() as { responses: RSVPResponse[]; backend: string };
-          if (result.backend === "supabase") {
-            nextResponses = result.responses ?? [];
+          if (result.backend === "supabase" && result.responses && result.responses.length > 0) {
+            nextResponses = result.responses;
+          }
+        }
+
+        if (nextResponses.length === 0 && nextInvitees.length > 0) {
+          const derivedResponses = nextInvitees.map((i) => i.rsvp).filter((r): r is RSVPResponse => Boolean(r));
+          if (derivedResponses.length > 0) {
+            nextResponses = derivedResponses;
           }
         }
 

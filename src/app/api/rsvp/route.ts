@@ -4,6 +4,8 @@ import { getInviteStatusFromRsvp } from "@/lib/invites";
 import { mapRSVPRow, toRSVPInsert, type RSVPDatabaseRow } from "@/lib/rsvp-mapper";
 import { getSupabaseServerClient, hasSupabaseEnv } from "@/lib/supabase-server";
 
+export const dynamic = "force-dynamic";
+
 export async function GET() {
   if (!(await hasAdminSession())) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
