@@ -86,14 +86,18 @@ export default function RootLayout({
                 var p2 = new Image(); p2.src = "/assets/wedding-rings.webp";
                 var href = window.location.href || "";
                 var search = window.location.search || "";
+                var hash = window.location.hash || "";
                 var path = window.location.pathname || "";
+
+                var isExplicitSkip = search.indexOf("view=main") !== -1 || search.indexOf("from=rsvp") !== -1 || search.indexOf("skip_intro=1") !== -1 || hash.indexOf("rsvp") !== -1 || hash.indexOf("thank-you") !== -1;
                 var isExplicitForce = search.indexOf("intro=1") !== -1 || href.indexOf("intro=1") !== -1;
+
                 var isGuestPath = path.indexOf("/i/") === 0;
                 var token = isGuestPath ? path.replace("/i/", "").split("?")[0] : "public";
                 var sessionSeen = false;
                 try { sessionSeen = sessionStorage.getItem("wedding-splash-seen:" + token) === "1"; } catch (e) {}
 
-                var isForce = isExplicitForce || (isGuestPath && !sessionSeen);
+                var isForce = !isExplicitSkip && (isExplicitForce || (isGuestPath && !sessionSeen));
                 if (isForce) {
                   document.documentElement.classList.remove('splash-skipped');
                 } else {

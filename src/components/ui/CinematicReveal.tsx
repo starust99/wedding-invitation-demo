@@ -21,6 +21,12 @@ function checkLocalStorageIntro(): boolean {
   try {
     const search = window.location.search || "";
     const href = window.location.href || "";
+    const hash = window.location.hash || "";
+
+    if (search.includes("view=main") || search.includes("from=rsvp") || search.includes("skip_intro=1") || hash.includes("thank-you") || hash.includes("rsvp")) {
+      return true;
+    }
+
     if (search.includes("intro=1") || href.includes("intro=1")) {
       return false;
     }

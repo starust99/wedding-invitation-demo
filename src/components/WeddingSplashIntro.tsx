@@ -15,15 +15,27 @@ function readForceIntro(storageKey?: string) {
   try {
     const search = window.location.search || "";
     const href = window.location.href || "";
+    const hash = window.location.hash || "";
+
+    if (search.includes("view=main") || search.includes("from=rsvp") || search.includes("skip_intro=1") || hash.includes("thank-you") || hash.includes("rsvp")) {
+      return false;
+    }
+
     if (search.includes("intro=1") || href.includes("intro=1")) return true;
 
     const key = storageKey || "public";
     if (window.sessionStorage.getItem(`wedding-splash-seen:${key}`) === "1") {
-      return false; // Already seen in current browser session/tab, do not replay when returning from /rsvp!
+      return false;
     }
 
     const pathname = window.location.pathname || "";
-    if (pathname.startsWith("/i/")) return true;
+    if (pathname.startsWith("/i/")) {
+      const token = pathname.replace("/i/", "").split("?")[0];
+      if (token && window.sessionStorage.getItem(`wedding-splash-seen:${token}`) === "1") {
+        return false;
+      }
+      return true;
+    }
     return false;
   } catch {
     return false;

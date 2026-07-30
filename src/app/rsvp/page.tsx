@@ -287,7 +287,7 @@ export default function RSVPPage() {
   const stayDecision = useWatch({ control, name: "stayDecision" });
   const watchedLodgingGuests = useWatch({ control, name: "lodgingGuests" });
   const formValues = useWatch({ control }) as RSVPFormInput;
-  const returnHref = inviteToken ? `/i/${encodeURIComponent(inviteToken)}` : "/";
+  const returnHref = inviteToken ? `/i/${encodeURIComponent(inviteToken)}?view=main` : "/?view=main";
 
   const inviteCopy = useMemo(() => buildInvitationCopy(inviteeContext ?? guestIdentity), [guestIdentity, inviteeContext]);
   const submissionCopy = useMemo(() => buildSubmissionCopy(attending, attendingCeremony, attendingBanquet, inviteCopy, inviteeContext ?? guestIdentity), [attending, attendingCeremony, attendingBanquet, inviteCopy, guestIdentity, inviteeContext]);
@@ -506,7 +506,7 @@ export default function RSVPPage() {
   }
 
   function redirectToInvitePage(token?: string, hash: string = "") {
-    const target = token ? `/i/${encodeURIComponent(token)}${hash}` : `/${hash}`;
+    const target = token ? `/i/${encodeURIComponent(token)}?view=main${hash}` : `/?view=main${hash}`;
     navigateWithTransition(target);
   }
 
