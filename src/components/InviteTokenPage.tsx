@@ -12,7 +12,7 @@ import { WeddingSplashIntro } from "@/components/WeddingSplashIntro";
 import { resolveGuestIdentity, type GuestIdentity } from "@/lib/guest-personalization";
 import { InviteAccessGate } from "@/components/InviteAccessGate";
 import { readLocalInvitees, writeLocalInvitees, type Invitee } from "@/lib/invites";
-import { readRSVPResponses } from "@/lib/rsvp-storage";
+import { readRSVPResponses, removeRSVPResponses } from "@/lib/rsvp-storage";
 import { applyTheme } from "@/lib/site-settings";
 import { usePublishedSettings } from "@/lib/use-published-settings";
 
@@ -93,6 +93,9 @@ export function InviteTokenPage({ token, initialInvitee }: { token: string; init
                   currentLocal.push(data.invitee);
                 }
                 writeLocalInvitees(currentLocal);
+                if (data.invitee.inviteStatus === "invited" && !data.invitee.rsvp) {
+                  removeRSVPResponses((r) => Boolean((token && r.inviteToken === token) || (data.invitee?.id && r.inviteeId === data.invitee.id)));
+                }
               } catch {}
             }
             setPayload({
@@ -150,7 +153,9 @@ export function InviteTokenPage({ token, initialInvitee }: { token: string; init
     [token, inviteeIdentity],
   );
   const rsvpHref = `/rsvp?invite=${encodeURIComponent(token)}`;
-  const localRsvp = typeof window !== "undefined" ? readRSVPResponses().find((r) => (token && r.inviteToken === token) || (invitee?.id && r.inviteeId === invitee.id)) : undefined;
+  const localRsvp = typeof window !== "undefined" && invitee?.inviteStatus !== "invited"
+    ? readRSVPResponses().find((r) => (token && r.inviteToken === token) || (invitee?.id && r.inviteeId === invitee.id))
+    : undefined;
   const activeRsvpObj = invitee?.rsvp || localRsvp;
   const hasHashThankYou = typeof window !== "undefined" && window.location.hash.includes("thank-you");
   const shouldShowThankYou = Boolean(activeRsvpObj || (invitee?.inviteStatus && invitee.inviteStatus !== "invited") || hasHashThankYou);
