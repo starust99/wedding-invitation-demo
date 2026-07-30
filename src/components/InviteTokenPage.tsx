@@ -11,7 +11,7 @@ import { WeddingDetailsSection } from "@/components/WeddingDetailsSection";
 import { WeddingSplashIntro } from "@/components/WeddingSplashIntro";
 import { resolveGuestIdentity, type GuestIdentity } from "@/lib/guest-personalization";
 import { InviteAccessGate } from "@/components/InviteAccessGate";
-import { readLocalInvitees, type Invitee } from "@/lib/invites";
+import { readLocalInvitees, writeLocalInvitees, type Invitee } from "@/lib/invites";
 import { applyTheme } from "@/lib/site-settings";
 import { usePublishedSettings } from "@/lib/use-published-settings";
 
@@ -81,16 +81,22 @@ export function InviteTokenPage({ token, initialInvitee }: { token: string; init
           const data = await response.json() as InvitePayload;
           if (!cancelled) {
             setFetchStatus("ok");
-            const mergedInvitee = data.invitee && localInvitee?.rsvp && !data.invitee.rsvp
-              ? {
-                  ...data.invitee,
-                  rsvp: localInvitee.rsvp,
-                  inviteStatus: localInvitee.inviteStatus,
+            const finalInvitee = data.invitee || localInvitee;
+            if (data.invitee && typeof window !== "undefined") {
+              try {
+                const currentLocal = readLocalInvitees();
+                const idx = currentLocal.findIndex((item) => item.token === token || item.id === data.invitee?.id);
+                if (idx >= 0) {
+                  currentLocal[idx] = data.invitee;
+                } else {
+                  currentLocal.push(data.invitee);
                 }
-              : data.invitee;
+                writeLocalInvitees(currentLocal);
+              } catch {}
+            }
             setPayload({
               ...data,
-              invitee: mergedInvitee,
+              invitee: finalInvitee,
             });
           }
         } else if (!cancelled) {
@@ -143,7 +149,7 @@ export function InviteTokenPage({ token, initialInvitee }: { token: string; init
     [token, inviteeIdentity],
   );
   const rsvpHref = `/rsvp?invite=${encodeURIComponent(token)}`;
-  const shouldShowThankYou = Boolean(invitee?.rsvp);
+  const shouldShowThankYou = Boolean(invitee?.rsvp || (invitee?.inviteStatus && invitee.inviteStatus !== "invited"));
 
   useEffect(() => {
     if (loading) return;
@@ -178,18 +184,17 @@ export function InviteTokenPage({ token, initialInvitee }: { token: string; init
       <WeddingDetailsSection config={config} guestIdentity={guestIdentity} />
       <GallerySection config={config} />
       {!shouldShowThankYou ? (
-        <RsvpSection config={config} guestIdentity={guestIdentity} rsvpHref={rsvpHref} />
-      ) : null}
-      {shouldShowThankYou ? (
+        <RsvpSection config={config} guestIdentity={guestIdentity} rsvpHref={rsvpHref} invitee={invitee} />
+      ) : (
         <ThankYouSection
           config={config}
           guestIdentity={guestIdentity}
-          rsvpAttending={invitee?.rsvp?.attending}
+          rsvpAttending={invitee?.rsvp?.attending || (invitee?.inviteStatus === "rsvp_no" ? "no" : invitee?.inviteStatus && invitee.inviteStatus !== "invited" ? "yes" : undefined)}
           rsvpAttendingCeremony={invitee?.rsvp?.attendingCeremony}
           rsvpAttendingBanquet={invitee?.rsvp?.attendingBanquet}
           rsvpHref={rsvpHref}
         />
-      ) : null}
+      )}
     </main>
   );
 }

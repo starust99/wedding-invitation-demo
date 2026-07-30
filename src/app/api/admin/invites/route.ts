@@ -15,6 +15,8 @@ import {
 import { mapRSVPRow, type RSVPDatabaseRow } from "@/lib/rsvp-mapper";
 import { getSupabaseServerClient, hasSupabaseEnv } from "@/lib/supabase-server";
 
+export const dynamic = "force-dynamic";
+
 type AdminInvitePayload = {
   invitees?: Invitee[];
   csv?: string;
@@ -55,16 +57,25 @@ export async function GET() {
     supplementsByInvitee.set(supplement.invitee_id, supplement);
   }
 
-  const responsesByToken = new Map<string, RSVPDatabaseRow>();
+  const responsesByKey = new Map<string, RSVPDatabaseRow>();
   for (const response of (responsesResult.data ?? []) as RSVPDatabaseRow[]) {
-    const key = response.invite_token || response.display_label || response.name;
-    if (!responsesByToken.has(key)) responsesByToken.set(key, response);
+    if (response.invitee_id) responsesByKey.set(`id:${response.invitee_id}`, response);
+    if (response.invite_token) responsesByKey.set(`token:${response.invite_token}`, response);
+    if (response.display_label && !responsesByKey.has(`label:${response.display_label.trim().toLowerCase()}`)) {
+      responsesByKey.set(`label:${response.display_label.trim().toLowerCase()}`, response);
+    }
+    if (response.name && !responsesByKey.has(`name:${response.name.trim().toLowerCase()}`)) {
+      responsesByKey.set(`name:${response.name.trim().toLowerCase()}`, response);
+    }
   }
 
   const invitees = (inviteesResult.data ?? []).map((row) => {
     const invitee = mapInviteRow(row as InviteeDatabaseRow, supplementsByInvitee.get((row as InviteeDatabaseRow).id) ? mapSupplementRow(supplementsByInvitee.get((row as InviteeDatabaseRow).id)!) : undefined);
-    const rsvpKey = invitee.token || invitee.displayLabel || invitee.guestName;
-    const response = responsesByToken.get(rsvpKey);
+    const response =
+      responsesByKey.get(`id:${invitee.id}`) ||
+      responsesByKey.get(`token:${invitee.token}`) ||
+      responsesByKey.get(`label:${invitee.displayLabel.trim().toLowerCase()}`) ||
+      responsesByKey.get(`name:${invitee.guestName.trim().toLowerCase()}`);
     return response ? { ...invitee, rsvp: mapRSVPRow(response) } : invitee;
   });
 

@@ -8,19 +8,26 @@ import { buildInvitationCopy, type GuestIdentity } from "@/lib/guest-personaliza
 import { usePageTransition } from "@/components/PageTransitionEffect";
 import { motion } from "framer-motion";
 
+import type { Invitee } from "@/lib/invites";
+
 export function RsvpSection({
   config,
   guestIdentity,
   rsvpHref = "/rsvp",
   transparentBg = false,
+  invitee,
 }: {
   config: WeddingConfig;
   guestIdentity: GuestIdentity;
   rsvpHref?: string;
   transparentBg?: boolean;
+  invitee?: Invitee;
 }) {
   const inviteCopy = useMemo(() => buildInvitationCopy(guestIdentity), [guestIdentity]);
   const { navigateWithTransition, prefetch } = usePageTransition();
+
+  const hasResponded = Boolean(invitee?.rsvp || (invitee?.inviteStatus && invitee.inviteStatus !== "invited"));
+  const isDeclined = invitee?.rsvp?.attending === "no" || invitee?.inviteStatus === "rsvp_no";
 
   // Prefetch /rsvp as soon as RsvpSection is rendered
   useEffect(() => {
@@ -46,6 +53,13 @@ export function RsvpSection({
           className="glass-panel relative w-full max-w-3xl overflow-hidden rounded-[2.5rem] px-5 py-8 sm:px-10 sm:py-10 lg:px-12 lg:py-12 shadow-none"
         >
           <div className="relative z-10 mx-auto flex max-w-2xl flex-col items-center text-center">
+            {hasResponded ? (
+              <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-emerald-500/40 bg-emerald-500/10 px-4 py-1.5 text-xs font-semibold text-emerald-800 dark:text-emerald-300 backdrop-blur-sm">
+                <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+                <span>{isDeclined ? "ĐÃ BÁO BẬN" : "ĐÃ XÁC NHẬN THAM DỰ"}</span>
+              </div>
+            ) : null}
+
             <h3 className="font-serif text-[1.12rem] sm:text-[1.25rem] md:text-[1.38rem] font-bold gold-foil-text uppercase leading-tight mt-0.5 mb-1">
               {config.sections.cta.eyebrow}
             </h3>
@@ -57,31 +71,46 @@ export function RsvpSection({
             <p suppressHydrationWarning className="wedding-type-meta font-sans mt-3.5 max-w-xl text-ink/62 uppercase tracking-wider" style={{ fontSize: "1.09em" }}>
               QUÝ KHÁCH THÂN MẾN,
             </p>
-            <p className="wedding-type-body font-sans mt-4 max-w-2xl text-ink/68">
-              Sự hiện diện của Quý khách là niềm vinh hạnh lớn nhất của hai gia đình.
-            </p>
-            <p className="wedding-type-body font-sans mt-3.5 max-w-2xl text-ink/68">
-              Để công tác đón tiếp được chuẩn bị chu đáo, xin Quý khách vui lòng xác nhận thông tin tham dự trước ngày <strong className="font-bold text-ink/90">{config.rsvp.deadline}</strong>.
-            </p>
-            <p className="wedding-type-body font-sans mt-3.5 max-w-xl text-ink/68">
-              Xin bấm nút "Gửi hồi đáp" để điền thông tin.
-            </p>
+
+            {hasResponded ? (
+              <>
+                <p className="wedding-type-body font-sans mt-4 max-w-2xl text-ink/80 font-medium">
+                  Cảm ơn Quý khách đã gửi lời hồi đáp cho hai gia đình.
+                </p>
+                <p className="wedding-type-body font-sans mt-2 max-w-2xl text-ink/68">
+                  Thông tin phản hồi của Quý khách đã được ghi nhận thành công trên hệ thống. Quý khách có thể xem lại hoặc chỉnh sửa thông tin tham dự bất kỳ lúc nào trước ngày <strong className="font-bold text-ink/90">{config.rsvp.deadline}</strong>.
+                </p>
+              </>
+            ) : (
+              <>
+                <p className="wedding-type-body font-sans mt-4 max-w-2xl text-ink/68">
+                  Sự hiện diện của Quý khách là niềm vinh hạnh lớn nhất của hai gia đình.
+                </p>
+                <p className="wedding-type-body font-sans mt-3.5 max-w-2xl text-ink/68">
+                  Để công tác đón tiếp được chuẩn bị chu đáo, xin Quý khách vui lòng xác nhận thông tin tham dự trước ngày <strong className="font-bold text-ink/90">{config.rsvp.deadline}</strong>.
+                </p>
+                <p className="wedding-type-body font-sans mt-3.5 max-w-xl text-ink/68">
+                  Xin bấm nút "Gửi hồi đáp" để điền thông tin.
+                </p>
+              </>
+            )}
+
             <p className="wedding-type-body font-sans mt-2 max-w-xl text-ink/68">
               Trân trọng cảm ơn.
             </p>
 
-              <button
-                type="button"
-                onClick={() => navigateWithTransition(rsvpHref)}
-                onMouseEnter={() => prefetch(rsvpHref)}
-                onTouchStart={() => prefetch(rsvpHref)}
-                className="mt-6 inline-flex h-[2.75rem] sm:h-[3.0rem] items-center justify-center transition hover:-translate-y-0.5 save-date-watercolor-btn mx-auto min-w-[11rem] sm:min-w-[12.5rem]"
-              >
-                <span className="save-date-btn-label">
-                  <HeartHandshake aria-hidden="true" className="w-4 h-4 sm:w-4.5 sm:h-4.5" />
-                  <span>Gửi hồi đáp</span>
-                </span>
-              </button>
+            <button
+              type="button"
+              onClick={() => navigateWithTransition(rsvpHref)}
+              onMouseEnter={() => prefetch(rsvpHref)}
+              onTouchStart={() => prefetch(rsvpHref)}
+              className="mt-6 inline-flex h-[2.75rem] sm:h-[3.0rem] items-center justify-center transition hover:-translate-y-0.5 save-date-watercolor-btn mx-auto min-w-[11rem] sm:min-w-[12.5rem]"
+            >
+              <span className="save-date-btn-label">
+                <HeartHandshake aria-hidden="true" className="w-4 h-4 sm:w-4.5 sm:h-4.5" />
+                <span>{hasResponded ? "Xem & Chỉnh sửa hồi đáp" : "Gửi hồi đáp"}</span>
+              </span>
+            </button>
           </div>
         </motion.div>
       </div>

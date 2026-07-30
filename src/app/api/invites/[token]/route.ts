@@ -13,6 +13,8 @@ import {
 import { mapRSVPRow, type RSVPDatabaseRow } from "@/lib/rsvp-mapper";
 import { getSupabaseServerClient, hasSupabaseEnv } from "@/lib/supabase-server";
 
+export const dynamic = "force-dynamic";
+
 export async function GET(_request: Request, { params }: { params: Promise<{ token: string }> }) {
   if (!hasSupabaseEnv()) {
     try {
