@@ -86,7 +86,7 @@ export function DressCodeSection({
   // Preload all dress code images to make color transitions instantaneous
   useEffect(() => {
     const imagesToPreload = [
-      "/assets/dresscode-theme-v4.jpg?v=9",
+      "/assets/dresscode-theme-v4.webp?v=10",
       ...DRESS_COLORS.map((c) => `${c.imgSrc}?v=8`),
     ];
     imagesToPreload.forEach((src) => {
@@ -184,7 +184,7 @@ export function DressCodeSection({
                 className="absolute inset-0 w-full h-full"
               >
                 <Image
-                  src={selectedColor ? `${selectedColor.imgSrc}?v=8` : "/assets/dresscode-theme-v4.jpg?v=9"}
+                  src={selectedColor ? `${selectedColor.imgSrc}?v=8` : "/assets/dresscode-theme-v4.webp?v=10"}
                   alt={selectedColor ? `Gợi ý phối đồ màu ${selectedColor.name}` : "Gợi ý phối đồ theo bảng màu vườn xuân"}
                   fill
                   unoptimized

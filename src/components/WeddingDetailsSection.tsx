@@ -37,7 +37,7 @@ export function WeddingDetailsSection({ config, guestIdentity }: { config: Weddi
         venueArea: "Quảng trường Terrace Montagne",
         dressCodeTitle: config.dressCode.title || "Sắc màu vườn xuân",
         dressCodeNote: inviteCopy.dressCodeLine,
-        dressCodeImageSrc: "/assets/dresscode-theme-v4.jpg",
+        dressCodeImageSrc: "/assets/dresscode-theme-v4.webp",
         dressCodeColors: config.dressCode.colors,
         timeline: config.timeline,
       }}
