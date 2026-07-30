@@ -572,7 +572,8 @@ export default function RSVPPage() {
     };
 
     try {
-      const endpoint = searchToken ? `/api/invites/${encodeURIComponent(searchToken)}/rsvp` : "/api/rsvp";
+      const targetToken = searchToken || inviteToken || inviteeContext?.token || payload.inviteToken;
+      const endpoint = targetToken ? `/api/invites/${encodeURIComponent(targetToken)}/rsvp` : "/api/rsvp";
       const apiResponse = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -605,15 +606,26 @@ export default function RSVPPage() {
 
   function persistLocalRsvp(payload: Omit<RSVPResponse, "id" | "submittedAt">) {
     const localResponse = saveRSVPResponse(payload);
-    if (inviteeContext) {
+    const targetToken = payload.inviteToken || inviteToken || inviteeContext?.token;
+    const currentLocal = readLocalInvitees();
+    const existing = currentLocal.find(
+      (i) => (targetToken && i.token === targetToken) || (payload.inviteeId && i.id === payload.inviteeId)
+    ) || inviteeContext;
+
+    if (existing) {
       const updatedInvitee: Invitee = {
-        ...inviteeContext,
+        ...existing,
         rsvp: localResponse,
         inviteStatus: getInviteStatusFromRsvp(payload.attending),
         updatedAt: new Date().toISOString(),
       };
       upsertLocalInvitees([updatedInvitee]);
       setInviteeContext(updatedInvitee);
+    }
+
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new Event("wedding-rsvp-updated"));
+      window.dispatchEvent(new Event("wedding-invitees-updated"));
     }
     return localResponse;
   }

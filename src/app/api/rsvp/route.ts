@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { hasAdminSession } from "@/lib/admin-auth";
+import { getInviteStatusFromRsvp } from "@/lib/invites";
 import { mapRSVPRow, toRSVPInsert, type RSVPDatabaseRow } from "@/lib/rsvp-mapper";
 import { getSupabaseServerClient, hasSupabaseEnv } from "@/lib/supabase-server";
 
@@ -32,17 +33,84 @@ export async function POST(request: Request) {
 
   const body = await request.json();
   const supabase = getSupabaseServerClient();
-  const { data, error } = await supabase
-    .from("rsvp_responses")
-    .insert(toRSVPInsert(body))
-    .select("*")
-    .single();
+
+  const token = body.inviteToken || body.token;
+  const inviteeId = body.inviteeId;
+  const name = body.name?.trim();
+  const displayLabel = body.displayLabel?.trim();
+
+  // Search for matching invitee in Supabase
+  let matchingInvitee: { id: string; token: string } | null = null;
+  if (inviteeId || token || displayLabel || name) {
+    let query = supabase.from("invitees").select("id, token");
+    if (inviteeId) {
+      query = query.eq("id", inviteeId);
+    } else if (token) {
+      query = query.eq("token", token);
+    } else if (displayLabel) {
+      query = query.eq("display_label", displayLabel);
+    } else if (name) {
+      query = query.eq("guest_name", name);
+    }
+    const { data: invitee } = await query.maybeSingle();
+    if (invitee) {
+      matchingInvitee = invitee;
+    }
+  }
+
+  const payload = {
+    ...body,
+    inviteeId: matchingInvitee?.id || body.inviteeId,
+    inviteToken: matchingInvitee?.token || token,
+  };
+
+  const insertPayload = {
+    ...toRSVPInsert(payload),
+    submitted_at: new Date().toISOString(),
+  };
+
+  let existingId: string | null = null;
+  if (matchingInvitee?.id || matchingInvitee?.token || payload.inviteToken) {
+    const filter = matchingInvitee?.id
+      ? `invitee_id.eq.${matchingInvitee.id}`
+      : `invite_token.eq.${payload.inviteToken}`;
+    const { data: existing } = await supabase
+      .from("rsvp_responses")
+      .select("id")
+      .or(filter)
+      .order("submitted_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (existing?.id) {
+      existingId = existing.id;
+    }
+  }
+
+  const mutation = existingId
+    ? supabase.from("rsvp_responses").update(insertPayload).eq("id", existingId)
+    : supabase.from("rsvp_responses").insert(insertPayload);
+
+  const { data, error } = await mutation.select("*").single();
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
-  return NextResponse.json({ response: mapRSVPRow(data as RSVPDatabaseRow), backend: "supabase" });
+  if (matchingInvitee?.id) {
+    await supabase
+      .from("invitees")
+      .update({
+        invite_status: getInviteStatusFromRsvp(body.attending),
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", matchingInvitee.id);
+  }
+
+  return NextResponse.json({
+    response: mapRSVPRow(data as RSVPDatabaseRow),
+    backend: "supabase",
+    hasSubmittedRsvp: true,
+  });
 }
 
 export async function DELETE(request: Request) {
