@@ -79,6 +79,7 @@ export default function Home() {
     };
 
     checkRsvp();
+    window.addEventListener("wedding-rsvp-updated", checkRsvp);
 
     return () => {
       window.removeEventListener("wedding-rsvp-updated", checkRsvp);
@@ -104,17 +105,18 @@ export default function Home() {
         <div aria-hidden="true" className="hero-couture-shade absolute inset-0 opacity-55" />
         
         <div className="relative z-10 flex flex-col gap-8 md:gap-12 w-full">
-          {(!hasRsvp || !guestIdentity.name) && (
+          {!hasRsvp && !activeRsvp ? (
             <RsvpSection config={config} guestIdentity={guestIdentity} transparentBg={true} />
+          ) : (
+            <ThankYouSection
+              config={config}
+              guestIdentity={guestIdentity}
+              rsvpAttending={activeRsvp?.attending || "yes"}
+              rsvpAttendingCeremony={activeRsvp?.attendingCeremony}
+              rsvpAttendingBanquet={activeRsvp?.attendingBanquet}
+              transparentBg={true}
+            />
           )}
-          <ThankYouSection
-            config={config}
-            guestIdentity={guestIdentity}
-            rsvpAttending={activeRsvp?.attending}
-            rsvpAttendingCeremony={activeRsvp?.attendingCeremony}
-            rsvpAttendingBanquet={activeRsvp?.attendingBanquet}
-            transparentBg={true}
-          />
         </div>
       </div>
     </main>

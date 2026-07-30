@@ -12,6 +12,7 @@ import { WeddingSplashIntro } from "@/components/WeddingSplashIntro";
 import { resolveGuestIdentity, type GuestIdentity } from "@/lib/guest-personalization";
 import { InviteAccessGate } from "@/components/InviteAccessGate";
 import { readLocalInvitees, writeLocalInvitees, type Invitee } from "@/lib/invites";
+import { readRSVPResponses } from "@/lib/rsvp-storage";
 import { applyTheme } from "@/lib/site-settings";
 import { usePublishedSettings } from "@/lib/use-published-settings";
 
@@ -149,7 +150,10 @@ export function InviteTokenPage({ token, initialInvitee }: { token: string; init
     [token, inviteeIdentity],
   );
   const rsvpHref = `/rsvp?invite=${encodeURIComponent(token)}`;
-  const shouldShowThankYou = Boolean(invitee?.rsvp || (invitee?.inviteStatus && invitee.inviteStatus !== "invited"));
+  const localRsvp = typeof window !== "undefined" ? readRSVPResponses().find((r) => (token && r.inviteToken === token) || (invitee?.id && r.inviteeId === invitee.id)) : undefined;
+  const activeRsvpObj = invitee?.rsvp || localRsvp;
+  const hasHashThankYou = typeof window !== "undefined" && window.location.hash.includes("thank-you");
+  const shouldShowThankYou = Boolean(activeRsvpObj || (invitee?.inviteStatus && invitee.inviteStatus !== "invited") || hasHashThankYou);
 
   useEffect(() => {
     if (loading) return;
@@ -189,9 +193,9 @@ export function InviteTokenPage({ token, initialInvitee }: { token: string; init
         <ThankYouSection
           config={config}
           guestIdentity={guestIdentity}
-          rsvpAttending={invitee?.rsvp?.attending || (invitee?.inviteStatus === "rsvp_no" ? "no" : invitee?.inviteStatus && invitee.inviteStatus !== "invited" ? "yes" : undefined)}
-          rsvpAttendingCeremony={invitee?.rsvp?.attendingCeremony}
-          rsvpAttendingBanquet={invitee?.rsvp?.attendingBanquet}
+          rsvpAttending={activeRsvpObj?.attending || (invitee?.inviteStatus === "rsvp_no" ? "no" : invitee?.inviteStatus && invitee.inviteStatus !== "invited" ? "yes" : "yes")}
+          rsvpAttendingCeremony={activeRsvpObj?.attendingCeremony}
+          rsvpAttendingBanquet={activeRsvpObj?.attendingBanquet}
           rsvpHref={rsvpHref}
         />
       )}

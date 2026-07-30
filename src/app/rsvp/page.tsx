@@ -423,6 +423,7 @@ export default function RSVPPage() {
 
       if (token) {
         setInviteToken(token);
+        try { sessionStorage.setItem("last_invite_token", token); } catch {}
 
         const localInvitee = readLocalInvitees().find((invitee) => invitee.token === token);
         if (localInvitee) {
@@ -506,7 +507,8 @@ export default function RSVPPage() {
   }
 
   function redirectToInvitePage(token?: string, hash: string = "") {
-    const target = token ? `/i/${encodeURIComponent(token)}?view=main${hash}` : `/?view=main${hash}`;
+    const activeToken = token || inviteToken || inviteeContext?.token || (typeof window !== "undefined" ? sessionStorage.getItem("last_invite_token") : null) || findAnyStoredInviteToken();
+    const target = activeToken ? `/i/${encodeURIComponent(activeToken)}?view=main${hash}` : `/?view=main${hash}`;
     navigateWithTransition(target);
   }
 
