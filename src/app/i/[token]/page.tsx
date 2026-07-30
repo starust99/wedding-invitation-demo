@@ -107,7 +107,7 @@ export async function generateMetadata({ params }: { params: Promise<{ token: st
     openGraph: {
       title,
       description,
-      url: `/i/${token}?intro=1`,
+      url: `/i/${token}`,
       images: [ogImage],
     },
     twitter: {

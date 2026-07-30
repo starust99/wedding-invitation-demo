@@ -485,7 +485,7 @@ export function normalizeInviteToken(value: string) {
 }
 
 export function buildInvitePath(token: string) {
-  return `/i/${encodeURIComponent(token)}?intro=1`;
+  return `/i/${encodeURIComponent(token)}`;
 }
 
 export function buildInviteUrl(token: string, origin = "") {
