@@ -4206,6 +4206,15 @@ textarea {
 }
 
 /* Instant splash skip dialog hide styles */
+html.splash-active,
+html.splash-active body {
+  overflow: hidden !important;
+  touch-action: none !important;
+  height: 100% !important;
+  max-height: 100vh !important;
+  overscroll-behavior: none !important;
+}
+
 html.splash-skipped:not(.splash-active) [role="dialog"][aria-label="Mở thiệp cưới"] {
   display: none !important;
 }

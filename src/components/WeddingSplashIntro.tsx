@@ -322,11 +322,39 @@ export function WeddingSplashIntro({
 
   useEffect(() => {
     if (preloading || isVisible) {
+      document.documentElement.classList.add("splash-active");
       const previousOverflow = document.body.style.overflow;
       document.body.style.overflow = "hidden";
 
+      const preventTouch = (e: TouchEvent) => {
+        if (e.cancelable) {
+          e.preventDefault();
+        }
+      };
+
+      const preventWheel = (e: WheelEvent) => {
+        if (e.cancelable) {
+          e.preventDefault();
+        }
+      };
+
+      const preventScrollKeys = (e: KeyboardEvent) => {
+        if (["Space", "ArrowDown", "ArrowUp", "PageDown", "PageUp"].includes(e.code)) {
+          if (e.cancelable) {
+            e.preventDefault();
+          }
+        }
+      };
+
+      window.addEventListener("touchmove", preventTouch, { passive: false });
+      window.addEventListener("wheel", preventWheel, { passive: false });
+      window.addEventListener("keydown", preventScrollKeys, { passive: false });
+
       return () => {
         document.body.style.overflow = previousOverflow;
+        window.removeEventListener("touchmove", preventTouch);
+        window.removeEventListener("wheel", preventWheel);
+        window.removeEventListener("keydown", preventScrollKeys);
       };
     }
   }, [preloading, isVisible]);
