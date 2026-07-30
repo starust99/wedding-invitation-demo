@@ -134,6 +134,12 @@ export async function DELETE(request: Request) {
   }
 
   const supabase = getSupabaseServerClient();
+
+  const { data: rowsToDelete } = await supabase
+    .from("rsvp_responses")
+    .select("invitee_id, invite_token")
+    .in("id", ids);
+
   const { error } = await supabase
     .from("rsvp_responses")
     .delete()
@@ -141,6 +147,18 @@ export async function DELETE(request: Request) {
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+
+  if (rowsToDelete && rowsToDelete.length > 0) {
+    const inviteeIds = rowsToDelete.map((r) => r.invitee_id).filter((id): id is string => Boolean(id));
+    const tokens = rowsToDelete.map((r) => r.invite_token).filter((t): t is string => Boolean(t));
+
+    if (inviteeIds.length > 0) {
+      await supabase.from("invitees").update({ invite_status: "invited", updated_at: new Date().toISOString() }).in("id", inviteeIds);
+    }
+    if (tokens.length > 0) {
+      await supabase.from("invitees").update({ invite_status: "invited", updated_at: new Date().toISOString() }).in("token", tokens);
+    }
   }
 
   return NextResponse.json({ ok: true, deletedIds: ids, backend: "supabase" });
