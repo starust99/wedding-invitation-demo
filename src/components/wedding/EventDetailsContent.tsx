@@ -626,18 +626,16 @@ export function EventDetailsContent({
               
               <div className="event-details-timeline-scene timeline-garden-path-scene w-full max-w-[28rem] sm:max-w-[34rem] md:max-w-[38rem] mx-auto min-h-[28rem] overflow-visible relative">
                 {/* Con đường: poster tĩnh luôn sẵn sàng; đủ 108 frame mới bắt đầu chạy. */}
-                <div className="timeline-garden-path-image timeline-path-video-wrap timeline-path-frames-wrap opacity-100 absolute inset-0 pointer-events-none">
-                  <div className="timeline-path-media">
-                    <img
-                      src="/assets/timeline-frames/frame_001.webp"
-                      alt=""
-                      aria-hidden="true"
-                      className="timeline-path-poster timeline-path-video"
-                    />
-                    <RoadSequencePlayer
-                      className="timeline-path-video w-full h-full object-contain"
-                    />
-                  </div>
+                <div className="timeline-garden-path-image timeline-path-video-wrap timeline-path-frames-wrap opacity-100 pointer-events-none">
+                  <img
+                    src="/assets/timeline-frames/frame_001.webp"
+                    alt=""
+                    aria-hidden="true"
+                    className="timeline-path-poster timeline-path-video"
+                  />
+                  <RoadSequencePlayer
+                    className="timeline-path-video w-full h-full object-cover"
+                  />
                 </div>
 
                 {/* Các thẻ mốc thời gian — so le trái/phải */}

@@ -4363,33 +4363,21 @@ html.splash-skipped body {
  * it receives the source frame's exact 9:16 box, so feathering follows the
  * artwork instead of the wider tablet container.
  */
-.timeline-path-media {
-  position: absolute;
-  inset-block: 0;
-  left: 50%;
-  height: 100%;
-  max-width: 100%;
-  aspect-ratio: 9 / 16;
-  transform: translateX(-50%);
-  isolation: isolate;
-  pointer-events: none;
-}
-
 .timeline-path-poster,
-.timeline-path-media .timeline-road-motion {
+.timeline-road-motion {
   position: absolute;
   inset: 0;
   display: block;
   width: 100%;
   height: 100%;
+  object-fit: cover;
 }
 
 .timeline-path-poster {
   z-index: 0;
-  object-fit: cover;
 }
 
-.timeline-path-media .timeline-road-motion {
+.timeline-road-motion {
   z-index: 1;
 }
 

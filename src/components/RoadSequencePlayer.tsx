@@ -276,7 +276,7 @@ export function RoadSequencePlayer({
       className={`${className} timeline-road-motion ${isReady ? "is-ready" : ""}`}
       aria-hidden="true"
       style={{
-        objectFit: "contain",
+        objectFit: "cover",
         pointerEvents: "none",
         width: "100%",
         height: "100%",
