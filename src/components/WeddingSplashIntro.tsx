@@ -218,6 +218,17 @@ export function WeddingSplashIntro({
 
     // The button is enabled only after the exact frame sequence for this
     // viewport, the hero reveal, the first timeline frame, and music are ready.
+    const dressCodeImages = [
+      "/assets/dresscode-theme-v4.webp?v=10",
+      "/assets/dresscode-pink-v3.jpg?v=8",
+      "/assets/dresscode-blue-v3.jpg?v=8",
+      "/assets/dresscode-yellow-v3.jpg?v=8",
+      "/assets/dresscode-green-v4.jpg?v=8",
+      "/assets/dresscode-cream-v3.jpg?v=8",
+      "/assets/dresscode-beige-v3.jpg?v=8",
+      "/assets/dresscode-brown-v3.jpg?v=8",
+    ];
+
     const staticImages = [
       "/assets/preloader-logo.webp",
       activeViewport === "mobile"
@@ -231,6 +242,7 @@ export function WeddingSplashIntro({
       "/assets/icon-cross-new.png",
       "/assets/hero-invite-heading-v5.png",
       "/assets/timeline-frames/frame_001.webp",
+      ...dressCodeImages,
     ];
 
     const splashFrames: string[] = [];
