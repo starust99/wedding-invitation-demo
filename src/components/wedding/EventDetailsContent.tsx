@@ -270,6 +270,7 @@ export function EventDetailsContent({
   const compact = mode === "preview";
   const mobilePreview = compact && viewport === "mobile";
   const [selectedColorId, setSelectedColorId] = useState<DressColorId | null>(null);
+  const [isRoadReady, setIsRoadReady] = useState(false);
   const content = config.content;
   const churchDateParsed = parseChurchDate(content.churchDate);
   const banquetDateParsed = {
@@ -626,15 +627,16 @@ export function EventDetailsContent({
               
               <div className="event-details-timeline-scene timeline-garden-path-scene w-full max-w-[28rem] sm:max-w-[34rem] md:max-w-[38rem] mx-auto min-h-[28rem] overflow-visible relative">
                 {/* Con đường: poster tĩnh luôn sẵn sàng; đủ 108 frame mới bắt đầu chạy. */}
-                <div className="timeline-garden-path-image timeline-path-video-wrap timeline-path-frames-wrap opacity-100 pointer-events-none">
+                <div className={`timeline-garden-path-image timeline-path-video-wrap timeline-path-frames-wrap opacity-100 pointer-events-none ${isRoadReady ? "is-ready" : ""}`}>
                   <img
                     src="/assets/timeline-frames/frame_001.webp"
                     alt=""
                     aria-hidden="true"
-                    className="timeline-path-poster timeline-path-video"
+                    className={`timeline-path-poster timeline-path-video ${isRoadReady ? "is-faded-out" : ""}`}
                   />
                   <RoadSequencePlayer
                     className="timeline-path-video w-full h-full object-cover"
+                    onReady={() => setIsRoadReady(true)}
                   />
                 </div>
 

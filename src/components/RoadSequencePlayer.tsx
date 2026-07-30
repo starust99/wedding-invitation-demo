@@ -50,9 +50,11 @@ function warmTimelineFrameBytes() {
 export function RoadSequencePlayer({
   className = "",
   style,
+  onReady,
 }: {
   className?: string;
   style?: React.CSSProperties;
+  onReady?: () => void;
 }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const imagesRef = useRef<Array<HTMLImageElement | undefined>>(
@@ -63,6 +65,12 @@ export function RoadSequencePlayer({
   const [isReady, setIsReady] = useState(false);
   const [isNearViewport, setIsNearViewport] = useState(false);
   const prefersReducedMotion = useReducedMotion();
+
+  useEffect(() => {
+    if (isReady && onReady) {
+      onReady();
+    }
+  }, [isReady, onReady]);
 
   const drawFrame = useCallback((image: HTMLImageElement) => {
     const canvas = canvasRef.current;

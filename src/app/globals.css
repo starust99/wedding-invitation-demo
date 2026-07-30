@@ -4375,6 +4375,15 @@ html.splash-skipped body {
 
 .timeline-path-poster {
   z-index: 0;
+  opacity: 1;
+  transition: opacity 1200ms cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: opacity;
+}
+
+.timeline-path-poster.is-faded-out,
+.timeline-path-frames-wrap.is-ready .timeline-path-poster {
+  opacity: 0;
+  pointer-events: none;
 }
 
 .timeline-road-motion {
