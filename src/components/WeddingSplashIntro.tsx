@@ -498,7 +498,7 @@ export function WeddingSplashIntro({
                     </button>
                   ) : (
                     <p className="text-[0.62rem] font-bold uppercase tracking-[0.25em] text-[#3f4642]/50 leading-relaxed">
-                      Đang chuẩn bị thiệp... {progress}%
+                      Đang chuẩn bị... {progress}%
                     </p>
                   )}
                 </div>
