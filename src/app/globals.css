@@ -703,15 +703,15 @@ textarea {
 /* Tablet View (min-width: 768px and max-width: 1023px) */
 @media (min-width: 768px) and (max-width: 1023px) {
   .save-date-hero-ornament-left {
-    left: 4%;
+    left: 1.5%;
     bottom: -3%;
-    width: clamp(11.5rem, 34.6%, 16.2rem);
+    width: clamp(10.2rem, 32%, 14.2rem);
     filter: brightness(1.15);
   }
   .save-date-hero-ornament-right {
-    right: 4%;
+    right: 1.5%;
     bottom: 1%;
-    width: clamp(9.4rem, 28%, 13.2rem);
+    width: clamp(8.4rem, 26%, 11.6rem);
   }
 }
 
