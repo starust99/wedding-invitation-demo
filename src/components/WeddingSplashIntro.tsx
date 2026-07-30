@@ -10,20 +10,31 @@ import { CanvasVideo } from "./CanvasVideo";
 
 type SplashStatus = "checking" | "closed" | "opening" | "hidden";
 
-function readForceIntro() {
-  if (typeof window === "undefined") return true;
+function readForceIntro(storageKey?: string) {
+  if (typeof window === "undefined") return false;
   try {
+    const search = window.location.search || "";
+    const href = window.location.href || "";
+    if (search.includes("intro=1") || href.includes("intro=1")) return true;
+
+    const key = storageKey || "public";
+    if (window.sessionStorage.getItem(`wedding-splash-seen:${key}`) === "1") {
+      return false; // Already seen in current browser session/tab, do not replay when returning from /rsvp!
+    }
+
     const pathname = window.location.pathname || "";
     if (pathname.startsWith("/i/")) return true;
-    return new URLSearchParams(window.location.search).get("intro") === "1" || window.location.href.includes("intro=1");
+    return false;
   } catch {
-    return true;
+    return false;
   }
 }
 
 function markSplashSeen(key: string) {
   try {
     window.localStorage.setItem(key, "1");
+    const cleanKey = key.replace(/^wedding-splash:/, "");
+    window.sessionStorage.setItem(`wedding-splash-seen:${cleanKey}`, "1");
   } catch {}
 }
 
@@ -51,7 +62,7 @@ export function WeddingSplashIntro({
 
   const [status, setStatus] = useState<SplashStatus>(() => {
     if (typeof window === "undefined") return "checking";
-    const shouldForce = readForceIntro();
+    const shouldForce = readForceIntro(storageKey);
     if (shouldForce) return "closed";
     if (hasSeenSplash(sessionKey)) return "hidden";
     return "closed";

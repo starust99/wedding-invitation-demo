@@ -87,7 +87,13 @@ export default function RootLayout({
                 var href = window.location.href || "";
                 var search = window.location.search || "";
                 var path = window.location.pathname || "";
-                var isForce = path.indexOf("/i/") === 0 || search.indexOf("intro=1") !== -1 || href.indexOf("intro=1") !== -1;
+                var isExplicitForce = search.indexOf("intro=1") !== -1 || href.indexOf("intro=1") !== -1;
+                var isGuestPath = path.indexOf("/i/") === 0;
+                var token = isGuestPath ? path.replace("/i/", "").split("?")[0] : "public";
+                var sessionSeen = false;
+                try { sessionSeen = sessionStorage.getItem("wedding-splash-seen:" + token) === "1"; } catch (e) {}
+
+                var isForce = isExplicitForce || (isGuestPath && !sessionSeen);
                 if (isForce) {
                   document.documentElement.classList.remove('splash-skipped');
                 } else {

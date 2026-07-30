@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useCallback, useContext, useRef, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 
 type TransitionContextValue = {
@@ -17,13 +17,17 @@ export function usePageTransition() {
   return useContext(TransitionContext);
 }
 
-const EXIT_MS = 160;
-
 export function PageTransitionEffect({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const [leaving, setLeaving] = useState(false);
   const navRef = useRef(false);
+
+  // Immediately reset leaving state when pathname changes so incoming page fades in smoothly without flicker
+  useEffect(() => {
+    setLeaving(false);
+    navRef.current = false;
+  }, [pathname]);
 
   const prefetch = useCallback(
     (href: string) => {
@@ -41,18 +45,12 @@ export function PageTransitionEffect({ children }: { children: React.ReactNode }
       if (navRef.current) return;
       navRef.current = true;
 
-      // Trigger prefetch and exit transition concurrently
       prefetch(href);
       setLeaving(true);
 
-      // Push route in parallel (40ms) while exit transition completes
       setTimeout(() => {
         router.push(href);
-        setTimeout(() => {
-          setLeaving(false);
-          navRef.current = false;
-        }, EXIT_MS);
-      }, 40);
+      }, 150);
     },
     [prefetch, router],
   );
