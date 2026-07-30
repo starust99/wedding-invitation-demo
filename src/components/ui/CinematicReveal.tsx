@@ -19,6 +19,10 @@ function getCurrentStorageKey(): string {
 function checkLocalStorageIntro(): boolean {
   if (typeof window === "undefined") return false;
   try {
+    if (document.documentElement.classList.contains("splash-active")) {
+      return false;
+    }
+
     const search = window.location.search || "";
     const href = window.location.href || "";
     const hash = window.location.hash || "";
@@ -41,6 +45,10 @@ function checkLocalStorageIntro(): boolean {
 
 export function checkIsIntroDone(): boolean {
   if (typeof window !== "undefined") {
+    if (document.documentElement.classList.contains("splash-active")) {
+      return false;
+    }
+
     const search = window.location.search || "";
     const href = window.location.href || "";
     if (search.includes("intro=1") || href.includes("intro=1")) {
@@ -129,7 +137,6 @@ export function LineReveal({
   type?: "header" | "body";
 }) {
   const ref = useRef(null);
-  const isDone = checkIsIntroDone();
 
   const fadeClass = type === "body" ? "hero-text-fade-body" : "hero-text-fade-header";
 

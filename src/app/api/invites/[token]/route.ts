@@ -16,6 +16,8 @@ import { getSupabaseServerClient, hasSupabaseEnv } from "@/lib/supabase-server";
 export const dynamic = "force-dynamic";
 
 export async function GET(_request: Request, { params }: { params: Promise<{ token: string }> }) {
+  const { token } = await params;
+
   if (!hasSupabaseEnv()) {
     try {
       const fs = require("fs");
@@ -40,7 +42,6 @@ export async function GET(_request: Request, { params }: { params: Promise<{ tok
     return NextResponse.json({ error: "Supabase is not configured" }, { status: 503 });
   }
 
-  const { token } = await params;
   const supabase = getSupabaseServerClient();
   const { data: inviteeRow, error: inviteeError } = await supabase
     .from("invitees")

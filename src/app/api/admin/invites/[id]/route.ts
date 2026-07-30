@@ -8,6 +8,7 @@ type PatchBody = Partial<{
   invite_unit: string;
   guest_name: string;
   display_label: string;
+  salutation_cluster: string;
   invitation_name: string;
   honorific: string;
   envelope_line: string;

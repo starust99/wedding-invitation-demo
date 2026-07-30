@@ -3,6 +3,7 @@ export type GuestIdentity = {
   honorific?: string;
   group?: string;
   displayLabel?: string;
+  salutationCluster?: string;
   displaySalutation?: string;
   invitationName?: string;
   relationship?: string;
@@ -56,6 +57,7 @@ export function readGuestIdentityFromSearch(search: string): GuestIdentity {
     honorific: clean(params.get("honorific") ?? params.get("title")),
     group: clean(params.get("group")),
     displayLabel: clean(params.get("displayLabel") ?? params.get("display_label")),
+    salutationCluster: clean(params.get("salutationCluster") ?? params.get("salutation_cluster")),
     displaySalutation: clean(params.get("displaySalutation") ?? params.get("display_salutation")),
     invitationName: clean(params.get("invitationName") ?? params.get("invitation_name")),
     relationship: clean(params.get("relationship") ?? params.get("relation")),
@@ -252,7 +254,7 @@ export type InvitationCopy = {
   thankYouLine: string;
   closingLine: string;
   signaturePrefix: string;
-  kinshipPronoun: string;
+  salutationCluster: string;
   dressCodeLine: string;
   presenceSubject: string;
 };
@@ -810,14 +812,6 @@ export function buildInvitationCopy(input?: InvitationCopyInput): InvitationCopy
   const relationshipText = resolveRelationshipText(input);
   const isChauRelation = includesAny(relationshipText, ["cháu", "chau"]);
 
-  const kinshipPronoun = isChauRelation
-    ? "các cháu"
-    : isFamily
-    ? "gia đình"
-    : recipientPronoun === "quý khách"
-    ? "quý khách"
-    : resolveKinshipPronoun(input, tone, guestLabel).toLowerCase();
-
   const cleanHostPronoun = hostPronoun.replace(/^gia (đình|dinh)\s+/i, "");
   const isParentsHost = input?.invitedBy === "parents" || tone === "parents_host";
 
@@ -883,7 +877,7 @@ export function buildInvitationCopy(input?: InvitationCopyInput): InvitationCopy
     thankYouLine,
     closingLine: `Sự hiện diện của ${presenceSubject} là niềm vinh hạnh và lời chúc phúc trọn vẹn nhất.`,
     signaturePrefix: tone === "elder" ? "Thương kính" : tone === "peer" || tone === "junior" ? "Thân mến" : "Trân trọng",
-    kinshipPronoun,
+    salutationCluster: cleanString(input?.salutationCluster) || "Quý khách",
     dressCodeLine: `Để cùng tạo nên những khung hình đẹp và hài hòa cho đêm tiệc, Quý khách có thể tham khảo các ý tưởng phối đồ dựa theo bảng màu dưới đây:\n\nLưu ý: Tiệc được tổ chức ngoài trời trong không khí se lạnh của mùa đông Đà Lạt, Quý khách hãy ưu tiên trang phục và phụ kiện đủ ấm để tận hưởng trọn vẹn buổi tiệc.`,
     presenceSubject,
   };

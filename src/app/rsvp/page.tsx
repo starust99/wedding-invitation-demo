@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useFieldArray, useForm, useWatch } from "react-hook-form";
@@ -12,8 +12,10 @@ import {
   Plus,
   Trash2,
   CalendarDays,
+  Church,
   Lock,
   Info,
+  Wine,
   X,
   Check,
 } from "lucide-react";
@@ -27,6 +29,7 @@ import {
   type RSVPResponse,
 } from "@/lib/rsvp-storage";
 import { buildInvitationCopy, resolveGuestIdentity, type GuestIdentity, type InvitationCopy } from "@/lib/guest-personalization";
+import { buildRsvpSubmissionCopy } from "@/lib/guest-rsvp-copy";
 import { getInviteStatusFromRsvp, readLocalInvitees, upsertLocalInvitees, type Invitee } from "@/lib/invites";
 import { usePageTransition } from "@/components/PageTransitionEffect";
 import { findAnyStoredInviteToken } from "@/lib/guest-personalization";
@@ -37,22 +40,23 @@ const lodgingGuestSchema = z.object({
   age: z.number().int().min(0, "Tuổi không hợp lệ.").optional(),
 });
 
-const rsvpSchema = z
-  .object({
-    honorific: z.string().optional(),
-    name: z.string().trim().optional().default(""),
-    phone: z.string().trim().optional().default(""),
-    attendingCeremony: z.enum(["yes", "no"]).nullable().default(null),
-    attendingBanquet: z.enum(["yes", "no"]).nullable().default(null),
-    attending: z.enum(["yes", "no"]),
-    guestCount: z.coerce.number().min(0),
-    guestGroup: z.string().trim().optional().default(""),
-    stayDecision: z.enum(["25", "26", "both", "none"]).default("none"),
-    accommodationNeeded: z.boolean().default(false),
-    lodgingGuests: z.array(lodgingGuestSchema).default([]),
-    dietaryNote: z.string().trim().optional(),
-    notes: z.string().trim().optional(),
-  })
+const rsvpFormFieldsSchema = z.object({
+  honorific: z.string().optional(),
+  name: z.string().trim().optional().default(""),
+  phone: z.string().trim().optional().default(""),
+  attendingCeremony: z.enum(["yes", "no"]).nullable().default(null),
+  attendingBanquet: z.enum(["yes", "no"]).nullable().default(null),
+  attending: z.enum(["yes", "no"]),
+  guestCount: z.coerce.number().min(0),
+  guestGroup: z.string().trim().optional().default(""),
+  stayDecision: z.enum(["25", "26", "both", "none"]).default("none"),
+  accommodationNeeded: z.boolean().default(false),
+  lodgingGuests: z.array(lodgingGuestSchema).default([]),
+  dietaryNote: z.string().trim().optional(),
+  notes: z.string().trim().optional(),
+});
+
+const rsvpSchema = rsvpFormFieldsSchema
   .superRefine((data, ctx) => {
     if (!data.attendingCeremony) {
       ctx.addIssue({ code: "custom", path: ["attendingCeremony"], message: "Vui lòng chọn phản hồi cho Thánh lễ Hôn phối." });
@@ -82,6 +86,7 @@ const rsvpSchema = z
 
 type RSVPFormInput = z.input<typeof rsvpSchema>;
 type RSVPFormOutput = z.output<typeof rsvpSchema>;
+type RSVPDraftValues = z.output<typeof rsvpFormFieldsSchema>;
 type LodgingGuestForm = {
   fullName: string;
   isChild: boolean;
@@ -89,6 +94,13 @@ type LodgingGuestForm = {
 };
 
 const RSVP_GUEST_EDIT_DEADLINE = new Date("2026-09-26T00:00:00+07:00");
+const RSVP_INVITE_FETCH_TIMEOUT_MS = 10_000;
+const RSVP_DRAFT_STORAGE_PREFIX = "wedding-rsvp-draft:";
+
+const rsvpDraftSchema = z.object({
+  savedAt: z.number(),
+  values: rsvpFormFieldsSchema,
+});
 
 const inputClass =
   "min-h-13 w-full rounded-2xl border border-serenity/22 bg-white/75 px-4 text-base text-center text-[#252934] outline-none transition placeholder:text-[#252934]/36 focus:border-serenity focus:bg-white/86 focus:ring-4 focus:ring-serenity/18";
@@ -99,6 +111,72 @@ function createLodgingGuest(fullName = ""): LodgingGuestForm {
     isChild: false,
     age: undefined,
   };
+}
+
+function rsvpDraftStorageKey(token: string) {
+  return `${RSVP_DRAFT_STORAGE_PREFIX}${token}`;
+}
+
+function readRsvpDraft(token: string): RSVPDraftValues | null {
+  if (!token || typeof window === "undefined") return null;
+
+  try {
+    const raw = sessionStorage.getItem(rsvpDraftStorageKey(token));
+    if (!raw) return null;
+    const parsed = rsvpDraftSchema.safeParse(JSON.parse(raw));
+    if (!parsed.success) {
+      sessionStorage.removeItem(rsvpDraftStorageKey(token));
+      return null;
+    }
+    return parsed.data.values;
+  } catch {
+    return null;
+  }
+}
+
+function writeRsvpDraft(token: string, values: RSVPFormInput) {
+  if (!token || typeof window === "undefined") return;
+
+  try {
+    const parsed = rsvpFormFieldsSchema.safeParse(values);
+    if (!parsed.success) return;
+    sessionStorage.setItem(
+      rsvpDraftStorageKey(token),
+      JSON.stringify({ savedAt: Date.now(), values: parsed.data }),
+    );
+  } catch {
+    // A blocked or full sessionStorage must never interrupt RSVP.
+  }
+}
+
+function clearRsvpDraft(token?: string) {
+  if (!token || typeof window === "undefined") return;
+  try {
+    sessionStorage.removeItem(rsvpDraftStorageKey(token));
+  } catch {
+    // Ignore browsers that block sessionStorage.
+  }
+}
+
+async function fetchWithTimeout(input: string, timeoutMs: number) {
+  const controller = typeof AbortController === "undefined" ? undefined : new AbortController();
+  let timeoutId: ReturnType<typeof setTimeout> | undefined;
+
+  const timeoutPromise = new Promise<never>((_, reject) => {
+    timeoutId = setTimeout(() => {
+      controller?.abort();
+      reject(new Error("invite-fetch-timeout"));
+    }, timeoutMs);
+  });
+
+  try {
+    return await Promise.race([
+      fetch(input, controller ? { signal: controller.signal } : undefined),
+      timeoutPromise,
+    ]);
+  } finally {
+    if (timeoutId) clearTimeout(timeoutId);
+  }
 }
 
 function normalizeLodgingGuests(guests: Array<Partial<LodgingGuestForm> | undefined> | undefined): LodgingGuest[] {
@@ -141,6 +219,52 @@ function Field({ label, error, children }: { label: ReactNode; error?: string; c
   );
 }
 
+function RsvpHydrationState() {
+  return (
+    <main
+      aria-busy="true"
+      className="public-invitation-page rsvp-page cinematic-stage relative flex min-h-screen items-center bg-transparent px-4 py-8 text-center text-[#252934] sm:px-6 sm:py-12"
+    >
+      <div aria-hidden="true" className="aurora-wash -z-10 opacity-60" />
+      <div aria-hidden="true" className="film-grain-soft -z-10" />
+
+      <section
+        role="status"
+        aria-live="polite"
+        className="mx-auto w-full max-w-2xl px-4 sm:px-8"
+      >
+        <p className="wedding-type-title text-[2rem] text-[#252934] sm:text-[2.5rem]">
+          Lời hồi đáp
+        </p>
+        <p className="mx-auto mt-3 max-w-md text-sm leading-relaxed text-[#7a6a5d] sm:text-base">
+          Đang chuẩn bị thông tin dành riêng cho Quý khách…
+        </p>
+
+        <div
+          aria-hidden="true"
+          className="mt-8 overflow-hidden rounded-[1.6rem] border border-serenity/18 bg-white/75 p-5 shadow-sm sm:p-8"
+        >
+          <div className="grid gap-6 motion-safe:animate-pulse motion-reduce:animate-none">
+            {[0, 1].map((item) => (
+              <div
+                key={item}
+                className="flex flex-col items-center gap-4 py-2 sm:flex-row sm:gap-6 sm:py-4"
+              >
+                <div className="h-14 w-14 shrink-0 rounded-[1.2rem] bg-rose-quartz/24 sm:h-16 sm:w-16" />
+                <div className="grid w-full flex-1 justify-items-center gap-2 sm:justify-items-start">
+                  <div className="h-4 w-36 rounded-full bg-[#7a6a5d]/10" />
+                  <div className="h-3 w-52 max-w-full rounded-full bg-serenity/14" />
+                </div>
+                <div className="h-11 w-44 max-w-full shrink-0 rounded-full bg-serenity/14" />
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+    </main>
+  );
+}
+
 function buildSubmissionCopy(
   attending: RSVPFormInput["attending"],
   attendingCeremony: RSVPFormInput["attendingCeremony"],
@@ -148,53 +272,14 @@ function buildSubmissionCopy(
   inviteCopy: InvitationCopy,
   guestIdentity?: GuestIdentity
 ) {
-  const rawHonorific = guestIdentity?.honorific?.trim();
-  const recipient = rawHonorific
-    ? rawHonorific.charAt(0).toUpperCase() + rawHonorific.slice(1)
-    : (inviteCopy.kinshipPronoun === "quý khách"
-      ? "Quý khách"
-      : inviteCopy.kinshipPronoun.charAt(0).toUpperCase() + inviteCopy.kinshipPronoun.slice(1));
-  const recipientLower = rawHonorific
-    ? rawHonorific.toLowerCase()
-    : inviteCopy.kinshipPronoun;
-
-  if (attending === "no") {
-    return {
-      title: "Đã xác nhận",
-      body: `Cảm ơn ${recipient} đã phản hồi.\n\nDù rất tiếc không thể chung vui trực tiếp, nhưng những tình cảm ấm áp và lời chúc gửi trao vẫn luôn được trân trọng vô cùng. Hẹn gặp lại ${recipient} vào một dịp sớm nhất!`,
-      showCalendar: false,
-    };
-  }
-
-  if (attendingCeremony === "yes" && attendingBanquet === "yes") {
-    return {
-      title: "Đã xác nhận",
-      body: `Lời hồi đáp đã được gửi thành công!\n\nThật hạnh phúc khi biết ${recipientLower} sẽ có mặt ở cả Thánh lễ Hôn phối lẫn Tiệc cưới để chung vui cùng Nhật & Phương.\n\nSự hiện diện của ${recipientLower} chính là món quà ý nghĩa nhất. Chân thành cảm ơn!`,
-      showCalendar: true,
-    };
-  }
-
-  if (attendingCeremony === "yes" && attendingBanquet === "no") {
-    return {
-      title: "Đã xác nhận",
-      body: `Lời hồi đáp đã được gửi thành công!\n\nCảm ơn ${recipient} đã sắp xếp thời gian đến chứng kiến và hiệp thông trong Thánh lễ Hôn phối của Nhật & Phương.\n\nDù rất tiếc không thể đồng hành trong buổi Tiệc cưới, sự hiện diện và lời cầu nguyện của ${recipientLower} tại Thánh đường đã là món quà vô cùng trân quý.`,
-      showCalendar: true,
-    };
-  }
-
-  if (attendingCeremony === "no" && attendingBanquet === "yes") {
-    return {
-      title: "Đã xác nhận",
-      body: `Lời hồi đáp đã được gửi thành công!\n\nCảm ơn ${recipient} đã sắp xếp thời gian đến chung vui tại Tiệc cưới của Nhật & Phương.\n\nSự đồng hành của ${recipientLower} chắc chắn sẽ giúp ngày vui thêm trọn vẹn và đong đầy ý nghĩa. Hẹn sớm gặp tại Đà Lạt!`,
-      showCalendar: true,
-    };
-  }
-
-  return {
-    title: "Đã xác nhận",
-    body: `Lời hồi đáp đã được gửi thành công.\n\n${inviteCopy.closingLine}`,
-    showCalendar: true,
-  };
+  return buildRsvpSubmissionCopy({
+    attending,
+    attendingCeremony,
+    attendingBanquet,
+    salutationCluster: guestIdentity?.salutationCluster,
+    fullGuestName: guestIdentity?.displayLabel || guestIdentity?.name,
+    fallbackClosingLine: inviteCopy.closingLine,
+  });
 }
 
 function normalizeAttendanceForForm(value: RSVPResponse["attending"] | undefined): RSVPFormInput["attending"] {
@@ -222,6 +307,7 @@ export default function RSVPPage() {
   const [guestRsvpLocked, setGuestRsvpLocked] = useState(false);
   const [isAdminBypassed, setIsAdminBypassed] = useState(false);
   const [adminLoginError, setAdminLoginError] = useState("");
+  const hasUserEditedFormRef = useRef(false);
   const { navigateWithTransition, prefetch } = usePageTransition();
 
   // Prefetch home page / on mount for instant return navigation
@@ -297,6 +383,18 @@ export default function RSVPPage() {
   const hasAnsweredBothEvents = attendingCeremony !== null && attendingBanquet !== null;
 
   useEffect(() => {
+    const activeToken = inviteToken || inviteeContext?.token || "";
+    if (isHydratingGuest || !hasUserEditedFormRef.current || !activeToken) return;
+    writeRsvpDraft(activeToken, formValues);
+  }, [formValues, inviteToken, inviteeContext?.token, isHydratingGuest]);
+
+  useEffect(() => {
+    if (isSubmitted) {
+      hasUserEditedFormRef.current = false;
+    }
+  }, [isSubmitted]);
+
+  useEffect(() => {
     let cancelled = false;
 
     const bypassed = typeof window !== "undefined" && sessionStorage.getItem("admin_rsvp_bypass") === "true";
@@ -311,6 +409,7 @@ export default function RSVPPage() {
     function applyIdentity(identity: GuestIdentity) {
       if (cancelled) return;
       setGuestIdentity(identity);
+      if (hasUserEditedFormRef.current) return;
       if (identity.name || identity.displayLabel) setValue("name", identity.name ?? identity.displayLabel ?? "", { shouldDirty: false });
       if (identity.honorific) setValue("honorific", identity.honorific, { shouldDirty: false });
       if (identity.group) setValue("guestGroup", identity.group, { shouldDirty: false });
@@ -324,6 +423,7 @@ export default function RSVPPage() {
         honorific: invitee.honorific,
         group: invitee.guestGroup,
         displayLabel: invitee.displayLabel,
+        salutationCluster: invitee.salutationCluster,
         displaySalutation: invitee.displaySalutation,
         invitationName: invitee.invitationName,
         relationship: invitee.relationship,
@@ -335,6 +435,7 @@ export default function RSVPPage() {
 
       applyIdentity(identity);
       setInviteeContext(invitee);
+      if (hasUserEditedFormRef.current) return;
       setValue("name", response?.name ?? invitee.displayLabel, { shouldDirty: false });
       setValue("phone", response?.phone ?? invitee.phone, { shouldDirty: false });
       setValue("guestGroup", response?.guestGroup ?? invitee.guestGroup, { shouldDirty: false });
@@ -369,6 +470,7 @@ export default function RSVPPage() {
 
     function applyResponseOnly(response: RSVPResponse) {
       if (cancelled) return;
+      if (hasUserEditedFormRef.current) return;
       setValue("name", response.name || "", { shouldDirty: false });
       setValue("phone", response.phone || "", { shouldDirty: false });
       setValue("guestGroup", response.guestGroup || "", { shouldDirty: false });
@@ -402,6 +504,24 @@ export default function RSVPPage() {
           : []);
     }
 
+    function applyDraft(values: RSVPDraftValues) {
+      if (cancelled) return;
+      hasUserEditedFormRef.current = true;
+      setValue("honorific", values.honorific ?? "", { shouldDirty: true });
+      setValue("name", values.name ?? "", { shouldDirty: true });
+      setValue("phone", values.phone ?? "", { shouldDirty: true });
+      setValue("attendingCeremony", values.attendingCeremony, { shouldDirty: true });
+      setValue("attendingBanquet", values.attendingBanquet, { shouldDirty: true });
+      setValue("attending", values.attending, { shouldDirty: true });
+      setValue("guestCount", values.guestCount, { shouldDirty: true });
+      setValue("guestGroup", values.guestGroup ?? "", { shouldDirty: true });
+      setValue("stayDecision", values.stayDecision, { shouldDirty: true });
+      setValue("accommodationNeeded", values.accommodationNeeded, { shouldDirty: true });
+      setValue("dietaryNote", values.dietaryNote ?? "", { shouldDirty: true });
+      setValue("notes", values.notes ?? "", { shouldDirty: true });
+      replace(values.lodgingGuests ?? []);
+    }
+
     async function hydrateGuest() {
       const params = new URLSearchParams(window.location.search);
       let token = params.get("invite") ?? params.get("token") ?? "";
@@ -418,22 +538,37 @@ export default function RSVPPage() {
 
       const bypassed = typeof window !== "undefined" && sessionStorage.getItem("admin_rsvp_bypass") === "true";
       setTokenGateChecked(true);
-      setMissingInviteToken(false);
+      setMissingInviteToken(!token && !bypassed);
       setGuestRsvpLocked(Date.now() >= RSVP_GUEST_EDIT_DEADLINE.getTime() && !bypassed);
+
+      if (!token && !bypassed) {
+        finishHydration();
+        return;
+      }
 
       if (token) {
         setInviteToken(token);
         try { sessionStorage.setItem("last_invite_token", token); } catch {}
 
         const localInvitee = readLocalInvitees().find((invitee) => invitee.token === token);
+        const draft = readRsvpDraft(token);
+        const hasImmediateState = Boolean(localInvitee || draft);
+
         if (localInvitee) {
           applyInvite(localInvitee);
+        }
+        if (draft) {
+          applyDraft(draft);
+        }
+        if (hasImmediateState) {
           finishHydration();
-          return;
         }
 
         try {
-          const response = await fetch(`/api/invites/${encodeURIComponent(token)}`);
+          const response = await fetchWithTimeout(
+            `/api/invites/${encodeURIComponent(token)}`,
+            RSVP_INVITE_FETCH_TIMEOUT_MS,
+          );
           if (response.ok) {
             const result = await response.json() as { invitee?: Invitee };
             if (result.invitee && !cancelled) {
@@ -443,7 +578,11 @@ export default function RSVPPage() {
             }
           }
         } catch {
-          // Local fallback below.
+          // Immediate local state or the generic identity below keeps RSVP usable.
+        }
+
+        if (hasImmediateState) {
+          return;
         }
       } else {
         const localResponses = readRSVPResponses();
@@ -493,8 +632,13 @@ export default function RSVPPage() {
     }
   }, [attending, attendingBanquet, attendingCeremony, guestCount, inviteeContext?.expectedGuestCount, replace, setValue]);
 
+  function markFormAsEdited() {
+    hasUserEditedFormRef.current = true;
+  }
+
   function handleStayDecisionChange(decision: "25" | "26" | "both" | "none") {
     if (!canRegisterStay) return;
+    markFormAsEdited();
     setValue("stayDecision", decision, { shouldDirty: true, shouldValidate: true });
     setValue("accommodationNeeded", decision !== "none", { shouldDirty: true });
     if (decision === "none") {
@@ -582,20 +726,25 @@ export default function RSVPPage() {
         body: JSON.stringify(payload),
       });
 
-      if (apiResponse.ok) {
-        persistLocalRsvp(payload);
-        setIsSubmitted(true);
-        return;
+      if (!apiResponse.ok) {
+        const result = await apiResponse.json().catch(() => null) as { error?: string } | null;
+        throw new Error(result?.error || "Máy chủ chưa ghi nhận được hồi đáp.");
       }
-    } catch {
-      // Local fallback keeps RSVP usable without a backend.
-    }
 
-    persistLocalRsvp(payload);
-    setIsSubmitted(true);
+      clearRsvpDraft(targetToken);
+      persistLocalRsvp(payload);
+      setIsSubmitted(true);
+    } catch (error) {
+      setSubmitError(
+        error instanceof Error && error.message
+          ? `Chưa gửi được hồi đáp: ${error.message} Vui lòng thử lại.`
+          : "Chưa gửi được hồi đáp. Vui lòng kiểm tra kết nối và thử lại.",
+      );
+    }
   }
 
   const handleGoToReview = async () => {
+    if (isHydratingGuest) return;
     setSubmitError("");
     const isValid = await trigger();
     if (isValid) {
@@ -678,6 +827,10 @@ export default function RSVPPage() {
       window.open(gcalUrl, "_blank");
     }
   };
+
+  if (isHydratingGuest) {
+    return <RsvpHydrationState />;
+  }
 
   if (missingInviteToken && tokenGateChecked && !isAdminBypassed) {
     return (
@@ -842,7 +995,7 @@ export default function RSVPPage() {
                   </p>
                   <div className="text-center max-w-lg mx-auto w-full">
                     <strong className="font-bold text-lg sm:text-xl text-[#252934] block">
-                      {formValues.honorific ? `${formValues.honorific} ` : ""}{formValues.name || inviteCopy.shortRecipientLabel}
+                      {inviteeContext?.displayLabel || guestIdentity.displayLabel || formValues.name || inviteCopy.shortRecipientLabel}
                     </strong>
                     {formValues.phone && (
                       <span className="font-medium text-sm text-[#7a6a5d] block mt-1">{formValues.phone}</span>
@@ -956,6 +1109,12 @@ export default function RSVPPage() {
                 )}
               </div>
 
+              {submitError ? (
+                <p className="mb-5 w-full max-w-xl rounded-2xl border border-[#9B4E5C]/25 bg-white/75 px-4 py-3 text-sm font-semibold text-[#9B4E5C]">
+                  {submitError}
+                </p>
+              ) : null}
+
               <div className="flex flex-col sm:flex-row items-center justify-center gap-3.5 w-full max-w-xl mx-auto">
                 <button
                   type="button"
@@ -999,6 +1158,8 @@ export default function RSVPPage() {
                   e.preventDefault();
                   if (!guestRsvpLocked) handleGoToReview();
                 }}
+                onInputCapture={markFormAsEdited}
+                onChangeCapture={markFormAsEdited}
                 className="w-full px-4 sm:px-8 text-center"
               >
                 {submitError ? (
@@ -1014,7 +1175,11 @@ export default function RSVPPage() {
                   <div className="py-2 sm:py-6 flex flex-col items-center sm:flex-row sm:justify-between sm:items-center gap-2 sm:gap-6 text-center sm:text-left">
                     {/* Badge */}
                     <div className="flex h-13 w-13 sm:h-16 sm:w-16 shrink-0 items-center justify-center rounded-[1.2rem] sm:rounded-[1.6rem] bg-white border border-[#f2e5e0] shadow-[0_8px_20px_rgba(242,229,224,0.5)] mb-1.5 sm:mb-0">
-                      <img src="/assets/icon-cross.png" className="h-8 w-8 sm:h-10 sm:w-10 object-contain" alt="Nhà thờ" />
+                      <Church
+                        aria-hidden="true"
+                        className="h-8 w-8 text-[#8f5d5d] sm:h-10 sm:w-10"
+                        strokeWidth={1.35}
+                      />
                     </div>
                     
                     {/* Chữ */}
@@ -1039,6 +1204,7 @@ export default function RSVPPage() {
                         <button
                           type="button"
                           onClick={() => {
+                            markFormAsEdited();
                             setValue("attendingCeremony", "yes", { shouldDirty: true, shouldValidate: true });
                           }}
                           className={[
@@ -1053,6 +1219,7 @@ export default function RSVPPage() {
                         <button
                           type="button"
                           onClick={() => {
+                            markFormAsEdited();
                             setValue("attendingCeremony", "no", { shouldDirty: true, shouldValidate: true });
                           }}
                           className={[
@@ -1074,7 +1241,11 @@ export default function RSVPPage() {
                   <div className="py-2 sm:py-6 flex flex-col items-center sm:flex-row sm:justify-between sm:items-center gap-2 sm:gap-6 text-center sm:text-left">
                     {/* Badge */}
                     <div className="flex h-13 w-13 sm:h-16 sm:w-16 shrink-0 items-center justify-center rounded-[1.2rem] sm:rounded-[1.6rem] bg-white border border-[#f2e5e0] shadow-[0_8px_20px_rgba(242,229,224,0.5)] mb-1.5 sm:mb-0">
-                      <img src="/assets/icon-glasses.png" className="h-8 w-8 sm:h-10 sm:w-10 object-contain" alt="Tiệc cưới" />
+                      <Wine
+                        aria-hidden="true"
+                        className="h-8 w-8 text-[#8f5d5d] sm:h-10 sm:w-10"
+                        strokeWidth={1.35}
+                      />
                     </div>
                     
                     {/* Chữ */}
@@ -1099,6 +1270,7 @@ export default function RSVPPage() {
                         <button
                           type="button"
                           onClick={() => {
+                            markFormAsEdited();
                             setValue("attendingBanquet", "yes", { shouldDirty: true, shouldValidate: true });
                           }}
                           className={[
@@ -1113,6 +1285,7 @@ export default function RSVPPage() {
                         <button
                           type="button"
                           onClick={() => {
+                            markFormAsEdited();
                             setValue("attendingBanquet", "no", { shouldDirty: true, shouldValidate: true });
                           }}
                           className={[
@@ -1239,7 +1412,14 @@ export default function RSVPPage() {
                                         <p className="text-[11px] font-bold tracking-widest text-[#252934]/40 uppercase">Người lưu trú {index + 1}</p>
                                         <button
                                           type="button"
-                                          onClick={() => fields.length === 1 ? replace([createLodgingGuest("")]) : remove(index)}
+                                          onClick={() => {
+                                            markFormAsEdited();
+                                            if (fields.length === 1) {
+                                              replace([createLodgingGuest("")]);
+                                            } else {
+                                              remove(index);
+                                            }
+                                          }}
                                           className="text-[#7a4a4a]/70 hover:text-[#7a4a4a] transition-colors p-1"
                                           aria-label="Xóa người lưu trú"
                                         >
@@ -1302,7 +1482,10 @@ export default function RSVPPage() {
                               <div className="grid justify-items-center">
                                 <button
                                   type="button"
-                                  onClick={() => append(createLodgingGuest(""))}
+                                  onClick={() => {
+                                    markFormAsEdited();
+                                    append(createLodgingGuest(""));
+                                  }}
                                   className="wedding-type-button inline-flex min-h-11 items-center gap-2 rounded-full border border-serenity/32 bg-serenity/30 px-6 font-bold text-[#252934] transition hover:bg-serenity/45"
                                 >
                                   <Plus className="h-4 w-4" /> THÊM NGƯỜI LƯU TRÚ

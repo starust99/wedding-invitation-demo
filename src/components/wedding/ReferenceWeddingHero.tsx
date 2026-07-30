@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import { ChevronDown } from "lucide-react";
-import { LineReveal, useRevealReady, checkIsIntroDone } from "@/components/ui/CinematicReveal";
+import { LineReveal, checkIsIntroDone } from "@/components/ui/CinematicReveal";
 import type { WeddingHeroEditorConfig } from "@/lib/wedding/hero-types";
 
 type ReferenceWeddingHeroProps = {
@@ -28,16 +28,11 @@ function stripRepeatedHeroInvitePrefix(text: string) {
 }
 
 export function ReferenceWeddingHero({ config, summary }: ReferenceWeddingHeroProps) {
-  const readyFromReveal = useRevealReady(true);
+  const [hasMounted, setHasMounted] = useState(false);
   const [isHeroAnimated, setIsHeroAnimated] = useState(false);
 
-  const [imageLoaded, setImageLoaded] = useState(false);
-  const imgRef = useRef<HTMLImageElement>(null);
-
   useEffect(() => {
-    if (imgRef.current && imgRef.current.complete) {
-      setImageLoaded(true);
-    }
+    setHasMounted(true);
 
     const handleIntroFinished = () => {
       setIsHeroAnimated(true);
@@ -46,14 +41,17 @@ export function ReferenceWeddingHero({ config, summary }: ReferenceWeddingHeroPr
     return () => window.removeEventListener("introFinished", handleIntroFinished);
   }, []);
 
-  const isSkipped = typeof window !== "undefined" && (
+  const isSplashActive =
+    hasMounted &&
+    document.documentElement.classList.contains("splash-active");
+  const isSkipped = hasMounted && !isSplashActive && (
     document.documentElement.classList.contains("splash-skipped") || checkIsIntroDone()
   );
 
   // Precedence:
   // 1. If introFinished event fired -> "hero-animating" (starts keyframes smoothly under dissolving envelope)
   // 2. If splash skipped on reload / return -> "hero-static" (100% static instantly on frame 0)
-  // 3. Base preparing state -> "hero-preparing" (opacity 0 while splash video is active)
+  // 3. Base preparing state -> "hero-preparing" (hidden until React commits an explicit reveal branch)
   let heroMotionClass = "hero-preparing";
   if (isHeroAnimated) {
     heroMotionClass = "hero-animating";
@@ -117,15 +115,6 @@ export function ReferenceWeddingHero({ config, summary }: ReferenceWeddingHeroPr
           <div
             className={`hero-photo-fade ${isDone ? "is-visible" : ""}`}
           >
-            {/* Invisible img for preloading and onload detection outside figure */}
-            <img
-              ref={imgRef}
-              src={heroCompositeSrc}
-              alt=""
-              style={{ display: "none", width: 0, height: 0, position: "absolute", opacity: 0, pointerEvents: "none" }}
-              onLoad={() => setImageLoaded(true)}
-            />
-
             <figure
               className="save-date-arch-figure save-date-arch-figure--composite"
               aria-label="Khung ảnh cưới"

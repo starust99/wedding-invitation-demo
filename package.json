@@ -8,6 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "check:guest-copy": "node scripts/check-guest-copy.mjs",
+    "check:rsvp-resilience": "node scripts/check-rsvp-resilience.mjs",
+    "check:slow-invite-experience": "node scripts/check-slow-invite-experience.mjs",
     "capture:browser": "node scripts/capture-browser-shots.mjs",
     "gitnexus:index": "gitnexus analyze --index-only",
     "gitnexus:index:force": "gitnexus analyze --index-only --force"

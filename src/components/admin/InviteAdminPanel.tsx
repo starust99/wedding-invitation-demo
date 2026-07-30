@@ -219,16 +219,14 @@ export function InviteAdminPanel() {
             nextInvitees = result.invitees ?? [];
             nextMediaAssets = result.mediaAssets ?? [];
             nextAlbumRules = result.albumRules?.length ? result.albumRules : defaultAlbumRules;
-            if (result.responses && result.responses.length > 0) {
-              nextResponses = result.responses;
-            }
+            nextResponses = result.responses ?? [];
           }
         }
 
         if (rsvpResponse.ok) {
           const result = await rsvpResponse.json() as { responses: RSVPResponse[]; backend: string };
-          if (result.backend === "supabase" && result.responses && result.responses.length > 0) {
-            nextResponses = result.responses;
+          if (result.backend === "supabase") {
+            nextResponses = result.responses ?? [];
           }
         }
 
@@ -606,6 +604,7 @@ export function InviteAdminPanel() {
     const existingTokens = new Set(invitees.map((item) => item.token));
     const nextInvitee = createInvitee({
       displayLabel: "Khách chưa đặt tên",
+      salutationCluster: "Quý khách",
       guestName: "Khách chưa đặt tên",
       invitationName: "Khách chưa đặt tên",
       guestGroup: "Khác",
@@ -1469,7 +1468,11 @@ export function InviteAdminPanel() {
                         <input className={panelInput} value={selectedInvitee.displayLabel} onChange={(event) => patchSelectedInvitee({ displayLabel: event.target.value })} />
                       </label>
                       <label className="grid gap-1.5 font-semibold text-[#8A8178] uppercase tracking-wider">
-                        Danh xưng khách (ông/bà/anh/chị)
+                        Cụm danh xưng
+                        <input className={panelInput} value={selectedInvitee.salutationCluster} onChange={(event) => patchSelectedInvitee({ salutationCluster: event.target.value })} />
+                      </label>
+                      <label className="grid gap-1.5 font-semibold text-[#8A8178] uppercase tracking-wider">
+                        Cụm tên khách
                         <input className={panelInput} value={selectedInvitee.guestName} onChange={(event) => patchSelectedInvitee({ guestName: event.target.value })} />
                       </label>
                       <label className="grid gap-1.5 font-semibold text-[#8A8178] uppercase tracking-wider">

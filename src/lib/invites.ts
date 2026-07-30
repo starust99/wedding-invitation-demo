@@ -1,5 +1,6 @@
 import type { RSVPResponse } from "@/lib/rsvp-storage";
 import { buildInvitationCopy } from "@/lib/guest-personalization";
+import { canonicalizeGuestFullName, resolveSalutationCluster } from "@/lib/guest-naming";
 
 export type InviteUnit = "individual" | "household";
 export type InvitedBy = "parents" | "couple";
@@ -27,6 +28,7 @@ export type Invitee = {
   inviteUnit: InviteUnit;
   guestName: string;
   displayLabel: string;
+  salutationCluster: string;
   displaySalutation: string;
   invitationName: string;
   honorific: string;
@@ -83,6 +85,7 @@ export const inviteCsvColumns = [
   "token",
   "invite_unit",
   "display_label",
+  "salutation_cluster",
   "display_salutation",
   "guest_name",
   "invitation_name",
@@ -110,6 +113,7 @@ export const inviteCsvColumnLabels: Record<InviteCsvColumn, string> = {
   token: "Mã link riêng",
   invite_unit: "Kiểu mời",
   display_label: "Tên hiển thị",
+  salutation_cluster: "Cụm danh xưng",
   display_salutation: "Cụm xưng hô hiển thị",
   guest_name: "Tên khách mời",
   invitation_name: "Tên in trên thiệp",
@@ -135,6 +139,7 @@ const inviteCsvColumnAliases: Record<InviteCsvColumn, string[]> = {
   token: ["token", "ma link rieng", "mã link", "link riêng"],
   invite_unit: ["invite_unit", "inviteUnit", "kieu moi", "kiểu mời", "loai khach moi", "loại khách mời", "kieu link moi", "kiểu link mời"],
   display_label: ["display_label", "displayLabel", "ten hien thi", "tên hiển thị", "ten goi", "tên gọi", "ten goi trong admin link", "ten hien thi trong admin link", "tên hiển thị trong admin/link", "ten de nhan biet trong admin", "tên dễ nhận biết trong admin"],
+  salutation_cluster: ["salutation_cluster", "salutationCluster", "cum danh xung", "cụm danh xưng"],
   display_salutation: ["display_salutation", "displaySalutation", "cum xung ho hien thi", "cụm xưng hô hiển thị", "xung ho hien thi", "xưng hô hiển thị", "cum hien thi ngan", "cụm hiển thị ngắn"],
   guest_name: ["guest_name", "guestName", "ten khach", "tên khách", "ten khach moi", "tên khách mời", "ten khach tren thiep", "ten khach ghi tren thiep", "tên khách ghi trên thiệp", "ten goc hoac cach nha minh goi", "tên gốc hoặc cách nhà mình gọi"],
   invitation_name: ["invitation_name", "invitationName", "ten in tren thiep", "tên in trên thiệp", "cach goi tren thiep", "cách gọi trên thiệp", "cach xung ho in tren thiep", "cách xưng hô in trên thiệp", "ten moi", "tên mời", "ten ghi tren thiep", "tên ghi trên thiệp"],
@@ -248,6 +253,7 @@ export const inviteTemplateRows = [
     token: "",
     invite_unit: "Cả nhà / hộ gia đình",
     display_label: "Ông Sáu",
+    salutation_cluster: "Chú",
     display_salutation: "Chú Sáu",
     guest_name: "Ông Sáu",
     invitation_name: "Chú Sáu",
@@ -272,6 +278,7 @@ export const inviteTemplateRows = [
     token: "",
     invite_unit: "Cả nhà / hộ gia đình",
     display_label: "Bác Minh",
+    salutation_cluster: "Bác",
     display_salutation: "Bác Minh",
     guest_name: "Bác Minh",
     invitation_name: "Bác Minh",
@@ -296,6 +303,7 @@ export const inviteTemplateRows = [
     token: "",
     invite_unit: "Một người",
     display_label: "Gia Hân",
+    salutation_cluster: "Bạn",
     display_salutation: "Gia Hân",
     guest_name: "Gia Hân",
     invitation_name: "Gia Hân",
@@ -320,6 +328,7 @@ export const inviteTemplateRows = [
     token: "",
     invite_unit: "Một người",
     display_label: "Anh Hoàng",
+    salutation_cluster: "Anh",
     display_salutation: "Anh Hoàng",
     guest_name: "Anh Hoàng",
     invitation_name: "Anh Hoàng",
@@ -344,6 +353,7 @@ export const inviteTemplateRows = [
     token: "",
     invite_unit: "Một người",
     display_label: "Em Linh",
+    salutation_cluster: "Em",
     display_salutation: "Em Linh",
     guest_name: "Em Linh",
     invitation_name: "Em Linh",
@@ -523,6 +533,7 @@ export function serializeInviteesCsv(invitees: Invitee[]) {
       token: invitee.token,
       invite_unit: inviteUnitLabels[invitee.inviteUnit],
       display_label: invitee.displayLabel,
+      salutation_cluster: invitee.salutationCluster,
       display_salutation: invitee.displaySalutation,
       guest_name: invitee.guestName,
       invitation_name: invitee.invitationName,
@@ -594,10 +605,12 @@ function parseCsv(text: string) {
 
 export function createInvitee(input: InviteeInput, existingTokens = new Set<string>(), preferredToken?: string): Invitee {
   const now = new Date().toISOString();
-  const displayLabel = clean(input.displayLabel) || clean(input.guestName) || "Khách mời";
-  const guestName = clean(input.guestName) || displayLabel;
-  const displaySalutation = clean(input.displaySalutation) || clean(input.invitationName) || guestName;
-  const invitationName = clean(input.invitationName) || displaySalutation;
+  const rawDisplayLabel = clean(input.displayLabel) || clean(input.guestName) || "Khách mời";
+  const salutationCluster = resolveSalutationCluster(clean(input.salutationCluster), rawDisplayLabel);
+  const displayLabel = canonicalizeGuestFullName(rawDisplayLabel, salutationCluster);
+  const guestName = canonicalizeGuestFullName(clean(input.guestName) || displayLabel, salutationCluster);
+  const displaySalutation = canonicalizeGuestFullName(clean(input.displaySalutation) || clean(input.invitationName) || guestName, salutationCluster);
+  const invitationName = canonicalizeGuestFullName(clean(input.invitationName) || displaySalutation, salutationCluster);
   const inviteUnit = pickEnum(input.inviteUnit, ["individual", "household"], "individual");
   const invitedBy = pickEnum(input.invitedBy, ["parents", "couple"], "couple");
   const relationship = clean(input.relationship);
@@ -609,6 +622,7 @@ export function createInvitee(input: InviteeInput, existingTokens = new Set<stri
   const inviteCopy = buildInvitationCopy({
     displayLabel,
     guestName,
+    salutationCluster,
     invitationName: displaySalutation,
     honorific: clean(input.honorific),
     relationship,
@@ -637,6 +651,7 @@ export function createInvitee(input: InviteeInput, existingTokens = new Set<stri
     inviteUnit,
     guestName,
     displayLabel,
+    salutationCluster,
     displaySalutation,
     invitationName,
     honorific: clean(input.honorific),
@@ -678,6 +693,7 @@ export function parseInviteCsv(text: string, existingInvitees: Invitee[] = []): 
       token: row.token,
       inviteUnit: parseInviteUnit(row.invite_unit),
       displayLabel,
+      salutationCluster: row.salutation_cluster || row.salutationCluster,
       displaySalutation: row.display_salutation || row.displaySalutation || row.invitation_name || row.invitationName || row.guest_name || row.guestName || displayLabel,
       guestName: row.guest_name || row.guestName || displayLabel,
       invitationName: row.invitation_name || row.invitationName || displayLabel,

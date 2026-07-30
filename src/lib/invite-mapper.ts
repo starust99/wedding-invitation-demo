@@ -16,6 +16,7 @@ export type InviteeDatabaseRow = {
   invite_unit: string;
   guest_name: string;
   display_label: string;
+  salutation_cluster?: string;
   invitation_name?: string;
   honorific: string;
   envelope_line: string;
@@ -88,6 +89,7 @@ export function mapInviteeRow(row: InviteeDatabaseRow, supplement?: InviteSupple
     inviteUnit: row.invite_unit as Invitee["inviteUnit"],
     guestName: row.guest_name,
     displayLabel: row.display_label,
+    salutationCluster: row.salutation_cluster ?? "",
     displaySalutation: row.invitation_name ?? row.display_label,
     invitationName: row.invitation_name ?? row.display_label,
     honorific: row.honorific,
@@ -121,6 +123,7 @@ export function toInviteeUpsert(invitee: Invitee) {
     invite_unit: invitee.inviteUnit,
     guest_name: invitee.guestName,
     display_label: invitee.displayLabel,
+    salutation_cluster: invitee.salutationCluster,
     invitation_name: invitee.displaySalutation || invitee.invitationName,
     honorific: invitee.honorific,
     envelope_line: invitee.envelopeLine,

@@ -1,7 +1,11 @@
 import { NextResponse } from "next/server";
 import { hasAdminSession } from "@/lib/admin-auth";
 import { getInviteStatusFromRsvp } from "@/lib/invites";
-import { mapRSVPRow, toRSVPInsert, type RSVPDatabaseRow } from "@/lib/rsvp-mapper";
+import {
+  mapRSVPRow,
+  toRSVPInsert,
+  type RSVPDatabaseRow,
+} from "@/lib/rsvp-mapper";
 import { getSupabaseServerClient, hasSupabaseEnv } from "@/lib/supabase-server";
 
 export const dynamic = "force-dynamic";
@@ -66,11 +70,6 @@ export async function POST(request: Request) {
     inviteToken: matchingInvitee?.token || token,
   };
 
-  const insertPayload = {
-    ...toRSVPInsert(payload),
-    submitted_at: new Date().toISOString(),
-  };
-
   let existingId: string | null = null;
   if (matchingInvitee?.id || matchingInvitee?.token || payload.inviteToken) {
     const filter = matchingInvitee?.id
@@ -88,11 +87,19 @@ export async function POST(request: Request) {
     }
   }
 
-  const mutation = existingId
-    ? supabase.from("rsvp_responses").update(insertPayload).eq("id", existingId)
-    : supabase.from("rsvp_responses").insert(insertPayload);
+  const submittedAt = new Date().toISOString();
+  const mutate = (includeEventAttendanceColumns: boolean) => {
+    const insertPayload = {
+      ...toRSVPInsert(payload, { includeEventAttendanceColumns }),
+      submitted_at: submittedAt,
+    };
+    const mutation = existingId
+      ? supabase.from("rsvp_responses").update(insertPayload).eq("id", existingId)
+      : supabase.from("rsvp_responses").insert(insertPayload);
+    return mutation.select("*").single();
+  };
 
-  const { data, error } = await mutation.select("*").single();
+  const { data, error } = await mutate(false);
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });

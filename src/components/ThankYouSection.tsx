@@ -4,6 +4,7 @@ import { HeartHandshake, MapPin, Image as ImageIcon } from "lucide-react";
 import { SectionMediaLayers } from "@/components/SectionMediaLayers";
 import type { WeddingConfig } from "@/lib/site-settings";
 import { buildInvitationCopy, type GuestIdentity } from "@/lib/guest-personalization";
+import { buildThankYouMessage } from "@/lib/guest-rsvp-copy";
 import { usePageTransition } from "@/components/PageTransitionEffect";
 import type { RSVPResponse } from "@/lib/rsvp-storage";
 import { motion } from "framer-motion";
@@ -40,25 +41,13 @@ export function ThankYouSection({
   const isBoth = rsvpAttendingCeremony === true && rsvpAttendingBanquet === true;
   const isDefault = !isDeclined && !isCeremonyOnly && !isBanquetOnly && !isBoth;
 
-  const rawHonorific = guestIdentity.honorific?.trim();
-  const recipient = rawHonorific
-    ? rawHonorific.charAt(0).toUpperCase() + rawHonorific.slice(1)
-    : (inviteCopy.kinshipPronoun === "quý khách"
-      ? "Quý khách"
-      : inviteCopy.kinshipPronoun.charAt(0).toUpperCase() + inviteCopy.kinshipPronoun.slice(1));
-
-  let thankYouMessage = "";
-  if (rsvpAttending === "no") {
-    thankYouMessage = `Xin chân thành cảm ơn! Rất hy vọng sẽ có dịp được đón tiếp ${recipient} vào một dịp khác.`;
-  } else if (rsvpAttendingBanquet === false) {
-    thankYouMessage = `Xin chân thành cảm ơn! Hẹn gặp ${recipient} tại Thánh lễ Hôn phối.`;
-  } else if (rsvpAttendingCeremony === true && rsvpAttendingBanquet === true) {
-    thankYouMessage = `Xin chân thành cảm ơn! Hẹn gặp ${recipient} tại Thánh lễ Hôn phối và Tiệc cưới.`;
-  } else if (rsvpAttendingCeremony === false && rsvpAttendingBanquet === true) {
-    thankYouMessage = `Xin chân thành cảm ơn! Hẹn gặp ${recipient} vào buổi Tiệc cưới thân mật tại Đà Lạt.`;
-  } else {
-    thankYouMessage = `Xin chân thành cảm ơn! Hẹn gặp ${recipient} tại ngày vui sắp tới.`;
-  }
+  const thankYouMessage = buildThankYouMessage({
+    attending: rsvpAttending,
+    attendingCeremony: rsvpAttendingCeremony,
+    attendingBanquet: rsvpAttendingBanquet,
+    salutationCluster: guestIdentity.salutationCluster,
+    fullGuestName: guestIdentity.displayLabel || guestIdentity.name,
+  });
 
   return (
     <section id="thank-you" className={transparentBg ? "relative overflow-hidden px-5 py-2 text-center text-ink sm:px-8" : "cinematic-stage editorial-band relative overflow-hidden px-5 py-12 text-center text-ink sm:px-8 sm:py-16 lg:py-20"}>

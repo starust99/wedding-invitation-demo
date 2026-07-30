@@ -44,8 +44,8 @@ const salutationDefinitions: SalutationDefinition[] = [
   { label: "Ông bà", hostRelationship: "ông bà", relationship: "ông bà của cô dâu/chú rể", householdMode: "couple", needsName: false, coupleHostPronoun: "chúng con", parentsHostPronoun: "gia đình chúng con" },
   { label: "Bố mẹ", hostRelationship: "bố mẹ", relationship: "bố mẹ của cô dâu/chú rể", householdMode: "couple", needsName: false, coupleHostPronoun: "chúng con", parentsHostPronoun: "gia đình chúng con" },
   { label: "Ba mẹ", hostRelationship: "ba mẹ", relationship: "bố mẹ của cô dâu/chú rể", householdMode: "couple", needsName: false, coupleHostPronoun: "chúng con", parentsHostPronoun: "gia đình chúng con" },
-  { label: "Bố", hostRelationship: "bố", relationship: "bố/mẹ của cô dâu/chú rể", householdMode: "couple", needsName: false, coupleHostPronoun: "chúng con", parentsHostPronoun: "gia đình chúng con" },
-  { label: "Mẹ", hostRelationship: "mẹ", relationship: "bố/mẹ của cô dâu/chú rể", householdMode: "couple", needsName: false, coupleHostPronoun: "chúng con", parentsHostPronoun: "gia đình chúng con" },
+  { label: "Bố", hostRelationship: "bố", relationship: "bố/mẹ của cô dâu/chú rể", householdMode: "single", needsName: false, coupleHostPronoun: "chúng con", parentsHostPronoun: "gia đình chúng con" },
+  { label: "Mẹ", hostRelationship: "mẹ", relationship: "bố/mẹ của cô dâu/chú rể", householdMode: "single", needsName: false, coupleHostPronoun: "chúng con", parentsHostPronoun: "gia đình chúng con" },
   { label: "Bác", hostRelationship: "bác", relationship: "bác của cô dâu/chú rể", householdMode: "single", needsName: true, coupleHostPronoun: "chúng con", parentsHostPronoun: "gia đình chúng con" },
   { label: "Vợ chồng bác", hostRelationship: "vợ chồng bác", relationship: "vợ chồng bác của cô dâu/chú rể", householdMode: "couple", needsName: true, coupleHostPronoun: "chúng con", parentsHostPronoun: "gia đình chúng con" },
   { label: "Gia đình bác", hostRelationship: "bác", relationship: "bác của cô dâu/chú rể", householdMode: "family", needsName: true, coupleHostPronoun: "chúng con", parentsHostPronoun: "gia đình chúng con" },
@@ -204,6 +204,7 @@ const exampleRows: TemplateRowValues[] = [
 ];
 
 type InferredTemplateValues = {
+  salutationCluster: string;
   guestName: string;
   displaySalutation: string;
   hostRelationship: string;
@@ -267,25 +268,8 @@ function cleanRedundantPrefix(salutationCluster: string, guestNameCore: string):
   return name;
 }
 
-function titleRelationshipWords(value: string) {
-  return value
-    .split(/\s+/)
-    .map((word) => (word ? word.charAt(0).toUpperCase() + word.slice(1) : word))
-    .join(" ");
-}
-
 function displayPrefixForSalutation(salutation: Pick<SalutationDefinition, "label" | "displayPrefix">) {
-  const prefix = clean(salutation.displayPrefix) || clean(salutation.label);
-  const normalized = normalizeText(prefix);
-  if (normalized === "hai ban") return "Hai bạn";
-  if (normalized.startsWith("gia dinh ")) {
-    return `Gia đình ${titleRelationshipWords(prefix.replace(/^gia đình\s+/i, ""))}`;
-  }
-  if (normalized === "gia dinh") return "Gia đình";
-  if (normalized.startsWith("vo chong ")) {
-    return `Vợ chồng ${titleRelationshipWords(prefix.replace(/^vợ chồng\s+/i, ""))}`;
-  }
-  return titleRelationshipWords(prefix);
+  return clean(salutation.displayPrefix) || clean(salutation.label);
 }
 
 function buildDisplayGuestName(salutationCluster: string, guestNameCore: string) {
@@ -295,7 +279,7 @@ function buildDisplayGuestName(salutationCluster: string, guestNameCore: string)
   if (!rawName) return cluster;
   const cleanedName = cleanRedundantPrefix(salutationCluster, rawName);
   const salutation = findSalutationDefinition(cluster);
-  const normalizedCluster = salutation ? displayPrefixForSalutation(salutation) : titleRelationshipWords(cluster);
+  const normalizedCluster = salutation ? displayPrefixForSalutation(salutation) : cluster;
   return `${normalizedCluster} ${cleanedName}`.replace(/\s+/g, " ").trim();
 }
 
@@ -326,6 +310,7 @@ function inferTemplateValues(values: TemplateRowValues): InferredTemplateValues 
   const coupleReference = invitedBy === "parents" ? salutation.parentsCoupleReference ?? resolveParentsCoupleReference() : salutation.coupleHostPronoun;
 
   return {
+    salutationCluster: displayPrefixForSalutation(salutation),
     guestName: buildDisplayGuestName(salutation.displayPrefix ?? values.salutationCluster, values.guestNameCore),
     displaySalutation: buildDisplayGuestName(salutation.displayPrefix ?? values.salutationCluster, values.guestNameCore),
     hostRelationship: salutation.hostRelationship,
@@ -861,6 +846,7 @@ export async function parseInviteWorkbook(buffer: ArrayBuffer, existingInvitees:
       const existingToken = indexes.token ? clean(read(indexes.token)) : "";
       const invitee = createInvitee({
         inviteUnit: deriveInviteUnit(inferred.householdMode),
+        salutationCluster: inferred.salutationCluster,
         displayLabel: inferred.guestName,
         displaySalutation: inferred.displaySalutation,
         guestName: inferred.guestName,

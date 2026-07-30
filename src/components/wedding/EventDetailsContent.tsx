@@ -7,12 +7,7 @@ import { motion } from "framer-motion";
 import type { Variants } from "framer-motion";
 import type { EventDetailsViewportMode, WeddingEventDetailsEditorConfig } from "@/lib/wedding/event-details-types";
 import { DressCodeSection, type DressColorId } from "./DressCodeSection";
-import SeamlessVideoPlayer from "@/components/SeamlessVideoPlayer";
-import { CanvasVideo } from "@/components/CanvasVideo";
 import { RoadSequencePlayer } from "@/components/RoadSequencePlayer";
-
-const timelinePathVideo = "/assets/timeline-path.mp4";
-const timelinePathWebm = "/assets/timeline-path-web.webm";
 
 function getTimelineIconPath(title: string): string | null {
   const t = title.toLowerCase();
@@ -630,12 +625,19 @@ export function EventDetailsContent({
               </div>
               
               <div className="event-details-timeline-scene timeline-garden-path-scene w-full max-w-[28rem] sm:max-w-[34rem] md:max-w-[38rem] mx-auto min-h-[28rem] overflow-visible relative">
-                {/* Con đường: High-performance 60fps Canvas Frame Sequence Player (Zero RAM Lag on Zalo) */}
-                <div className="timeline-garden-path-image timeline-path-video-wrap opacity-100 absolute inset-0 pointer-events-none">
-                  <RoadSequencePlayer
-                    className="timeline-path-video w-full h-full object-contain"
-                    style={{ backgroundColor: "var(--wedding-cream, #f7f2ea)" }}
-                  />
+                {/* Con đường: poster tĩnh luôn sẵn sàng; đủ 108 frame mới bắt đầu chạy. */}
+                <div className="timeline-garden-path-image timeline-path-video-wrap timeline-path-frames-wrap opacity-100 absolute inset-0 pointer-events-none">
+                  <div className="timeline-path-media">
+                    <img
+                      src="/assets/timeline-frames/frame_001.webp"
+                      alt=""
+                      aria-hidden="true"
+                      className="timeline-path-poster timeline-path-video"
+                    />
+                    <RoadSequencePlayer
+                      className="timeline-path-video w-full h-full object-contain"
+                    />
+                  </div>
                 </div>
 
                 {/* Các thẻ mốc thời gian — so le trái/phải */}

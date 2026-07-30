@@ -29,6 +29,7 @@ function toGuestIdentity(invitee?: Invitee): GuestIdentity {
     honorific: invitee.honorific || undefined,
     group: invitee.guestGroup || undefined,
     displayLabel: invitee.displayLabel || undefined,
+    salutationCluster: invitee.salutationCluster || undefined,
     displaySalutation: invitee.displaySalutation || undefined,
     invitationName: invitee.invitationName || undefined,
     relationship: invitee.relationship || undefined,
@@ -53,6 +54,16 @@ export function InviteTokenPage({ token, initialInvitee }: { token: string; init
 
   useEffect(() => {
     let cancelled = false;
+    let suppressCacheRefresh = false;
+
+    const syncLocalCache = (sync: () => void) => {
+      suppressCacheRefresh = true;
+      try {
+        sync();
+      } finally {
+        suppressCacheRefresh = false;
+      }
+    };
 
     async function loadInvite() {
       if (!initialInvitee) {
@@ -62,6 +73,15 @@ export function InviteTokenPage({ token, initialInvitee }: { token: string; init
       setFetchStatus((prev) => (prev === "ok" ? "ok" : "idle"));
 
       const localInvitee = readLocalInvitees().find((item) => item.token === token);
+      if (!localInvitee && initialInvitee && typeof window !== "undefined") {
+        try {
+          const currentLocal = readLocalInvitees();
+          currentLocal.push(initialInvitee);
+          syncLocalCache(() => writeLocalInvitees(currentLocal));
+        } catch {
+          // RSVP can still hydrate from the network if local storage is blocked.
+        }
+      }
       if (!cancelled) {
         setPayload(localInvitee ? { backend: "local", invitee: localInvitee } : { backend: initialInvitee ? "supabase" : "local", invitee: localInvitee || initialInvitee });
         if (localInvitee) {
@@ -80,22 +100,25 @@ export function InviteTokenPage({ token, initialInvitee }: { token: string; init
           }
         } else if (response.ok) {
           const data = await response.json() as InvitePayload;
+          const remoteInvitee = data.invitee;
           if (!cancelled) {
             setFetchStatus("ok");
-            const finalInvitee = data.invitee || localInvitee;
-            if (data.invitee && typeof window !== "undefined") {
+            const finalInvitee = remoteInvitee || localInvitee;
+            if (remoteInvitee && typeof window !== "undefined") {
               try {
-                const currentLocal = readLocalInvitees();
-                const idx = currentLocal.findIndex((item) => item.token === token || item.id === data.invitee?.id);
-                if (idx >= 0) {
-                  currentLocal[idx] = data.invitee;
-                } else {
-                  currentLocal.push(data.invitee);
-                }
-                writeLocalInvitees(currentLocal);
-                if (data.invitee.inviteStatus === "invited" && !data.invitee.rsvp) {
-                  removeRSVPResponses((r) => Boolean((token && r.inviteToken === token) || (data.invitee?.id && r.inviteeId === data.invitee.id)));
-                }
+                syncLocalCache(() => {
+                  const currentLocal = readLocalInvitees();
+                  const idx = currentLocal.findIndex((item) => item.token === token || item.id === remoteInvitee.id);
+                  if (idx >= 0) {
+                    currentLocal[idx] = remoteInvitee;
+                  } else {
+                    currentLocal.push(remoteInvitee);
+                  }
+                  writeLocalInvitees(currentLocal);
+                  if (remoteInvitee.inviteStatus === "invited" && !remoteInvitee.rsvp) {
+                    removeRSVPResponses((r) => Boolean((token && r.inviteToken === token) || (remoteInvitee.id && r.inviteeId === remoteInvitee.id)));
+                  }
+                });
               } catch {}
             }
             setPayload({
@@ -128,6 +151,7 @@ export function InviteTokenPage({ token, initialInvitee }: { token: string; init
     }
 
     const refresh = () => {
+      if (suppressCacheRefresh) return;
       void loadInvite();
     };
 
@@ -144,7 +168,7 @@ export function InviteTokenPage({ token, initialInvitee }: { token: string; init
       window.removeEventListener("wedding-invitees-updated", refresh);
       window.removeEventListener("wedding-rsvp-updated", refresh);
     };
-  }, [token]);
+  }, [initialInvitee, token]);
 
   const invitee = payload.invitee;
   const inviteeIdentity = useMemo(() => toGuestIdentity(invitee), [invitee]);

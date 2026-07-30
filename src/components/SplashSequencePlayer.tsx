@@ -8,11 +8,12 @@ const FRAME_RATE = 18; // 18 frames per second (exact 6.05s video duration)
 const FRAME_DURATION = 1000 / FRAME_RATE; // ~55.5ms per frame
 
 interface SplashSequencePlayerProps {
-  variant: "mobile" | "desktop";
+  variant: "mobile" | "desktop" | "desktop-ipad";
   isPlaying: boolean;
   onEnded?: () => void;
   className?: string;
   style?: React.CSSProperties;
+  objectFit?: React.CSSProperties["objectFit"];
 }
 
 export function SplashSequencePlayer({
@@ -21,6 +22,7 @@ export function SplashSequencePlayer({
   onEnded,
   className = "",
   style,
+  objectFit = "cover",
 }: SplashSequencePlayerProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const imagesRef = useRef<HTMLImageElement[]>([]);
@@ -29,7 +31,11 @@ export function SplashSequencePlayer({
   useEffect(() => {
     // 1. Get pre-decoded images from GlobalImageCache or fallback load
     const images: HTMLImageElement[] = [];
-    const folder = variant === "mobile" ? "splash-frames-mobile" : "splash-frames-desktop";
+    const folder = variant === "mobile"
+      ? "splash-frames-mobile"
+      : variant === "desktop-ipad"
+        ? "splash-frames-desktop-ipad"
+        : "splash-frames-desktop";
 
     for (let i = 1; i <= TOTAL_FRAMES; i++) {
       const numStr = String(i).padStart(3, "0");
@@ -120,7 +126,7 @@ export function SplashSequencePlayer({
       ref={canvasRef}
       className={className}
       style={{
-        objectFit: "cover",
+        objectFit,
         pointerEvents: "none",
         width: "100%",
         height: "100%",

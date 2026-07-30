@@ -1,0 +1,8 @@
+.git
+.gitnexus
+.next
+.tmp-*
+node_modules
+output
+coverage
+*.xlsx

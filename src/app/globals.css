@@ -4148,14 +4148,20 @@ textarea {
   will-change: opacity, transform;
 }
 
-/* 1. Base / Preparing state: Opacity 0 while splash envelope video is active */
-html:not(.splash-skipped) .hero-preparing .hero-logo-fade,
-html:not(.splash-skipped) .hero-preparing .hero-photo-fade,
-html:not(.splash-skipped) .hero-preparing .hero-ornament-fade-left,
-html:not(.splash-skipped) .hero-preparing .hero-ornament-fade-right,
-html:not(.splash-skipped) .hero-preparing .hero-text-fade,
-html:not(.splash-skipped) .hero-preparing .hero-text-fade-header,
-html:not(.splash-skipped) .hero-preparing .hero-text-fade-body {
+/*
+ * 1. Base / preparing state.
+ * Keep every reveal layer hidden until React has committed either the
+ * animating or static branch. This guard must not depend on splash-skipped:
+ * embedded WebViews can paint after that root class changes but before the
+ * introFinished state update reaches the hero.
+ */
+.hero-preparing .hero-logo-fade,
+.hero-preparing .hero-photo-fade,
+.hero-preparing .hero-ornament-fade-left,
+.hero-preparing .hero-ornament-fade-right,
+.hero-preparing .hero-text-fade,
+.hero-preparing .hero-text-fade-header,
+.hero-preparing .hero-text-fade-body {
   opacity: 0 !important;
   animation: none !important;
   transition: none !important;
@@ -4337,6 +4343,92 @@ html.splash-skipped body {
   opacity: 1;
 }
 
+.timeline-path-video.timeline-road-motion {
+  opacity: 0;
+  transition: opacity 900ms cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: opacity;
+}
+
+.timeline-path-video.timeline-road-motion.is-ready {
+  opacity: 1;
+}
+
+.timeline-path-frames-wrap::before,
+.timeline-path-frames-wrap::after {
+  content: none;
+}
+
+/*
+ * Keep the original timeline scene and cards untouched. Only the media inside
+ * it receives the source frame's exact 9:16 box, so feathering follows the
+ * artwork instead of the wider tablet container.
+ */
+.timeline-path-media {
+  position: absolute;
+  inset-block: 0;
+  left: 50%;
+  height: 100%;
+  max-width: 100%;
+  aspect-ratio: 9 / 16;
+  transform: translateX(-50%);
+  isolation: isolate;
+  pointer-events: none;
+}
+
+.timeline-path-poster,
+.timeline-path-media .timeline-road-motion {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.timeline-path-poster {
+  z-index: 0;
+  object-fit: cover;
+}
+
+.timeline-path-media .timeline-road-motion {
+  z-index: 1;
+}
+
+/* Blur and color feather hug the actual frame edges, not the outer scene. */
+.timeline-path-media::after {
+  content: "";
+  position: absolute;
+  inset: -2.5%;
+  z-index: 2;
+  pointer-events: none;
+  background: radial-gradient(
+    ellipse 78% 91% at center,
+    transparent 64%,
+    rgba(247, 242, 234, 0.28) 78%,
+    rgba(247, 242, 234, 0.78) 91%,
+    var(--wedding-cream, #f7f2ea) 100%
+  );
+  -webkit-backdrop-filter: blur(7px);
+  backdrop-filter: blur(7px);
+  -webkit-mask-image: radial-gradient(
+    ellipse 78% 91% at center,
+    transparent 59%,
+    rgba(0, 0, 0, 0.42) 75%,
+    black 100%
+  );
+  mask-image: radial-gradient(
+    ellipse 78% 91% at center,
+    transparent 59%,
+    rgba(0, 0, 0, 0.42) 75%,
+    black 100%
+  );
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .timeline-path-video.timeline-road-motion {
+    display: none;
+  }
+}
+
 .timeline-path-video-wrap::before,
 .timeline-path-video-wrap::after {
   content: "";
@@ -4364,7 +4456,7 @@ html.splash-skipped body {
   mix-blend-mode: normal;
 }
 
-/* Tablet/Desktop: video bị letterbox hẹp hơn → siết feather + blur mạnh hơn ở 2 bên */
+/* Tablet/Desktop: keep the original stronger side feather. */
 @media (min-width: 640px) {
   .timeline-path-video {
     -webkit-mask-image:
@@ -4485,6 +4577,3 @@ html.splash-skipped body {
     transform: rotate(2.5deg);
   }
 }
-
-
-

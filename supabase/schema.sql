@@ -7,6 +7,8 @@ create table if not exists rsvp_responses (
   display_label text,
   name text not null,
   phone text not null,
+  attending_ceremony boolean,
+  attending_banquet boolean,
   attending text not null check (attending in ('yes', 'no', 'maybe')),
   guest_count int not null default 1 check (guest_count >= 0),
   guest_group text not null,
@@ -27,6 +29,8 @@ create table if not exists rsvp_responses (
 alter table rsvp_responses add column if not exists invitee_id uuid;
 alter table rsvp_responses add column if not exists invite_token text;
 alter table rsvp_responses add column if not exists display_label text;
+alter table rsvp_responses add column if not exists attending_ceremony boolean;
+alter table rsvp_responses add column if not exists attending_banquet boolean;
 alter table rsvp_responses add column if not exists lodging_guests jsonb not null default '[]'::jsonb;
 
 create index if not exists rsvp_responses_submitted_at_idx on rsvp_responses (submitted_at desc);
@@ -43,6 +47,7 @@ create table if not exists invitees (
   invite_unit text not null default 'individual' check (invite_unit in ('individual', 'household')),
   guest_name text not null default '',
   display_label text not null,
+  salutation_cluster text not null default '',
   invitation_name text not null default '',
   honorific text not null default '',
   envelope_line text not null default '',
@@ -66,6 +71,7 @@ create table if not exists invitees (
 );
 
 alter table invitees add column if not exists invitation_name text not null default '';
+alter table invitees add column if not exists salutation_cluster text not null default '';
 alter table invitees add column if not exists host_relationship text not null default '';
 alter table invitees add column if not exists host_pronoun text not null default '';
 alter table invitees add column if not exists couple_reference text not null default '';

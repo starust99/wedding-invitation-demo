@@ -88,7 +88,7 @@ export function BackgroundMusic() {
     const handlePlaySignal = () => {
       try {
         localStorage.removeItem("wedding-music-muted");
-      } catch (e) {}
+      } catch {}
       setIsMuted(false);
       setShowController(true);
       startFadeIn();
@@ -186,6 +186,7 @@ export function BackgroundMusic() {
         src="/assets/audio/co-chut-ngot-ngao.mp3"
         loop
         preload="auto"
+        playsInline
       />
 
 

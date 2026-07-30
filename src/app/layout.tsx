@@ -1,5 +1,4 @@
 import type { Metadata, Viewport } from "next";
-import Script from "next/script";
 import { Cormorant_Garamond, Be_Vietnam_Pro, Dancing_Script } from "next/font/google";
 import "./globals.css";
 import { PageTransitionEffect } from "@/components/PageTransitionEffect";
@@ -8,24 +7,24 @@ import { BackgroundMusic } from "@/components/wedding/BackgroundMusic";
 
 const cormorantGaramond = Cormorant_Garamond({
   display: "swap",
-  subsets: ["latin", "latin-ext", "vietnamese"],
+  preload: false,
+  subsets: ["latin", "vietnamese"],
   variable: "--font-cormorant-garamond",
-  weight: ["300", "400", "500", "600", "700"],
   style: ["normal", "italic"],
 });
 
 const beVietnamPro = Be_Vietnam_Pro({
   display: "swap",
-  subsets: ["latin", "latin-ext", "vietnamese"],
+  subsets: ["latin", "vietnamese"],
   variable: "--font-be-vietnam-pro",
-  weight: ["300", "400", "500", "600"],
+  weight: ["400", "500", "600"],
 });
 
 const dancingScript = Dancing_Script({
   display: "swap",
+  preload: false,
   subsets: ["latin", "vietnamese"],
   variable: "--font-dancing-script",
-  weight: ["400", "500", "600", "700"],
 });
 
 const fontVariables = [
@@ -76,14 +75,10 @@ export default function RootLayout({
   return (
     <html lang="vi" data-scroll-behavior="smooth" className={fontVariables} suppressHydrationWarning>
       <head>
-        <link rel="preload" href="/assets/timeline-path.webp" as="image" type="image/webp" />
-        <link rel="preload" href="/assets/wedding-rings.webp" as="image" type="image/webp" />
         <script
           dangerouslySetInnerHTML={{
             __html: `
               try {
-                var p1 = new Image(); p1.src = "/assets/timeline-path.webp";
-                var p2 = new Image(); p2.src = "/assets/wedding-rings.webp";
                 var href = window.location.href || "";
                 var search = window.location.search || "";
                 var hash = window.location.hash || "";

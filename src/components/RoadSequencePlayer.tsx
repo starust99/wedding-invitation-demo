@@ -1,12 +1,51 @@
 "use client";
 
-import React, { useEffect, useRef } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import { useReducedMotion } from "framer-motion";
 import { GlobalImageCache } from "@/lib/global-image-cache";
 
 const TOTAL_FRAMES = 108;
-const FRAME_RATE = 12; // 12 frames per second
-const FRAME_DURATION = 1000 / FRAME_RATE; // 83.33ms per frame for full 9.0s duration
-const GHOST_WINDOW = 12; // 12 frames (1.0s) ghost shadow blur window at loop junction
+const FRAME_RATE = 12;
+const FRAME_DURATION = 1000 / FRAME_RATE;
+const GHOST_WINDOW = 12;
+const WARMUP_CONCURRENCY = 6;
+const DECODE_CONCURRENCY = 8;
+
+const FRAME_SRCS = Array.from({ length: TOTAL_FRAMES }, (_, index) => {
+  const frameNumber = String(index + 1).padStart(3, "0");
+  return `/assets/timeline-frames/frame_${frameNumber}.webp`;
+});
+
+let timelineWarmupPromise: Promise<void> | null = null;
+
+function warmTimelineFrameBytes() {
+  if (timelineWarmupPromise) return timelineWarmupPromise;
+
+  timelineWarmupPromise = (async () => {
+    let nextIndex = 0;
+    const worker = async () => {
+      while (nextIndex < FRAME_SRCS.length) {
+        const src = FRAME_SRCS[nextIndex++];
+        try {
+          const response = await fetch(src, { cache: "force-cache" });
+          if (response.ok) {
+            // Consume the body so embedded browsers commit the complete frame
+            // to their HTTP cache. The bytes are not retained in JS memory.
+            await response.arrayBuffer();
+          }
+        } catch {
+          // The decoded loader retries any frame that did not warm successfully.
+        }
+      }
+    };
+
+    await Promise.all(
+      Array.from({ length: WARMUP_CONCURRENCY }, () => worker()),
+    );
+  })();
+
+  return timelineWarmupPromise;
+}
 
 export function RoadSequencePlayer({
   className = "",
@@ -16,105 +55,226 @@ export function RoadSequencePlayer({
   style?: React.CSSProperties;
 }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const imagesRef = useRef<HTMLImageElement[]>([]);
+  const imagesRef = useRef<Array<HTMLImageElement | undefined>>(
+    new Array(TOTAL_FRAMES),
+  );
+  const decodeStartedRef = useRef(false);
+  const cancelledRef = useRef(false);
+  const [isReady, setIsReady] = useState(false);
+  const [isNearViewport, setIsNearViewport] = useState(false);
+  const prefersReducedMotion = useReducedMotion();
+
+  const drawFrame = useCallback((image: HTMLImageElement) => {
+    const canvas = canvasRef.current;
+    if (!canvas || image.naturalWidth <= 0) return;
+    const context = canvas.getContext("2d");
+    if (!context) return;
+
+    if (
+      canvas.width !== image.naturalWidth ||
+      canvas.height !== image.naturalHeight
+    ) {
+      canvas.width = image.naturalWidth;
+      canvas.height = image.naturalHeight;
+    }
+    context.clearRect(0, 0, canvas.width, canvas.height);
+    context.globalAlpha = 1;
+    context.filter = "none";
+    context.drawImage(image, 0, 0, canvas.width, canvas.height);
+  }, []);
+
+  const decodeTimelineFrames = useCallback(async () => {
+    if (decodeStartedRef.current || isReady) return;
+    decodeStartedRef.current = true;
+
+    // Finish the network-only warmup before creating 108 decoded images. This
+    // prevents WebKit from issuing a second competing request for the same
+    // frame while the first one is still in flight.
+    await warmTimelineFrameBytes();
+
+    while (!cancelledRef.current) {
+      const pendingIndexes = FRAME_SRCS.map((_, index) => index).filter(
+        (index) => !imagesRef.current[index],
+      );
+      if (pendingIndexes.length === 0) {
+        setIsReady(true);
+        break;
+      }
+
+      let nextPending = 0;
+      const worker = async () => {
+        while (
+          nextPending < pendingIndexes.length &&
+          !cancelledRef.current
+        ) {
+          const frameIndex = pendingIndexes[nextPending++];
+          try {
+            const image = await GlobalImageCache.preloadRequired(
+              FRAME_SRCS[frameIndex],
+            );
+            imagesRef.current[frameIndex] = image;
+            if (frameIndex === 0) drawFrame(image);
+          } catch {
+            // Leave this slot empty. The next pass retries only missing frames.
+          }
+        }
+      };
+
+      await Promise.all(
+        Array.from({ length: DECODE_CONCURRENCY }, () => worker()),
+      );
+
+      if (imagesRef.current.every(Boolean)) {
+        setIsReady(true);
+        break;
+      }
+
+      await new Promise((resolve) => window.setTimeout(resolve, 1_000));
+    }
+
+    decodeStartedRef.current = false;
+  }, [drawFrame, isReady]);
 
   useEffect(() => {
-    // 1. Get pre-decoded images from GlobalImageCache or fallback load
-    const images: HTMLImageElement[] = [];
-    for (let i = 1; i <= TOTAL_FRAMES; i++) {
-      const numStr = String(i).padStart(3, "0");
-      const src = `/assets/timeline-frames/frame_${numStr}.webp`;
-      const cached = GlobalImageCache.get(src);
-      if (cached) {
-        images.push(cached);
-      } else {
-        const img = new Image();
-        img.src = src;
-        images.push(img);
-        GlobalImageCache.preload(src);
-      }
-    }
-    imagesRef.current = images;
+    cancelledRef.current = false;
 
-    // 2. Pure Forward Canvas Loop (0 -> 107 -> 0) with Ghost Shadow Blur Loop Transition
-    let animId: number;
+    const cachedFirstFrame = GlobalImageCache.get(FRAME_SRCS[0]);
+    if (cachedFirstFrame) {
+      imagesRef.current[0] = cachedFirstFrame;
+      drawFrame(cachedFirstFrame);
+    }
+
+    const handleWarmup = () => {
+      void warmTimelineFrameBytes();
+    };
+    const handleDecode = () => {
+      void warmTimelineFrameBytes();
+      void decodeTimelineFrames();
+    };
+
+    window.addEventListener("weddingTimelineWarmup", handleWarmup);
+    window.addEventListener("weddingTimelineDecode", handleDecode);
+
+    const initialCheck = window.setTimeout(() => {
+      const splashSkipped =
+        document.documentElement.classList.contains("splash-skipped");
+      const splashMissing = !document.getElementById("wedding-splash-screen");
+      if (splashSkipped || splashMissing) handleDecode();
+    }, 0);
+
+    return () => {
+      cancelledRef.current = true;
+      window.clearTimeout(initialCheck);
+      window.removeEventListener("weddingTimelineWarmup", handleWarmup);
+      window.removeEventListener("weddingTimelineDecode", handleDecode);
+    };
+  }, [decodeTimelineFrames, drawFrame]);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    if (!("IntersectionObserver" in window)) {
+      setIsNearViewport(true);
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      ([entry]) => setIsNearViewport(Boolean(entry?.isIntersecting)),
+      { rootMargin: "700px 0px" },
+    );
+    observer.observe(canvas);
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (!isReady || !isNearViewport || prefersReducedMotion) return;
+
+    let animationId = 0;
     let startTime: number | null = null;
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
+    const context = canvas.getContext("2d");
+    if (!context) return;
 
     const render = (timestamp: number) => {
-      if (!startTime) startTime = timestamp;
+      if (document.hidden) {
+        startTime = null;
+        animationId = window.requestAnimationFrame(render);
+        return;
+      }
+      if (startTime === null) startTime = timestamp;
+
       const elapsed = timestamp - startTime;
+      const frameIndex = Math.floor(elapsed / FRAME_DURATION) % TOTAL_FRAMES;
+      const currentImage = imagesRef.current[frameIndex];
 
-      // 100% Forward direction always (0 -> 107 -> 0)
-      const exactFrame = (elapsed / FRAME_DURATION) % TOTAL_FRAMES;
-      const frameIndex = Math.floor(exactFrame);
-      const currentImg = imagesRef.current[frameIndex];
-
-      if (currentImg && currentImg.complete && currentImg.naturalWidth > 0) {
-        if (canvas.width !== currentImg.naturalWidth) {
-          canvas.width = currentImg.naturalWidth;
-          canvas.height = currentImg.naturalHeight;
+      if (currentImage) {
+        if (
+          canvas.width !== currentImage.naturalWidth ||
+          canvas.height !== currentImage.naturalHeight
+        ) {
+          canvas.width = currentImage.naturalWidth;
+          canvas.height = currentImage.naturalHeight;
         }
 
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-        // Calculate ghost shadow blur factor near loop junction
-        // End window: frames (TOTAL_FRAMES - GHOST_WINDOW)..107
-        // Start window: frames 0..GHOST_WINDOW
+        context.clearRect(0, 0, canvas.width, canvas.height);
         const isEndWindow = frameIndex >= TOTAL_FRAMES - GHOST_WINDOW;
         const isStartWindow = frameIndex <= GHOST_WINDOW;
 
-        let blurPx = 0;
-        if (isEndWindow && "filter" in ctx) {
-          const progress = (frameIndex - (TOTAL_FRAMES - GHOST_WINDOW)) / GHOST_WINDOW;
-          blurPx = progress * 1.2; // 0px to 1.2px ultra-subtle ghost blur
-          ctx.filter = `blur(${blurPx.toFixed(1)}px)`;
-        } else if (isStartWindow && "filter" in ctx) {
-          const progress = 1.0 - (frameIndex / GHOST_WINDOW);
-          blurPx = progress * 1.2; // 1.2px to 0px ultra-subtle unblur
-          ctx.filter = `blur(${blurPx.toFixed(1)}px)`;
-        } else if ("filter" in ctx) {
-          ctx.filter = "none";
+        if (isEndWindow) {
+          const progress =
+            (frameIndex - (TOTAL_FRAMES - GHOST_WINDOW)) / GHOST_WINDOW;
+          context.filter = `blur(${(progress * 1.2).toFixed(1)}px)`;
+        } else if (isStartWindow) {
+          const progress = 1 - frameIndex / GHOST_WINDOW;
+          context.filter = `blur(${(progress * 1.2).toFixed(1)}px)`;
+        } else {
+          context.filter = "none";
         }
 
-        // Base layer: draw current frame
-        ctx.globalAlpha = 1.0;
-        ctx.drawImage(currentImg, 0, 0, canvas.width, canvas.height);
+        context.globalAlpha = 1;
+        context.drawImage(
+          currentImage,
+          0,
+          0,
+          canvas.width,
+          canvas.height,
+        );
 
-        // Ghost shadow overlay blending at the end of cycle (blends frame 0 over frame 96..107)
         if (isEndWindow) {
-          const progress = (frameIndex - (TOTAL_FRAMES - GHOST_WINDOW)) / GHOST_WINDOW;
-          const smoothAlpha = progress * progress * (3 - 2 * progress); // Smoothstep S-curve
-          const firstImg = imagesRef.current[0];
-          if (firstImg && firstImg.complete) {
-            ctx.globalAlpha = smoothAlpha;
-            ctx.drawImage(firstImg, 0, 0, canvas.width, canvas.height);
+          const progress =
+            (frameIndex - (TOTAL_FRAMES - GHOST_WINDOW)) / GHOST_WINDOW;
+          const smoothAlpha = progress * progress * (3 - 2 * progress);
+          const firstImage = imagesRef.current[0];
+          if (firstImage) {
+            context.globalAlpha = smoothAlpha;
+            context.drawImage(
+              firstImage,
+              0,
+              0,
+              canvas.width,
+              canvas.height,
+            );
           }
         }
 
-        if ("filter" in ctx) {
-          ctx.filter = "none";
-        }
-        ctx.globalAlpha = 1.0;
+        context.filter = "none";
+        context.globalAlpha = 1;
       }
 
-      animId = requestAnimationFrame(render);
+      animationId = window.requestAnimationFrame(render);
     };
 
-    animId = requestAnimationFrame(render);
-
-    return () => {
-      cancelAnimationFrame(animId);
-    };
-  }, []);
+    animationId = window.requestAnimationFrame(render);
+    return () => window.cancelAnimationFrame(animationId);
+  }, [isNearViewport, isReady, prefersReducedMotion]);
 
   return (
     <canvas
       ref={canvasRef}
-      className={className}
+      className={`${className} timeline-road-motion ${isReady ? "is-ready" : ""}`}
+      aria-hidden="true"
       style={{
         objectFit: "contain",
         pointerEvents: "none",

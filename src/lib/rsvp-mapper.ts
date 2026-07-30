@@ -7,8 +7,8 @@ export type RSVPDatabaseRow = {
   display_label: string | null;
   name: string;
   phone: string;
-  attending_ceremony: boolean | null;
-  attending_banquet: boolean | null;
+  attending_ceremony?: boolean | null;
+  attending_banquet?: boolean | null;
   attending: "yes" | "no" | "maybe";
   guest_count: number;
   guest_group: string;
@@ -26,18 +26,37 @@ export type RSVPDatabaseRow = {
   submitted_at: string;
 };
 
-function parseLodgingGuests(value: unknown): LodgingGuest[] {
+type LegacyRsvpMetadata = {
+  guests: LodgingGuest[];
+  attendingCeremony?: boolean;
+  attendingBanquet?: boolean;
+};
+
+function parseLegacyRsvpMetadata(value: unknown): LegacyRsvpMetadata {
   if (typeof value === "string") {
     try {
-      return parseLodgingGuests(JSON.parse(value));
+      return parseLegacyRsvpMetadata(JSON.parse(value));
     } catch {
-      return [];
+      return { guests: [] };
     }
   }
 
-  if (!Array.isArray(value)) return [];
+  let rawGuests: unknown = value;
+  let attendingCeremony: boolean | undefined;
+  let attendingBanquet: boolean | undefined;
 
-  return value.flatMap((item) => {
+  if (value && typeof value === "object" && !Array.isArray(value)) {
+    const metadata = value as Record<string, unknown>;
+    rawGuests = metadata.guests;
+    attendingCeremony = typeof metadata.attendingCeremony === "boolean" ? metadata.attendingCeremony : undefined;
+    attendingBanquet = typeof metadata.attendingBanquet === "boolean" ? metadata.attendingBanquet : undefined;
+  }
+
+  if (!Array.isArray(rawGuests)) {
+    return { guests: [], attendingCeremony, attendingBanquet };
+  }
+
+  const guests = rawGuests.flatMap((item) => {
     if (!item || typeof item !== "object") return [];
     const guest = item as Record<string, unknown>;
     const fullName = typeof guest.fullName === "string"
@@ -65,9 +84,13 @@ function parseLodgingGuests(value: unknown): LodgingGuest[] {
       age: typeof ageValue === "number" && Number.isFinite(ageValue) ? ageValue : undefined,
     }];
   });
+
+  return { guests, attendingCeremony, attendingBanquet };
 }
 
 export function mapRSVPRow(row: RSVPDatabaseRow): RSVPResponse {
+  const legacyMetadata = parseLegacyRsvpMetadata(row.lodging_guests);
+
   return {
     id: row.id,
     inviteeId: row.invitee_id ?? undefined,
@@ -75,8 +98,8 @@ export function mapRSVPRow(row: RSVPDatabaseRow): RSVPResponse {
     displayLabel: row.display_label ?? undefined,
     name: row.name,
     phone: row.phone,
-    attendingCeremony: row.attending_ceremony ?? undefined,
-    attendingBanquet: row.attending_banquet ?? undefined,
+    attendingCeremony: row.attending_ceremony ?? legacyMetadata.attendingCeremony,
+    attendingBanquet: row.attending_banquet ?? legacyMetadata.attendingBanquet,
     attending: row.attending,
     guestCount: row.guest_count,
     guestGroup: row.guest_group,
@@ -84,7 +107,7 @@ export function mapRSVPRow(row: RSVPDatabaseRow): RSVPResponse {
     transportNeeded: row.transport_needed,
     accommodationNeeded: row.accommodation_needed,
     stayingGuestCount: row.staying_guest_count ?? undefined,
-    lodgingGuests: parseLodgingGuests(row.lodging_guests),
+    lodgingGuests: legacyMetadata.guests,
     checkInDate: row.check_in_date ?? undefined,
     checkOutDate: row.check_out_date ?? undefined,
     roomType: row.room_type ?? undefined,
@@ -95,7 +118,11 @@ export function mapRSVPRow(row: RSVPDatabaseRow): RSVPResponse {
   };
 }
 
-export function toRSVPInsert(response: Omit<RSVPResponse, "id" | "submittedAt">) {
+export function toRSVPInsert(
+  response: Omit<RSVPResponse, "id" | "submittedAt">,
+  options: { includeEventAttendanceColumns?: boolean } = {},
+) {
+  const includeEventAttendanceColumns = options.includeEventAttendanceColumns ?? true;
   const tokenColumns = response.inviteeId || response.inviteToken || response.displayLabel
     ? {
         invitee_id: response.inviteeId || null,
@@ -103,13 +130,25 @@ export function toRSVPInsert(response: Omit<RSVPResponse, "id" | "submittedAt">)
         display_label: response.displayLabel || null,
       }
     : {};
+  const eventAttendanceColumns = includeEventAttendanceColumns
+    ? {
+        attending_ceremony: response.attendingCeremony ?? null,
+        attending_banquet: response.attendingBanquet ?? null,
+      }
+    : {};
+  const lodgingGuests = includeEventAttendanceColumns
+    ? response.lodgingGuests
+    : {
+        guests: response.lodgingGuests ?? [],
+        attendingCeremony: response.attendingCeremony,
+        attendingBanquet: response.attendingBanquet,
+      };
 
   return {
     ...tokenColumns,
+    ...eventAttendanceColumns,
     name: response.name,
     phone: response.phone,
-    attending_ceremony: response.attendingCeremony ?? null,
-    attending_banquet: response.attendingBanquet ?? null,
     attending: response.attending,
     guest_count: response.guestCount,
     guest_group: response.guestGroup,
@@ -117,7 +156,7 @@ export function toRSVPInsert(response: Omit<RSVPResponse, "id" | "submittedAt">)
     transport_needed: response.transportNeeded,
     accommodation_needed: response.accommodationNeeded,
     staying_guest_count: response.stayingGuestCount ?? null,
-    lodging_guests: response.lodgingGuests,
+    lodging_guests: lodgingGuests,
     check_in_date: response.checkInDate || null,
     check_out_date: response.checkOutDate || null,
     room_type: response.roomType || null,
