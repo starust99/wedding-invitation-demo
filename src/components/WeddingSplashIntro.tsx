@@ -11,11 +11,13 @@ import { CanvasVideo } from "./CanvasVideo";
 type SplashStatus = "checking" | "closed" | "opening" | "hidden";
 
 function readForceIntro() {
-  if (typeof window === "undefined") return false;
+  if (typeof window === "undefined") return true;
   try {
+    const pathname = window.location.pathname || "";
+    if (pathname.startsWith("/i/")) return true;
     return new URLSearchParams(window.location.search).get("intro") === "1" || window.location.href.includes("intro=1");
   } catch {
-    return false;
+    return true;
   }
 }
 

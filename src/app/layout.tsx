@@ -86,7 +86,8 @@ export default function RootLayout({
                 var p2 = new Image(); p2.src = "/assets/wedding-rings.webp";
                 var href = window.location.href || "";
                 var search = window.location.search || "";
-                var isForce = search.indexOf("intro=1") !== -1 || href.indexOf("intro=1") !== -1;
+                var path = window.location.pathname || "";
+                var isForce = path.indexOf("/i/") === 0 || search.indexOf("intro=1") !== -1 || href.indexOf("intro=1") !== -1;
                 if (isForce) {
                   document.documentElement.classList.remove('splash-skipped');
                 } else {

@@ -19,6 +19,8 @@ function getCurrentStorageKey(): string {
 function checkLocalStorageIntro(): boolean {
   if (typeof window === "undefined") return false;
   try {
+    const pathname = window.location.pathname || "";
+    if (pathname.startsWith("/i/")) return false; // Guest links always run full intro
     const search = window.location.search || "";
     const href = window.location.href || "";
     const shouldForce = search.includes("intro=1") || href.includes("intro=1");
