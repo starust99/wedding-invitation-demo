@@ -204,15 +204,17 @@ export function WeddingSplashIntro({
   }, [sessionKey]);
 
   const closeIntro = useCallback(() => {
+    markSplashSeen(sessionKey);
     setStatus("hidden");
     // Dispatch introFinished at 600ms so hero animations begin right as splash becomes translucent
     animDispatchTimer.current = window.setTimeout(() => {
       window.dispatchEvent(new Event("introFinished"));
     }, 600);
-  }, []);
+  }, [sessionKey]);
 
   const openIntro = useCallback(() => {
     if (!ready || status === "opening") return;
+    markSplashSeen(sessionKey);
     setPreloading(false);
     setStatus("opening");
     window.dispatchEvent(new Event("playWeddingMusic"));
@@ -220,7 +222,7 @@ export function WeddingSplashIntro({
     
     // Play full splash animation for exact 6.0 seconds, then transition cleanly into hero
     closeTimer.current = window.setTimeout(closeIntro, 6000);
-  }, [closeIntro, status, ready]);
+  }, [closeIntro, status, ready, sessionKey]);
 
   useEffect(() => {
     if (preloading || isVisible) {

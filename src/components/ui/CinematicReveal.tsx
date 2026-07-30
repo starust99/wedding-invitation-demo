@@ -19,14 +19,15 @@ function getCurrentStorageKey(): string {
 function checkLocalStorageIntro(): boolean {
   if (typeof window === "undefined") return false;
   try {
-    const pathname = window.location.pathname || "";
-    if (pathname.startsWith("/i/")) return false; // Guest links always run full intro
     const search = window.location.search || "";
     const href = window.location.href || "";
-    const shouldForce = search.includes("intro=1") || href.includes("intro=1");
+    if (search.includes("intro=1") || href.includes("intro=1")) {
+      return false;
+    }
     const key = getCurrentStorageKey();
-    const hasSeen = window.localStorage.getItem(`wedding-splash:${key}`) === "1";
-    return hasSeen && !shouldForce;
+    const sessionSeen = window.sessionStorage.getItem(`wedding-splash-seen:${key}`) === "1";
+    const localSeen = window.localStorage.getItem(`wedding-splash:${key}`) === "1" || window.localStorage.getItem(`wedding-splash:wedding-splash:${key}`) === "1";
+    return sessionSeen || localSeen;
   } catch {
     return false;
   }
