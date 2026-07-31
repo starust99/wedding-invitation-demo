@@ -57,7 +57,7 @@ export function createAdminSessionToken() {
   return `${payload}.${signature}`;
 }
 
-function isValidAdminSessionToken(token: string | undefined) {
+export function isValidAdminSessionToken(token: string | undefined) {
   if (!token || token.length > 256) return false;
 
   const [version, expiresAtValue, signature, extra] = token.split(".");

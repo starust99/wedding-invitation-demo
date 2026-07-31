@@ -34,7 +34,6 @@ import {
   defaultAlbumRules,
   filterMediaAssetsForInvitee,
   generateInviteToken,
-  getInviteStatusFromRsvp,
   householdModeLabels,
   invitedByLabels,
   inviteUnitLabels,
@@ -84,7 +83,7 @@ const inviteStatusLabels: Record<Invitee["inviteStatus"], string> = {
   rsvp_yes: "Đã xác nhận",
   rsvp_no: "Đã từ chối",
   rsvp_maybe: "Đang cân nhắc",
-  supplement_ready: "Đã có bổ sung",
+  supplement_ready: "Đã cập nhật",
   album_ready: "Đã sẵn sàng xem album",
 };
 
@@ -96,20 +95,6 @@ function formatDate(value: string) {
   } catch {
     return value;
   }
-}
-
-function ensureSupplement(invitee: Invitee): NonNullable<Invitee["supplement"]> {
-  const now = new Date().toISOString();
-  return invitee.supplement ?? {
-    id: crypto.randomUUID(),
-    inviteeId: invitee.id,
-    tableZone: "",
-    tableName: "",
-    seatNote: "",
-    arrivalNote: "",
-    status: "draft",
-    updatedAt: now,
-  };
 }
 
 function buildInvitePayload(invitee: Invitee) {
@@ -415,86 +400,6 @@ export function InviteAdminPanel() {
     }
   }
 
-  async function saveSupplement() {
-    if (!selectedInvitee) return;
-    const supplement = ensureSupplement(selectedInvitee);
-    const now = new Date().toISOString();
-    setBusy(true);
-    setMessage("");
-    setError("");
-
-    try {
-      if (backend === "supabase") {
-        const response = await fetch(`/api/admin/invites/${selectedInvitee.id}/supplement`, {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            tableZone: supplement.tableZone,
-            tableName: supplement.tableName,
-            seatNote: supplement.seatNote,
-            arrivalNote: supplement.arrivalNote,
-            status: supplement.status,
-          }),
-        });
-
-        if (!response.ok) throw new Error("Không lưu được thông tin bổ sung.");
-        const result = await response.json() as { invitee?: Invitee };
-        if (result.invitee) {
-          setInvitees((current) => current.map((item) => item.id === result.invitee?.id ? result.invitee as Invitee : item));
-        }
-        setMessage("Đã lưu thông tin bổ sung.");
-      } else {
-        const nextInvitees = invitees.map((item) => item.id === selectedInvitee.id
-          ? {
-              ...item,
-              supplement: { ...supplement, updatedAt: now },
-              inviteStatus: supplement.status === "published" ? "supplement_ready" : item.inviteStatus,
-              updatedAt: now,
-            }
-          : item);
-        setInvitees(nextInvitees);
-        writeLocalInvitees(nextInvitees);
-        setMessage("Đã lưu thông tin bổ sung vào bộ nhớ trình duyệt.");
-      }
-    } catch (saveError) {
-      setError(saveError instanceof Error ? saveError.message : "Không lưu được thông tin bổ sung.");
-    } finally {
-      setBusy(false);
-    }
-  }
-
-  async function clearSupplement() {
-    if (!selectedInvitee) return;
-    setBusy(true);
-    setMessage("");
-    setError("");
-
-    try {
-      if (backend === "supabase") {
-        const response = await fetch(`/api/admin/invites/${selectedInvitee.id}/supplement`, { method: "DELETE" });
-        if (!response.ok) throw new Error("Không xóa được thông tin bổ sung.");
-        const result = await response.json() as { invitee?: Invitee | null };
-        setInvitees((current) => current.map((item) => item.id === selectedInvitee.id
-          ? result.invitee ?? { ...item, supplement: undefined, updatedAt: new Date().toISOString() }
-          : item));
-      } else {
-        const now = new Date().toISOString();
-        const nextStatus = selectedRsvp ? getInviteStatusFromRsvp(selectedRsvp.attending) : "invited";
-        const nextInvitees = invitees.map((item) => item.id === selectedInvitee.id
-          ? { ...item, supplement: undefined, inviteStatus: nextStatus, updatedAt: now }
-          : item);
-        setInvitees(nextInvitees);
-        writeLocalInvitees(nextInvitees);
-      }
-
-      setMessage("Đã xóa thông tin bổ sung.");
-    } catch (deleteError) {
-      setError(deleteError instanceof Error ? deleteError.message : "Không xóa được thông tin bổ sung.");
-    } finally {
-      setBusy(false);
-    }
-  }
-
   async function regenerateToken() {
     if (!selectedInvitee) return;
     if (!window.confirm("Token cũ sẽ ngừng hoạt động ngay. Bạn có chắc muốn tạo token mới cho khách này?")) return;
@@ -686,7 +591,6 @@ export function InviteAdminPanel() {
         postCeremonyPartyInvited: hasPostCeremonyPartyColumn
           ? invitee.postCeremonyPartyInvited
           : match.postCeremonyPartyInvited,
-        supplement: match.supplement,
         rsvp: match.rsvp,
       };
     });
@@ -1370,7 +1274,7 @@ export function InviteAdminPanel() {
                     <Link2 className="h-3.5 w-3.5" /> Xuất toàn bộ link
                   </button>
                   <button type="button" onClick={() => void addInvitee()} className="col-span-2 inline-flex min-h-11 items-center justify-center gap-1.5 rounded-lg border border-[#E8DDCC] bg-white px-3 text-xs font-semibold text-[#2E2A25] active:scale-[0.98] transition lg:col-span-1" disabled={busy}>
-                    <Plus className="h-3.5 w-3.5 text-[#5F6F4E]" /> Thêm tay
+                    <Plus className="h-3.5 w-3.5 text-[#5F6F4E]" /> Thêm khách
                   </button>
                 </div>
                 <input ref={importFileRef} type="file" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" className="hidden" onChange={(event) => void importWorkbookFile(event.target.files?.[0])} />
@@ -1692,55 +1596,7 @@ export function InviteAdminPanel() {
                   </div>
                 </div>
 
-                {/* Panel 2: Table / Seat Supplement */}
-                <div className="rounded-2xl border border-[#DED4C5] bg-white shadow-sm">
-                  <div className="p-4 sm:p-5">
-                    
-                    <div className="flex items-center justify-between gap-4 border-b border-[#E8DDCC] pb-4 mb-4">
-                      <div>
-                        <span className="text-[10px] font-bold uppercase tracking-wider text-[#b4975a]">THÔNG TIN BÀN TIỆC &amp; VỊ TRÍ</span>
-                        <h4 className="mt-0.5 text-lg font-bold text-[#2E2A25]">Xếp sảnh, số bàn và chỉ đường</h4>
-                      </div>
-                      <div className="flex gap-1.5">
-                        <button type="button" onClick={() => void clearSupplement()} className="inline-flex h-9 items-center gap-1 px-3 rounded-full border border-[#E8DDCC] bg-white text-xs font-semibold text-[#9B4E5C]" disabled={busy}>
-                          <Trash2 className="h-3.5 w-3.5" /> Xoá
-                        </button>
-                        <button type="button" onClick={() => void saveSupplement()} className="inline-flex h-9 items-center gap-1 px-3.5 rounded-full bg-[#5F6F4E] text-xs font-bold text-white shadow-sm" disabled={busy}>
-                          Lưu
-                        </button>
-                      </div>
-                    </div>
-
-                    <div className="grid gap-3.5 sm:grid-cols-2 text-xs">
-                      <label className="grid gap-1.5 font-semibold text-[#8A8178] uppercase tracking-wider">
-                        Khu vực / Sảnh
-                        <input className={panelInput} placeholder="Ví dụ: Sảnh ngoài trời, Khu A" value={selectedInvitee.supplement?.tableZone ?? ""} onChange={(event) => patchSelectedInvitee({ supplement: { ...ensureSupplement(selectedInvitee), tableZone: event.target.value, updatedAt: new Date().toISOString() } })} />
-                      </label>
-                      <label className="grid gap-1.5 font-semibold text-[#8A8178] uppercase tracking-wider">
-                        Tên / Số bàn
-                        <input className={panelInput} placeholder="Ví dụ: Bàn 06, Bàn Bạn Cô Dâu" value={selectedInvitee.supplement?.tableName ?? ""} onChange={(event) => patchSelectedInvitee({ supplement: { ...ensureSupplement(selectedInvitee), tableName: event.target.value, updatedAt: new Date().toISOString() } })} />
-                      </label>
-                      <label className="grid gap-1.5 font-semibold text-[#8A8178] uppercase tracking-wider sm:col-span-2">
-                        Ghi chú chỗ ngồi
-                        <input className={panelInput} placeholder="Ví dụ: Cạnh lối đi, Gần sân khấu..." value={selectedInvitee.supplement?.seatNote ?? ""} onChange={(event) => patchSelectedInvitee({ supplement: { ...ensureSupplement(selectedInvitee), seatNote: event.target.value, updatedAt: new Date().toISOString() } })} />
-                      </label>
-                      <label className="grid gap-1.5 font-semibold text-[#8A8178] uppercase tracking-wider sm:col-span-2">
-                        Hướng dẫn di chuyển đến vị trí
-                        <input className={panelInput} placeholder="Ví dụ: Từ sảnh chính rẽ phải 50m..." value={selectedInvitee.supplement?.arrivalNote ?? ""} onChange={(event) => patchSelectedInvitee({ supplement: { ...ensureSupplement(selectedInvitee), arrivalNote: event.target.value, updatedAt: new Date().toISOString() } })} />
-                      </label>
-                      <label className="grid gap-1.5 font-semibold text-[#8A8178] uppercase tracking-wider">
-                        Trạng thái hiển thị cho khách
-                        <select className={panelSelect} value={selectedInvitee.supplement?.status ?? "draft"} onChange={(event) => patchSelectedInvitee({ supplement: { ...ensureSupplement(selectedInvitee), status: event.target.value === "published" ? "published" : "draft", updatedAt: new Date().toISOString() } })}>
-                          <option value="draft">Bản nháp (Ẩn)</option>
-                          <option value="published">Đã gửi (Hiển thị ở thiệp khách)</option>
-                        </select>
-                      </label>
-                    </div>
-
-                  </div>
-                </div>
-
-                {/* Panel 3: Album Preview */}
+                {/* Album Preview */}
                 <div className="rounded-2xl border border-[#DED4C5] bg-white shadow-sm">
                   <div className="p-4 sm:p-5">
                     <span className="text-[10px] font-bold uppercase tracking-wider text-[#b4975a] block mb-3">ẢNH ALBUM KHÁCH NÀY ĐƯỢC XEM</span>

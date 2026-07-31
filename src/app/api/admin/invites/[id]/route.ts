@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { hasAdminSession } from "@/lib/admin-auth";
-import { mapInviteSupplementRow, mapInviteeRow, type InviteSupplementDatabaseRow, type InviteeDatabaseRow } from "@/lib/invite-mapper";
+import { mapInviteeRow, type InviteeDatabaseRow } from "@/lib/invite-mapper";
 import { getSupabaseServerClient, hasSupabaseEnv } from "@/lib/supabase-server";
 
 type PatchBody = Partial<{
@@ -55,14 +55,8 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
-  const { data: supplement } = await supabase
-    .from("invite_supplements")
-    .select("*")
-    .eq("invitee_id", id)
-    .maybeSingle();
-
   return NextResponse.json({
-    invitee: mapInviteeRow(data as InviteeDatabaseRow, supplement ? mapInviteSupplementRow(supplement as InviteSupplementDatabaseRow) : undefined),
+    invitee: mapInviteeRow(data as InviteeDatabaseRow),
   });
 }
 

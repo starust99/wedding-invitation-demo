@@ -4,11 +4,9 @@ import { parseInviteCsv, type Invitee } from "@/lib/invites";
 import {
   mapMediaAssetRow,
   mapAlbumRuleRow,
-  mapInviteSupplementRow as mapSupplementRow,
   mapInviteeRow as mapInviteRow,
   toInviteeUpsert,
   type AlbumRuleDatabaseRow,
-  type InviteSupplementDatabaseRow,
   type InviteeDatabaseRow,
   type MediaAssetDatabaseRow,
 } from "@/lib/invite-mapper";
@@ -28,34 +26,26 @@ export async function GET() {
   }
 
   if (!hasSupabaseEnv()) {
-    return NextResponse.json({ backend: "local", invitees: [], supplements: [], mediaAssets: [], albumRules: [] });
+    return NextResponse.json({ backend: "local", invitees: [], mediaAssets: [], albumRules: [] });
   }
 
   const supabase = getSupabaseServerClient();
   const [
     inviteesResult,
-    supplementsResult,
     responsesResult,
     mediaResult,
     albumRulesResult,
   ] = await Promise.all([
     supabase.from("invitees").select("*").order("updated_at", { ascending: false }),
-    supabase.from("invite_supplements").select("*"),
     supabase.from("rsvp_responses").select("*").order("submitted_at", { ascending: false }),
     supabase.from("media_assets").select("*").order("updated_at", { ascending: false }),
     supabase.from("album_rules").select("*"),
   ]);
 
   if (inviteesResult.error) return NextResponse.json({ error: inviteesResult.error.message }, { status: 500 });
-  if (supplementsResult.error) return NextResponse.json({ error: supplementsResult.error.message }, { status: 500 });
   if (responsesResult.error) return NextResponse.json({ error: responsesResult.error.message }, { status: 500 });
   if (mediaResult.error) return NextResponse.json({ error: mediaResult.error.message }, { status: 500 });
   if (albumRulesResult.error) return NextResponse.json({ error: albumRulesResult.error.message }, { status: 500 });
-
-  const supplementsByInvitee = new Map<string, InviteSupplementDatabaseRow>();
-  for (const supplement of (supplementsResult.data ?? []) as InviteSupplementDatabaseRow[]) {
-    supplementsByInvitee.set(supplement.invitee_id, supplement);
-  }
 
   const responsesByKey = new Map<string, RSVPDatabaseRow>();
   for (const response of (responsesResult.data ?? []) as RSVPDatabaseRow[]) {
@@ -70,7 +60,7 @@ export async function GET() {
   }
 
   const invitees = (inviteesResult.data ?? []).map((row) => {
-    const invitee = mapInviteRow(row as InviteeDatabaseRow, supplementsByInvitee.get((row as InviteeDatabaseRow).id) ? mapSupplementRow(supplementsByInvitee.get((row as InviteeDatabaseRow).id)!) : undefined);
+    const invitee = mapInviteRow(row as InviteeDatabaseRow);
     const response =
       responsesByKey.get(`id:${invitee.id}`) ||
       responsesByKey.get(`token:${invitee.token}`) ||

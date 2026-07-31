@@ -149,7 +149,7 @@ async function loginAdmin() {
   await page.locator('input[type="password"]').fill(adminPassword);
   await Promise.all([
     page.waitForURL("**/admin", { timeout: 30000 }),
-    page.getByRole("button", { name: "Vào admin" }).click(),
+    page.getByRole("button", { name: "Submit password" }).click(),
   ]);
   await page.close();
 }
