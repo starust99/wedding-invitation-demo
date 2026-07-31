@@ -51,7 +51,7 @@ const rsvpFormFieldsSchema = z.object({
   attending: z.enum(["yes", "no"]),
   guestCount: z.coerce.number().min(0),
   guestGroup: z.string().trim().optional().default(""),
-  stayDecision: z.enum(["25", "26", "both", "none"]).default("none"),
+  stayDecision: z.enum(["25", "26", "both", "none"]).nullable().default(null),
   accommodationNeeded: z.boolean().default(false),
   lodgingGuests: z.array(lodgingGuestSchema).default([]),
   dietaryNote: z.string().trim().optional(),
@@ -69,12 +69,15 @@ const rsvpSchema = rsvpFormFieldsSchema
     if (data.postCeremonyPartyInvited && data.attendingCeremony === "yes" && !data.attendingPostCeremonyParty) {
       ctx.addIssue({ code: "custom", path: ["attendingPostCeremonyParty"], message: "Vui lòng chọn phản hồi cho tiệc sau Thánh lễ." });
     }
+    if (data.attendingBanquet === "yes" && data.stayDecision === null) {
+      ctx.addIssue({ code: "custom", path: ["stayDecision"], message: "Vui lòng chọn phương án lưu trú." });
+    }
     
     if (data.attending !== "no" && data.guestCount < 1) {
       ctx.addIssue({ code: "custom", path: ["guestCount"], message: "Nếu tham dự, số người cần từ 1 trở lên." });
     }
 
-    if (data.attending === "yes" && data.attendingBanquet === "yes" && data.stayDecision !== "none") {
+    if (data.attending === "yes" && data.attendingBanquet === "yes" && data.stayDecision !== null && data.stayDecision !== "none") {
       if (data.lodgingGuests.length < 1) {
         ctx.addIssue({ code: "custom", path: ["lodgingGuests"], message: "Vui lòng thêm ít nhất một người lưu trú." });
       }
@@ -363,7 +366,7 @@ export default function RSVPPage() {
       attending: "yes",
       guestCount: 1,
       guestGroup: "",
-      stayDecision: "none",
+      stayDecision: null,
       accommodationNeeded: false,
       lodgingGuests: [],
       dietaryNote: "",
@@ -458,7 +461,7 @@ export default function RSVPPage() {
       setValue("attendingBanquet", normalizeBoolean(response?.attendingBanquet), { shouldDirty: false });
       setValue("attending", normalizeAttendanceForForm(response?.attending), { shouldDirty: false });
       setValue("dietaryNote", response?.dietaryNote ?? "", { shouldDirty: false });
-      let initialStayDecision: "25" | "26" | "both" | "none" = "none";
+      let initialStayDecision: "25" | "26" | "both" | "none" | null = response ? "none" : null;
       if (response?.accommodationNeeded) {
         const inDate = response.checkInDate;
         const outDate = response.checkOutDate;
@@ -477,7 +480,7 @@ export default function RSVPPage() {
       setValue("notes", response?.notes ?? "", { shouldDirty: false });
       replace(response?.lodgingGuests?.length
         ? response.lodgingGuests
-        : initialStayDecision !== "none"
+        : initialStayDecision !== null && initialStayDecision !== "none"
           ? [createLodgingGuest("")]
           : []);
     }
@@ -636,14 +639,14 @@ export default function RSVPPage() {
       setValue("attending", "no", { shouldDirty: true });
       setValue("guestCount", 0, { shouldDirty: true });
       setValue("accommodationNeeded", false, { shouldDirty: true });
-      setValue("stayDecision", "none", { shouldDirty: true });
+      setValue("stayDecision", null, { shouldDirty: true });
       replace([]);
       return;
     }
 
     if (attendingBanquet === "no") {
       setValue("accommodationNeeded", false, { shouldDirty: true });
-      setValue("stayDecision", "none", { shouldDirty: true });
+      setValue("stayDecision", null, { shouldDirty: true });
       replace([]);
     }
 
@@ -692,7 +695,10 @@ export default function RSVPPage() {
   async function onSubmit(data: RSVPFormOutput) {
     setSubmitError("");
 
-    const isStaying = data.attending === "yes" && data.attendingBanquet === "yes" && data.stayDecision !== "none";
+    const isStaying = data.attending === "yes"
+      && data.attendingBanquet === "yes"
+      && data.stayDecision !== null
+      && data.stayDecision !== "none";
     const cleanLodgingGuests = !isStaying
       ? []
       : normalizeLodgingGuests(data.lodgingGuests);
@@ -1115,7 +1121,7 @@ export default function RSVPPage() {
                         {stayDecision === "none" && "Không nghỉ lại"}
                       </strong>
 
-                      {stayDecision !== "none" && lodgingGuests.length > 0 && (
+                      {stayDecision !== null && stayDecision !== "none" && lodgingGuests.length > 0 && (
                         <div className="bg-serenity/8 p-4.5 rounded-2xl border border-serenity/14 max-w-lg mx-auto w-full text-left mt-1">
                           <p className="text-xs font-bold text-[#7a6a5d] uppercase mb-2">
                             Danh sách người lưu trú ({lodgingGuests.length} người):
@@ -1457,6 +1463,7 @@ export default function RSVPPage() {
                           {/* Option 25 */}
                           <button
                             type="button"
+                            aria-pressed={stayDecision === "25"}
                             onClick={() => handleStayDecisionChange("25")}
                             className={[
                               "flex flex-col items-center justify-center min-h-[3.6rem] sm:min-h-[4.2rem] rounded-xl border p-2 sm:p-3 text-center transition-all duration-200 cursor-pointer shadow-sm",
@@ -1472,6 +1479,7 @@ export default function RSVPPage() {
                           {/* Option 26 */}
                           <button
                             type="button"
+                            aria-pressed={stayDecision === "26"}
                             onClick={() => handleStayDecisionChange("26")}
                             className={[
                               "flex flex-col items-center justify-center min-h-[3.6rem] sm:min-h-[4.2rem] rounded-xl border p-2 sm:p-3 text-center transition-all duration-200 cursor-pointer shadow-sm",
@@ -1487,6 +1495,7 @@ export default function RSVPPage() {
                           {/* Option both */}
                           <button
                             type="button"
+                            aria-pressed={stayDecision === "both"}
                             onClick={() => handleStayDecisionChange("both")}
                             className={[
                               "flex flex-col items-center justify-center min-h-[3.6rem] sm:min-h-[4.2rem] rounded-xl border p-2 sm:p-3 text-center transition-all duration-200 cursor-pointer shadow-sm",
@@ -1502,6 +1511,7 @@ export default function RSVPPage() {
                           {/* Option none */}
                           <button
                             type="button"
+                            aria-pressed={stayDecision === "none"}
                             onClick={() => handleStayDecisionChange("none")}
                             className={[
                               "flex flex-col items-center justify-center min-h-[3.6rem] sm:min-h-[4.2rem] rounded-xl border p-2 sm:p-3 text-center transition-all duration-200 cursor-pointer shadow-sm",
@@ -1513,10 +1523,15 @@ export default function RSVPPage() {
                             <span className="text-sm sm:text-base font-bold">Không nghỉ lại</span>
                           </button>
                         </div>
+                        {errors.stayDecision ? (
+                          <p className="-mt-3 mb-5 text-center text-xs font-bold text-[#9B4E5C]">
+                            {errors.stayDecision.message}
+                          </p>
+                        ) : null}
 
                         {/* List người lưu trú */}
                         <AnimatePresence initial={false}>
-                          {stayDecision !== "none" && (
+                          {stayDecision !== null && stayDecision !== "none" && (
                             <motion.div
                               initial={{ height: 0, opacity: 0, overflow: "hidden" }}
                               animate={{ height: "auto", opacity: 1, overflow: "visible" }}

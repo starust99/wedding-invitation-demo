@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { chromium } from "playwright";
 
-const baseUrl = (process.env.RSVP_TEST_BASE_URL || "http://127.0.0.1:3000").replace(/\/$/, "");
+const baseUrl = (process.env.RSVP_TEST_BASE_URL || "http://localhost:3000").replace(/\/$/, "");
 const token = process.env.RSVP_TEST_TOKEN || "gia-dinh-anh-chi-hien-hong-b30c877d";
 const inviteApiPath = `/api/invites/${token}`;
 
@@ -15,6 +15,32 @@ async function selectBothEvents(page) {
   assert.equal(await yesButtons.count(), 2, "RSVP must expose exactly two event attendance choices.");
   await yesButtons.nth(0).click();
   await yesButtons.nth(1).click();
+}
+
+async function requireExplicitStayDecision(page) {
+  const noStayButton = page.getByRole("button", { name: "Không nghỉ lại", exact: true });
+  await noStayButton.waitFor({ state: "visible" });
+  assert.doesNotMatch(
+    await noStayButton.getAttribute("class") || "",
+    /bg-\[#7a4a4a\]/,
+    "Lodging must open without preselecting 'Không nghỉ lại'.",
+  );
+  assert.equal(
+    await noStayButton.getAttribute("aria-pressed"),
+    "false",
+    "'Không nghỉ lại' must expose an unselected state to assistive technology.",
+  );
+
+  await page.getByRole("button", { name: "XEM LẠI VÀ HOÀN TẤT", exact: true }).click();
+  await page.getByText("Vui lòng chọn phương án lưu trú.", { exact: true }).waitFor();
+  assert.equal(
+    await page.getByRole("heading", { name: "Xác nhận thông tin hồi đáp", exact: true }).count(),
+    0,
+    "Review must wait for an explicit lodging choice.",
+  );
+
+  await noStayButton.click();
+  await page.getByText("Vui lòng chọn phương án lưu trú.", { exact: true }).waitFor({ state: "hidden" });
 }
 
 async function fillNotes(page) {
@@ -62,6 +88,7 @@ try {
   await page.goto(`${baseUrl}/rsvp?invite=${token}`, { waitUntil: "domcontentloaded" });
 
   await selectBothEvents(page);
+  await requireExplicitStayDecision(page);
   const firstPass = await fillNotes(page);
   await delay(3_000);
   await assertDraftValues(firstPass.notes, firstPass.dietaryNote);
@@ -103,7 +130,7 @@ try {
   await directPage.getByText("THÁNH LỄ HÔN PHỐI", { exact: true }).waitFor({ timeout: 15_000 });
   await directContext.close();
 
-  console.log("RSVP resilience checks passed: delayed hydration, review, reload draft, and direct-link loading gate.");
+  console.log("RSVP resilience checks passed: explicit lodging choice, delayed hydration, review, reload draft, and direct-link loading gate.");
 } finally {
   await browser.close();
 }
