@@ -14,7 +14,11 @@ the least-friction handoff:
 
 The operating system or calendar provider may still require its own final
 `Add` or `Save` confirmation. The wedding site must not show an alert, open a
-popup, or ask the guest to identify their calendar provider first.
+popup, or ask the guest to identify their calendar provider first. When a
+recognized chat-app WebView stays visible after a calendar action instead of
+handing the event off, the confirmation card may reveal one short, inline
+instruction for opening the same page in Safari, Chrome, or the default
+external browser.
 
 ## Event Requirements
 
@@ -30,4 +34,6 @@ popup, or ask the guest to identify their calendar provider first.
 - Android redirects must use same-tab HTTPS navigation, never `window.open`.
 - Apple and desktop calendar responses must come from a real server URL, never
   a client-generated `blob:` URL.
-
+- Ordinary Safari, Chrome, and desktop browsers receive no fallback guidance.
+- A successful `pagehide`, window blur, or hidden document cancels pending
+  guidance before it becomes visible.

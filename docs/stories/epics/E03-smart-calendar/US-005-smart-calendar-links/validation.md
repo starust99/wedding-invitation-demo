@@ -9,11 +9,11 @@ produce deterministic, device-appropriate server responses.
 
 | Layer | Cases |
 | --- | --- |
-| Unit | iCalendar contains stable UID, event times, UTF-8 details, and CRLF output. |
+| Unit | iCalendar contains stable UID, event times, UTF-8 details, and CRLF output; browser guidance maps named apps and generic WebViews without matching ordinary browsers. |
 | Integration | Apple/desktop gets iCalendar; Android gets a same-tab Google Calendar redirect; unknown event returns 404. |
-| E2E | Existing confirmation card still exposes only `THÁNH LỄ` and `TIỆC CƯỚI` calendar actions. |
-| Platform | Mobile, tablet, desktop, and representative chat-app user agents. |
-| Performance | Route adds no client bundle or third-party script. |
+| E2E | Existing confirmation card still exposes only `THÁNH LỄ` and `TIỆC CƯỚI` calendar actions; failed handoff help appears inline and remains non-blocking. |
+| Platform | Mobile, tablet, desktop, representative chat-app user agents, and unnamed iOS/Android WebViews. |
+| Performance | No third-party script; fallback adds only local user-agent detection and a short-lived timer. |
 | Logs/Audit | No guest identity or provider-account data is logged or stored. |
 
 ## Fixtures
@@ -28,6 +28,7 @@ produce deterministic, device-appropriate server responses.
 
 ```text
 CALENDAR_TEST_BASE_URL=http://localhost:3107 npm run check:smart-calendar
+npm run check:calendar-handoff
 npx tsc --noEmit --pretty false
 npm run lint
 npm run build

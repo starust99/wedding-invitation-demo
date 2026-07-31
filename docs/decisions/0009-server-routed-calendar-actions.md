@@ -20,6 +20,13 @@ same-origin server endpoint. Android receives a same-tab Google Calendar
 redirect. Apple, desktop, and unknown clients receive a server-generated
 iCalendar file. Do not store guest identity or calendar credentials.
 
+Do not show browser-opening instructions preemptively. For recognized chat-app
+WebViews and generic mobile WebViews only, start a short client-side watch after
+the guest clicks a calendar action. Treat `pagehide`, window blur, or a hidden
+document as a successful handoff signal. If the page remains visible, reveal
+one inline, app-appropriate instruction for opening the page in Safari, Chrome,
+or the device's external browser.
+
 ## Alternatives Considered
 
 1. Keep browser-generated iCalendar blobs and popup windows.
@@ -43,9 +50,10 @@ Tradeoffs:
 - A chat app that refuses all calendar downloads can still prevent the Apple
   handoff; the website cannot override the host app's native WebView policy.
 - Android guests may need to authenticate with Google Calendar.
+- User-agent detection is advisory and cannot identify every future app
+  version, so unnamed WebViews receive a generic external-browser instruction.
 
 ## Follow-Up
 
-- Revisit an optional email-delivery fallback only if production device testing
-  shows a material Apple in-app failure rate.
-
+- Revisit an optional email-delivery fallback only if the inline external-browser
+  recovery still leaves a material failure rate in production device testing.

@@ -13,6 +13,7 @@ In scope:
 - Same-origin smart calendar route.
 - Existing RSVP calendar buttons.
 - Automated route and source-contract checks.
+- Delayed inline guidance for failed chat-app WebView handoffs.
 
 Out of scope:
 
@@ -46,4 +47,3 @@ Hard gates:
 
 Pause if the existing UI must change, calendar times are ambiguous, the route
 would expose guest data, or validation would require submitting a real RSVP.
-

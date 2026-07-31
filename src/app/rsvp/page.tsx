@@ -29,6 +29,11 @@ import {
 } from "@/lib/rsvp-storage";
 import { buildInvitationCopy, resolveGuestIdentity, type GuestIdentity, type InvitationCopy } from "@/lib/guest-personalization";
 import { buildRsvpSubmissionCopy } from "@/lib/guest-rsvp-copy";
+import {
+  CALENDAR_HANDOFF_HELP_DELAY_MS,
+  getCalendarHandoffGuidance,
+  type CalendarHandoffGuidance,
+} from "@/lib/calendar-handoff";
 import { getInviteStatusFromRsvp, readLocalInvitees, upsertLocalInvitees, type Invitee } from "@/lib/invites";
 import { usePageTransition } from "@/components/PageTransitionEffect";
 import { findAnyStoredInviteToken } from "@/lib/guest-personalization";
@@ -314,7 +319,9 @@ export default function RSVPPage() {
   const [guestRsvpLocked, setGuestRsvpLocked] = useState(false);
   const [isAdminBypassed, setIsAdminBypassed] = useState(false);
   const [adminLoginError, setAdminLoginError] = useState("");
+  const [calendarHandoffHelp, setCalendarHandoffHelp] = useState<CalendarHandoffGuidance | null>(null);
   const hasUserEditedFormRef = useRef(false);
+  const calendarHandoffCleanupRef = useRef<(() => void) | null>(null);
   const { navigateWithTransition, prefetch } = usePageTransition();
 
   // Prefetch home page / on mount for instant return navigation
@@ -407,6 +414,50 @@ export default function RSVPPage() {
       hasUserEditedFormRef.current = false;
     }
   }, [isSubmitted]);
+
+  useEffect(() => () => {
+    calendarHandoffCleanupRef.current?.();
+  }, []);
+
+  function handleCalendarHandoffAttempt() {
+    calendarHandoffCleanupRef.current?.();
+    setCalendarHandoffHelp(null);
+
+    const guidance = getCalendarHandoffGuidance({
+      userAgent: window.navigator.userAgent || "",
+      platform: window.navigator.platform,
+      maxTouchPoints: window.navigator.maxTouchPoints,
+    });
+
+    if (!guidance) return;
+
+    const cleanup = () => {
+      window.clearTimeout(timeoutId);
+      window.removeEventListener("pagehide", markHandoffSucceeded);
+      window.removeEventListener("blur", markHandoffSucceeded);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      if (calendarHandoffCleanupRef.current === cleanup) {
+        calendarHandoffCleanupRef.current = null;
+      }
+    };
+
+    const markHandoffSucceeded = () => cleanup();
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "hidden") cleanup();
+    };
+
+    window.addEventListener("pagehide", markHandoffSucceeded, { once: true });
+    window.addEventListener("blur", markHandoffSucceeded, { once: true });
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    const timeoutId = window.setTimeout(() => {
+      const handoffStillBlocked = document.visibilityState === "visible";
+      cleanup();
+      if (handoffStillBlocked) setCalendarHandoffHelp(guidance);
+    }, CALENDAR_HANDOFF_HELP_DELAY_MS);
+
+    calendarHandoffCleanupRef.current = cleanup;
+  }
 
   useEffect(() => {
     let cancelled = false;
@@ -947,6 +998,7 @@ export default function RSVPPage() {
                       // eslint-disable-next-line @next/next/no-html-link-for-pages
                       <a
                         href="/calendar/thanh-le"
+                        onClick={handleCalendarHandoffAttempt}
                         className="wedding-type-button inline-flex h-11 items-center justify-center gap-2 rounded-full border border-serenity/24 bg-white/80 px-6 text-xs sm:text-sm font-bold text-[#252934] transition hover:bg-white hover:shadow-sm min-w-[130px]"
                       >
                         <CalendarDays className="w-4 h-4" /> THÁNH LỄ
@@ -957,12 +1009,33 @@ export default function RSVPPage() {
                       // eslint-disable-next-line @next/next/no-html-link-for-pages
                       <a
                         href="/calendar/tiec-cuoi"
+                        onClick={handleCalendarHandoffAttempt}
                         className="wedding-type-button inline-flex h-11 items-center justify-center gap-2 rounded-full border border-serenity/24 bg-white/80 px-6 text-xs sm:text-sm font-bold text-[#252934] transition hover:bg-white hover:shadow-sm min-w-[130px]"
                       >
                         <CalendarDays className="w-4 h-4" /> TIỆC CƯỚI
                       </a>
                     )}
                   </div>
+                  <AnimatePresence initial={false}>
+                    {calendarHandoffHelp ? (
+                      <motion.div
+                        key={calendarHandoffHelp.message}
+                        role="status"
+                        aria-live="polite"
+                        initial={{ opacity: 0, y: 6 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: 4 }}
+                        transition={{ duration: 0.24, ease: [0.16, 1, 0.3, 1] }}
+                        className="mt-4 flex items-start gap-2.5 rounded-2xl border border-serenity/18 bg-white/62 px-4 py-3 text-left text-sm leading-relaxed text-[#54473b]"
+                      >
+                        <CircleHelp aria-hidden="true" className="mt-0.5 h-4 w-4 shrink-0 text-[#7a6a5d]" />
+                        <p>
+                          <strong className="font-bold text-[#252934]">Chưa mở được lịch?</strong>{" "}
+                          {calendarHandoffHelp.message}
+                        </p>
+                      </motion.div>
+                    ) : null}
+                  </AnimatePresence>
                 </div>
               ) : null}
               <div className="mt-6">

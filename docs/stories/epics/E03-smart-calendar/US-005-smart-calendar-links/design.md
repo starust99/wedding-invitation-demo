@@ -12,6 +12,11 @@ description, map URL, and filename for one wedding event.
 3. The route validates the event id and reads the request user agent.
 4. Android receives a temporary redirect to a prefilled Google Calendar event.
 5. Other clients receive an iCalendar response from the same route.
+6. In an in-app browser only, the client starts a short non-blocking watch.
+7. `pagehide`, blur, or a hidden document cancels the watch as a successful
+   handoff signal.
+8. If the page is still visible after the delay, one inline app-specific or
+   generic external-browser instruction appears below the existing buttons.
 
 ## Interface Contract
 
@@ -28,10 +33,10 @@ No database or Supabase change.
 
 ## UI / Platform Impact
 
-The existing typography, spacing, card, icon, and labels remain unchanged.
-Only the interactive element changes from a JavaScript button to a same-styled
-anchor, allowing navigation even when client-side popup/download APIs are
-restricted.
+The existing typography, spacing, card, icon, and labels remain unchanged. The
+same-styled anchors keep their native navigation. A small live-status line is
+conditionally added only after a likely failed in-app handoff; it never blocks
+or replaces the links.
 
 ## Observability
 
@@ -46,4 +51,3 @@ identity or calendar-account data is recorded.
    suppress new windows.
 3. Add provider-selection UI. Rejected because the user explicitly requires the
    current two-button interface and the fewest possible guest decisions.
-

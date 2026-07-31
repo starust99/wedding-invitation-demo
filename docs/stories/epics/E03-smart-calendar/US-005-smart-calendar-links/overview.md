@@ -9,9 +9,11 @@ downloads and new windows.
 
 ## Target Behavior
 
-Keep the confirmation UI visually unchanged. Both calendar buttons become
+Keep the confirmation UI visually unchanged. Both calendar buttons remain
 ordinary same-origin links backed by a server route that selects the Apple,
-Android, desktop, or fallback response without asking the guest.
+Android, desktop, or fallback response without asking the guest. If a known or
+generic chat-app WebView remains visible after the handoff attempt, reveal a
+single inline instruction that matches its app and operating system.
 
 ## Affected Users
 
@@ -28,4 +30,5 @@ Android, desktop, or fallback response without asking the guest.
 - Collecting guest email addresses.
 - Adding a third-party calendar-link provider.
 - Redesigning the RSVP confirmation screen.
-
+- Showing browser instructions before a guest actually encounters a failed
+  handoff.

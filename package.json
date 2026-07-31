@@ -11,6 +11,7 @@
     "check:post-ceremony-rsvp": "node scripts/check-post-ceremony-rsvp.mjs",
     "check:rsvp-resilience": "node scripts/check-rsvp-resilience.mjs",
     "check:smart-calendar": "node scripts/check-smart-calendar.mjs",
+    "check:calendar-handoff": "node scripts/check-calendar-handoff.mjs",
     "check:slow-invite-experience": "node scripts/check-slow-invite-experience.mjs",
     "capture:browser": "node scripts/capture-browser-shots.mjs",
     "gitnexus:index": "gitnexus analyze --index-only",
