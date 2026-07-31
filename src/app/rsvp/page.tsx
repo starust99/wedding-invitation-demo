@@ -19,7 +19,6 @@ import {
   X,
   Check,
 } from "lucide-react";
-import { weddingConfig } from "@/config/wedding.config";
 import {
   countLodgingChildren,
   formatLodgingGuestLabel,
@@ -826,50 +825,6 @@ export default function RSVPPage() {
   const hasCeremony = formValues.attendingCeremony === "yes";
   const hasBanquet = formValues.attendingBanquet === "yes";
   
-  const ceremonyCalTitle = `Thánh lễ Hôn phối ${weddingConfig.couple.displayName}`;
-  const ceremonyCalLocation = `${weddingConfig.church?.name || "Nhà Thờ Giáo Xứ Tam Hải"} (${weddingConfig.church?.address || "180 Đ. Tam Châu, Tam Bình, Hồ Chí Minh"})`;
-  const ceremonyCalDesc = `Thánh lễ Hôn phối của ${weddingConfig.couple.displayName}.\nThời gian: 10:00 ngày 20/12/2026.\nĐịa điểm: ${ceremonyCalLocation}.`;
-  const ceremonyGcalUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(ceremonyCalTitle)}&dates=20261220T030000Z/20261220T043000Z&details=${encodeURIComponent(ceremonyCalDesc)}&location=${encodeURIComponent(ceremonyCalLocation)}`;
-  const ceremonyIcsContent = `BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//Wedding//EN\nCALSCALE:GREGORIAN\nBEGIN:VEVENT\nDTSTART:20261220T030000Z\nDTEND:20261220T043000Z\nSUMMARY:${ceremonyCalTitle}\nLOCATION:${ceremonyCalLocation}\nDESCRIPTION:${ceremonyCalDesc}\nEND:VEVENT\nEND:VCALENDAR`;
-
-  const banquetCalTitle = `Tiệc cưới ${weddingConfig.couple.displayName}`;
-  const banquetCalLocation = `${weddingConfig.venue.name} (${weddingConfig.venue.address})`;
-  const banquetCalDesc = `Tiệc cưới của ${weddingConfig.couple.displayName}.\nThời gian: 17:30 ngày 26/12/2026.\nĐịa điểm: ${banquetCalLocation}.`;
-  const banquetGcalUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(banquetCalTitle)}&dates=20261226T103000Z/20261226T140000Z&details=${encodeURIComponent(banquetCalDesc)}&location=${encodeURIComponent(banquetCalLocation)}`;
-  const banquetIcsContent = `BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//Wedding//EN\nCALSCALE:GREGORIAN\nBEGIN:VEVENT\nDTSTART:20261226T103000Z\nDTEND:20261226T140000Z\nSUMMARY:${banquetCalTitle}\nLOCATION:${banquetCalLocation}\nDESCRIPTION:${banquetCalDesc}\nEND:VEVENT\nEND:VCALENDAR`;
-
-  const openCalendar = (icsContent: string, gcalUrl: string, fileName: string) => {
-    const userAgent = navigator.userAgent || navigator.vendor || (window as any).opera;
-    const isApple = /iPad|iPhone|iPod|Mac/i.test(userAgent) && !(window as any).MSStream;
-    const isInAppBrowser = /Zalo|FBAN|FBAV|Instagram|Line|TikTok|Messenger/i.test(userAgent);
-
-    if (isApple) {
-      if (isInAppBrowser) {
-        alert("Trình duyệt này chặn tải lịch. Vui lòng nhấn dấu ba chấm ở góc trên màn hình và chọn 'Mở bằng trình duyệt' (Safari) để lưu lịch.");
-        return;
-      }
-      
-      const isSafari = /Safari/i.test(userAgent) && !/Chrome|CriOS|FxiOS|OPiOS|mercury/i.test(userAgent);
-      if (!isSafari) {
-        alert("Để lưu lịch tự động trên thiết bị Apple, vui lòng mở link bằng Safari. Nếu dùng Chrome/Firefox, hãy nhấn mở file vừa tải về nhé!");
-      }
-      
-      const blob = new Blob([icsContent], { type: "text/calendar;charset=utf-8" });
-      const blobUrl = URL.createObjectURL(blob);
-      
-      const link = document.createElement("a");
-      link.href = blobUrl;
-      link.download = fileName;
-      document.body.appendChild(link);
-      link.click();
-      
-      document.body.removeChild(link);
-      setTimeout(() => URL.revokeObjectURL(blobUrl), 100);
-    } else {
-      window.open(gcalUrl, "_blank");
-    }
-  };
-
   if (isHydratingGuest) {
     return <RsvpHydrationState />;
   }
@@ -988,22 +943,24 @@ export default function RSVPPage() {
                   </p>
                   <div className="flex flex-row justify-center gap-3.5 flex-wrap">
                     {hasCeremony && (
-                      <button
-                        type="button"
-                        onClick={() => openCalendar(ceremonyIcsContent, ceremonyGcalUrl, "thanh-le-nhat-phuong.ics")}
+                      // Calendar files require a full document navigation so in-app WebViews can hand them to the operating system.
+                      // eslint-disable-next-line @next/next/no-html-link-for-pages
+                      <a
+                        href="/calendar/thanh-le"
                         className="wedding-type-button inline-flex h-11 items-center justify-center gap-2 rounded-full border border-serenity/24 bg-white/80 px-6 text-xs sm:text-sm font-bold text-[#252934] transition hover:bg-white hover:shadow-sm min-w-[130px]"
                       >
                         <CalendarDays className="w-4 h-4" /> THÁNH LỄ
-                      </button>
+                      </a>
                     )}
                     {hasBanquet && (
-                      <button
-                        type="button"
-                        onClick={() => openCalendar(banquetIcsContent, banquetGcalUrl, "tiec-cuoi-nhat-phuong.ics")}
+                      // Calendar files require a full document navigation so in-app WebViews can hand them to the operating system.
+                      // eslint-disable-next-line @next/next/no-html-link-for-pages
+                      <a
+                        href="/calendar/tiec-cuoi"
                         className="wedding-type-button inline-flex h-11 items-center justify-center gap-2 rounded-full border border-serenity/24 bg-white/80 px-6 text-xs sm:text-sm font-bold text-[#252934] transition hover:bg-white hover:shadow-sm min-w-[130px]"
                       >
                         <CalendarDays className="w-4 h-4" /> TIỆC CƯỚI
-                      </button>
+                      </a>
                     )}
                   </div>
                 </div>
