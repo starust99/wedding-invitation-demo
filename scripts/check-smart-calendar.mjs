@@ -8,7 +8,10 @@ const userAgents = {
   iphoneMessenger: "Mozilla/5.0 (iPhone; CPU iPhone OS 18_5 like Mac OS X) AppleWebKit/605.1.15 Mobile/15E148 [FBAN/MessengerForiOS;FBAV/514.0]",
   androidChrome: "Mozilla/5.0 (Linux; Android 15; Pixel 9) AppleWebKit/537.36 Chrome/136.0.0.0 Mobile Safari/537.36",
   androidZalo: "Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 Chrome/132.0.0.0 Mobile Safari/537.36 Zalo android",
-  desktop: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/136.0.0.0 Safari/537.36",
+  ipadSafari: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15) AppleWebKit/605.1.15 Version/18.5 Mobile/15E148 Safari/604.1",
+  macSafari: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 Version/18.5 Safari/605.1.15",
+  macChrome: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 Chrome/136.0.0.0 Safari/537.36",
+  windowsChrome: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/136.0.0.0 Safari/537.36",
 };
 
 async function requestCalendar(event, userAgent) {
@@ -18,11 +21,14 @@ async function requestCalendar(event, userAgent) {
   });
 }
 
-async function assertIcsResponse(userAgent, expectedUid, expectedStart) {
+async function assertIcsResponse(userAgent, expectedDisposition, expectedUid, expectedStart) {
   const response = await requestCalendar("thanh-le", userAgent);
   assert.equal(response.status, 200);
   assert.match(response.headers.get("content-type") || "", /^text\/calendar; charset=utf-8/i);
-  assert.match(response.headers.get("content-disposition") || "", /thanh-le-nhat-phuong\.ics/);
+  assert.match(
+    response.headers.get("content-disposition") || "",
+    new RegExp(`^${expectedDisposition}; filename="Lich-Thanh-le-Nhat-Phuong\\.ics"$`, "i"),
+  );
   assert.match(response.headers.get("vary") || "", /(?:^|,\s*)User-Agent(?:,|$)/i);
   assert.match(response.headers.get("cache-control") || "", /no-store/);
 
@@ -34,9 +40,20 @@ async function assertIcsResponse(userAgent, expectedUid, expectedStart) {
   assert.doesNotMatch(body, /(?<!\r)\n/, "iCalendar output must use CRLF line endings.");
 }
 
-await assertIcsResponse(userAgents.iphoneSafari, "thanh-le-20261220@nhatphuong.love", "20261220T030000Z");
-await assertIcsResponse(userAgents.iphoneMessenger, "thanh-le-20261220@nhatphuong.love", "20261220T030000Z");
-await assertIcsResponse(userAgents.desktop, "thanh-le-20261220@nhatphuong.love", "20261220T030000Z");
+for (const userAgent of [userAgents.iphoneSafari, userAgents.ipadSafari, userAgents.macSafari]) {
+  await assertIcsResponse(userAgent, "inline", "thanh-le-20261220@nhatphuong.love", "20261220T030000Z");
+}
+
+for (const userAgent of [userAgents.iphoneMessenger, userAgents.macChrome, userAgents.windowsChrome]) {
+  await assertIcsResponse(userAgent, "attachment", "thanh-le-20261220@nhatphuong.love", "20261220T030000Z");
+}
+
+const banquetDownload = await requestCalendar("tiec-cuoi", userAgents.windowsChrome);
+assert.equal(banquetDownload.status, 200);
+assert.match(
+  banquetDownload.headers.get("content-disposition") || "",
+  /^attachment; filename="Lich-Tiec-cuoi-Nhat-Phuong\.ics"$/i,
+);
 
 for (const userAgent of [userAgents.androidChrome, userAgents.androidZalo]) {
   const response = await requestCalendar("tiec-cuoi", userAgent);
@@ -52,7 +69,7 @@ for (const userAgent of [userAgents.androidChrome, userAgents.androidZalo]) {
   assert.match(location.searchParams.get("text") || "", /Tiệc cưới Nhật & Phương/);
 }
 
-const missingResponse = await requestCalendar("khong-ton-tai", userAgents.desktop);
+const missingResponse = await requestCalendar("khong-ton-tai", userAgents.windowsChrome);
 assert.equal(missingResponse.status, 404);
 
 const rsvpSource = await readFile(new URL("../src/app/rsvp/page.tsx", import.meta.url), "utf8");
@@ -62,4 +79,4 @@ assert.doesNotMatch(rsvpSource, /const openCalendar/);
 assert.doesNotMatch(rsvpSource, /URL\.createObjectURL/);
 assert.doesNotMatch(rsvpSource, /window\.open\(gcalUrl/);
 
-console.log("Smart calendar checks passed: unchanged links, Apple/desktop ICS, Android Google Calendar, cache safety, and 404 handling.");
+console.log("Smart calendar checks passed: unchanged links, inline Apple Safari ICS, readable fallback downloads, Android Google Calendar, cache safety, and 404 handling.");

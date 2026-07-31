@@ -16,6 +16,7 @@ export type CalendarHostApp =
 
 export type CalendarHandoffGuidance = {
   hostApp: CalendarHostApp;
+  kind: "external-browser" | "downloaded-file";
   message: string;
 };
 
@@ -87,22 +88,48 @@ function appSpecificMessage(hostApp: CalendarHostApp, ios: boolean) {
   }
 }
 
+function downloadedFileMessage(environment: CalendarClientEnvironment, ios: boolean) {
+  const client = `${environment.userAgent} ${environment.platform ?? ""}`;
+
+  if (ios) {
+    return "Mở mục Tải về, chạm tệp lịch vừa tải rồi chọn Thêm.";
+  }
+
+  if (/Windows/i.test(client)) {
+    return "Mở tệp lịch vừa tải xuống, sau đó chọn Outlook hoặc ứng dụng Lịch để lưu.";
+  }
+
+  if (/Macintosh|MacIntel|Mac OS X/i.test(client)) {
+    return "Mở tệp lịch vừa tải xuống để thêm vào ứng dụng Lịch.";
+  }
+
+  return "Mở tệp lịch vừa tải xuống rồi chọn Thêm vào Lịch.";
+}
+
 export function getCalendarHandoffGuidance(environment: CalendarClientEnvironment): CalendarHandoffGuidance | null {
   const hostApp = detectHostApp(environment.userAgent);
   const ios = isIosDevice(environment);
   const android = /Android/i.test(environment.userAgent);
   const isNamedInAppBrowser = hostApp !== "unknown";
+  const isInAppBrowser = isNamedInAppBrowser || isGenericInAppBrowser(environment.userAgent, ios);
 
-  if (!isNamedInAppBrowser && !isGenericInAppBrowser(environment.userAgent, ios)) {
-    return null;
+  if (isInAppBrowser) {
+    if (!ios && !android && hostApp === "unknown") {
+      return null;
+    }
+
+    return {
+      hostApp,
+      kind: "external-browser",
+      message: appSpecificMessage(hostApp, ios),
+    };
   }
 
-  if (!ios && !android && hostApp === "unknown") {
-    return null;
-  }
+  if (android) return null;
 
   return {
     hostApp,
-    message: appSpecificMessage(hostApp, ios),
+    kind: "downloaded-file",
+    message: downloadedFileMessage(environment, ios),
   };
 }

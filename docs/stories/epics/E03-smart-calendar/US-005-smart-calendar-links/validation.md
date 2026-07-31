@@ -9,10 +9,10 @@ produce deterministic, device-appropriate server responses.
 
 | Layer | Cases |
 | --- | --- |
-| Unit | iCalendar contains stable UID, event times, UTF-8 details, and CRLF output; browser guidance maps named apps and generic WebViews without matching ordinary browsers. |
-| Integration | Apple/desktop gets iCalendar; Android gets a same-tab Google Calendar redirect; unknown event returns 404. |
-| E2E | Existing confirmation card still exposes only `THÁNH LỄ` and `TIỆC CƯỚI` calendar actions; failed handoff help appears inline and remains non-blocking. |
-| Platform | Mobile, tablet, desktop, representative chat-app user agents, and unnamed iOS/Android WebViews. |
+| Unit | iCalendar contains stable UID, event times, UTF-8 details, CRLF output, and readable filenames; browser guidance distinguishes chat-app recovery from downloaded-file recovery. |
+| Integration | External Apple Safari gets inline iCalendar; remaining desktop/WebView clients get an attachment; Android gets a same-tab Google Calendar redirect; unknown event returns 404. |
+| E2E | Existing confirmation card still exposes only `THÁNH LỄ` and `TIỆC CƯỚI`; chat-app and downloaded-file recovery appear inline, remain non-blocking, and cancel on successful handoff signals. |
+| Platform | iPhone Safari, iPad Safari desktop user agent, macOS Safari/Chrome, Windows Chrome, Android Chrome, representative chat apps, and unnamed iOS/Android WebViews. |
 | Performance | No third-party script; fallback adds only local user-agent detection and a short-lived timer. |
 | Logs/Audit | No guest identity or provider-account data is logged or stored. |
 
@@ -36,8 +36,12 @@ npm run build
 
 ## Acceptance Evidence
 
-- Local smart-calendar checks passed for iPhone Safari, iPhone Messenger,
-  Android Chrome, Android Zalo, desktop, cache headers, and unknown-event 404.
+- Local smart-calendar checks passed for inline iPhone/iPad/macOS Safari,
+  attachment-based Messenger/macOS Chrome/Windows Chrome, readable filenames,
+  Android Chrome/Zalo redirects, cache headers, and unknown-event 404.
+- Browser E2E proved that Zalo still receives external-browser guidance,
+  ordinary iPhone Safari receives downloaded-file recovery, and blur cancels
+  either pending instruction.
 - Existing RSVP resilience, post-ceremony RSVP, and guest-copy checks passed.
 - TypeScript and production build passed.
 - ESLint passed with no errors; existing repository warnings remain.

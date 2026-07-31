@@ -14,6 +14,8 @@ In scope:
 - Existing RSVP calendar buttons.
 - Automated route and source-contract checks.
 - Delayed inline guidance for failed chat-app WebView handoffs.
+- Delayed, device-specific guidance when a calendar file downloads without
+  opening a calendar application.
 
 Out of scope:
 

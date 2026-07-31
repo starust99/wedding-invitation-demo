@@ -13,7 +13,9 @@ Keep the confirmation UI visually unchanged. Both calendar buttons remain
 ordinary same-origin links backed by a server route that selects the Apple,
 Android, desktop, or fallback response without asking the guest. If a known or
 generic chat-app WebView remains visible after the handoff attempt, reveal a
-single inline instruction that matches its app and operating system.
+single inline instruction that matches its app and operating system. If an
+ordinary non-Android browser remains visible, explain how to open the calendar
+file in guest language rather than exposing the `.ics` implementation detail.
 
 ## Affected Users
 

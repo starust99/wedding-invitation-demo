@@ -2,6 +2,7 @@ import {
   buildGoogleCalendarUrl,
   buildIcsCalendar,
   getWeddingCalendarEvent,
+  shouldPresentIcsInline,
   shouldUseGoogleCalendar,
 } from "@/lib/wedding-calendar";
 
@@ -48,10 +49,9 @@ export async function GET(
     status: 200,
     headers: {
       ...sharedHeaders,
-      "Content-Disposition": `attachment; filename="${event.fileName}"`,
+      "Content-Disposition": `${shouldPresentIcsInline(userAgent) ? "inline" : "attachment"}; filename="${event.fileName}"`,
       "Content-Language": "vi",
       "Content-Type": "text/calendar; charset=utf-8",
     },
   });
 }
-

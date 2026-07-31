@@ -27,7 +27,7 @@ const weddingCalendarEvents: Record<WeddingCalendarEventId, WeddingCalendarEvent
     location: `${weddingConfig.church.name} (${weddingConfig.church.address})`,
     mapUrl: weddingConfig.church.mapUrl,
     description: `Thánh lễ Hôn phối của ${weddingConfig.couple.displayName}.`,
-    fileName: "thanh-le-nhat-phuong.ics",
+    fileName: "Lich-Thanh-le-Nhat-Phuong.ics",
     uid: "thanh-le-20261220@nhatphuong.love",
   },
   "tiec-cuoi": {
@@ -39,7 +39,7 @@ const weddingCalendarEvents: Record<WeddingCalendarEventId, WeddingCalendarEvent
     location: `${weddingConfig.venue.name} (${weddingConfig.venue.address})`,
     mapUrl: weddingConfig.venue.mapUrl,
     description: `Tiệc cưới của ${weddingConfig.couple.displayName}.`,
-    fileName: "tiec-cuoi-nhat-phuong.ics",
+    fileName: "Lich-Tiec-cuoi-Nhat-Phuong.ics",
     uid: "tiec-cuoi-20261226@nhatphuong.love",
   },
 };
@@ -50,6 +50,17 @@ export function getWeddingCalendarEvent(value: string) {
 
 export function shouldUseGoogleCalendar(userAgent: string) {
   return /Android/i.test(userAgent);
+}
+
+export function shouldPresentIcsInline(userAgent: string) {
+  const isAppleMobile = /iPhone|iPad|iPod/i.test(userAgent)
+    || (/Macintosh/i.test(userAgent) && /Mobile\//i.test(userAgent));
+  const isExternalIosBrowser = /Version\/\d+(?:\.\d+)*.*Safari|CriOS|FxiOS|EdgiOS|OPiOS/i.test(userAgent);
+  const isMacSafari = /Macintosh/i.test(userAgent)
+    && /Version\/\d+(?:\.\d+)*.*Safari/i.test(userAgent)
+    && !/Chrome|Chromium|CriOS|Edg|OPR|Firefox|FxiOS/i.test(userAgent);
+
+  return (isAppleMobile && isExternalIosBrowser) || isMacSafari;
 }
 
 function eventDetails(event: WeddingCalendarEvent) {
@@ -123,4 +134,3 @@ export function buildIcsCalendar(event: WeddingCalendarEvent) {
 
   return `${lines.map(foldIcsLine).join("\r\n")}\r\n`;
 }
-

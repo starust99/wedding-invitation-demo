@@ -21,13 +21,14 @@ const {
 
 const cases = [
   {
-    name: "iPhone Safari stays silent",
+    name: "iPhone Safari explains a downloaded calendar file",
     environment: {
       userAgent: "Mozilla/5.0 (iPhone; CPU iPhone OS 18_5 like Mac OS X) AppleWebKit/605.1.15 Version/18.5 Mobile/15E148 Safari/604.1",
       platform: "iPhone",
       maxTouchPoints: 5,
     },
-    expected: null,
+    expectedKind: "downloaded-file",
+    expected: /Mở mục Tải về.*chọn Thêm/,
   },
   {
     name: "iPhone Zalo points to Safari",
@@ -36,6 +37,7 @@ const cases = [
       platform: "iPhone",
       maxTouchPoints: 5,
     },
+    expectedKind: "external-browser",
     expected: /Trên Zalo:.*Mở bằng Safari/,
   },
   {
@@ -45,6 +47,7 @@ const cases = [
       platform: "Linux armv8l",
       maxTouchPoints: 5,
     },
+    expectedKind: "external-browser",
     expected: /Trên Zalo:.*Mở bằng Chrome/,
   },
   {
@@ -54,6 +57,7 @@ const cases = [
       platform: "iPhone",
       maxTouchPoints: 5,
     },
+    expectedKind: "external-browser",
     expected: /Trên Messenger:.*Mở bằng Safari/,
   },
   {
@@ -63,6 +67,7 @@ const cases = [
       platform: "Linux armv8l",
       maxTouchPoints: 5,
     },
+    expectedKind: "external-browser",
     expected: /Trên Telegram:.*Mở bằng Chrome/,
   },
   {
@@ -72,6 +77,7 @@ const cases = [
       platform: "Linux armv8l",
       maxTouchPoints: 5,
     },
+    expectedKind: "external-browser",
     expected: /다른 브라우저로 열기/,
   },
   {
@@ -81,6 +87,7 @@ const cases = [
       platform: "iPhone",
       maxTouchPoints: 5,
     },
+    expectedKind: "external-browser",
     expected: /Trên WhatsApp:.*chạm giữ liên kết.*Safari/,
   },
   {
@@ -90,6 +97,7 @@ const cases = [
       platform: "iPhone",
       maxTouchPoints: 5,
     },
+    expectedKind: "external-browser",
     expected: /biểu tượng chia sẻ.*Safari/,
   },
   {
@@ -99,14 +107,35 @@ const cases = [
       platform: "Linux armv8l",
       maxTouchPoints: 5,
     },
+    expectedKind: "external-browser",
     expected: /biểu tượng chia sẻ.*Chrome/,
   },
   {
-    name: "desktop Chrome stays silent",
+    name: "macOS Chrome explains the downloaded calendar file",
     environment: {
       userAgent: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 Chrome/136.0 Safari/537.36",
       platform: "MacIntel",
       maxTouchPoints: 0,
+    },
+    expectedKind: "downloaded-file",
+    expected: /Mở tệp lịch vừa tải xuống.*ứng dụng Lịch/,
+  },
+  {
+    name: "Windows Chrome explains Outlook or Calendar",
+    environment: {
+      userAgent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/136.0 Safari/537.36",
+      platform: "Win32",
+      maxTouchPoints: 0,
+    },
+    expectedKind: "downloaded-file",
+    expected: /Outlook hoặc ứng dụng Lịch/,
+  },
+  {
+    name: "ordinary Android Chrome stays silent for its Google Calendar redirect",
+    environment: {
+      userAgent: "Mozilla/5.0 (Linux; Android 15; Pixel 9) AppleWebKit/537.36 Chrome/136.0 Mobile Safari/537.36",
+      platform: "Linux armv8l",
+      maxTouchPoints: 5,
     },
     expected: null,
   },
@@ -118,6 +147,7 @@ for (const testCase of cases) {
     assert.equal(result, null, testCase.name);
   } else {
     assert.ok(result, `${testCase.name}: expected guidance`);
+    assert.equal(result.kind, testCase.expectedKind, testCase.name);
     assert.match(result.message, testCase.expected, testCase.name);
   }
 }
@@ -200,11 +230,20 @@ if (e2eBaseUrl) {
 
     const safari = await openSubmittedRsvp(browser, cases[0].environment.userAgent);
     await safari.page.getByRole("link", { name: "THÁNH LỄ", exact: true }).click();
+    await safari.page.getByText(/Chưa mở được lịch\?.*Mở mục Tải về/).waitFor({
+      timeout: CALENDAR_HANDOFF_HELP_DELAY_MS + 2_000,
+    });
+    if (process.env.CALENDAR_HANDOFF_DOWNLOAD_SCREENSHOT) {
+      await safari.page.screenshot({ path: process.env.CALENDAR_HANDOFF_DOWNLOAD_SCREENSHOT });
+    }
+
+    await safari.page.getByRole("link", { name: "THÁNH LỄ", exact: true }).click();
+    await safari.page.evaluate(() => window.dispatchEvent(new Event("blur")));
     await safari.page.waitForTimeout(CALENDAR_HANDOFF_HELP_DELAY_MS + 300);
     assert.equal(
       await safari.page.getByText(/Chưa mở được lịch\?/).count(),
       0,
-      "Ordinary Safari must not receive fallback help.",
+      "A successful Safari handoff signal must cancel downloaded-file recovery help.",
     );
     await safari.context.close();
   } finally {
@@ -212,4 +251,4 @@ if (e2eBaseUrl) {
   }
 }
 
-console.log(`Calendar handoff checks passed: silent standard browsers, named app guidance, generic WebView fallback, delayed inline help, unchanged links${e2eBaseUrl ? ", and browser behavior" : ""}.`);
+console.log(`Calendar handoff checks passed: named app guidance, generic WebView fallback, device-specific downloaded-file recovery, Android silence, delayed inline help, unchanged links${e2eBaseUrl ? ", and browser behavior" : ""}.`);

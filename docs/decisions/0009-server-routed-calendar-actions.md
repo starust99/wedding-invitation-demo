@@ -20,12 +20,19 @@ same-origin server endpoint. Android receives a same-tab Google Calendar
 redirect. Apple, desktop, and unknown clients receive a server-generated
 iCalendar file. Do not store guest identity or calendar credentials.
 
+External Safari on iPhone, iPad, and Mac receives the iCalendar response as
+`inline` to prioritize the platform calendar handler. Other non-Android
+clients receive an `attachment` with a readable event filename. A downloaded
+file is not treated as proof that the event reached the guest's calendar.
+
 Do not show browser-opening instructions preemptively. For recognized chat-app
-WebViews and generic mobile WebViews only, start a short client-side watch after
-the guest clicks a calendar action. Treat `pagehide`, window blur, or a hidden
-document as a successful handoff signal. If the page remains visible, reveal
-one inline, app-appropriate instruction for opening the page in Safari, Chrome,
-or the device's external browser.
+WebViews, generic mobile WebViews, and ordinary non-Android browsers, start a
+short client-side watch after the guest clicks a calendar action. Treat
+`pagehide`, window blur, or a hidden document as a successful handoff signal.
+If the page remains visible, reveal one inline recovery instruction: chat apps
+explain how to use an external browser, while ordinary browsers explain how to
+open the downloaded calendar file. Never require the guest to understand the
+`.ics` extension.
 
 ## Alternatives Considered
 
@@ -52,6 +59,9 @@ Tradeoffs:
 - Android guests may need to authenticate with Google Calendar.
 - User-agent detection is advisory and cannot identify every future app
   version, so unnamed WebViews receive a generic external-browser instruction.
+- Browsers do not expose a universal signal proving that the guest pressed the
+  final calendar `Add` or `Save` button; visibility signals remain a best-effort
+  handoff proxy.
 
 ## Follow-Up
 
