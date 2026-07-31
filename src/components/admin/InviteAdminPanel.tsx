@@ -16,15 +16,16 @@ import {
   RefreshCw,
   Search,
   Save,
-  Settings2,
   Square,
   Trash2,
   ClipboardList,
-  Database,
   FileSpreadsheet,
   Hotel,
   PencilRuler,
   UsersRound,
+  Images,
+  ExternalLink,
+  SlidersHorizontal,
 } from "lucide-react";
 import {
   buildInviteUrl,
@@ -87,11 +88,6 @@ const inviteStatusLabels: Record<Invitee["inviteStatus"], string> = {
   album_ready: "Đã sẵn sàng xem album",
 };
 
-
-const backendLabels: Record<"local" | "supabase", string> = {
-  local: "Lưu cục bộ",
-  supabase: "Supabase",
-};
 
 function formatDate(value: string) {
   if (!value) return "—";
@@ -1049,134 +1045,122 @@ export function InviteAdminPanel() {
 
 
   return (
-    <div className="flex flex-col gap-6">
-      {/* Premium Dashboard Header */}
-      <div className="p-2 rounded-[2.2rem] bg-[#5f6f4e]/5 border border-[#5f6f4e]/10 shadow-[0_12px_36px_rgba(95,111,78,0.04)] relative overflow-hidden">
-        <div aria-hidden="true" className="paper-grain-luxury absolute inset-0 opacity-[0.06] pointer-events-none rounded-[2.2rem]" />
-        
-        <div className="relative p-6 sm:p-8 rounded-[calc(2.2rem-0.5rem)] bg-[#fdfbf7] border border-[#b4975a]/15 shadow-[inset_0_1.5px_2px_rgba(255,255,255,0.85)] flex flex-col md:flex-row md:items-center md:justify-between gap-6">
-          <div className="space-y-2">
-            <span className="text-[10px] font-bold uppercase tracking-[0.24em] text-[#b4975a] block">
-              Trang quản trị điều phối cưới
-            </span>
-            <h1 className="font-serif text-3xl sm:text-4xl text-[#2e2a25] tracking-wide leading-tight">
-              Nhật &amp; Phương
-            </h1>
-            <div className="flex flex-wrap items-center gap-2 mt-2">
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-800 text-[11px] font-semibold border border-emerald-500/15">
-                <Database className="w-3 h-3" /> {backendLabels[backend]}
-              </span>
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#b4975a]/10 text-[#6e5949] text-[11px] font-semibold border border-[#b4975a]/15">
-                <Settings2 className="w-3 h-3" /> Giao diện: {config.themeName || "Vườn mùa đông Đà Lạt"}
-              </span>
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#5f6f4e]/10 text-[#5f6f4e] text-[11px] font-semibold border border-[#5f6f4e]/15">
-                <ClipboardList className="w-3 h-3" /> Hồi đáp: {summary.total} khách
-              </span>
-            </div>
-          </div>
-          
-          <div className="flex flex-wrap gap-3">
-            <Link href="/" className="inline-flex min-h-11 items-center gap-2 rounded-full border border-[#D6BFA3] bg-[#FFFDF8] px-5 text-sm font-semibold text-[#2E2A25] shadow-sm transition hover:bg-white active:scale-[0.98]">
-              Trang thiệp mời
-            </Link>
-            <Link href="/admin/editor" className="inline-flex min-h-11 items-center gap-2 rounded-full bg-[#5F6F4E] px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-[#526244] active:scale-[0.98]">
-              <PencilRuler className="h-4 w-4" /> Mở trình chỉnh sửa
-            </Link>
-          </div>
+    <div className="flex flex-col gap-4 sm:gap-6">
+      <header className="flex flex-col gap-4 border-b border-[#DED4C5] pb-5 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#7B7168]">Quản lý đám cưới</p>
+          <h1 className="mt-1 text-2xl font-bold tracking-tight text-[#2E2A25] sm:text-3xl">Nhật &amp; Phương</h1>
         </div>
-      </div>
+        <div className="grid grid-cols-2 gap-2 sm:flex">
+          <Link href="/" className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-[#D6BFA3] bg-white px-4 text-sm font-semibold text-[#2E2A25] transition hover:bg-[#FFFDF8] active:scale-[0.98]">
+            <ExternalLink className="h-4 w-4" /> Trang thiệp
+          </Link>
+          <Link href="/admin/editor" className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-[#5F6F4E] px-4 text-sm font-semibold text-white transition hover:bg-[#526244] active:scale-[0.98]">
+            <PencilRuler className="h-4 w-4" /> Chỉnh sửa thiệp
+          </Link>
+        </div>
+      </header>
 
-      {/* Floating Segmented Navigation Control */}
-      <div className="flex justify-center my-2">
-        <div className="inline-flex rounded-full bg-white/90 p-1 border border-[#b4975a]/15 shadow-[0_8px_32px_rgba(63,70,66,0.06)] backdrop-blur-md">
-          {[
-            { id: "rsvps", label: "📊 Hồi đáp & Thống kê" },
-            { id: "invitees", label: "👥 Danh sách khách & Link" },
-            { id: "album", label: "🖼️ Album ảnh & Quy tắc" }
-          ].map((item) => (
-            <button
-              key={item.id}
-              type="button"
-              onClick={() => setTab(item.id as any)}
-              className={`px-5 py-2 rounded-full text-xs sm:text-sm font-semibold tracking-wide transition-all duration-300 ${
-                tab === item.id 
-                  ? "bg-[#5f6f4e] text-white shadow-sm" 
-                  : "text-[#665d54] hover:text-[#2e2a25] hover:bg-[#5f6f4e]/5"
-              }`}
-            >
-              {item.label}
-            </button>
-          ))}
-        </div>
-      </div>
+      <nav aria-label="Khu vực quản trị" className="grid grid-cols-3 rounded-2xl border border-[#DED4C5] bg-white p-1 shadow-sm">
+        {[
+          { id: "rsvps", label: "Hồi đáp", icon: ClipboardList },
+          { id: "invitees", label: "Khách mời", icon: UsersRound },
+          { id: "album", label: "Album", icon: Images },
+        ].map(({ id, label, icon: Icon }) => (
+          <button
+            key={id}
+            type="button"
+            onClick={() => setTab(id as "rsvps" | "invitees" | "album")}
+            aria-current={tab === id ? "page" : undefined}
+            className={`inline-flex min-h-11 items-center justify-center gap-2 rounded-xl px-2 text-xs font-semibold transition sm:text-sm ${
+              tab === id
+                ? "bg-[#5F6F4E] text-white shadow-sm"
+                : "text-[#665D54] hover:bg-[#F8F3EA] hover:text-[#2E2A25]"
+            }`}
+          >
+            <Icon className="h-4 w-4" />
+            {label}
+          </button>
+        ))}
+      </nav>
 
       {/* Tab 1: RSVPs & Statistics */}
       {tab === "rsvps" && (
         <div className="space-y-6">
-          {/* Bento Grid Stats */}
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {[
-              { icon: UsersRound, label: "Tổng lời phản hồi", value: responses.length, hint: "Số form khách gửi về", color: "bg-[#5F6F4E]/10 text-[#5F6F4E]" },
-              { icon: CheckSquare, label: "Khách dự tiệc cưới", value: banquetGuests, hint: "Tổng số người dự tiệc cưới", color: "bg-emerald-500/10 text-emerald-700" },
-              { icon: ClipboardList, label: "Khách dự Thánh lễ", value: ceremonyGuests, hint: "Tham dự Thánh lễ Hôn phối", color: "bg-blue-500/10 text-blue-700" },
-              { icon: UsersRound, label: "Khách dự tiệc sau Hôn phối", value: postCeremonyPartyGuests, hint: "Ước tính theo số khách của lời hồi đáp", color: "bg-[#b4975a]/10 text-[#6e5949]" },
-              { icon: Square, label: "Khách không tham dự", value: notAttending, hint: "Số lời từ chối báo về", color: "bg-rose-500/10 text-rose-700" },
-              { icon: Hotel, label: "Số người lưu trú", value: stayingGuests, hint: "Cần bố trí phòng ngủ", color: "bg-[#b4975a]/10 text-[#6e5949]" },
-              { icon: UsersRound, label: "Trẻ em lưu trú", value: childrenStaying, hint: "Dưới 12 tuổi trong đoàn ở lại", color: "bg-amber-500/10 text-amber-700" },
-            ].map(({ icon: Icon, label, value, hint, color }) => (
-              <div key={label} className="p-1 rounded-[1.8rem] bg-white border border-[#E8DDCC] shadow-[0_4px_20px_rgba(63,70,66,0.02)] hover:shadow-md transition duration-300">
-                <div className="relative p-5 rounded-[calc(1.8rem-0.25rem)] bg-[#FCFAF4] border border-[#b4975a]/10 flex flex-col justify-between h-full min-h-[140px]">
-                  <div className="flex items-start justify-between gap-3">
-                    <span className="text-xs font-semibold text-[#756b60] leading-snug">{label}</span>
-                    <div className={`flex h-9 w-9 items-center justify-center rounded-full shrink-0 ${color}`}>
-                      <Icon className="h-4.5 w-4.5" />
-                    </div>
+          <section aria-labelledby="overview-title" className="overflow-hidden rounded-2xl border border-[#DED4C5] bg-white shadow-sm">
+            <div className="flex items-center justify-between border-b border-[#E8DDCC] px-4 py-3 sm:px-5">
+              <h2 id="overview-title" className="font-semibold text-[#2E2A25]">Tổng quan</h2>
+              <span className="text-xs text-[#7B7168]">Cập nhật theo RSVP</span>
+            </div>
+            <div className="grid grid-cols-2 lg:grid-cols-4">
+              {[
+                { label: "Lời phản hồi", value: responses.length, note: `${summary.yes} xác nhận · ${summary.no} từ chối`, estimated: false },
+                { label: "Dự Thánh lễ", value: ceremonyGuests, note: "người", estimated: true },
+                { label: "Dự tiệc cưới", value: banquetGuests, note: "người", estimated: true },
+                { label: "Lưu trú", value: stayingGuests, note: "người", estimated: true },
+              ].map(({ label, value, note, estimated }, index) => (
+                <div key={label} className={`min-h-28 p-4 sm:p-5 ${index % 2 === 0 ? "border-r" : ""} ${index < 2 ? "border-b lg:border-b-0" : ""} ${index === 1 ? "lg:border-r" : ""} ${index === 2 ? "lg:border-r" : ""} border-[#E8DDCC]`}>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <p className="text-xs font-semibold text-[#6F665D]">{label}</p>
+                    {estimated && <span className="rounded-full bg-[#F3EEE2] px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-[#6E5949]">Ước lượng</span>}
                   </div>
-                  <div className="mt-4">
-                    <p className="font-serif text-4xl text-[#5F6F4E] font-medium">{value}</p>
-                    <p className="mt-1.5 text-[11px] leading-relaxed text-[#8A8178]">{hint}</p>
-                  </div>
+                  <p className="mt-3 text-3xl font-bold tabular-nums text-[#2E2A25]">{value}</p>
+                  <p className="mt-1 text-xs text-[#8A8178]">{note}</p>
+                </div>
+              ))}
+            </div>
+            {(postCeremonyPartyGuests > 0 || childrenStaying > 0 || notAttending > 0) && (
+              <div className="flex flex-wrap gap-x-5 gap-y-2 border-t border-[#E8DDCC] bg-[#FCFAF4] px-4 py-3 text-xs text-[#665D54] sm:px-5">
+                <span>Tiệc sau Thánh lễ: <b>{postCeremonyPartyGuests} người</b> <i>(ước lượng)</i></span>
+                <span>Trẻ em lưu trú: <b>{childrenStaying}</b> <i>(ước lượng)</i></span>
+                <span>Lời từ chối: <b>{notAttending}</b></span>
+              </div>
+            )}
+          </section>
+
+          <section aria-labelledby="responses-title" className="rounded-2xl border border-[#DED4C5] bg-white p-4 shadow-sm sm:p-5">
+              <div className="mb-4 flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
+                <div>
+                  <h2 id="responses-title" className="text-lg font-bold text-[#2E2A25]">Danh sách hồi đáp</h2>
+                  <p className="text-xs text-[#7B7168]">{filteredResponses.length} trong {responses.length} lời phản hồi</p>
                 </div>
               </div>
-            ))}
-          </div>
 
-          {/* Filters & Actions & Table Card */}
-          <div className="p-2 rounded-[2.2rem] bg-white border border-[#E8DDCC] shadow-[0_12px_36px_rgba(63,70,66,0.02)]">
-            <div className="p-5 rounded-[calc(2.2rem-0.5rem)] bg-[#fdfbf7] border border-[#b4975a]/10">
-              
-              {/* Controls bar */}
-              <div className="flex flex-wrap items-center justify-between gap-4 border-b border-[#E8DDCC] pb-4.5 mb-5">
-                <div className="flex flex-wrap items-center gap-3">
-                  <select value={attendingFilter} onChange={(event) => setAttendingFilter(event.target.value)} className="min-h-10 rounded-full border border-[#E8DDCC] bg-white px-4 py-2 text-xs sm:text-sm outline-none transition focus:border-[#5F6F4E]">
+              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-4">
+                  <select aria-label="Lọc theo phản hồi" value={attendingFilter} onChange={(event) => setAttendingFilter(event.target.value)} className="min-h-11 w-full rounded-xl border border-[#E8DDCC] bg-white px-3 text-sm outline-none transition focus:border-[#5F6F4E]">
                     <option value="all">Phản hồi: tất cả</option>
                     <option value="yes">Đã xác nhận</option>
                     <option value="no">Đã từ chối</option>
                     <option value="maybe">Cần thêm thời gian</option>
                   </select>
-                  <select value={accommodationFilter} onChange={(event) => setAccommodationFilter(event.target.value)} className="min-h-10 rounded-full border border-[#E8DDCC] bg-white px-4 py-2 text-xs sm:text-sm outline-none transition focus:border-[#5F6F4E]">
+                  <select aria-label="Lọc theo lưu trú" value={accommodationFilter} onChange={(event) => setAccommodationFilter(event.target.value)} className="min-h-11 w-full rounded-xl border border-[#E8DDCC] bg-white px-3 text-sm outline-none transition focus:border-[#5F6F4E]">
                     <option value="all">Lưu trú: tất cả</option>
                     <option value="yes">Cần hỗ trợ</option>
                     <option value="no">Không cần</option>
                   </select>
-                  <select value={postCeremonyFilter} onChange={(event) => setPostCeremonyFilter(event.target.value)} className="min-h-10 rounded-full border border-[#E8DDCC] bg-white px-4 py-2 text-xs sm:text-sm outline-none transition focus:border-[#5F6F4E]">
+                  <select aria-label="Lọc theo tiệc sau Thánh lễ" value={postCeremonyFilter} onChange={(event) => setPostCeremonyFilter(event.target.value)} className="min-h-11 w-full rounded-xl border border-[#E8DDCC] bg-white px-3 text-sm outline-none transition focus:border-[#5F6F4E]">
                     <option value="all">Tiệc sau Hôn phối: tất cả</option>
                     <option value="yes">Sẽ tham dự</option>
                     <option value="no">Không tham dự</option>
                     <option value="pending">Chưa trả lời</option>
                     <option value="not_applicable">Không áp dụng</option>
                   </select>
-                  <select value={groupFilter} onChange={(event) => setGroupFilter(event.target.value)} className="min-h-10 rounded-full border border-[#E8DDCC] bg-white px-4 py-2 text-xs sm:text-sm outline-none transition focus:border-[#5F6F4E]">
+                  <select aria-label="Lọc theo nhóm khách" value={groupFilter} onChange={(event) => setGroupFilter(event.target.value)} className="min-h-11 w-full rounded-xl border border-[#E8DDCC] bg-white px-3 text-sm outline-none transition focus:border-[#5F6F4E]">
                     <option value="all">Nhóm khách: tất cả</option>
                     {groups.map((group) => <option key={group} value={group}>{group}</option>)}
                   </select>
-                </div>
+              </div>
 
-                <div className="flex flex-wrap items-center gap-2">
+              <details className="group my-4 rounded-xl border border-[#E8DDCC] bg-[#FCFAF4]">
+                <summary className="flex min-h-11 cursor-pointer list-none items-center gap-2 px-3 text-sm font-semibold text-[#665D54] marker:hidden">
+                  <SlidersHorizontal className="h-4 w-4" /> Xuất và thao tác
+                  <span className="ml-auto text-xs font-normal text-[#8A8178]">{selectedCount > 0 ? `${selectedCount} đã chọn` : "Mở"}</span>
+                </summary>
+                <div className="grid gap-2 border-t border-[#E8DDCC] p-3 sm:grid-cols-2 xl:grid-cols-5">
                   <button
                     type="button"
                     onClick={toggleVisibleResponses}
-                    className="inline-flex min-h-10 items-center gap-2 rounded-full border border-[#D6BFA3] bg-white px-4 text-xs font-semibold text-[#2E2A25] active:scale-[0.98] transition"
+                    className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border border-[#D6BFA3] bg-white px-3 text-xs font-semibold text-[#2E2A25] active:scale-[0.98] transition"
                     disabled={filteredResponses.length === 0}
                   >
                     {allVisibleSelected ? <CheckSquare className="h-4 w-4 text-[#5F6F4E]" /> : <Square className="h-4 w-4 text-[#8A8178]" />}
@@ -1185,7 +1169,7 @@ export function InviteAdminPanel() {
                   <button
                     type="button"
                     onClick={() => void deleteSelectedResponses()}
-                    className="inline-flex min-h-10 items-center gap-2 rounded-full bg-[#9B4E5C] px-4 text-xs font-semibold text-white active:scale-[0.98] transition disabled:opacity-40"
+                    className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border border-[#D9B9BF] bg-white px-3 text-xs font-semibold text-[#9B4E5C] active:scale-[0.98] transition disabled:opacity-40"
                     disabled={selectedCount === 0 || deletingRsvp}
                   >
                     <Trash2 className="h-4 w-4" />
@@ -1194,16 +1178,16 @@ export function InviteAdminPanel() {
                   <button
                     type="button"
                     onClick={() => void exportRsvpWorkbook("filtered")}
-                    className="inline-flex min-h-10 items-center gap-2 rounded-full border border-[#D6BFA3] bg-[#FFFDF8] px-4 text-xs font-semibold text-[#2E2A25] shadow-sm transition hover:bg-white active:scale-[0.98] disabled:opacity-40"
+                    className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg bg-[#5F6F4E] px-3 text-xs font-semibold text-white transition active:scale-[0.98] disabled:opacity-40"
                     disabled={exportingWorkbook || filteredResponses.length === 0}
                   >
-                    <FileSpreadsheet className="h-4 w-4 text-[#5F6F4E]" />
+                    <FileSpreadsheet className="h-4 w-4" />
                     Xuất Excel RSVP
                   </button>
                   <button
                     type="button"
                     onClick={exportCsv}
-                    className="inline-flex min-h-10 items-center gap-2 rounded-full border border-[#E8DDCC] bg-transparent px-4 text-xs font-semibold text-[#756b60] transition hover:bg-[#FFFDF8] active:scale-[0.98] disabled:opacity-40"
+                    className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border border-[#E8DDCC] bg-white px-3 text-xs font-semibold text-[#756b60] transition active:scale-[0.98] disabled:opacity-40"
                     disabled={filteredResponses.length === 0}
                   >
                     <Download className="h-4 w-4" /> CSV dự phòng
@@ -1211,18 +1195,49 @@ export function InviteAdminPanel() {
                   <button
                     type="button"
                     onClick={clearDemoData}
-                    className="inline-flex min-h-10 items-center gap-2 rounded-full border border-[#E8DDCC] bg-transparent px-4 text-xs font-semibold text-[#9B4E5C] transition hover:bg-[#FFFDF8] active:scale-[0.98]"
+                    className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border border-[#E8DDCC] bg-white px-3 text-xs font-semibold text-[#9B4E5C] transition active:scale-[0.98]"
                   >
                     <Trash2 className="h-4 w-4" /> Xoá demo
                   </button>
                 </div>
-              </div>
+              </details>
 
               {message && <p className="mb-4 text-sm font-semibold text-[#5F6F4E] bg-[#5F6F4E]/5 px-4 py-2.5 rounded-xl border border-[#5F6F4E]/12">{message}</p>}
               {error && <p className="mb-4 text-sm font-semibold text-[#9B4E5C] bg-[#9B4E5C]/5 px-4 py-2.5 rounded-xl border border-[#9B4E5C]/12">{error}</p>}
 
-              {/* Data Table */}
-              <div className="overflow-x-auto rounded-xl border border-[#E8DDCC]">
+              <div className="grid gap-2 lg:hidden">
+                {filteredResponses.length === 0 ? (
+                  <p className="rounded-xl border border-dashed border-[#D6BFA3] px-4 py-8 text-center text-sm text-[#8A8178]">Chưa có lời hồi đáp phù hợp.</p>
+                ) : filteredResponses.map((response) => (
+                  <article key={response.id} className={`rounded-xl border p-3 ${selectedResponseIds.has(response.id) ? "border-[#5F6F4E] bg-[#F7F8F3]" : "border-[#E8DDCC] bg-white"}`}>
+                    <div className="flex items-start gap-3">
+                      <button type="button" aria-label={`Chọn ${response.name}`} onClick={() => setResponseSelection(response.id, !selectedResponseIds.has(response.id))} className="mt-0.5 inline-flex h-6 w-6 shrink-0 items-center justify-center text-[#5F6F4E]">
+                        {selectedResponseIds.has(response.id) ? <CheckSquare className="h-5 w-5" /> : <Square className="h-5 w-5" />}
+                      </button>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="min-w-0">
+                            <h3 className="truncate font-semibold text-[#2E2A25]">{response.name}</h3>
+                            <p className="text-[11px] text-[#8A8178]">{formatDate(response.submittedAt)}</p>
+                          </div>
+                          <span className="shrink-0 rounded-full bg-[#F3EEE2] px-2.5 py-1 text-[11px] font-semibold text-[#665D54]">{attendingLabel(response.attending)}</span>
+                        </div>
+                        <div className="mt-3 flex flex-wrap gap-1.5 text-[11px] text-[#665D54]">
+                          <span className="rounded-md bg-[#F8F3EA] px-2 py-1">Thánh lễ: <b>{response.attendingCeremony ? "Có" : "Không"}</b></span>
+                          <span className="rounded-md bg-[#F8F3EA] px-2 py-1">Tiệc cưới: <b>{response.attendingBanquet ? "Có" : "Không"}</b></span>
+                          {postCeremonyStatus(response) !== "not_applicable" && <span className="rounded-md bg-[#F8F3EA] px-2 py-1">Tiệc sau lễ: <b>{postCeremonyStatus(response) === "yes" ? "Có" : postCeremonyStatus(response) === "no" ? "Không" : "Chưa trả lời"}</b></span>}
+                        </div>
+                        <div className="mt-3 grid grid-cols-2 gap-2 border-t border-[#E8DDCC] pt-3 text-xs">
+                          <p><span className="text-[#8A8178]">Số người</span><br /><b>{response.guestCount} <span className="font-normal">(ước lượng)</span></b></p>
+                          <p><span className="text-[#8A8178]">Lưu trú</span><br /><b>{response.accommodationNeeded ? `${response.stayingGuestCount ?? response.lodgingGuests?.length ?? 0} người` : "Không"}</b>{response.accommodationNeeded && <span className="block text-[11px] text-[#8A8178]">Ước lượng</span>}</p>
+                        </div>
+                      </div>
+                    </div>
+                  </article>
+                ))}
+              </div>
+
+              <div className="hidden overflow-x-auto rounded-xl border border-[#E8DDCC] lg:block">
                 <table className="w-full min-w-[900px] text-left text-sm">
                   <thead className="bg-[#F8F3EA] text-[#8A8178] border-b border-[#E8DDCC]">
                     <tr>
@@ -1235,7 +1250,7 @@ export function InviteAdminPanel() {
                       <th className="p-4">Số điện thoại</th>
                       <th className="p-4">Phản hồi</th>
                       <th className="p-4">Sự kiện</th>
-                      <th className="p-4">Số người</th>
+                      <th className="p-4">Số người <span className="block text-[10px] font-normal">Ước lượng</span></th>
                       <th className="p-4">Nhóm</th>
                       <th className="p-4">Lưu trú</th>
                       <th className="p-4">Người lưu trú</th>
@@ -1281,7 +1296,7 @@ export function InviteAdminPanel() {
                         </td>
                         <td className="p-4 text-xs">{response.guestCount}</td>
                         <td className="p-4 text-xs">{response.guestGroup}</td>
-                        <td className="p-4 text-xs">{response.accommodationNeeded ? `${response.stayingGuestCount ?? response.lodgingGuests?.length ?? 0} người` : "Không"}</td>
+                        <td className="p-4 text-xs">{response.accommodationNeeded ? <>{response.stayingGuestCount ?? response.lodgingGuests?.length ?? 0} người <span className="block text-[10px] text-[#8A8178]">Ước lượng</span></> : "Không"}</td>
                         <td className="p-4 text-xs max-w-[200px] truncate text-[#665d54]">{response.accommodationNeeded ? (response.lodgingGuests?.length ? summarizeLodgingGuests(response.lodgingGuests) : "Chưa có danh sách") : "Không"}</td>
                         <td className="p-4 text-xs max-w-[220px] truncate text-[#665d54]">{response.dietaryNote || response.notes || "—"}</td>
                       </tr>
@@ -1290,21 +1305,20 @@ export function InviteAdminPanel() {
                 </table>
               </div>
 
-              {/* Lodging Summary Card Footer */}
-              <div className="mt-6 p-4 rounded-2xl bg-[#FCFAF4] border border-[#E8DDCC] grid gap-4 sm:grid-cols-2 lg:grid-cols-4 text-xs text-[#665d54]">
-                <div className="flex flex-col gap-1.5 p-3 rounded-xl bg-white border border-[#E8DDCC]">
-                  <span className="text-[#8A8178] font-semibold">TỔNG KHÁCH Ở LẠI</span>
+              <div className="mt-5 grid gap-px overflow-hidden rounded-xl border border-[#E8DDCC] bg-[#E8DDCC] sm:grid-cols-2 lg:grid-cols-4 text-xs text-[#665d54]">
+                <div className="flex flex-col gap-1.5 bg-[#FCFAF4] p-3">
+                  <span className="text-[#8A8178] font-semibold">KHÁCH Ở LẠI · ƯỚC LƯỢNG</span>
                   <b className="text-lg text-[#5F6F4E]">{stayingGuests} người</b>
                 </div>
-                <div className="flex flex-col gap-1.5 p-3 rounded-xl bg-white border border-[#E8DDCC]">
-                  <span className="text-[#8A8178] font-semibold">LƯU TRÚ ĐÊM 25/12</span>
+                <div className="flex flex-col gap-1.5 bg-[#FCFAF4] p-3">
+                  <span className="text-[#8A8178] font-semibold">ĐÊM 25/12 · ƯỚC LƯỢNG</span>
                   <b className="text-lg text-[#2E2A25]">{stayingDec25} người</b>
                 </div>
-                <div className="flex flex-col gap-1.5 p-3 rounded-xl bg-white border border-[#E8DDCC]">
-                  <span className="text-[#8A8178] font-semibold">LƯU TRÚ ĐÊM 26/12</span>
+                <div className="flex flex-col gap-1.5 bg-[#FCFAF4] p-3">
+                  <span className="text-[#8A8178] font-semibold">ĐÊM 26/12 · ƯỚC LƯỢNG</span>
                   <b className="text-lg text-[#2E2A25]">{stayingDec26} người</b>
                 </div>
-                <div className="flex flex-col justify-between p-3 rounded-xl bg-white border border-[#E8DDCC] min-h-[64px]">
+                <div className="flex min-h-[64px] flex-col justify-between bg-[#FCFAF4] p-3">
                   <span className="text-[#8A8178] font-semibold">DANH SÁCH LƯU TRÚ</span>
                   <button type="button" onClick={() => void exportRsvpWorkbook("lodging")} className="inline-flex items-center gap-1.5 text-xs font-bold text-[#5F6F4E] hover:underline" disabled={accommodationRequests === 0}>
                     <Hotel className="w-3.5 h-3.5" /> Xuất Excel resort
@@ -1312,53 +1326,50 @@ export function InviteAdminPanel() {
                 </div>
               </div>
 
-            </div>
-          </div>
+          </section>
         </div>
       )}
 
       {/* Tab 2: Guests & Links */}
       {tab === "invitees" && (
-        <div className="grid gap-6 lg:grid-cols-[minmax(0,1.2fr)_minmax(420px,0.8fr)]">
+        <div className="grid gap-5 xl:grid-cols-[minmax(0,1.15fr)_minmax(400px,0.85fr)]">
           {/* Left panel: Guest List */}
-          <div className="p-2 rounded-[2.2rem] bg-white border border-[#E8DDCC] shadow-sm flex flex-col gap-4">
-            <div className="p-4 sm:p-5">
+          <section className="rounded-2xl border border-[#DED4C5] bg-white p-4 shadow-sm sm:p-5">
+            <div>
               
-              {/* Quick stats */}
-              <div className="grid gap-3 grid-cols-2 sm:grid-cols-4 mb-5">
+              <div className="mb-5 grid grid-cols-2 overflow-hidden rounded-xl border border-[#E8DDCC] sm:grid-cols-4">
                 {[
-                  ["Tổng khách mời", invitees.length, "Có trong danh sách"],
-                  ["Đã có RSVP", summary.total, "Phản hồi gửi về"],
-                  ["Đợt nạp gần nhất", lastImportedInvitees.length, "Xuất link nhanh đợt này"],
-                  ["Đang hiển thị", visibleInvitees.length, "Số dòng tìm được"],
-                ].map(([label, value, hint]) => (
-                  <div key={String(label)} className="rounded-2xl border border-[#E8DDCC] bg-[#FCFAF4] p-3.5">
-                    <span className="text-[10px] font-semibold uppercase tracking-wider text-[#8A8178] block">{label}</span>
-                    <span className="mt-2 font-serif text-2xl text-[#2E2A25] block">{value}</span>
-                    <span className="mt-0.5 text-[10px] leading-relaxed text-[#8A8178] block">{hint}</span>
+                  ["Thiệp riêng", invitees.length],
+                  ["Đã hồi đáp", summary.total],
+                  ["Vừa nhập", lastImportedInvitees.length],
+                  ["Đang hiển thị", visibleInvitees.length],
+                ].map(([label, value], index) => (
+                  <div key={String(label)} className={`bg-[#FCFAF4] p-3 sm:p-4 ${index % 2 === 0 ? "border-r" : ""} ${index < 2 ? "border-b sm:border-b-0" : ""} ${index === 1 || index === 2 ? "sm:border-r" : ""} border-[#E8DDCC]`}>
+                    <span className="block text-[11px] font-semibold text-[#7B7168]">{label}</span>
+                    <span className="mt-1 block text-2xl font-bold tabular-nums text-[#2E2A25]">{value}</span>
                   </div>
                 ))}
               </div>
 
-              {/* Excel workflow tool links */}
-              <div className="p-4 rounded-2xl bg-[#FCFAF4] border border-[#E8DDCC] flex flex-col xl:flex-row xl:items-center justify-between gap-4 mb-5">
-                <div className="text-xs text-[#665d54] leading-relaxed max-w-sm">
-                  <b>Quy trình nạp Excel:</b> Tải file mẫu &gt; Điền khách mời &gt; Tải lên để đồng bộ &gt; Xuất file chứa link thiệp riêng để gửi khách.
+              <div className="mb-5 rounded-xl border border-[#E8DDCC] bg-[#FCFAF4] p-3 sm:p-4">
+                <div className="mb-3">
+                  <h2 className="font-semibold text-[#2E2A25]">Nhập và xuất danh sách</h2>
+                  <p className="mt-0.5 text-xs text-[#7B7168]">Tải mẫu, điền danh sách rồi tải lại lên.</p>
                 </div>
-                <div className="flex flex-wrap gap-2.5">
-                  <button type="button" onClick={() => void downloadTemplate()} className="inline-flex min-h-10 items-center gap-1.5 rounded-full border border-[#D6BFA3] bg-white px-3.5 text-xs font-semibold text-[#2E2A25] hover:bg-[#F3EEE2] active:scale-[0.98] transition">
+                <div className="grid grid-cols-2 gap-2 lg:grid-cols-5">
+                  <button type="button" onClick={() => void downloadTemplate()} className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-lg border border-[#D6BFA3] bg-white px-3 text-xs font-semibold text-[#2E2A25] active:scale-[0.98] transition">
                     <Download className="h-3.5 w-3.5 text-[#5F6F4E]" /> Tải mẫu
                   </button>
-                  <button type="button" onClick={() => importFileRef.current?.click()} className="inline-flex min-h-10 items-center gap-1.5 rounded-full border border-[#D6BFA3] bg-white px-3.5 text-xs font-semibold text-[#2E2A25] hover:bg-[#F3EEE2] active:scale-[0.98] transition" disabled={busy}>
-                    {busy ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <FileUp className="h-3.5 w-3.5 text-[#5F6F4E]" />} Tải Excel lên
+                  <button type="button" onClick={() => importFileRef.current?.click()} className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-lg bg-[#5F6F4E] px-3 text-xs font-semibold text-white active:scale-[0.98] transition" disabled={busy}>
+                    {busy ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <FileUp className="h-3.5 w-3.5" />} Tải Excel lên
                   </button>
-                  <button type="button" onClick={() => void exportInviteLinksWorkbook(lastImportedInvitees, "đợt vừa nạp")} className="inline-flex min-h-10 items-center gap-1.5 rounded-full border border-[#D6BFA3] bg-white px-3.5 text-xs font-semibold text-[#2E2A25] hover:bg-[#F3EEE2] active:scale-[0.98] transition disabled:opacity-40" disabled={lastImportedInvitees.length === 0}>
-                    <Download className="h-3.5 w-3.5 text-[#5F6F4E]" /> Link đợt nạp
+                  <button type="button" onClick={() => void exportInviteLinksWorkbook(lastImportedInvitees, "đợt vừa nạp")} className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-lg border border-[#D6BFA3] bg-white px-3 text-xs font-semibold text-[#2E2A25] active:scale-[0.98] transition disabled:opacity-40" disabled={lastImportedInvitees.length === 0}>
+                    <Download className="h-3.5 w-3.5 text-[#5F6F4E]" /> Link vừa nhập
                   </button>
-                  <button type="button" onClick={() => void exportInviteLinksWorkbook()} className="inline-flex min-h-10 items-center gap-1.5 rounded-full bg-[#5F6F4E] px-3.5 text-xs font-semibold text-white hover:bg-[#526244] active:scale-[0.98] transition disabled:opacity-40" disabled={busy || invitees.length === 0}>
+                  <button type="button" onClick={() => void exportInviteLinksWorkbook()} className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-lg border border-[#D6BFA3] bg-white px-3 text-xs font-semibold text-[#2E2A25] active:scale-[0.98] transition disabled:opacity-40" disabled={busy || invitees.length === 0}>
                     <Link2 className="h-3.5 w-3.5" /> Xuất toàn bộ link
                   </button>
-                  <button type="button" onClick={() => void addInvitee()} className="inline-flex min-h-10 items-center gap-1.5 rounded-full border border-[#E8DDCC] bg-white px-3.5 text-xs font-semibold text-[#2E2A25] hover:bg-[#F3EEE2] active:scale-[0.98] transition" disabled={busy}>
+                  <button type="button" onClick={() => void addInvitee()} className="col-span-2 inline-flex min-h-11 items-center justify-center gap-1.5 rounded-lg border border-[#E8DDCC] bg-white px-3 text-xs font-semibold text-[#2E2A25] active:scale-[0.98] transition lg:col-span-1" disabled={busy}>
                     <Plus className="h-3.5 w-3.5 text-[#5F6F4E]" /> Thêm tay
                   </button>
                 </div>
@@ -1366,22 +1377,22 @@ export function InviteAdminPanel() {
               </div>
 
               {/* Search and select actions */}
-              <div className="flex flex-col md:flex-row gap-3 mb-4">
+              <div className="mb-4 flex flex-col gap-2 sm:flex-row">
                 <label className="relative flex-1">
                   <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[#8A8178]" />
                   <input
-                    className="min-h-10 w-full rounded-full border border-[#E8DDCC] bg-white pl-11 pr-4 text-xs sm:text-sm text-[#2E2A25] outline-none transition focus:border-[#5F6F4E] focus:ring-4 focus:ring-[#5F6F4E]/8"
+                    className="min-h-11 w-full rounded-xl border border-[#E8DDCC] bg-white pl-11 pr-4 text-sm text-[#2E2A25] outline-none transition focus:border-[#5F6F4E] focus:ring-4 focus:ring-[#5F6F4E]/8"
                     placeholder="Tìm theo tên khách, nhóm khách hoặc mã link..."
                     value={searchQuery}
                     onChange={(event) => setSearchQuery(event.target.value)}
                   />
                 </label>
 
-                <div className="flex items-center gap-2">
+                <div className="grid grid-cols-2 gap-2">
                   <button
                     type="button"
                     onClick={toggleVisibleInviteesSelection}
-                    className="inline-flex min-h-10 items-center gap-1.5 rounded-full border border-[#D6BFA3] bg-white px-3.5 text-xs font-semibold text-[#2E2A25] active:scale-[0.98] transition"
+                    className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-xl border border-[#D6BFA3] bg-white px-3 text-xs font-semibold text-[#2E2A25] active:scale-[0.98] transition"
                     disabled={visibleInvitees.length === 0}
                   >
                     {allVisibleInviteesSelected ? <CheckSquare className="h-4 w-4 text-[#5F6F4E]" /> : <Square className="h-4 w-4 text-[#8A8178]" />}
@@ -1390,7 +1401,7 @@ export function InviteAdminPanel() {
                   <button
                     type="button"
                     onClick={() => void deleteSelectedInvitees()}
-                    className="inline-flex min-h-10 items-center gap-1.5 rounded-full bg-[#9B4E5C] px-3.5 text-xs font-semibold text-white active:scale-[0.98] transition disabled:opacity-40"
+                    className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-xl border border-[#D9B9BF] bg-white px-3 text-xs font-semibold text-[#9B4E5C] active:scale-[0.98] transition disabled:opacity-40"
                     disabled={selectedInvitees.length === 0 || bulkDeleting}
                   >
                     <Trash2 className="h-4 w-4" />
@@ -1401,8 +1412,36 @@ export function InviteAdminPanel() {
 
               {importNotice && <p className="mb-4 text-xs text-[#9B4E5C] bg-[#9B4E5C]/5 px-3 py-2 rounded-xl">{importNotice}</p>}
 
-              {/* Invitees Table */}
-              <div className="overflow-x-auto rounded-xl border border-[#E8DDCC] max-h-[36rem] overflow-y-auto">
+              <div className="grid max-h-[42rem] gap-2 overflow-y-auto lg:hidden">
+                {visibleInvitees.length === 0 ? (
+                  <p className="rounded-xl border border-dashed border-[#D6BFA3] px-4 py-8 text-center text-sm text-[#8A8178]">{invitees.length === 0 ? "Chưa có khách mời. Hãy nhập danh sách hoặc thêm khách." : "Không tìm thấy khách mời phù hợp."}</p>
+                ) : visibleInvitees.map((invitee) => {
+                  const rsvp = invitee.rsvp ?? rsvpByInviteeId.get(invitee.id);
+                  const isSelected = selectedInvitee?.id === invitee.id;
+                  const isChecked = selectedInviteeIds.has(invitee.id);
+                  return (
+                    <article key={invitee.id} onClick={() => setSelectedInviteeId(invitee.id)} className={`cursor-pointer rounded-xl border p-3 ${isSelected ? "border-[#5F6F4E] bg-[#F7F8F3]" : "border-[#E8DDCC] bg-white"}`}>
+                      <div className="flex items-start gap-3">
+                        <button type="button" aria-label={`Chọn ${invitee.displayLabel}`} onClick={(event) => { event.stopPropagation(); setInviteeSelection(invitee.id, !isChecked); }} className="mt-0.5 inline-flex h-6 w-6 shrink-0 items-center justify-center text-[#5F6F4E]">
+                          {isChecked ? <CheckSquare className="h-5 w-5" /> : <Square className="h-5 w-5" />}
+                        </button>
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-start justify-between gap-3">
+                            <div className="min-w-0">
+                              <h3 className="truncate font-semibold text-[#2E2A25]">{invitee.displayLabel}</h3>
+                              <p className="text-[11px] text-[#8A8178]">{invitee.guestGroup || "Chưa phân nhóm"}</p>
+                            </div>
+                            <button type="button" aria-label="Sao chép link thiệp" onClick={(event) => { event.stopPropagation(); void navigator.clipboard.writeText(buildInviteUrl(invitee.token, window.location.origin)); setMessage("Đã sao chép link."); }} className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-[#E8DDCC] bg-white text-[#5F6F4E]"><Copy className="h-4 w-4" /></button>
+                          </div>
+                          <p className="mt-2 text-xs text-[#665D54]">{rsvp ? <><b>{attendingLabel(rsvp.attending)}</b> · {rsvp.guestCount} người <span className="text-[#8A8178]">(ước lượng)</span></> : inviteStatusLabels[invitee.inviteStatus]}</p>
+                        </div>
+                      </div>
+                    </article>
+                  );
+                })}
+              </div>
+
+              <div className="hidden max-h-[36rem] overflow-x-auto overflow-y-auto rounded-xl border border-[#E8DDCC] lg:block">
                 <table className="w-full min-w-[700px] text-left text-sm">
                   <thead className="sticky top-0 bg-[#F8F3EA] text-[#8A8178] border-b border-[#E8DDCC] z-10">
                     <tr>
@@ -1453,7 +1492,7 @@ export function InviteAdminPanel() {
                             <td className="p-3 text-xs">{invitee.guestGroup}</td>
                             <td className="p-3 text-xs">
                               {rsvp ? (
-                                <span className="font-semibold text-[#5F6F4E]">{attendingLabel(rsvp.attending)} ({rsvp.guestCount}k)</span>
+                                <span className="font-semibold text-[#5F6F4E]">{attendingLabel(rsvp.attending)} · {rsvp.guestCount} người <span className="font-normal text-[#8A8178]">(ước lượng)</span></span>
                               ) : (
                                 <span className="text-[#8A8178]">{inviteStatusLabels[invitee.inviteStatus]}</span>
                               )}
@@ -1480,20 +1519,20 @@ export function InviteAdminPanel() {
               </div>
 
             </div>
-          </div>
+          </section>
 
           {/* Right panel: Invitee Editor */}
           <div className="flex flex-col gap-6">
             {selectedInvitee ? (
               <>
                 {/* Panel 1: Basic Info */}
-                <div className="p-2 rounded-[2.2rem] bg-white border border-[#E8DDCC] shadow-sm">
-                  <div className="p-5 rounded-[calc(2.2rem-0.5rem)] bg-[#fdfbf7] border border-[#b4975a]/10">
+                <div className="rounded-2xl border border-[#DED4C5] bg-white shadow-sm">
+                  <div className="p-4 sm:p-5">
                     
                     <div className="flex flex-wrap items-start justify-between gap-4 border-b border-[#E8DDCC] pb-4 mb-4">
                       <div>
                         <span className="text-[10px] font-bold uppercase tracking-wider text-[#b4975a]">THÔNG TIN KHÁCH MỜI</span>
-                        <h3 className="font-serif text-2xl text-[#2E2A25] mt-1">{selectedInvitee.displayLabel}</h3>
+                        <h3 className="mt-1 text-xl font-bold text-[#2E2A25]">{selectedInvitee.displayLabel}</h3>
                       </div>
                       
                       <div className="flex flex-wrap gap-1.5">
@@ -1534,15 +1573,11 @@ export function InviteAdminPanel() {
                         <input className={panelInput} value={selectedInvitee.invitationName} onChange={(event) => patchSelectedInvitee({ invitationName: event.target.value })} />
                       </label>
                       <label className="grid gap-1.5 font-semibold text-[#8A8178] uppercase tracking-wider">
-                        Xưng hô (Chú/Cô/Anh/Chị/Em)
-                        <input className={panelInput} value={selectedInvitee.honorific} onChange={(event) => patchSelectedInvitee({ honorific: event.target.value })} />
-                      </label>
-                      <label className="grid gap-1.5 font-semibold text-[#8A8178] uppercase tracking-wider">
                         Nhóm khách
                         <input className={panelInput} value={selectedInvitee.guestGroup} onChange={(event) => patchSelectedInvitee({ guestGroup: event.target.value })} />
                       </label>
                       <label className="grid gap-1.5 font-semibold text-[#8A8178] uppercase tracking-wider">
-                        Số khách dự kiến
+                        Số người (ước lượng)
                         <input className={panelInput} type="number" min={1} value={selectedInvitee.expectedGuestCount} onChange={(event) => patchSelectedInvitee({ expectedGuestCount: Math.max(1, Number(event.target.value) || 1) })} />
                       </label>
                       <label className="flex min-h-11 cursor-pointer items-center gap-3 self-end rounded-2xl border border-[#E8DDCC] bg-white px-4 text-xs font-semibold normal-case tracking-normal text-[#2E2A25]">
@@ -1562,59 +1597,59 @@ export function InviteAdminPanel() {
                         Lời mời trong thiệp
                         <input className={panelInput} value={selectedInvitee.insideInviteLine} onChange={(event) => patchSelectedInvitee({ insideInviteLine: event.target.value })} />
                       </label>
-                      <label className="grid gap-1.5 font-semibold text-[#8A8178] uppercase tracking-wider">
-                        Đơn vị mời
-                        <select className={panelSelect} value={selectedInvitee.inviteUnit} onChange={(event) => patchSelectedInvitee({ inviteUnit: event.target.value === "household" ? "household" : "individual" })}>
-                          <option value="individual">{inviteUnitLabels.individual}</option>
-                          <option value="household">{inviteUnitLabels.household}</option>
-                        </select>
-                      </label>
-                      <label className="grid gap-1.5 font-semibold text-[#8A8178] uppercase tracking-wider">
-                        Ai đứng mời
-                        <select className={panelSelect} value={selectedInvitee.invitedBy} onChange={(event) => patchSelectedInvitee({ invitedBy: event.target.value === "parents" ? "parents" : "couple" })}>
-                          <option value="couple">{invitedByLabels.couple}</option>
-                          <option value="parents">{invitedByLabels.parents}</option>
-                        </select>
-                      </label>
-                      <label className="grid gap-1.5 font-semibold text-[#8A8178] uppercase tracking-wider">
-                        Mối quan hệ
-                        <input className={panelInput} value={selectedInvitee.relationship} onChange={(event) => patchSelectedInvitee({ relationship: event.target.value })} />
-                      </label>
-                      <label className="grid gap-1.5 font-semibold text-[#8A8178] uppercase tracking-wider">
-                        Ghi xưng với người đứng mời
-                        <input className={panelInput} value={selectedInvitee.hostRelationship} onChange={(event) => patchSelectedInvitee({ hostRelationship: event.target.value })} />
-                      </label>
-                      <label className="grid gap-1.5 font-semibold text-[#8A8178] uppercase tracking-wider">
-                        Cách người mời xưng hô
-                        <input className={panelInput} value={selectedInvitee.hostPronoun} onChange={(event) => patchSelectedInvitee({ hostPronoun: event.target.value })} />
-                      </label>
-                      <label className="grid gap-1.5 font-semibold text-[#8A8178] uppercase tracking-wider">
-                        Gọi CD-CR là
-                        <input className={panelInput} value={selectedInvitee.coupleReference} onChange={(event) => patchSelectedInvitee({ coupleReference: event.target.value })} />
-                      </label>
-                      <label className="grid gap-1.5 font-semibold text-[#8A8178] uppercase tracking-wider">
-                        Chế độ mời kèm
-                        <select className={panelSelect} value={selectedInvitee.householdMode} onChange={(event) => patchSelectedInvitee({ householdMode: event.target.value as Invitee["householdMode"] })}>
-                          <option value="single">{householdModeLabels.single}</option>
-                          <option value="couple">{householdModeLabels.couple}</option>
-                          <option value="family">{householdModeLabels.family}</option>
-                          <option value="widowed">{householdModeLabels.widowed}</option>
-                        </select>
-                      </label>
-                      <label className="grid gap-1.5 font-semibold text-[#8A8178] uppercase tracking-wider">
-                        Chính sách +1
-                        <select className={panelSelect} value={selectedInvitee.plusOnePolicy} onChange={(event) => patchSelectedInvitee({ plusOnePolicy: event.target.value as Invitee["plusOnePolicy"] })}>
-                          <option value="none">{plusOnePolicyLabels.none}</option>
-                          <option value="spouse">{plusOnePolicyLabels.spouse}</option>
-                          <option value="family">{plusOnePolicyLabels.family}</option>
-                          <option value="lover">{plusOnePolicyLabels.lover}</option>
-                          <option value="open_plus_one">{plusOnePolicyLabels.open_plus_one}</option>
-                        </select>
-                      </label>
-                      <label className="grid gap-1.5 font-semibold text-[#8A8178] uppercase tracking-wider">
-                        Mã nhóm album
-                        <input className={panelInput} value={joinAudienceTags(selectedInvitee.audienceTags)} onChange={(event) => patchSelectedInvitee({ audienceTags: parseAudienceTags(event.target.value) })} />
-                      </label>
+                      <details className="group rounded-xl border border-[#E8DDCC] bg-[#FCFAF4] sm:col-span-2">
+                        <summary className="flex min-h-11 cursor-pointer list-none items-center px-4 text-xs font-semibold normal-case tracking-normal text-[#665D54] marker:hidden">
+                          Thông tin nâng cao
+                          <span className="ml-auto text-[11px] font-normal text-[#8A8178]">Chỉ mở khi cần</span>
+                        </summary>
+                        <div className="grid gap-3.5 border-t border-[#E8DDCC] p-4 sm:grid-cols-2">
+                          <label className="grid gap-1.5 font-semibold text-[#8A8178] uppercase tracking-wider">
+                            Xưng hô đơn
+                            <input className={panelInput} value={selectedInvitee.honorific} onChange={(event) => patchSelectedInvitee({ honorific: event.target.value })} />
+                          </label>
+                          <label className="grid gap-1.5 font-semibold text-[#8A8178] uppercase tracking-wider">
+                            Đơn vị mời
+                            <select className={panelSelect} value={selectedInvitee.inviteUnit} onChange={(event) => patchSelectedInvitee({ inviteUnit: event.target.value === "household" ? "household" : "individual" })}>
+                              <option value="individual">{inviteUnitLabels.individual}</option>
+                              <option value="household">{inviteUnitLabels.household}</option>
+                            </select>
+                          </label>
+                          <label className="grid gap-1.5 font-semibold text-[#8A8178] uppercase tracking-wider">
+                            Ai đứng mời
+                            <select className={panelSelect} value={selectedInvitee.invitedBy} onChange={(event) => patchSelectedInvitee({ invitedBy: event.target.value === "parents" ? "parents" : "couple" })}>
+                              <option value="couple">{invitedByLabels.couple}</option>
+                              <option value="parents">{invitedByLabels.parents}</option>
+                            </select>
+                          </label>
+                          <label className="grid gap-1.5 font-semibold text-[#8A8178] uppercase tracking-wider">
+                            Mối quan hệ
+                            <input className={panelInput} value={selectedInvitee.relationship} onChange={(event) => patchSelectedInvitee({ relationship: event.target.value })} />
+                          </label>
+                          <label className="grid gap-1.5 font-semibold text-[#8A8178] uppercase tracking-wider">
+                            Chế độ mời kèm
+                            <select className={panelSelect} value={selectedInvitee.householdMode} onChange={(event) => patchSelectedInvitee({ householdMode: event.target.value as Invitee["householdMode"] })}>
+                              <option value="single">{householdModeLabels.single}</option>
+                              <option value="couple">{householdModeLabels.couple}</option>
+                              <option value="family">{householdModeLabels.family}</option>
+                              <option value="widowed">{householdModeLabels.widowed}</option>
+                            </select>
+                          </label>
+                          <label className="grid gap-1.5 font-semibold text-[#8A8178] uppercase tracking-wider">
+                            Chính sách +1
+                            <select className={panelSelect} value={selectedInvitee.plusOnePolicy} onChange={(event) => patchSelectedInvitee({ plusOnePolicy: event.target.value as Invitee["plusOnePolicy"] })}>
+                              <option value="none">{plusOnePolicyLabels.none}</option>
+                              <option value="spouse">{plusOnePolicyLabels.spouse}</option>
+                              <option value="family">{plusOnePolicyLabels.family}</option>
+                              <option value="lover">{plusOnePolicyLabels.lover}</option>
+                              <option value="open_plus_one">{plusOnePolicyLabels.open_plus_one}</option>
+                            </select>
+                          </label>
+                          <label className="grid gap-1.5 font-semibold text-[#8A8178] uppercase tracking-wider sm:col-span-2">
+                            Mã nhóm album
+                            <input className={panelInput} value={joinAudienceTags(selectedInvitee.audienceTags)} onChange={(event) => patchSelectedInvitee({ audienceTags: parseAudienceTags(event.target.value) })} />
+                          </label>
+                        </div>
+                      </details>
                       <label className="grid gap-1.5 font-semibold text-[#8A8178] uppercase tracking-wider">
                         Số điện thoại
                         <input className={panelInput} value={selectedInvitee.phone} onChange={(event) => patchSelectedInvitee({ phone: event.target.value })} />
@@ -1632,7 +1667,7 @@ export function InviteAdminPanel() {
                       {selectedRsvp ? (
                         <div className="mt-3 pt-3 border-t border-[#E8DDCC] space-y-1">
                           <p className="font-semibold text-[#2E2A25]">Hồi đáp từ form:</p>
-                          <p>Trạng thái: <b>{attendingLabel(selectedRsvp.attending)}</b> · Dự {selectedRsvp.guestCount} người.</p>
+                          <p>Trạng thái: <b>{attendingLabel(selectedRsvp.attending)}</b> · Dự {selectedRsvp.guestCount} người <span className="text-[#8A8178]">(ước lượng)</span>.</p>
                           <p>
                             Tiệc sau Hôn phối: <b>{
                               postCeremonyStatus(selectedRsvp) === "yes"
@@ -1644,7 +1679,7 @@ export function InviteAdminPanel() {
                                     : "Không áp dụng"
                             }</b>.
                           </p>
-                          {selectedRsvp.accommodationNeeded && <p>Cần lưu trú: <b>{selectedRsvp.stayingGuestCount ?? selectedRsvp.lodgingGuests?.length ?? 0} người</b> ({selectedRsvp.lodgingGuests?.length ? summarizeLodgingGuests(selectedRsvp.lodgingGuests) : "Chưa điền tên"}).</p>}
+                          {selectedRsvp.accommodationNeeded && <p>Cần lưu trú: <b>{selectedRsvp.stayingGuestCount ?? selectedRsvp.lodgingGuests?.length ?? 0} người</b> <span className="text-[#8A8178]">(ước lượng)</span> ({selectedRsvp.lodgingGuests?.length ? summarizeLodgingGuests(selectedRsvp.lodgingGuests) : "Chưa điền tên"}).</p>}
                           {(selectedRsvp.dietaryNote || selectedRsvp.notes) && <p>Ghi chú/Ẩm thực: <i>{selectedRsvp.dietaryNote || selectedRsvp.notes}</i></p>}
                         </div>
                       ) : (
@@ -1658,13 +1693,13 @@ export function InviteAdminPanel() {
                 </div>
 
                 {/* Panel 2: Table / Seat Supplement */}
-                <div className="p-2 rounded-[2.2rem] bg-white border border-[#E8DDCC] shadow-sm">
-                  <div className="p-5 rounded-[calc(2.2rem-0.5rem)] bg-[#fdfbf7] border border-[#b4975a]/10">
+                <div className="rounded-2xl border border-[#DED4C5] bg-white shadow-sm">
+                  <div className="p-4 sm:p-5">
                     
                     <div className="flex items-center justify-between gap-4 border-b border-[#E8DDCC] pb-4 mb-4">
                       <div>
                         <span className="text-[10px] font-bold uppercase tracking-wider text-[#b4975a]">THÔNG TIN BÀN TIỆC &amp; VỊ TRÍ</span>
-                        <h4 className="font-serif text-lg text-[#2E2A25] mt-0.5">Xếp sảnh, số bàn và chỉ đường</h4>
+                        <h4 className="mt-0.5 text-lg font-bold text-[#2E2A25]">Xếp sảnh, số bàn và chỉ đường</h4>
                       </div>
                       <div className="flex gap-1.5">
                         <button type="button" onClick={() => void clearSupplement()} className="inline-flex h-9 items-center gap-1 px-3 rounded-full border border-[#E8DDCC] bg-white text-xs font-semibold text-[#9B4E5C]" disabled={busy}>
@@ -1706,8 +1741,8 @@ export function InviteAdminPanel() {
                 </div>
 
                 {/* Panel 3: Album Preview */}
-                <div className="p-2 rounded-[2.2rem] bg-white border border-[#E8DDCC] shadow-sm">
-                  <div className="p-5 rounded-[calc(2.2rem-0.5rem)] bg-[#fdfbf7] border border-[#b4975a]/10">
+                <div className="rounded-2xl border border-[#DED4C5] bg-white shadow-sm">
+                  <div className="p-4 sm:p-5">
                     <span className="text-[10px] font-bold uppercase tracking-wider text-[#b4975a] block mb-3">ẢNH ALBUM KHÁCH NÀY ĐƯỢC XEM</span>
                     <div className="grid gap-3 sm:grid-cols-2">
                       {visibleAlbumAssets.length === 0 ? (
@@ -1738,17 +1773,17 @@ export function InviteAdminPanel() {
 
       {/* Tab 3: Media Gallery & Album Rules */}
       {tab === "album" && (
-        <div className="grid gap-6 lg:grid-cols-2">
+        <div className="grid gap-5 xl:grid-cols-2">
           {/* Left panel: Media Assets list */}
-          <div className="p-2 rounded-[2.2rem] bg-white border border-[#E8DDCC] shadow-sm">
-            <div className="p-5 rounded-[calc(2.2rem-0.5rem)] bg-[#fdfbf7] border border-[#b4975a]/10">
+          <section className="rounded-2xl border border-[#DED4C5] bg-white shadow-sm">
+            <div className="p-4 sm:p-5">
               
               <div className="flex items-center justify-between gap-4 border-b border-[#E8DDCC] pb-4 mb-4">
                 <div>
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-[#b4975a]">DANH SÁCH ẢNH ALBUM</span>
-                  <h3 className="font-serif text-2xl text-[#2E2A25] mt-1">Ảnh riêng tư cho các nhóm</h3>
+                  <h2 className="text-lg font-bold text-[#2E2A25]">Ảnh album</h2>
+                  <p className="mt-0.5 text-xs text-[#7B7168]">Ảnh riêng tư theo từng nhóm khách</p>
                 </div>
-                <button type="button" onClick={() => void addMediaAsset()} className="inline-flex h-9 items-center gap-1.5 rounded-full bg-[#5F6F4E] px-4 text-xs font-bold text-white shadow-sm active:scale-[0.98] transition">
+                <button type="button" onClick={() => void addMediaAsset()} className="inline-flex min-h-10 items-center gap-1.5 rounded-lg bg-[#5F6F4E] px-4 text-xs font-bold text-white active:scale-[0.98] transition">
                   <Plus className="h-3.5 w-3.5" /> Thêm ảnh
                 </button>
               </div>
@@ -1801,18 +1836,18 @@ export function InviteAdminPanel() {
               </div>
 
             </div>
-          </div>
+          </section>
 
           {/* Right panel: Album Rules manager */}
-          <div className="p-2 rounded-[2.2rem] bg-white border border-[#E8DDCC] shadow-sm">
-            <div className="p-5 rounded-[calc(2.2rem-0.5rem)] bg-[#fdfbf7] border border-[#b4975a]/10">
+          <section className="rounded-2xl border border-[#DED4C5] bg-white shadow-sm">
+            <div className="p-4 sm:p-5">
               
               <div className="flex items-center justify-between gap-4 border-b border-[#E8DDCC] pb-4 mb-4">
                 <div>
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-[#b4975a]">CẤU HÌNH PHÂN QUYỀN ALBUM</span>
-                  <h3 className="font-serif text-2xl text-[#2E2A25] mt-1">Quy tắc xem ảnh</h3>
+                  <h2 className="text-lg font-bold text-[#2E2A25]">Quy tắc xem ảnh</h2>
+                  <p className="mt-0.5 text-xs text-[#7B7168]">Phân quyền album theo nhóm khách</p>
                 </div>
-                <button type="button" onClick={() => addAlbumRule()} className="inline-flex h-9 items-center gap-1.5 rounded-full bg-[#5F6F4E] px-4 text-xs font-bold text-white shadow-sm active:scale-[0.98] transition">
+                <button type="button" onClick={() => addAlbumRule()} className="inline-flex min-h-10 items-center gap-1.5 rounded-lg bg-[#5F6F4E] px-4 text-xs font-bold text-white active:scale-[0.98] transition">
                   <Plus className="h-3.5 w-3.5" /> Thêm quy tắc
                 </button>
               </div>
@@ -1839,7 +1874,7 @@ export function InviteAdminPanel() {
 
               <div className="mt-6 pt-5 border-t border-[#E8DDCC] flex items-center justify-between gap-4">
                 <div className="flex items-center gap-3">
-                  <button type="button" onClick={() => void saveAlbum()} className="inline-flex min-h-11 items-center gap-2 rounded-full bg-[#2E2A25] px-6 text-sm font-bold text-white shadow-sm hover:bg-[#1a1714] active:scale-[0.98] transition" disabled={busy}>
+                  <button type="button" onClick={() => void saveAlbum()} className="inline-flex min-h-11 items-center gap-2 rounded-lg bg-[#2E2A25] px-5 text-sm font-bold text-white transition hover:bg-[#1a1714] active:scale-[0.98]" disabled={busy}>
                     <Save className="h-4 w-4" /> Lưu cấu hình album
                   </button>
                   {mediaMessage && <p className="text-xs font-semibold text-[#5F6F4E]">{mediaMessage}</p>}
@@ -1847,7 +1882,7 @@ export function InviteAdminPanel() {
               </div>
 
             </div>
-          </div>
+          </section>
         </div>
       )}
     </div>
