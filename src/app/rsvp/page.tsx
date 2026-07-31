@@ -1224,7 +1224,7 @@ export default function RSVPPage() {
                   </p>
                 ) : null}
 
-                {/* Khối Xác nhận tham dự (Attendance) */}
+                {/* Khối Thánh lễ và tiệc sau Thánh lễ */}
                 <div className="rounded-[1.6rem] border border-serenity/18 bg-white/80 p-4 sm:p-8 shadow-sm text-center mb-6 grid gap-1 sm:gap-2">
                   
                   {/* Sự kiện 1: Thánh lễ */}
@@ -1357,8 +1357,15 @@ export default function RSVPPage() {
                     ) : null}
                   </AnimatePresence>
 
-                  <div className="h-px w-full bg-serenity/28 my-1.5 sm:my-4" />
+                  {errors.attendingCeremony && <p className="mt-2 text-xs text-center text-[#9B4E5C] font-bold">{errors.attendingCeremony.message}</p>}
+                </div>
 
+                {/* Khối Tiệc cưới và lưu trú */}
+                <motion.div
+                  layout
+                  transition={{ layout: { duration: 0.28, ease: "easeOut" } }}
+                  className="rounded-[1.6rem] border border-serenity/18 bg-white/80 p-4 sm:p-8 shadow-sm text-center mb-6 grid gap-1 sm:gap-2"
+                >
                   {/* Sự kiện 2: Tiệc cưới */}
                   <div className="py-2 sm:py-6 flex flex-col items-center sm:flex-row sm:justify-between sm:items-center gap-2 sm:gap-6 text-center sm:text-left">
                     {/* Badge */}
@@ -1423,21 +1430,20 @@ export default function RSVPPage() {
                     </div>
                   </div>
 
-                  {errors.attendingCeremony && <p className="mt-2 text-xs text-center text-[#9B4E5C] font-bold">{errors.attendingCeremony.message}</p>}
                   {errors.attendingBanquet && <p className="mt-2 text-xs text-center text-[#9B4E5C] font-bold">{errors.attendingBanquet.message}</p>}
-                </div>
 
-                {/* Lưu trú - Progressive disclosure inline */}
-                <AnimatePresence initial={false}>
-                  {attendingBanquet === "yes" && (
-                    <motion.div
-                      initial={{ height: 0, opacity: 0, overflow: "hidden" }}
-                      animate={{ height: "auto", opacity: 1, overflow: "visible" }}
-                      exit={{ height: 0, opacity: 0, overflow: "hidden" }}
-                      transition={{ duration: 0.28, ease: "easeInOut" }}
-                      className="mb-6"
-                    >
-                      <div className="rounded-[1.6rem] border border-serenity/18 bg-white/80 p-4 sm:p-6 shadow-sm text-center">
+                  {/* Lưu trú - mở ngay trong khối Tiệc cưới */}
+                  <AnimatePresence initial={false}>
+                    {attendingBanquet === "yes" && (
+                      <motion.div
+                        key="banquet-lodging"
+                        initial={{ opacity: 0, y: -8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -6 }}
+                        transition={{ duration: 0.24, ease: "easeOut" }}
+                        className="mt-2 border-t border-serenity/22 pt-5 text-center sm:mt-4 sm:pt-7"
+                      >
+                        <div>
                         <p className="text-[0.82rem] sm:text-sm font-bold tracking-[0.15em] text-[#7a6a5d] uppercase mb-2">
                           LƯU TRÚ
                         </p>
@@ -1616,10 +1622,11 @@ export default function RSVPPage() {
                             </motion.div>
                           )}
                         </AnimatePresence>
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </motion.div>
 
                 {/* Ghi chú & Nút gửi - chỉ hiện khi đã trả lời xong 2 câu hỏi trên */}
                 <AnimatePresence initial={false}>
