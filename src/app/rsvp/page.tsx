@@ -1307,7 +1307,7 @@ export default function RSVPPage() {
                               Tiệc sau Thánh lễ
                             </p>
                             <p className="mt-1 text-sm leading-relaxed text-[#252934]/72">
-                              Kính mời Quý khách ở lại tham dự buổi tiệc thân mật cùng gia đình sau Thánh lễ
+                              Kính mời Quý khách dự buổi tiệc thân mật cùng gia đình sau Thánh lễ
                             </p>
                           </div>
                           <div className="flex shrink-0 flex-col items-center gap-1 sm:gap-1.5">
@@ -1626,20 +1626,19 @@ export default function RSVPPage() {
                       </motion.div>
                     )}
                   </AnimatePresence>
-                </motion.div>
 
-                {/* Ghi chú & Nút gửi - chỉ hiện khi đã trả lời xong 2 câu hỏi trên */}
-                <AnimatePresence initial={false}>
-                  {hasAnsweredRequiredEvents && (
-                    <motion.div
-                      initial={{ height: 0, opacity: 0, overflow: "hidden" }}
-                      animate={{ height: "auto", opacity: 1, overflow: "visible" }}
-                      exit={{ height: 0, opacity: 0, overflow: "hidden" }}
-                      transition={{ duration: 0.3, ease: "easeInOut" }}
-                    >
-                      {/* Ghi chú */}
-                      <div className="rounded-[1.6rem] border border-serenity/18 bg-white/80 p-5 shadow-sm text-left mb-6">
-                        <p className="text-[0.82rem] sm:text-sm font-bold tracking-[0.15em] text-[#7a6a5d] uppercase mb-4">
+                  {/* Ghi chú - mở ngay trong khối Tiệc cưới */}
+                  <AnimatePresence initial={false}>
+                    {hasAnsweredRequiredEvents && (
+                      <motion.div
+                        key="banquet-notes"
+                        initial={{ opacity: 0, y: -8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -6 }}
+                        transition={{ duration: 0.24, ease: "easeOut" }}
+                        className="mt-2 border-t border-serenity/22 pt-5 text-left sm:mt-4 sm:pt-7"
+                      >
+                        <p className="mb-4 text-center text-[0.82rem] font-bold uppercase tracking-[0.15em] text-[#7a6a5d] sm:text-sm">
                           Ghi chú
                         </p>
                         <div className="grid gap-5">
@@ -1662,8 +1661,20 @@ export default function RSVPPage() {
                             </Field>
                           )}
                         </div>
-                      </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </motion.div>
 
+                {/* Nút gửi - chỉ hiện khi đã trả lời xong các câu hỏi sự kiện */}
+                <AnimatePresence initial={false}>
+                  {hasAnsweredRequiredEvents && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0, overflow: "hidden" }}
+                      animate={{ height: "auto", opacity: 1, overflow: "visible" }}
+                      exit={{ height: 0, opacity: 0, overflow: "hidden" }}
+                      transition={{ duration: 0.3, ease: "easeInOut" }}
+                    >
                       {/* Nút XEM LẠI VÀ HOÀN TẤT */}
                       <div className="mt-4 flex justify-center">
                         <motion.button
