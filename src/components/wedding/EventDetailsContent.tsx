@@ -661,12 +661,12 @@ export function EventDetailsContent({
               </div>
 
               {/* Divider */}
-              <div className="w-full border-t border-[#b4975a]/15 mt-8 mb-2" />
+              <div className="w-full border-t border-[#b4975a]/15 mt-8 sm:mt-14 md:mt-16 mb-2" />
             </motion.div>
           )}
 
           {/* Section 3: Dress Code */}
-          <motion.div variants={cardItemVariant} className="pt-6 pb-0 w-full">
+          <motion.div variants={cardItemVariant} className="pt-6 sm:pt-10 md:pt-12 pb-0 w-full">
             <DressCodeSection
               title={dressCodeTitle}
               note={dressCodeNote}
