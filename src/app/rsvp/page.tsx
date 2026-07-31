@@ -67,7 +67,7 @@ const rsvpSchema = rsvpFormFieldsSchema
       ctx.addIssue({ code: "custom", path: ["attendingBanquet"], message: "Vui lòng chọn phản hồi cho Tiệc cưới." });
     }
     if (data.postCeremonyPartyInvited && data.attendingCeremony === "yes" && !data.attendingPostCeremonyParty) {
-      ctx.addIssue({ code: "custom", path: ["attendingPostCeremonyParty"], message: "Vui lòng chọn phản hồi cho tiệc sau Hôn phối." });
+      ctx.addIssue({ code: "custom", path: ["attendingPostCeremonyParty"], message: "Vui lòng chọn phản hồi cho tiệc sau Thánh lễ." });
     }
     
     if (data.attending !== "no" && data.guestCount < 1) {
@@ -1065,7 +1065,7 @@ export default function RSVPPage() {
                     {formValues.postCeremonyPartyInvited && formValues.attendingCeremony === "yes" ? (
                       <div className="flex items-center justify-between py-3.5 px-4.5 sm:px-5.5 rounded-2xl bg-[#fffaf2]/80 border border-[#d7c6a8]/45">
                         <div className="text-left">
-                          <p className="font-bold text-[#252934] text-base sm:text-lg">Tiệc sau Hôn phối</p>
+                          <p className="font-bold text-[#252934] text-base sm:text-lg">Tiệc sau Thánh lễ</p>
                           <p className="text-xs sm:text-sm text-[#7a6a5d] font-medium mt-0.5">Sau Thánh lễ Hôn phối</p>
                         </div>
                         <span className={`inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs sm:text-sm font-semibold shadow-xs shrink-0 ${
@@ -1304,43 +1304,48 @@ export default function RSVPPage() {
                         <div className="flex flex-col items-center gap-3 sm:flex-row sm:justify-between">
                           <div className="text-center sm:text-left">
                             <p className="text-sm font-bold tracking-[0.1em] text-[#7a6a5d] uppercase">
-                              Tiệc sau Hôn phối
+                              Tiệc sau Thánh lễ
                             </p>
                             <p className="mt-1 text-sm leading-relaxed text-[#252934]/72">
-                              Quý khách có tham dự buổi tiệc thân mật sau Thánh lễ không?
+                              Kính mời Quý khách ở lại tham dự buổi tiệc thân mật cùng gia đình sau Thánh lễ
                             </p>
                           </div>
-                          <div className="flex h-11 shrink-0 items-center rounded-full bg-white/90 p-1 ring-1 ring-serenity/30 shadow-[0_4px_14px_rgba(63,70,66,0.08)]">
-                            <button
-                              type="button"
-                              onClick={() => {
-                                markFormAsEdited();
-                                setValue("attendingPostCeremonyParty", "yes", { shouldDirty: true, shouldValidate: true });
-                              }}
-                              className={[
-                                "h-full rounded-full px-6 text-sm font-semibold transition-all duration-200",
-                                formValues.attendingPostCeremonyParty === "yes"
-                                  ? "bg-[#7a8a5c] text-white shadow-sm"
-                                  : "text-[#252934] hover:bg-[#252934]/5",
-                              ].join(" ")}
-                            >
-                              Có
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => {
-                                markFormAsEdited();
-                                setValue("attendingPostCeremonyParty", "no", { shouldDirty: true, shouldValidate: true });
-                              }}
-                              className={[
-                                "h-full rounded-full px-6 text-sm font-semibold transition-all duration-200",
-                                formValues.attendingPostCeremonyParty === "no"
-                                  ? "bg-[#7a4a4a] text-white shadow-sm"
-                                  : "text-[#252934] hover:bg-[#252934]/5",
-                              ].join(" ")}
-                            >
-                              Không
-                            </button>
+                          <div className="flex shrink-0 flex-col items-center gap-1 sm:gap-1.5">
+                            <span className="text-[11px] font-bold tracking-[0.14em] text-[#7a6a5d]/75 uppercase">
+                              Tham dự:
+                            </span>
+                            <div className="flex h-11 items-center rounded-full bg-white/90 p-1 ring-1 ring-serenity/30 shadow-[0_4px_14px_rgba(63,70,66,0.08)]">
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  markFormAsEdited();
+                                  setValue("attendingPostCeremonyParty", "yes", { shouldDirty: true, shouldValidate: true });
+                                }}
+                                className={[
+                                  "h-full rounded-full px-6 text-sm font-semibold transition-all duration-200",
+                                  formValues.attendingPostCeremonyParty === "yes"
+                                    ? "bg-[#7a8a5c] text-white shadow-sm"
+                                    : "text-[#252934] hover:bg-[#252934]/5",
+                                ].join(" ")}
+                              >
+                                Có
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  markFormAsEdited();
+                                  setValue("attendingPostCeremonyParty", "no", { shouldDirty: true, shouldValidate: true });
+                                }}
+                                className={[
+                                  "h-full rounded-full px-6 text-sm font-semibold transition-all duration-200",
+                                  formValues.attendingPostCeremonyParty === "no"
+                                    ? "bg-[#7a4a4a] text-white shadow-sm"
+                                    : "text-[#252934] hover:bg-[#252934]/5",
+                                ].join(" ")}
+                              >
+                                Không
+                              </button>
+                            </div>
                           </div>
                         </div>
                         {errors.attendingPostCeremonyParty ? (

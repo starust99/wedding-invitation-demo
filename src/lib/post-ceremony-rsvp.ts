@@ -20,7 +20,7 @@ export function resolvePostCeremonyPartyAnswer({
     return {
       ok: false,
       applies: true,
-      error: "Vui lòng chọn phản hồi cho tiệc sau Hôn phối.",
+      error: "Vui lòng chọn phản hồi cho tiệc sau Thánh lễ.",
     };
   }
   return { ok: true, applies: true, value: answer };
