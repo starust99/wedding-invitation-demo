@@ -15,14 +15,31 @@ import { buildInvitationCopy } from "@/lib/guest-personalization";
 import { weddingConfig } from "@/config/wedding.config";
 
 const inviteSheetName = "Danh sách khách mời";
-const guideSheetName = "Hướng dẫn";
-const exampleSheetName = "Ví dụ";
+const systemSheetName = "_Dữ liệu hệ thống";
 const maxInviteRows = 1000;
 const defaultCoupleDisplayName = weddingConfig.couple.displayName || "Nhật & Phương";
-const optionStartColumn = 11;
-const termLookupStartColumn = 16;
+const titleRowIndex = 1;
+const subtitleRowIndex = 2;
+const headerRowIndex = 4;
+const firstDataRow = headerRowIndex + 1;
+const optionStartColumn = 1;
+const termLookupStartColumn = 5;
 const termLookupColumnCount = 6;
 const groupLookupStartColumn = termLookupStartColumn + termLookupColumnCount;
+const palette = {
+  olive: "FF5F6F4E",
+  oliveDark: "FF48563A",
+  champagne: "FFD6BFA3",
+  ivory: "FFFFFDF8",
+  dropdown: "FFFFF8E8",
+  formula: "FFF1EEE7",
+  white: "FFFFFFFF",
+  text: "FF2E2A25",
+  muted: "FF776F66",
+  border: "FFE7DDCE",
+  warning: "FFFFE7B8",
+  duplicate: "FFF7D9D9",
+} as const;
 type SalutationDefinition = {
   label: string;
   displayPrefix?: string;
@@ -106,15 +123,13 @@ const guestGroupDefinitions: GuestGroupDefinition[] = [
 
 
 const columns = [
-  { key: "salutationCluster", header: "Cụm danh xưng", width: 24 },
-  { key: "guestNameCore", header: "Tên khách", width: 22 },
-  { key: "guestName", header: "Cụm tên khách", width: 28 },
-  { key: "guestGroup", header: "Nhóm khách", width: 34 },
-  { key: "postCeremonyPartyInvited", header: "Tham gia tiệc sau Hôn phối", width: 28 },
-  { key: "insideInviteLine", header: "Lời mời trong thiệp", width: 72 },
+  { key: "salutationCluster", header: "Cụm danh xưng", width: 30 },
+  { key: "guestNameCore", header: "Tên khách", width: 24 },
+  { key: "guestName", header: "Cụm tên khách", width: 34 },
+  { key: "guestGroup", header: "Nhóm khách", width: 40 },
+  { key: "postCeremonyPartyInvited", header: "Tham gia tiệc sau Hôn phối", width: 32 },
+  { key: "insideInviteLine", header: "Lời mời trong thiệp", width: 66 },
 ] as const;
-
-type TemplateColumnKey = (typeof columns)[number]["key"];
 
 type TemplateRowValues = {
   salutationCluster: string;
@@ -160,53 +175,6 @@ const legacyFallbackRowValues: LegacyRowValues = {
 };
 
 const spreadsheetInsideInviteHeading = "TRÂN TRỌNG & THÂN MỜI";
-
-const headerNotes: Partial<Record<TemplateColumnKey, string>> = {
-  salutationCluster: "Chọn cụm danh xưng chuẩn. Ví dụ: Anh, Hai bạn, Vợ chồng bác, Gia đình dì, Gia đình, Gia đình anh chị, Gia đình anh, Gia đình chị, Cô chú.",
-  guestNameCore: "Chỉ gõ phần tên riêng hoặc tên đôi. Ví dụ: Hoàng, Tiến, Sáu, Linh, Tùng & Hương.",
-  guestName: "Cột công thức tự động kết hợp cụm danh xưng và tên khách để tạo thành tên đầy đủ.",
-  guestGroup: "Chọn theo nhóm lớn để dễ lọc danh sách và chia bàn sau này.",
-  postCeremonyPartyInvited: "Để trống với khách thông thường. Chỉ chọn Có nếu muốn hỏi thêm khách này có dự tiệc sau Hôn phối hay không.",
-  insideInviteLine: "Cột công thức, tự động tạo lời mời trong thiệp.",
-};
-
-const exampleRows: TemplateRowValues[] = [
-  {
-    salutationCluster: "Bố mẹ",
-    guestNameCore: "",
-    guestGroup: "[Nhà Gái] Họ ngoại",
-  },
-  {
-    salutationCluster: "Gia đình dì",
-    guestNameCore: "Sáu",
-    guestGroup: "[Nhà Gái] Họ ngoại",
-  },
-  {
-    salutationCluster: "Bạn",
-    guestNameCore: "Thư",
-    guestGroup: "[Nhật] Bạn bè & Đồng nghiệp",
-  },
-  {
-    salutationCluster: "Anh",
-    guestNameCore: "Hoàng",
-    guestGroup: "[Nhật] Bạn bè & Đồng nghiệp",
-  },
-  {
-    salutationCluster: "Anh chị",
-    guestNameCore: "Thành",
-    guestGroup: "[Nhật] Bạn bè & Đồng nghiệp",
-  },
-  {
-    salutationCluster: "Gia đình anh chị",
-    guestNameCore: "Tuấn",
-    guestGroup: "[Nhật] Bạn bè & Đồng nghiệp",
-  },
-  {
-    salutationCluster: "Vợ chồng em",
-    guestNameCore: "Linh",
-    guestGroup: "[Phương] Bạn bè & Đồng nghiệp",
-  },
-];
 
 type InferredTemplateValues = {
   salutationCluster: string;
@@ -353,13 +321,13 @@ function columnLetter(index: number) {
 
 function optionRange(optionKey: OptionKey, optionIndex: number, optionColumns: Record<OptionKey, string[]>) {
   const letter = columnLetter(optionStartColumn + optionIndex);
-  return `${quoteSheetName(guideSheetName)}!$${letter}$2:$${letter}$${optionColumns[optionKey].length + 1}`;
+  return `${quoteSheetName(systemSheetName)}!$${letter}$2:$${letter}$${optionColumns[optionKey].length + 1}`;
 }
 
 function termLookupRange() {
   const start = columnLetter(termLookupStartColumn);
   const end = columnLetter(termLookupStartColumn + termLookupColumnCount - 1);
-  return `${quoteSheetName(guideSheetName)}!$${start}$2:$${end}$${salutationDefinitions.length + 1}`;
+  return `${quoteSheetName(systemSheetName)}!$${start}$2:$${end}$${salutationDefinitions.length + 1}`;
 }
 
 
@@ -399,7 +367,7 @@ function rowPreview(values: TemplateRowValues, options: ReturnType<typeof resolv
 function displayNameCombinedFormula(rowIndex: number) {
   const clusterCell = `$A${rowIndex}`;
   const nameCell = `$B${rowIndex}`;
-  return `IF(${clusterCell}="","",IF(${nameCell}="",IFERROR(VLOOKUP(${clusterCell},${termLookupRange()},9,FALSE),${clusterCell}),TRIM(IFERROR(VLOOKUP(${clusterCell},${termLookupRange()},9,FALSE),${clusterCell})&" "&${nameCell})))`;
+  return `IF(${clusterCell}="","",IF(${nameCell}="",IFERROR(VLOOKUP(${clusterCell},${termLookupRange()},6,FALSE),${clusterCell}),TRIM(IFERROR(VLOOKUP(${clusterCell},${termLookupRange()},6,FALSE),${clusterCell})&" "&${nameCell})))`;
 }
 
 function insideInviteFormula(rowIndex: number, options: ReturnType<typeof resolveSpreadsheetOptions>) {
@@ -468,26 +436,45 @@ function deriveHonorific(hostRelationship: string) {
 
 function styleInputCell(cell: ExcelJS.Cell, isDropdown: boolean) {
   cell.protection = { locked: false };
-  cell.alignment = { vertical: "middle", wrapText: true };
-  cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: isDropdown ? "FFFFFBF2" : "FFFFFFFF" } };
+  cell.font = { name: "Arial", size: 13, color: { argb: palette.text } };
+  cell.alignment = { vertical: "middle", horizontal: "left", wrapText: true };
+  cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: isDropdown ? palette.dropdown : palette.white } };
   cell.border = {
-    top: { style: "thin", color: { argb: "FFE8DDCC" } },
-    left: { style: "thin", color: { argb: "FFE8DDCC" } },
-    bottom: { style: "thin", color: { argb: "FFE8DDCC" } },
-    right: { style: "thin", color: { argb: "FFE8DDCC" } },
+    bottom: { style: "thin", color: { argb: palette.border } },
+    right: { style: "thin", color: { argb: palette.border } },
   };
 }
 
 function styleFormulaCell(cell: ExcelJS.Cell) {
   cell.protection = { locked: true };
-  cell.alignment = { vertical: "middle", wrapText: true };
-  cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFF4F0E7" } };
+  cell.font = { name: "Arial", size: 12, color: { argb: palette.muted } };
+  cell.alignment = { vertical: "middle", horizontal: "left", wrapText: true };
+  cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: palette.formula } };
   cell.border = {
-    top: { style: "thin", color: { argb: "FFE8DDCC" } },
-    left: { style: "thin", color: { argb: "FFE8DDCC" } },
-    bottom: { style: "thin", color: { argb: "FFE8DDCC" } },
-    right: { style: "thin", color: { argb: "FFE8DDCC" } },
+    bottom: { style: "thin", color: { argb: palette.border } },
+    right: { style: "thin", color: { argb: palette.border } },
   };
+}
+
+function buildTitleBanner(worksheet: ExcelJS.Worksheet, options: ReturnType<typeof resolveSpreadsheetOptions>) {
+  worksheet.mergeCells(`A${titleRowIndex}:F${titleRowIndex}`);
+  const titleCell = worksheet.getCell(titleRowIndex, 1);
+  titleCell.value = "DANH SÁCH KHÁCH MỜI";
+  titleCell.font = { name: "Georgia", size: 24, bold: true, color: { argb: palette.white } };
+  titleCell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: palette.olive } };
+  titleCell.alignment = { horizontal: "center", vertical: "middle" };
+  worksheet.getRow(titleRowIndex).height = 48;
+
+  worksheet.mergeCells(`A${subtitleRowIndex}:F${subtitleRowIndex}`);
+  const subtitleCell = worksheet.getCell(subtitleRowIndex, 1);
+  subtitleCell.value = `Lễ thành hôn ${options.coupleDisplayName}`;
+  subtitleCell.font = { name: "Arial", size: 13, italic: true, color: { argb: palette.text } };
+  subtitleCell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: palette.ivory } };
+  subtitleCell.alignment = { horizontal: "center", vertical: "middle" };
+  subtitleCell.border = { bottom: { style: "thin", color: { argb: palette.champagne } } };
+  worksheet.getRow(subtitleRowIndex).height = 30;
+
+  worksheet.getRow(headerRowIndex - 1).height = 8;
 }
 
 function applyFormulaCells(row: ExcelJS.Row, rowIndex: number, options: ReturnType<typeof resolveSpreadsheetOptions>, values?: TemplateRowValues) {
@@ -503,19 +490,12 @@ function applyFormulaCells(row: ExcelJS.Row, rowIndex: number, options: ReturnTy
   styleFormulaCell(insideCell);
 }
 
-function fillEditableCells(row: ExcelJS.Row, values: TemplateRowValues) {
-  row.getCell(1).value = values.salutationCluster;
-  row.getCell(2).value = values.guestNameCore;
-  row.getCell(4).value = values.guestGroup;
-  row.getCell(5).value = values.postCeremonyPartyInvited ?? "";
-}
-
-function applyTemplateRows(worksheet: ExcelJS.Worksheet, options: ReturnType<typeof resolveSpreadsheetOptions>, startRowIndex = 2) {
+function applyTemplateRows(worksheet: ExcelJS.Worksheet, options: ReturnType<typeof resolveSpreadsheetOptions>, startRowIndex = firstDataRow) {
   const optionColumns = getOptionColumns(options.coupleDisplayName);
 
   for (let rowIndex = startRowIndex; rowIndex < startRowIndex + maxInviteRows; rowIndex += 1) {
     const row = worksheet.getRow(rowIndex);
-    row.height = 48;
+    row.height = 54;
 
     // 1. salutationCluster
     const cell1 = row.getCell(1);
@@ -565,72 +545,13 @@ function applyTemplateRows(worksheet: ExcelJS.Worksheet, options: ReturnType<typ
 }
 
 
-function buildGuideSheet(workbook: ExcelJS.Workbook, options: ReturnType<typeof resolveSpreadsheetOptions>) {
-  const worksheet = workbook.addWorksheet(guideSheetName);
+function buildSystemSheet(workbook: ExcelJS.Workbook, options: ReturnType<typeof resolveSpreadsheetOptions>) {
+  const worksheet = workbook.addWorksheet(systemSheetName);
   const optionColumns = getOptionColumns(options.coupleDisplayName);
   const optionEntries = Object.entries(optionColumns) as [OptionKey, string[]][];
 
-  worksheet.views = [{ state: "frozen", ySplit: 1 }];
-  worksheet.columns = [
-    { key: "section", width: 24 },
-    { key: "detail", width: 78 },
-    { key: "note", width: 42 },
-    { key: "spacer1", width: 4 },
-    { key: "column", width: 32 },
-    { key: "meaning", width: 64 },
-    { key: "spacer2", width: 4 },
-    { key: "spacer3", width: 4 },
-    { key: "spacer4", width: 4 },
-    { key: "spacer5", width: 4 },
-  ];
-
-  worksheet.getCell("A1").value = "Hướng dẫn nhanh";
-  worksheet.getCell("B1").value = "Cách dùng file Excel";
-  worksheet.getCell("A2").value = "Bước 1";
-  worksheet.getCell("B2").value = "Chỉ điền các cột cần thiết ở sheet Danh sách khách mời.";
-  worksheet.getCell("A3").value = "Bước 2";
-  worksheet.getCell("B3").value = "Cụm danh xưng, Nhóm khách và tùy chọn tiệc sau Hôn phối dùng dropdown. Tên khách là cột gõ tay.";
-  worksheet.getCell("A4").value = "Bước 3";
-  worksheet.getCell("B4").value = "Nhìn các cột preview để kiểm tra dòng phong bì, lời mời trong thiệp và trạng thái sẵn sàng upload.";
-  worksheet.getCell("A5").value = "Bước 4";
-  worksheet.getCell("B5").value = "Upload lại file này vào /admin, rồi bấm Xuất Excel link riêng.";
-  worksheet.getCell("A7").value = "Lưu ý";
-  worksheet.getCell("B7").value = "Không sửa các cột preview công thức. Nếu lời mời chưa hiện, bấm Enter ở ô Tên khách hoặc mở bằng Microsoft Excel/Google Sheets để file tự tính lại.";
-  worksheet.getCell("A8").value = "Mẹo điền";
-  worksheet.getCell("B8").value = "Ví dụ chọn Cụm danh xưng = Vợ chồng bác, Tên khách = Tiến thì hệ thống tự tạo Cụm tên khách = Vợ chồng bác Tiến.";
-  worksheet.getCell("A10").value = "Cột điền chính";
-  worksheet.getCell("B10").value = "Cách ghi chuẩn";
-  worksheet.getCell("A11").value = "Một người";
-  worksheet.getCell("B11").value = "Cụm danh xưng = Anh/Chị/Em/Bác/Chú..., Tên khách = phần tên riêng.";
-  worksheet.getCell("A12").value = "Hai vợ chồng";
-  worksheet.getCell("B12").value = "Cụm danh xưng = Vợ chồng bác/Anh chị/Vợ chồng em..., Tên khách = phần tên riêng.";
-  worksheet.getCell("A13").value = "Gia đình";
-  worksheet.getCell("B13").value = "Cụm danh xưng = Gia đình dì/Gia đình anh chị/Gia đình bạn..., Tên khách = phần tên riêng.";
-  worksheet.getCell("A14").value = "Ba mẹ mời ông bà";
-  worksheet.getCell("B14").value = "Chọn Cụm danh xưng = Bố mẹ hoặc Ông bà, có thể để trống Tên khách.";
-  worksheet.getCell("A15").value = "Tiệc sau Hôn phối";
-  worksheet.getCell("B15").value = "Mặc định để trống. Chỉ chọn Có cho khách cần được hỏi thêm trong phần RSVP sau khi xác nhận dự Thánh lễ.";
-
-  const explanations = [
-    ["Cụm danh xưng", "Chọn cách gọi khách: Anh, Vợ chồng bác, Gia đình dì, Gia đình anh chị, Cô chú..."],
-    ["Tên khách", "Chỉ gõ phần tên riêng. Có thể để trống với các cụm như Bố mẹ, Ba mẹ, Ông bà."],
-    ["Cụm tên khách", "Cột công thức tự động kết hợp cụm danh xưng và tên khách để tạo thành tên đầy đủ."],
-    ["Nhóm khách", "Nhóm đã được gom theo tiền tố [Nhà Trai], [Nhà Gái], [Nhật], [Phương] để dễ dò và dễ lọc chia bàn."],
-    ["Tham gia tiệc sau Hôn phối", "Để trống với khách thông thường. Chọn Có để hiện câu hỏi phụ trên RSVP khi khách xác nhận dự Thánh lễ."],
-    ["Lời mời trong thiệp", "Cột preview, đây là lời mời sẽ lưu cho link riêng của khách."],
-  ];
-
-  worksheet.getCell("E1").value = "Giải thích từng cột";
-  worksheet.getCell("F1").value = "Ý nghĩa";
-  explanations.forEach(([column, meaning], index) => {
-    worksheet.getCell(index + 2, 5).value = column;
-    worksheet.getCell(index + 2, 6).value = meaning;
-  });
-
   optionEntries.forEach(([optionKey, values], columnIndex) => {
     const targetColumnIndex = optionStartColumn + columnIndex;
-    const column = worksheet.getColumn(targetColumnIndex);
-    column.width = 34;
     worksheet.getCell(1, targetColumnIndex).value = columns.find((item) => item.key === optionKey)?.header ?? optionKey;
     values.forEach((value, valueIndex) => {
       worksheet.getCell(valueIndex + 2, targetColumnIndex).value = value;
@@ -663,52 +584,79 @@ function buildGuideSheet(workbook: ExcelJS.Workbook, options: ReturnType<typeof 
     worksheet.getCell(targetRow, groupLookupStartColumn + 1).value = item.audienceTags;
   });
 
-  worksheet.getRow(1).height = 28;
-  worksheet.getRow(1).eachCell((cell) => {
-    cell.font = { bold: true, color: { argb: "FFFFFFFF" } };
-    cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FF5F6F4E" } };
-    cell.alignment = { vertical: "middle", horizontal: "center", wrapText: true };
-  });
-  worksheet.eachRow((row, rowIndex) => {
-    if (rowIndex === 1) return;
-    row.height = 34;
-    row.eachCell((cell) => {
-      cell.alignment = { vertical: "middle", wrapText: true };
-      cell.border = {
-        top: { style: "thin", color: { argb: "FFE8DDCC" } },
-        left: { style: "thin", color: { argb: "FFE8DDCC" } },
-        bottom: { style: "thin", color: { argb: "FFE8DDCC" } },
-        right: { style: "thin", color: { argb: "FFE8DDCC" } },
-      };
-    });
-  });
+  worksheet.state = "veryHidden";
 }
 
 function applyWorksheetColumns(worksheet: ExcelJS.Worksheet) {
   worksheet.columns = columns.map((column) => ({
     key: column.key,
-    header: column.header,
     width: column.width,
   }));
 }
 
 function applyHeaderRow(worksheet: ExcelJS.Worksheet, rowIndex: number) {
   const headerRow = worksheet.getRow(rowIndex);
-  headerRow.height = 28;
+  headerRow.height = 48;
   columns.forEach((column, index) => {
     const cell = headerRow.getCell(index + 1);
     cell.value = column.header;
-    cell.font = { bold: true, color: { argb: "FFFFFFFF" } };
-    cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FF5F6F4E" } };
+    cell.font = { name: "Arial", size: 12, bold: true, color: { argb: palette.white } };
+    cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: palette.oliveDark } };
     cell.alignment = { vertical: "middle", horizontal: "center", wrapText: true };
     cell.border = {
-      top: { style: "thin", color: { argb: "FFD7C6A8" } },
-      left: { style: "thin", color: { argb: "FFD7C6A8" } },
-      bottom: { style: "thin", color: { argb: "FFD7C6A8" } },
-      right: { style: "thin", color: { argb: "FFD7C6A8" } },
+      top: { style: "thin", color: { argb: palette.oliveDark } },
+      left: { style: "thin", color: { argb: palette.champagne } },
+      bottom: { style: "medium", color: { argb: palette.champagne } },
+      right: { style: "thin", color: { argb: palette.champagne } },
     };
-    const note = headerNotes[column.key];
-    if (note) cell.note = note;
+  });
+}
+
+function applyInputConditionalFormatting(worksheet: ExcelJS.Worksheet) {
+  const lastDataRow = firstDataRow + maxInviteRows - 1;
+  const warningStyle = {
+    fill: { type: "pattern", pattern: "solid", fgColor: { argb: palette.warning } } as ExcelJS.Fill,
+    font: { color: { argb: palette.text }, bold: true },
+  };
+
+  worksheet.addConditionalFormatting({
+    ref: `A${firstDataRow}:A${lastDataRow}`,
+    rules: [{
+      type: "expression",
+      priority: 1,
+      formulae: [`AND($A${firstDataRow}="",OR($B${firstDataRow}<>"",$D${firstDataRow}<>""))`],
+      style: warningStyle,
+    }],
+  });
+  worksheet.addConditionalFormatting({
+    ref: `B${firstDataRow}:B${lastDataRow}`,
+    rules: [{
+      type: "expression",
+      priority: 2,
+      formulae: [`AND($A${firstDataRow}<>"",$B${firstDataRow}="",NOT(OR($A${firstDataRow}="Ông bà",$A${firstDataRow}="Bố mẹ",$A${firstDataRow}="Ba mẹ",$A${firstDataRow}="Bố",$A${firstDataRow}="Mẹ")))`],
+      style: warningStyle,
+    }],
+  });
+  worksheet.addConditionalFormatting({
+    ref: `D${firstDataRow}:D${lastDataRow}`,
+    rules: [{
+      type: "expression",
+      priority: 3,
+      formulae: [`AND(OR($A${firstDataRow}<>"",$B${firstDataRow}<>""),$D${firstDataRow}="")`],
+      style: warningStyle,
+    }],
+  });
+  worksheet.addConditionalFormatting({
+    ref: `C${firstDataRow}:C${lastDataRow}`,
+    rules: [{
+      type: "expression",
+      priority: 4,
+      formulae: [`AND($C${firstDataRow}<>"",COUNTIF($C$${firstDataRow}:$C$${lastDataRow},$C${firstDataRow})>1)`],
+      style: {
+        fill: { type: "pattern", pattern: "solid", fgColor: { argb: palette.duplicate } },
+        font: { color: { argb: palette.text }, bold: true },
+      },
+    }],
   });
 }
 
@@ -734,38 +682,6 @@ function findInviteHeaderRow(worksheet: ExcelJS.Worksheet) {
   return { headerRowIndex, headers };
 }
 
-function hideHelperColumns(worksheet: ExcelJS.Worksheet) {
-  void worksheet;
-}
-
-function buildExampleSheet(workbook: ExcelJS.Workbook, options: ReturnType<typeof resolveSpreadsheetOptions>) {
-  const worksheet = workbook.addWorksheet(exampleSheetName, {
-    views: [{ state: "frozen", ySplit: 1 }],
-  });
-
-  applyWorksheetColumns(worksheet);
-  worksheet.autoFilter = {
-    from: { row: 1, column: 1 },
-    to: { row: 1, column: 6 },
-  };
-  applyHeaderRow(worksheet, 1);
-  hideHelperColumns(worksheet);
-
-  exampleRows.forEach((values, index) => {
-    const rowIndex = index + 2;
-    const row = worksheet.getRow(rowIndex);
-    row.height = 52;
-    fillEditableCells(row, values);
-    styleInputCell(row.getCell(1), true);
-    styleInputCell(row.getCell(2), false);
-    styleInputCell(row.getCell(4), true);
-    styleInputCell(row.getCell(5), true);
-    applyFormulaCells(row, rowIndex, options, values);
-  });
-
-  worksheet.getColumn(6).font = { color: { argb: "FF2E2A25" } };
-}
-
 export async function buildInviteTemplateWorkbook(spreadsheetOptions: SpreadsheetOptions = {}) {
   const options = resolveSpreadsheetOptions(spreadsheetOptions);
   const workbook = new ExcelJS.Workbook();
@@ -773,25 +689,47 @@ export async function buildInviteTemplateWorkbook(spreadsheetOptions: Spreadshee
   workbook.created = new Date();
   workbook.modified = new Date();
   workbook.calcProperties.fullCalcOnLoad = true;
+  workbook.views = [{ x: 0, y: 0, width: 18000, height: 10000, firstSheet: 0, activeTab: 0, visibility: "visible" }];
 
   const worksheet = workbook.addWorksheet(inviteSheetName, {
-    views: [{ state: "frozen", ySplit: 1 }],
+    views: [{
+      state: "frozen",
+      xSplit: 6,
+      ySplit: headerRowIndex,
+      activeCell: `A${firstDataRow}`,
+      topLeftCell: `G${firstDataRow}`,
+      showGridLines: false,
+      zoomScale: 85,
+    }],
   });
+  worksheet.properties.defaultRowHeight = 54;
   applyWorksheetColumns(worksheet);
+  buildTitleBanner(worksheet, options);
   worksheet.autoFilter = {
-    from: { row: 1, column: 1 },
-    to: { row: 1, column: 6 },
+    from: { row: headerRowIndex, column: 1 },
+    to: { row: headerRowIndex, column: 6 },
   };
 
-  const headerRowIndex = 1;
   applyHeaderRow(worksheet, headerRowIndex);
-  hideHelperColumns(worksheet);
-  const firstDataRow = 2;
-  buildGuideSheet(workbook, options);
-  buildExampleSheet(workbook, options);
+  buildSystemSheet(workbook, options);
   applyTemplateRows(worksheet, options, firstDataRow);
-
-  worksheet.getColumn(6).font = { color: { argb: "FF2E2A25" } };
+  applyInputConditionalFormatting(worksheet);
+  worksheet.pageSetup = {
+    orientation: "landscape",
+    paperSize: 9,
+    fitToPage: true,
+    fitToWidth: 1,
+    fitToHeight: 0,
+    horizontalCentered: true,
+    margins: { left: 0.3, right: 0.3, top: 0.5, bottom: 0.5, header: 0.2, footer: 0.2 },
+    printTitlesRow: `1:${headerRowIndex}`,
+  };
+  await worksheet.protect("nhatphuong", {
+    selectLockedCells: true,
+    selectUnlockedCells: true,
+    autoFilter: true,
+    sort: true,
+  });
 
   return workbook;
 }
