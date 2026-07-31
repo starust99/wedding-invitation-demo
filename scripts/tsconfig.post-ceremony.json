@@ -1,0 +1,18 @@
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "outDir": "../.tmp-post-ceremony-check",
+    "target": "ES2022",
+    "module": "CommonJS",
+    "moduleResolution": "Node",
+    "noEmit": false,
+    "incremental": false,
+    "isolatedModules": false
+  },
+  "include": [
+    "../src/lib/invite-spreadsheet.ts",
+    "../src/lib/invite-mapper.ts",
+    "../src/lib/post-ceremony-rsvp.ts",
+    "../src/lib/rsvp-mapper.ts"
+  ]
+}

@@ -10,9 +10,11 @@ export type RSVPResponse = {
   inviteeId?: string;
   inviteToken?: string;
   displayLabel?: string;
+  postCeremonyPartyInvited?: boolean;
   name: string;
   phone: string;
   attendingCeremony?: boolean;
+  attendingPostCeremonyParty?: boolean;
   attendingBanquet?: boolean;
   attending: "yes" | "no" | "maybe";
   guestCount: number;

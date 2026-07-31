@@ -39,9 +39,11 @@ function normalizeResponses(value: unknown): RSVPResponse[] {
       inviteeId: response.inviteeId ? text(response.inviteeId) : undefined,
       inviteToken: response.inviteToken ? text(response.inviteToken) : undefined,
       displayLabel: response.displayLabel ? text(response.displayLabel) : undefined,
+      postCeremonyPartyInvited: typeof response.postCeremonyPartyInvited === "boolean" ? response.postCeremonyPartyInvited : undefined,
       name: text(response.name),
       phone: text(response.phone),
       attendingCeremony: typeof response.attendingCeremony === "boolean" ? response.attendingCeremony : undefined,
+      attendingPostCeremonyParty: typeof response.attendingPostCeremonyParty === "boolean" ? response.attendingPostCeremonyParty : undefined,
       attendingBanquet: typeof response.attendingBanquet === "boolean" ? response.attendingBanquet : undefined,
       attending: response.attending === "no" ? "no" : response.attending === "maybe" ? "maybe" : "yes",
       guestCount: Number(response.guestCount) || 0,
@@ -101,6 +103,9 @@ function addSummarySheet(workbook: ExcelJS.Workbook, responses: RSVPResponse[], 
     ["Ngày xuất", new Date().toLocaleString("vi-VN")],
     ["Tổng lời hồi đáp", responses.length],
     ["Số khách xác nhận tham dự", attendingYes.reduce((sum, response) => sum + response.guestCount, 0)],
+    ["Số khách dự Thánh lễ", responses.filter((response) => response.attendingCeremony).reduce((sum, response) => sum + response.guestCount, 0)],
+    ["Số khách dự tiệc sau Hôn phối", responses.filter((response) => response.attendingPostCeremonyParty).reduce((sum, response) => sum + response.guestCount, 0)],
+    ["Số khách dự Tiệc cưới", responses.filter((response) => response.attendingBanquet).reduce((sum, response) => sum + response.guestCount, 0)],
     ["Số lời từ chối", responses.filter((response) => response.attending === "no").length],
     ["Số yêu cầu lưu trú", stayingResponses.length],
     ["Tổng người ở lại", stayingGuests],
@@ -127,6 +132,7 @@ function addResponsesSheet(workbook: ExcelJS.Workbook, responses: RSVPResponse[]
     { key: "name", header: "Họ tên khách điền", width: 30 },
     { key: "phone", header: "Số điện thoại", width: 18 },
     { key: "attendingCeremony", header: "Dự Thánh lễ", width: 18 },
+    { key: "attendingPostCeremonyParty", header: "Dự tiệc sau Hôn phối", width: 24 },
     { key: "attendingBanquet", header: "Dự Tiệc mừng", width: 18 },
     { key: "attending", header: "Phản hồi chung", width: 20 },
     { key: "guestCount", header: "Số khách", width: 12 },
@@ -149,6 +155,11 @@ function addResponsesSheet(workbook: ExcelJS.Workbook, responses: RSVPResponse[]
       name: response.name,
       phone: response.phone,
       attendingCeremony: response.attendingCeremony !== undefined ? formatBoolean(response.attendingCeremony) : "-",
+      attendingPostCeremonyParty: !response.postCeremonyPartyInvited || !response.attendingCeremony
+        ? "Không áp dụng"
+        : response.attendingPostCeremonyParty === undefined
+          ? "Chưa trả lời"
+          : formatBoolean(response.attendingPostCeremonyParty),
       attendingBanquet: response.attendingBanquet !== undefined ? formatBoolean(response.attendingBanquet) : "-",
       attending: attendingLabel(response.attending),
       guestCount: response.guestCount,
@@ -166,7 +177,7 @@ function addResponsesSheet(workbook: ExcelJS.Workbook, responses: RSVPResponse[]
     });
   });
 
-  styleWorksheet(worksheet, "A1:R1");
+  styleWorksheet(worksheet, "A1:S1");
 }
 
 function addLodgingSheet(workbook: ExcelJS.Workbook, responses: RSVPResponse[]) {

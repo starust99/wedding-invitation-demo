@@ -8,6 +8,13 @@ const columns: Array<[string, (response: RSVPResponse) => string | number | bool
   ["Tên khách", (response) => response.name],
   ["Số điện thoại", (response) => response.phone],
   ["Tham dự", (response) => attendingLabel(response.attending)],
+  ["Dự Thánh lễ", (response) => response.attendingCeremony === undefined ? "" : response.attendingCeremony ? "Có" : "Không"],
+  ["Dự tiệc sau Hôn phối", (response) => {
+    if (!response.postCeremonyPartyInvited || !response.attendingCeremony) return "Không áp dụng";
+    if (response.attendingPostCeremonyParty === undefined) return "Chưa trả lời";
+    return response.attendingPostCeremonyParty ? "Có" : "Không";
+  }],
+  ["Dự Tiệc cưới", (response) => response.attendingBanquet === undefined ? "" : response.attendingBanquet ? "Có" : "Không"],
   ["Số khách", (response) => response.guestCount],
   ["Nhóm khách", (response) => response.guestGroup],
   ["Ghi chú thực đơn", (response) => response.dietaryNote],
@@ -54,6 +61,7 @@ export function serializeInviteLinksCsv(invitees: Invitee[], origin = "") {
     "Link thiệp riêng",
     "Nhóm khách mời",
     "Số khách dự kiến",
+    "Hỏi tiệc sau Hôn phối",
     "Trạng thái RSVP",
     "Số điện thoại",
     "Ghi chú",
@@ -68,6 +76,7 @@ export function serializeInviteLinksCsv(invitees: Invitee[], origin = "") {
     escapeCsv(buildInviteUrl(invitee.token, origin)),
     escapeCsv(invitee.guestGroup),
     escapeCsv(invitee.expectedGuestCount),
+    escapeCsv(invitee.postCeremonyPartyInvited ? "Có" : ""),
     escapeCsv(inviteStatusLabels[invitee.inviteStatus]),
     escapeCsv(invitee.phone),
     escapeCsv(invitee.notes),

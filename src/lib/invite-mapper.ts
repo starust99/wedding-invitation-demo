@@ -31,6 +31,7 @@ export type InviteeDatabaseRow = {
   guest_group: string;
   audience_tags: string[] | null;
   expected_guest_count: number;
+  post_ceremony_party_invited?: boolean | null;
   phone: string;
   email: string;
   notes: string;
@@ -105,6 +106,7 @@ export function mapInviteeRow(row: InviteeDatabaseRow, supplement?: InviteSupple
     guestGroup: row.guest_group,
     audienceTags: row.audience_tags ?? [],
     expectedGuestCount: row.expected_guest_count,
+    postCeremonyPartyInvited: row.post_ceremony_party_invited ?? false,
     phone: row.phone,
     email: row.email,
     notes: row.notes,
@@ -138,6 +140,7 @@ export function toInviteeUpsert(invitee: Invitee) {
     guest_group: invitee.guestGroup,
     audience_tags: invitee.audienceTags,
     expected_guest_count: invitee.expectedGuestCount,
+    post_ceremony_party_invited: invitee.postCeremonyPartyInvited,
     phone: invitee.phone,
     email: invitee.email,
     notes: invitee.notes,

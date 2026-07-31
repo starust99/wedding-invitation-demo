@@ -44,6 +44,7 @@ export type Invitee = {
   guestGroup: string;
   audienceTags: string[];
   expectedGuestCount: number;
+  postCeremonyPartyInvited: boolean;
   phone: string;
   email: string;
   notes: string;
@@ -73,6 +74,7 @@ export type AlbumRule = {
 export type InviteImportResult = {
   invitees: Invitee[];
   errors: string[];
+  hasPostCeremonyPartyColumn?: boolean;
 };
 
 export type InviteeInput = Partial<Invitee>;
@@ -102,6 +104,7 @@ export const inviteCsvColumns = [
   "guest_group",
   "audience_tags",
   "expected_guest_count",
+  "post_ceremony_party_invited",
   "phone",
   "email",
   "notes",
@@ -130,6 +133,7 @@ export const inviteCsvColumnLabels: Record<InviteCsvColumn, string> = {
   guest_group: "Nhóm khách mời",
   audience_tags: "Nhóm xem album",
   expected_guest_count: "Số khách",
+  post_ceremony_party_invited: "Tham gia tiệc sau Hôn phối",
   phone: "Số điện thoại",
   email: "Email",
   notes: "Ghi chú",
@@ -156,6 +160,7 @@ const inviteCsvColumnAliases: Record<InviteCsvColumn, string[]> = {
   guest_group: ["guest_group", "guestGroup", "nhom khach", "nhóm khách", "nhom khach moi", "nhóm khách mời"],
   audience_tags: ["audience_tags", "audienceTags", "nhom xem album", "nhóm xem album", "nhom duoc xem album", "nhóm được xem album", "tag album"],
   expected_guest_count: ["expected_guest_count", "expectedGuestCount", "so khach du kien", "số khách dự kiến"],
+  post_ceremony_party_invited: ["post_ceremony_party_invited", "postCeremonyPartyInvited", "tham gia tiec sau hon phoi", "tham gia tiệc sau hôn phối"],
   phone: ["phone", "so dien thoai", "số điện thoại", "dien thoai", "điện thoại"],
   email: ["email"],
   notes: ["notes", "ghi chu", "ghi chú"],
@@ -270,6 +275,7 @@ export const inviteTemplateRows = [
     guest_group: "Họ ngoại",
     audience_tags: "gia đình;họ ngoại",
     expected_guest_count: "2",
+    post_ceremony_party_invited: "",
     phone: "",
     email: "",
     notes: "",
@@ -295,6 +301,7 @@ export const inviteTemplateRows = [
     guest_group: "Họ nội",
     audience_tags: "gia đình;họ nội",
     expected_guest_count: "2",
+    post_ceremony_party_invited: "",
     phone: "",
     email: "",
     notes: "",
@@ -320,6 +327,7 @@ export const inviteTemplateRows = [
     guest_group: "Bạn đại học",
     audience_tags: "bạn bè;bạn đại học",
     expected_guest_count: "1",
+    post_ceremony_party_invited: "",
     phone: "",
     email: "",
     notes: "",
@@ -345,6 +353,7 @@ export const inviteTemplateRows = [
     guest_group: "Đồng nghiệp",
     audience_tags: "đồng nghiệp",
     expected_guest_count: "1",
+    post_ceremony_party_invited: "",
     phone: "",
     email: "",
     notes: "",
@@ -370,6 +379,7 @@ export const inviteTemplateRows = [
     guest_group: "Bạn nhỏ tuổi hơn",
     audience_tags: "bạn bè",
     expected_guest_count: "1",
+    post_ceremony_party_invited: "",
     phone: "",
     email: "",
     notes: "",
@@ -550,6 +560,7 @@ export function serializeInviteesCsv(invitees: Invitee[]) {
       guest_group: invitee.guestGroup,
       audience_tags: joinAudienceTags(invitee.audienceTags),
       expected_guest_count: invitee.expectedGuestCount,
+      post_ceremony_party_invited: invitee.postCeremonyPartyInvited ? "Có" : "",
       phone: invitee.phone,
       email: invitee.email,
       notes: invitee.notes,
@@ -667,6 +678,7 @@ export function createInvitee(input: InviteeInput, existingTokens = new Set<stri
     guestGroup: clean(input.guestGroup) || "Khác",
     audienceTags: Array.isArray(input.audienceTags) ? input.audienceTags.filter(Boolean) : splitTags(input.audienceTags),
     expectedGuestCount: Math.max(1, Number(input.expectedGuestCount) || 1),
+    postCeremonyPartyInvited: Boolean(input.postCeremonyPartyInvited),
     phone: clean(input.phone),
     email: clean(input.email),
     notes: clean(input.notes),
@@ -682,12 +694,20 @@ export function parseInviteCsv(text: string, existingInvitees: Invitee[] = []): 
   const existingTokens = new Set(existingInvitees.map((invitee) => invitee.token));
   const usedTokens = new Set<string>();
   const rows = parseCsv(text);
+  const firstLine = text.replace(/^\uFEFF/, "").split(/\r?\n/).find((line) => line.trim()) ?? "";
+  const resolvedHeaders = parseCsvLine(firstLine).map(resolveInviteCsvColumn);
+  const hasPostCeremonyPartyColumn = resolvedHeaders.includes("post_ceremony_party_invited");
   const errors: string[] = [];
   const invitees = rows.map((row, index) => {
     const displayLabel = row.display_label || row.displayLabel || row.guest_name || row.guestName;
     if (!displayLabel) errors.push(`Dòng ${index + 2}: thiếu Tên dễ nhận biết trong admin hoặc Tên gốc.`);
     const hasExplicitToken = Boolean(clean(row.token));
     const tokenPool = hasExplicitToken ? usedTokens : new Set([...existingTokens, ...usedTokens]);
+    const postCeremonyPartyValue = clean(row.post_ceremony_party_invited || row.postCeremonyPartyInvited);
+    const postCeremonyPartyInvited = normalizeCsvKey(postCeremonyPartyValue) === "co";
+    if (postCeremonyPartyValue && !postCeremonyPartyInvited) {
+      errors.push(`Dòng ${index + 2}: cột Tham gia tiệc sau Hôn phối chỉ nhận giá trị Có hoặc để trống.`);
+    }
 
     const invitee = createInvitee({
       token: row.token,
@@ -710,6 +730,7 @@ export function parseInviteCsv(text: string, existingInvitees: Invitee[] = []): 
       guestGroup: row.guest_group || row.guestGroup,
       audienceTags: parseAudienceTags(row.audience_tags || row.audienceTags),
       expectedGuestCount: Number(row.expected_guest_count || row.expectedGuestCount),
+      postCeremonyPartyInvited,
       phone: row.phone,
       email: row.email,
       notes: row.notes,
@@ -719,7 +740,7 @@ export function parseInviteCsv(text: string, existingInvitees: Invitee[] = []): 
     return invitee;
   });
 
-  return { invitees, errors };
+  return { invitees, errors, hasPostCeremonyPartyColumn };
 }
 
 export function readLocalInvitees(): Invitee[] {

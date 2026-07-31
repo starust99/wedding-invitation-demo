@@ -8,12 +8,14 @@ import {
 } from "@/lib/rsvp-mapper";
 import type { RSVPResponse } from "@/lib/rsvp-storage";
 import { getSupabaseServerClient, hasSupabaseEnv } from "@/lib/supabase-server";
+import { resolvePostCeremonyPartyAnswer } from "@/lib/post-ceremony-rsvp";
 
 const guestRsvpSchema = z.object({
   displayLabel: z.string().trim().optional(),
   name: z.string().trim().min(1).max(200),
   phone: z.string().trim().max(30).default(""),
   attendingCeremony: z.boolean(),
+  attendingPostCeremonyParty: z.boolean().optional(),
   attendingBanquet: z.boolean(),
   guestCount: z.coerce.number().int().min(0).max(50),
   guestGroup: z.string().trim().max(200).default(""),
@@ -50,12 +52,21 @@ export async function POST(request: Request, { params }: { params: Promise<{ tok
   const supabase = getSupabaseServerClient();
   const { data: invitee, error: inviteeError } = await supabase
     .from("invitees")
-    .select("id, token, display_label, guest_group, expected_guest_count")
+    .select("id, token, display_label, guest_group, expected_guest_count, post_ceremony_party_invited")
     .eq("token", token)
     .maybeSingle();
 
   if (inviteeError) return NextResponse.json({ error: inviteeError.message }, { status: 500 });
   if (!invitee) return NextResponse.json({ error: "Invite not found" }, { status: 404 });
+
+  const postCeremonyParty = resolvePostCeremonyPartyAnswer({
+    invited: Boolean(invitee.post_ceremony_party_invited),
+    attendingCeremony: body.attendingCeremony,
+    answer: body.attendingPostCeremonyParty,
+  });
+  if (!postCeremonyParty.ok) {
+    return NextResponse.json({ error: postCeremonyParty.error }, { status: 400 });
+  }
 
   const expectedGuestCount = Math.max(1, Number(invitee.expected_guest_count) || 1);
   const attending = body.attendingCeremony || body.attendingBanquet ? "yes" : "no";
@@ -68,6 +79,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ tok
     displayLabel: invitee.display_label as string,
     name: invitee.display_label as string,
     guestGroup: invitee.guest_group as string,
+    attendingPostCeremonyParty: postCeremonyParty.value,
     attending,
     guestCount: attending === "no"
       ? 0
@@ -102,7 +114,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ tok
     return mutation.select("*").single();
   };
 
-  const { data, error } = await mutate(false);
+  const { data, error } = await mutate(true);
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 

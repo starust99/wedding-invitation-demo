@@ -7,6 +7,7 @@ import {
   type RSVPDatabaseRow,
 } from "@/lib/rsvp-mapper";
 import { getSupabaseServerClient, hasSupabaseEnv } from "@/lib/supabase-server";
+import { resolvePostCeremonyPartyAnswer } from "@/lib/post-ceremony-rsvp";
 
 export const dynamic = "force-dynamic";
 
@@ -46,9 +47,9 @@ export async function POST(request: Request) {
   const displayLabel = body.displayLabel?.trim();
 
   // Search for matching invitee in Supabase
-  let matchingInvitee: { id: string; token: string } | null = null;
+  let matchingInvitee: { id: string; token: string; post_ceremony_party_invited: boolean | null } | null = null;
   if (inviteeId || token || displayLabel || name) {
-    let query = supabase.from("invitees").select("id, token");
+    let query = supabase.from("invitees").select("id, token, post_ceremony_party_invited");
     if (inviteeId) {
       query = query.eq("id", inviteeId);
     } else if (token) {
@@ -64,10 +65,20 @@ export async function POST(request: Request) {
     }
   }
 
+  const postCeremonyParty = resolvePostCeremonyPartyAnswer({
+    invited: Boolean(matchingInvitee?.post_ceremony_party_invited),
+    attendingCeremony: body.attendingCeremony === true,
+    answer: body.attendingPostCeremonyParty,
+  });
+  if (!postCeremonyParty.ok) {
+    return NextResponse.json({ error: postCeremonyParty.error }, { status: 400 });
+  }
+
   const payload = {
     ...body,
     inviteeId: matchingInvitee?.id || body.inviteeId,
     inviteToken: matchingInvitee?.token || token,
+    attendingPostCeremonyParty: postCeremonyParty.value,
   };
 
   let existingId: string | null = null;
@@ -99,7 +110,7 @@ export async function POST(request: Request) {
     return mutation.select("*").single();
   };
 
-  const { data, error } = await mutate(false);
+  const { data, error } = await mutate(true);
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });

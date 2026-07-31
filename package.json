@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "eslint",
     "check:guest-copy": "node scripts/check-guest-copy.mjs",
+    "check:post-ceremony-rsvp": "node scripts/check-post-ceremony-rsvp.mjs",
     "check:rsvp-resilience": "node scripts/check-rsvp-resilience.mjs",
     "check:slow-invite-experience": "node scripts/check-slow-invite-experience.mjs",
     "capture:browser": "node scripts/capture-browser-shots.mjs",

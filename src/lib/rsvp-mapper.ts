@@ -8,6 +8,7 @@ export type RSVPDatabaseRow = {
   name: string;
   phone: string;
   attending_ceremony?: boolean | null;
+  attending_post_ceremony_party?: boolean | null;
   attending_banquet?: boolean | null;
   attending: "yes" | "no" | "maybe";
   guest_count: number;
@@ -29,6 +30,7 @@ export type RSVPDatabaseRow = {
 type LegacyRsvpMetadata = {
   guests: LodgingGuest[];
   attendingCeremony?: boolean;
+  attendingPostCeremonyParty?: boolean;
   attendingBanquet?: boolean;
 };
 
@@ -43,17 +45,19 @@ function parseLegacyRsvpMetadata(value: unknown): LegacyRsvpMetadata {
 
   let rawGuests: unknown = value;
   let attendingCeremony: boolean | undefined;
+  let attendingPostCeremonyParty: boolean | undefined;
   let attendingBanquet: boolean | undefined;
 
   if (value && typeof value === "object" && !Array.isArray(value)) {
     const metadata = value as Record<string, unknown>;
     rawGuests = metadata.guests;
     attendingCeremony = typeof metadata.attendingCeremony === "boolean" ? metadata.attendingCeremony : undefined;
+    attendingPostCeremonyParty = typeof metadata.attendingPostCeremonyParty === "boolean" ? metadata.attendingPostCeremonyParty : undefined;
     attendingBanquet = typeof metadata.attendingBanquet === "boolean" ? metadata.attendingBanquet : undefined;
   }
 
   if (!Array.isArray(rawGuests)) {
-    return { guests: [], attendingCeremony, attendingBanquet };
+    return { guests: [], attendingCeremony, attendingPostCeremonyParty, attendingBanquet };
   }
 
   const guests = rawGuests.flatMap((item) => {
@@ -85,7 +89,7 @@ function parseLegacyRsvpMetadata(value: unknown): LegacyRsvpMetadata {
     }];
   });
 
-  return { guests, attendingCeremony, attendingBanquet };
+  return { guests, attendingCeremony, attendingPostCeremonyParty, attendingBanquet };
 }
 
 export function mapRSVPRow(row: RSVPDatabaseRow): RSVPResponse {
@@ -99,6 +103,7 @@ export function mapRSVPRow(row: RSVPDatabaseRow): RSVPResponse {
     name: row.name,
     phone: row.phone,
     attendingCeremony: row.attending_ceremony ?? legacyMetadata.attendingCeremony,
+    attendingPostCeremonyParty: row.attending_post_ceremony_party ?? legacyMetadata.attendingPostCeremonyParty,
     attendingBanquet: row.attending_banquet ?? legacyMetadata.attendingBanquet,
     attending: row.attending,
     guestCount: row.guest_count,
@@ -133,6 +138,7 @@ export function toRSVPInsert(
   const eventAttendanceColumns = includeEventAttendanceColumns
     ? {
         attending_ceremony: response.attendingCeremony ?? null,
+        attending_post_ceremony_party: response.attendingPostCeremonyParty ?? null,
         attending_banquet: response.attendingBanquet ?? null,
       }
     : {};
@@ -141,6 +147,7 @@ export function toRSVPInsert(
     : {
         guests: response.lodgingGuests ?? [],
         attendingCeremony: response.attendingCeremony,
+        attendingPostCeremonyParty: response.attendingPostCeremonyParty,
         attendingBanquet: response.attendingBanquet,
       };
 

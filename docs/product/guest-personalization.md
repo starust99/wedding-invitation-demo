@@ -41,10 +41,25 @@ Public copy must not infer these two values from `hostRelationship` or
 - `Bố` and `Mẹ` are single-person invitations with expected count `1`.
 - `Bố mẹ`, `Ba mẹ`, and `Ông bà` are couple invitations with expected count `2`.
 
+## Post-Ceremony Party
+
+The invite workbook contains `Tham gia tiệc sau Hôn phối`:
+
+- Blank means the question does not apply to the invitee.
+- `Có` means the invitee is asked whether they will attend the gathering after
+  the wedding ceremony.
+- No other non-blank value is valid.
+
+The RSVP question appears only after an eligible invitee chooses to attend the
+wedding ceremony. Invitation scope and the guest answer are separate fields.
+The answer is cleared when the question no longer applies.
+
+Admin estimates the post-ceremony headcount from the existing RSVP guest count;
+guests are not asked for another number.
+
 ## Compatibility
 
 Existing imported invitees may not have a stored `Cụm danh xưng`. A
 deterministic longest-prefix match against the Excel salutation definitions may
 be used as a compatibility fallback. New imports must persist the exact Excel
 salutation cluster.
-

@@ -9,6 +9,7 @@ create table if not exists rsvp_responses (
   phone text not null,
   attending_ceremony boolean,
   attending_banquet boolean,
+  attending_post_ceremony_party boolean,
   attending text not null check (attending in ('yes', 'no', 'maybe')),
   guest_count int not null default 1 check (guest_count >= 0),
   guest_group text not null,
@@ -31,7 +32,12 @@ alter table rsvp_responses add column if not exists invite_token text;
 alter table rsvp_responses add column if not exists display_label text;
 alter table rsvp_responses add column if not exists attending_ceremony boolean;
 alter table rsvp_responses add column if not exists attending_banquet boolean;
+alter table rsvp_responses add column if not exists attending_post_ceremony_party boolean;
 alter table rsvp_responses add column if not exists lodging_guests jsonb not null default '[]'::jsonb;
+alter table rsvp_responses drop constraint if exists rsvp_post_ceremony_requires_ceremony;
+alter table rsvp_responses
+  add constraint rsvp_post_ceremony_requires_ceremony
+  check (attending_post_ceremony_party is null or attending_ceremony is true);
 
 create index if not exists rsvp_responses_submitted_at_idx on rsvp_responses (submitted_at desc);
 create index if not exists rsvp_responses_attending_idx on rsvp_responses (attending);
@@ -62,6 +68,7 @@ create table if not exists invitees (
   guest_group text not null default 'Khác',
   audience_tags text[] not null default '{}',
   expected_guest_count int not null default 1 check (expected_guest_count >= 1),
+  post_ceremony_party_invited boolean not null default false,
   phone text not null default '',
   email text not null default '',
   notes text not null default '',
@@ -75,6 +82,7 @@ alter table invitees add column if not exists salutation_cluster text not null d
 alter table invitees add column if not exists host_relationship text not null default '';
 alter table invitees add column if not exists host_pronoun text not null default '';
 alter table invitees add column if not exists couple_reference text not null default '';
+alter table invitees add column if not exists post_ceremony_party_invited boolean not null default false;
 
 create index if not exists invitees_guest_group_idx on invitees (guest_group);
 create index if not exists invitees_invite_status_idx on invitees (invite_status);

@@ -2,7 +2,7 @@
 
 /* eslint-disable @next/next/no-img-element */
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
@@ -176,6 +176,7 @@ export function InviteAdminPanel() {
   const importFileRef = useRef<HTMLInputElement | null>(null);
 
   const [attendingFilter, setAttendingFilter] = useState("all");
+  const [postCeremonyFilter, setPostCeremonyFilter] = useState("all");
   const [accommodationFilter, setAccommodationFilter] = useState("all");
   const [groupFilter, setGroupFilter] = useState("all");
   const [selectedResponseIds, setSelectedResponseIds] = useState<Set<string>>(() => new Set());
@@ -283,6 +284,28 @@ export function InviteAdminPanel() {
     }
     return map;
   }, [responses]);
+  const inviteeById = useMemo(() => new Map(invitees.map((invitee) => [invitee.id, invitee])), [invitees]);
+  const inviteeByToken = useMemo(() => new Map(invitees.map((invitee) => [invitee.token, invitee])), [invitees]);
+
+  const inviteeForResponse = useCallback((response: RSVPResponse) => {
+    return (response.inviteeId ? inviteeById.get(response.inviteeId) : undefined)
+      ?? (response.inviteToken ? inviteeByToken.get(response.inviteToken) : undefined);
+  }, [inviteeById, inviteeByToken]);
+
+  const postCeremonyStatus = useCallback((response: RSVPResponse) => {
+    const invitee = inviteeForResponse(response);
+    if (!invitee?.postCeremonyPartyInvited || response.attendingCeremony !== true) return "not_applicable";
+    if (response.attendingPostCeremonyParty === true) return "yes";
+    if (response.attendingPostCeremonyParty === false) return "no";
+    return "pending";
+  }, [inviteeForResponse]);
+
+  const enrichResponsesForExport = useCallback((source: RSVPResponse[]) => {
+    return source.map((response) => ({
+      ...response,
+      postCeremonyPartyInvited: Boolean(inviteeForResponse(response)?.postCeremonyPartyInvited),
+    }));
+  }, [inviteeForResponse]);
 
   const selectedRsvp = selectedInvitee?.id ? rsvpByInviteeId.get(selectedInvitee.id) : undefined;
   const visibleAlbumAssets = selectedInvitee ? filterMediaAssetsForInvitee(mediaAssets, selectedInvitee, albumRules) : mediaAssets.filter((asset) => asset.status === "published");
@@ -643,7 +666,7 @@ export function InviteAdminPanel() {
     }
   }
 
-  function preserveExistingInviteLinks(nextInvitees: Invitee[]) {
+  function preserveExistingInviteLinks(nextInvitees: Invitee[], hasPostCeremonyPartyColumn = true) {
     const byKey = new Map<string, Invitee>();
     for (const invitee of invitees) {
       for (const key of [invitee.displayLabel, invitee.guestName, invitee.invitationName]) {
@@ -664,6 +687,9 @@ export function InviteAdminPanel() {
         token: match.token,
         createdAt: match.createdAt,
         inviteStatus: match.inviteStatus,
+        postCeremonyPartyInvited: hasPostCeremonyPartyColumn
+          ? invitee.postCeremonyPartyInvited
+          : match.postCeremonyPartyInvited,
         supplement: match.supplement,
         rsvp: match.rsvp,
       };
@@ -683,8 +709,12 @@ export function InviteAdminPanel() {
         setImportNotice("");
       }
 
-      const nextInvitees = preserveExistingInviteLinks(parsed.invitees);
+      const hasPostCeremonyPartyColumn = parsed.hasPostCeremonyPartyColumn !== false;
+      const nextInvitees = preserveExistingInviteLinks(parsed.invitees, hasPostCeremonyPartyColumn);
       if (nextInvitees.length === 0) throw new Error("File Excel chưa có dòng khách mời hợp lệ.");
+      if (!hasPostCeremonyPartyColumn) {
+        setImportNotice("File Excel cũ chưa có cột Tham gia tiệc sau Hôn phối. Hệ thống đã giữ nguyên thiết lập hiện tại của khách cũ; khách mới mặc định không được hỏi.");
+      }
 
       if (backend === "supabase") {
         const response = await fetch("/api/admin/invites", {
@@ -862,15 +892,17 @@ export function InviteAdminPanel() {
   const filteredResponses = useMemo(() => {
     return responses.filter((response) => {
       if (attendingFilter !== "all" && response.attending !== attendingFilter) return false;
+      if (postCeremonyFilter !== "all" && postCeremonyStatus(response) !== postCeremonyFilter) return false;
       if (accommodationFilter === "yes" && !response.accommodationNeeded) return false;
       if (accommodationFilter === "no" && response.accommodationNeeded) return false;
       if (groupFilter !== "all" && response.guestGroup !== groupFilter) return false;
       return true;
     });
-  }, [responses, attendingFilter, accommodationFilter, groupFilter]);
+  }, [responses, attendingFilter, postCeremonyFilter, accommodationFilter, groupFilter, postCeremonyStatus]);
 
   const notAttending = useMemo(() => responses.filter((response) => response.attending === "no").length, [responses]);
   const ceremonyGuests = useMemo(() => responses.filter((response) => response.attending === "yes" && response.attendingCeremony).reduce((sum, response) => sum + response.guestCount, 0), [responses]);
+  const postCeremonyPartyGuests = useMemo(() => responses.filter((response) => response.attending === "yes" && response.attendingPostCeremonyParty).reduce((sum, response) => sum + response.guestCount, 0), [responses]);
   const banquetGuests = useMemo(() => responses.filter((response) => response.attending === "yes" && response.attendingBanquet).reduce((sum, response) => sum + response.guestCount, 0), [responses]);
   const stayingGuests = useMemo(() => responses.reduce((sum, response) => sum + (response.stayingGuestCount ?? response.lodgingGuests?.length ?? 0), 0), [responses]);
   const accommodationRequests = useMemo(() => responses.filter((response) => response.accommodationNeeded).length, [responses]);
@@ -958,7 +990,7 @@ export function InviteAdminPanel() {
   }
 
   function exportCsv() {
-    downloadCsv(`rsvp-responses-${new Date().toISOString().slice(0, 10)}.csv`, toRSVPCsv(filteredResponses));
+    downloadCsv(`rsvp-responses-${new Date().toISOString().slice(0, 10)}.csv`, toRSVPCsv(enrichResponsesForExport(filteredResponses)));
   }
 
   async function exportRsvpWorkbook(kind: "filtered" | "lodging") {
@@ -983,7 +1015,7 @@ export function InviteAdminPanel() {
       const response = await fetch("/api/admin/rsvp-workbook", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ responses: sourceResponses, title }),
+        body: JSON.stringify({ responses: enrichResponsesForExport(sourceResponses), title }),
       });
 
       if (response.status === 401) {
@@ -1087,6 +1119,7 @@ export function InviteAdminPanel() {
               { icon: UsersRound, label: "Tổng lời phản hồi", value: responses.length, hint: "Số form khách gửi về", color: "bg-[#5F6F4E]/10 text-[#5F6F4E]" },
               { icon: CheckSquare, label: "Khách dự tiệc cưới", value: banquetGuests, hint: "Tổng số người dự tiệc cưới", color: "bg-emerald-500/10 text-emerald-700" },
               { icon: ClipboardList, label: "Khách dự Thánh lễ", value: ceremonyGuests, hint: "Tham dự Thánh lễ Hôn phối", color: "bg-blue-500/10 text-blue-700" },
+              { icon: UsersRound, label: "Khách dự tiệc sau Hôn phối", value: postCeremonyPartyGuests, hint: "Ước tính theo số khách của lời hồi đáp", color: "bg-[#b4975a]/10 text-[#6e5949]" },
               { icon: Square, label: "Khách không tham dự", value: notAttending, hint: "Số lời từ chối báo về", color: "bg-rose-500/10 text-rose-700" },
               { icon: Hotel, label: "Số người lưu trú", value: stayingGuests, hint: "Cần bố trí phòng ngủ", color: "bg-[#b4975a]/10 text-[#6e5949]" },
               { icon: UsersRound, label: "Trẻ em lưu trú", value: childrenStaying, hint: "Dưới 12 tuổi trong đoàn ở lại", color: "bg-amber-500/10 text-amber-700" },
@@ -1125,6 +1158,13 @@ export function InviteAdminPanel() {
                     <option value="all">Lưu trú: tất cả</option>
                     <option value="yes">Cần hỗ trợ</option>
                     <option value="no">Không cần</option>
+                  </select>
+                  <select value={postCeremonyFilter} onChange={(event) => setPostCeremonyFilter(event.target.value)} className="min-h-10 rounded-full border border-[#E8DDCC] bg-white px-4 py-2 text-xs sm:text-sm outline-none transition focus:border-[#5F6F4E]">
+                    <option value="all">Tiệc sau Hôn phối: tất cả</option>
+                    <option value="yes">Sẽ tham dự</option>
+                    <option value="no">Không tham dự</option>
+                    <option value="pending">Chưa trả lời</option>
+                    <option value="not_applicable">Không áp dụng</option>
                   </select>
                   <select value={groupFilter} onChange={(event) => setGroupFilter(event.target.value)} className="min-h-10 rounded-full border border-[#E8DDCC] bg-white px-4 py-2 text-xs sm:text-sm outline-none transition focus:border-[#5F6F4E]">
                     <option value="all">Nhóm khách: tất cả</option>
@@ -1194,6 +1234,7 @@ export function InviteAdminPanel() {
                       <th className="p-4">Tên khách</th>
                       <th className="p-4">Số điện thoại</th>
                       <th className="p-4">Phản hồi</th>
+                      <th className="p-4">Sự kiện</th>
                       <th className="p-4">Số người</th>
                       <th className="p-4">Nhóm</th>
                       <th className="p-4">Lưu trú</th>
@@ -1204,7 +1245,7 @@ export function InviteAdminPanel() {
                   <tbody className="divide-y divide-[#E8DDCC]">
                     {filteredResponses.length === 0 ? (
                       <tr>
-                        <td colSpan={9} className="p-8 text-center text-[#8A8178] bg-[#FCFAF4]/30">
+                        <td colSpan={10} className="p-8 text-center text-[#8A8178] bg-[#FCFAF4]/30">
                           Chưa có lời hồi đáp phù hợp.
                         </td>
                       </tr>
@@ -1225,6 +1266,19 @@ export function InviteAdminPanel() {
                         </td>
                         <td className="p-4 text-xs">{response.phone}</td>
                         <td className="p-4 text-xs font-semibold">{attendingLabel(response.attending)}</td>
+                        <td className="p-4 text-[11px] leading-relaxed text-[#665d54]">
+                          <span className="block">Thánh lễ: <b>{response.attendingCeremony ? "Có" : "Không"}</b></span>
+                          {postCeremonyStatus(response) !== "not_applicable" ? (
+                            <span className="block">Tiệc sau lễ: <b>{
+                              postCeremonyStatus(response) === "yes"
+                                ? "Có"
+                                : postCeremonyStatus(response) === "no"
+                                  ? "Không"
+                                  : "Chưa trả lời"
+                            }</b></span>
+                          ) : null}
+                          <span className="block">Tiệc cưới: <b>{response.attendingBanquet ? "Có" : "Không"}</b></span>
+                        </td>
                         <td className="p-4 text-xs">{response.guestCount}</td>
                         <td className="p-4 text-xs">{response.guestGroup}</td>
                         <td className="p-4 text-xs">{response.accommodationNeeded ? `${response.stayingGuestCount ?? response.lodgingGuests?.length ?? 0} người` : "Không"}</td>
@@ -1491,6 +1545,15 @@ export function InviteAdminPanel() {
                         Số khách dự kiến
                         <input className={panelInput} type="number" min={1} value={selectedInvitee.expectedGuestCount} onChange={(event) => patchSelectedInvitee({ expectedGuestCount: Math.max(1, Number(event.target.value) || 1) })} />
                       </label>
+                      <label className="flex min-h-11 cursor-pointer items-center gap-3 self-end rounded-2xl border border-[#E8DDCC] bg-white px-4 text-xs font-semibold normal-case tracking-normal text-[#2E2A25]">
+                        <input
+                          type="checkbox"
+                          checked={selectedInvitee.postCeremonyPartyInvited}
+                          onChange={(event) => patchSelectedInvitee({ postCeremonyPartyInvited: event.target.checked })}
+                          className="h-4 w-4 rounded accent-[#5F6F4E]"
+                        />
+                        Hỏi khách về tiệc sau Hôn phối
+                      </label>
                       <label className="grid gap-1.5 font-semibold text-[#8A8178] uppercase tracking-wider">
                         Dòng ngoài phong bì
                         <input className={panelInput} value={selectedInvitee.envelopeLine} onChange={(event) => patchSelectedInvitee({ envelopeLine: event.target.value })} />
@@ -1570,6 +1633,17 @@ export function InviteAdminPanel() {
                         <div className="mt-3 pt-3 border-t border-[#E8DDCC] space-y-1">
                           <p className="font-semibold text-[#2E2A25]">Hồi đáp từ form:</p>
                           <p>Trạng thái: <b>{attendingLabel(selectedRsvp.attending)}</b> · Dự {selectedRsvp.guestCount} người.</p>
+                          <p>
+                            Tiệc sau Hôn phối: <b>{
+                              postCeremonyStatus(selectedRsvp) === "yes"
+                                ? "Sẽ tham dự"
+                                : postCeremonyStatus(selectedRsvp) === "no"
+                                  ? "Không tham dự"
+                                  : postCeremonyStatus(selectedRsvp) === "pending"
+                                    ? "Chưa trả lời"
+                                    : "Không áp dụng"
+                            }</b>.
+                          </p>
                           {selectedRsvp.accommodationNeeded && <p>Cần lưu trú: <b>{selectedRsvp.stayingGuestCount ?? selectedRsvp.lodgingGuests?.length ?? 0} người</b> ({selectedRsvp.lodgingGuests?.length ? summarizeLodgingGuests(selectedRsvp.lodgingGuests) : "Chưa điền tên"}).</p>}
                           {(selectedRsvp.dietaryNote || selectedRsvp.notes) && <p>Ghi chú/Ẩm thực: <i>{selectedRsvp.dietaryNote || selectedRsvp.notes}</i></p>}
                         </div>

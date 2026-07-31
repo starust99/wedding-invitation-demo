@@ -45,6 +45,8 @@ const rsvpFormFieldsSchema = z.object({
   name: z.string().trim().optional().default(""),
   phone: z.string().trim().optional().default(""),
   attendingCeremony: z.enum(["yes", "no"]).nullable().default(null),
+  postCeremonyPartyInvited: z.boolean().default(false),
+  attendingPostCeremonyParty: z.enum(["yes", "no"]).nullable().default(null),
   attendingBanquet: z.enum(["yes", "no"]).nullable().default(null),
   attending: z.enum(["yes", "no"]),
   guestCount: z.coerce.number().min(0),
@@ -63,6 +65,9 @@ const rsvpSchema = rsvpFormFieldsSchema
     }
     if (!data.attendingBanquet) {
       ctx.addIssue({ code: "custom", path: ["attendingBanquet"], message: "Vui lòng chọn phản hồi cho Tiệc cưới." });
+    }
+    if (data.postCeremonyPartyInvited && data.attendingCeremony === "yes" && !data.attendingPostCeremonyParty) {
+      ctx.addIssue({ code: "custom", path: ["attendingPostCeremonyParty"], message: "Vui lòng chọn phản hồi cho tiệc sau Hôn phối." });
     }
     
     if (data.attending !== "no" && data.guestCount < 1) {
@@ -352,6 +357,8 @@ export default function RSVPPage() {
       name: "",
       phone: "",
       attendingCeremony: null,
+      postCeremonyPartyInvited: false,
+      attendingPostCeremonyParty: null,
       attendingBanquet: null,
       attending: "yes",
       guestCount: 1,
@@ -367,6 +374,8 @@ export default function RSVPPage() {
   const { fields, append, remove, replace } = useFieldArray({ control, name: "lodgingGuests" });
   const attending = useWatch({ control, name: "attending" });
   const attendingCeremony = useWatch({ control, name: "attendingCeremony" });
+  const postCeremonyPartyInvited = useWatch({ control, name: "postCeremonyPartyInvited" });
+  const attendingPostCeremonyParty = useWatch({ control, name: "attendingPostCeremonyParty" });
   const attendingBanquet = useWatch({ control, name: "attendingBanquet" });
   const guestCount = useWatch({ control, name: "guestCount" });
   const accommodationNeeded = useWatch({ control, name: "accommodationNeeded" });
@@ -380,7 +389,10 @@ export default function RSVPPage() {
   const lodgingGuests = normalizeLodgingGuests((watchedLodgingGuests ?? []) as Array<Partial<LodgingGuestForm> | undefined>);
   const terracottaNote = buildTerracottaNote(lodgingGuests);
   const canRegisterStay = attending !== "no";
-  const hasAnsweredBothEvents = attendingCeremony !== null && attendingBanquet !== null;
+  const shouldAskPostCeremonyParty = postCeremonyPartyInvited && attendingCeremony === "yes";
+  const hasAnsweredRequiredEvents = attendingCeremony !== null
+    && attendingBanquet !== null
+    && (!shouldAskPostCeremonyParty || attendingPostCeremonyParty !== null);
 
   useEffect(() => {
     const activeToken = inviteToken || inviteeContext?.token || "";
@@ -435,12 +447,14 @@ export default function RSVPPage() {
 
       applyIdentity(identity);
       setInviteeContext(invitee);
+      setValue("postCeremonyPartyInvited", Boolean(invitee.postCeremonyPartyInvited), { shouldDirty: false });
       if (hasUserEditedFormRef.current) return;
       setValue("name", response?.name ?? invitee.displayLabel, { shouldDirty: false });
       setValue("phone", response?.phone ?? invitee.phone, { shouldDirty: false });
       setValue("guestGroup", response?.guestGroup ?? invitee.guestGroup, { shouldDirty: false });
       setValue("guestCount", response?.guestCount ?? invitee.expectedGuestCount, { shouldDirty: false });
       setValue("attendingCeremony", normalizeBoolean(response?.attendingCeremony), { shouldDirty: false });
+      setValue("attendingPostCeremonyParty", normalizeBoolean(response?.attendingPostCeremonyParty), { shouldDirty: false });
       setValue("attendingBanquet", normalizeBoolean(response?.attendingBanquet), { shouldDirty: false });
       setValue("attending", normalizeAttendanceForForm(response?.attending), { shouldDirty: false });
       setValue("dietaryNote", response?.dietaryNote ?? "", { shouldDirty: false });
@@ -476,6 +490,7 @@ export default function RSVPPage() {
       setValue("guestGroup", response.guestGroup || "", { shouldDirty: false });
       setValue("guestCount", response.guestCount || 1, { shouldDirty: false });
       setValue("attendingCeremony", normalizeBoolean(response.attendingCeremony), { shouldDirty: false });
+      setValue("attendingPostCeremonyParty", normalizeBoolean(response.attendingPostCeremonyParty), { shouldDirty: false });
       setValue("attendingBanquet", normalizeBoolean(response.attendingBanquet), { shouldDirty: false });
       setValue("attending", normalizeAttendanceForForm(response.attending), { shouldDirty: false });
       setValue("dietaryNote", response.dietaryNote ?? "", { shouldDirty: false });
@@ -511,6 +526,7 @@ export default function RSVPPage() {
       setValue("name", values.name ?? "", { shouldDirty: true });
       setValue("phone", values.phone ?? "", { shouldDirty: true });
       setValue("attendingCeremony", values.attendingCeremony, { shouldDirty: true });
+      setValue("attendingPostCeremonyParty", values.attendingPostCeremonyParty, { shouldDirty: true });
       setValue("attendingBanquet", values.attendingBanquet, { shouldDirty: true });
       setValue("attending", values.attending, { shouldDirty: true });
       setValue("guestCount", values.guestCount, { shouldDirty: true });
@@ -609,6 +625,13 @@ export default function RSVPPage() {
   }, [replace, setValue]);
 
   useEffect(() => {
+    if ((!postCeremonyPartyInvited || attendingCeremony !== "yes") && attendingPostCeremonyParty !== null) {
+      setValue("attendingPostCeremonyParty", null, {
+        shouldDirty: hasUserEditedFormRef.current,
+        shouldValidate: false,
+      });
+    }
+
     if (attendingCeremony === "no" && attendingBanquet === "no" && attending !== "no") {
       setValue("attending", "no", { shouldDirty: true });
       setValue("guestCount", 0, { shouldDirty: true });
@@ -630,7 +653,17 @@ export default function RSVPPage() {
         setValue("guestCount", inviteeContext?.expectedGuestCount || 1, { shouldDirty: true });
       }
     }
-  }, [attending, attendingBanquet, attendingCeremony, guestCount, inviteeContext?.expectedGuestCount, replace, setValue]);
+  }, [
+    attending,
+    attendingBanquet,
+    attendingCeremony,
+    attendingPostCeremonyParty,
+    guestCount,
+    inviteeContext?.expectedGuestCount,
+    postCeremonyPartyInvited,
+    replace,
+    setValue,
+  ]);
 
   function markFormAsEdited() {
     hasUserEditedFormRef.current = true;
@@ -700,6 +733,9 @@ export default function RSVPPage() {
       name: resolvedName,
       phone: resolvedPhone,
       attendingCeremony: data.attendingCeremony === "yes",
+      attendingPostCeremonyParty: data.postCeremonyPartyInvited && data.attendingCeremony === "yes"
+        ? data.attendingPostCeremonyParty === "yes"
+        : undefined,
       attendingBanquet: data.attendingBanquet === "yes",
       attending: data.attending,
       guestCount: resolvedGuestCount,
@@ -1026,6 +1062,26 @@ export default function RSVPPage() {
                       </span>
                     </div>
 
+                    {formValues.postCeremonyPartyInvited && formValues.attendingCeremony === "yes" ? (
+                      <div className="flex items-center justify-between py-3.5 px-4.5 sm:px-5.5 rounded-2xl bg-[#fffaf2]/80 border border-[#d7c6a8]/45">
+                        <div className="text-left">
+                          <p className="font-bold text-[#252934] text-base sm:text-lg">Tiệc sau Hôn phối</p>
+                          <p className="text-xs sm:text-sm text-[#7a6a5d] font-medium mt-0.5">Sau Thánh lễ Hôn phối</p>
+                        </div>
+                        <span className={`inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs sm:text-sm font-semibold shadow-xs shrink-0 ${
+                          formValues.attendingPostCeremonyParty === "yes"
+                            ? "bg-[#7a8a5c] text-white"
+                            : "bg-[#7a4a4a] text-white"
+                        }`}>
+                          {formValues.attendingPostCeremonyParty === "yes" ? (
+                            <><Check className="w-3.5 h-3.5 text-white" /> Sẽ tham dự</>
+                          ) : (
+                            <><X className="w-3.5 h-3.5 text-white" /> Không tham dự</>
+                          )}
+                        </span>
+                      </div>
+                    ) : null}
+
                     <div className="flex items-center justify-between py-3.5 px-4.5 sm:px-5.5 rounded-2xl bg-serenity/8 border border-serenity/14">
                       <div className="text-left">
                         <p className="font-bold text-[#252934] text-base sm:text-lg">Tiệc cưới</p>
@@ -1234,6 +1290,67 @@ export default function RSVPPage() {
                       </div>
                     </div>
                   </div>
+
+                  <AnimatePresence initial={false}>
+                    {shouldAskPostCeremonyParty ? (
+                      <motion.div
+                        key="post-ceremony-party-question"
+                        initial={{ opacity: 0, y: -8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -6 }}
+                        transition={{ duration: 0.22, ease: "easeOut" }}
+                        className="mx-auto my-2 w-full max-w-xl rounded-[1.35rem] border border-[#d7c6a8]/55 bg-[#fffaf2]/78 px-4 py-4 shadow-[0_8px_24px_rgba(122,106,93,0.06)] sm:px-5"
+                      >
+                        <div className="flex flex-col items-center gap-3 sm:flex-row sm:justify-between">
+                          <div className="text-center sm:text-left">
+                            <p className="text-sm font-bold tracking-[0.1em] text-[#7a6a5d] uppercase">
+                              Tiệc sau Hôn phối
+                            </p>
+                            <p className="mt-1 text-sm leading-relaxed text-[#252934]/72">
+                              Quý khách có tham dự buổi tiệc thân mật sau Thánh lễ không?
+                            </p>
+                          </div>
+                          <div className="flex h-11 shrink-0 items-center rounded-full bg-white/90 p-1 ring-1 ring-serenity/30 shadow-[0_4px_14px_rgba(63,70,66,0.08)]">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                markFormAsEdited();
+                                setValue("attendingPostCeremonyParty", "yes", { shouldDirty: true, shouldValidate: true });
+                              }}
+                              className={[
+                                "h-full rounded-full px-6 text-sm font-semibold transition-all duration-200",
+                                formValues.attendingPostCeremonyParty === "yes"
+                                  ? "bg-[#7a8a5c] text-white shadow-sm"
+                                  : "text-[#252934] hover:bg-[#252934]/5",
+                              ].join(" ")}
+                            >
+                              Có
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                markFormAsEdited();
+                                setValue("attendingPostCeremonyParty", "no", { shouldDirty: true, shouldValidate: true });
+                              }}
+                              className={[
+                                "h-full rounded-full px-6 text-sm font-semibold transition-all duration-200",
+                                formValues.attendingPostCeremonyParty === "no"
+                                  ? "bg-[#7a4a4a] text-white shadow-sm"
+                                  : "text-[#252934] hover:bg-[#252934]/5",
+                              ].join(" ")}
+                            >
+                              Không
+                            </button>
+                          </div>
+                        </div>
+                        {errors.attendingPostCeremonyParty ? (
+                          <p className="mt-2 text-center text-xs font-bold text-[#9B4E5C]">
+                            {errors.attendingPostCeremonyParty.message}
+                          </p>
+                        ) : null}
+                      </motion.div>
+                    ) : null}
+                  </AnimatePresence>
 
                   <div className="h-px w-full bg-serenity/28 my-1.5 sm:my-4" />
 
@@ -1501,7 +1618,7 @@ export default function RSVPPage() {
 
                 {/* Ghi chú & Nút gửi - chỉ hiện khi đã trả lời xong 2 câu hỏi trên */}
                 <AnimatePresence initial={false}>
-                  {hasAnsweredBothEvents && (
+                  {hasAnsweredRequiredEvents && (
                     <motion.div
                       initial={{ height: 0, opacity: 0, overflow: "hidden" }}
                       animate={{ height: "auto", opacity: 1, overflow: "visible" }}

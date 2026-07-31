@@ -110,6 +110,7 @@ const columns = [
   { key: "guestNameCore", header: "Tên khách", width: 22 },
   { key: "guestName", header: "Cụm tên khách", width: 28 },
   { key: "guestGroup", header: "Nhóm khách", width: 34 },
+  { key: "postCeremonyPartyInvited", header: "Tham gia tiệc sau Hôn phối", width: 28 },
   { key: "insideInviteLine", header: "Lời mời trong thiệp", width: 72 },
 ] as const;
 
@@ -119,11 +120,13 @@ type TemplateRowValues = {
   salutationCluster: string;
   guestNameCore: string;
   guestGroup: string;
+  postCeremonyPartyInvited?: string;
 };
 
 type OptionKey =
   | "salutationCluster"
-  | "guestGroup";
+  | "guestGroup"
+  | "postCeremonyPartyInvited";
 
 type SpreadsheetOptions = {
   coupleDisplayName?: string;
@@ -140,6 +143,7 @@ function getOptionColumns(coupleDisplayName: string): Record<OptionKey, string[]
   return {
     salutationCluster: salutationDefinitions.map((item) => item.label),
     guestGroup: guestGroupDefinitions.map((item) => item.label),
+    postCeremonyPartyInvited: ["Có"],
   };
 }
 
@@ -162,6 +166,7 @@ const headerNotes: Partial<Record<TemplateColumnKey, string>> = {
   guestNameCore: "Chỉ gõ phần tên riêng hoặc tên đôi. Ví dụ: Hoàng, Tiến, Sáu, Linh, Tùng & Hương.",
   guestName: "Cột công thức tự động kết hợp cụm danh xưng và tên khách để tạo thành tên đầy đủ.",
   guestGroup: "Chọn theo nhóm lớn để dễ lọc danh sách và chia bàn sau này.",
+  postCeremonyPartyInvited: "Để trống với khách thông thường. Chỉ chọn Có nếu muốn hỏi thêm khách này có dự tiệc sau Hôn phối hay không.",
   insideInviteLine: "Cột công thức, tự động tạo lời mời trong thiệp.",
 };
 
@@ -493,7 +498,7 @@ function applyFormulaCells(row: ExcelJS.Row, rowIndex: number, options: ReturnTy
   displayNameCombinedCell.value = { formula: displayNameCombinedFormula(rowIndex), result: inferred?.guestName ?? "" };
   styleFormulaCell(displayNameCombinedCell);
 
-  const insideCell = row.getCell(5);
+  const insideCell = row.getCell(6);
   insideCell.value = { formula: insideInviteFormula(rowIndex, options), result: preview?.insideInviteLine ?? "" };
   styleFormulaCell(insideCell);
 }
@@ -502,6 +507,7 @@ function fillEditableCells(row: ExcelJS.Row, values: TemplateRowValues) {
   row.getCell(1).value = values.salutationCluster;
   row.getCell(2).value = values.guestNameCore;
   row.getCell(4).value = values.guestGroup;
+  row.getCell(5).value = values.postCeremonyPartyInvited ?? "";
 }
 
 function applyTemplateRows(worksheet: ExcelJS.Worksheet, options: ReturnType<typeof resolveSpreadsheetOptions>, startRowIndex = 2) {
@@ -541,6 +547,19 @@ function applyTemplateRows(worksheet: ExcelJS.Worksheet, options: ReturnType<typ
       error: "Ô này dùng danh sách chọn để tránh nhập sai.",
     };
 
+    // 5. postCeremonyPartyInvited
+    const cell5 = row.getCell(5);
+    styleInputCell(cell5, true);
+    cell5.dataValidation = {
+      type: "list",
+      allowBlank: true,
+      formulae: [optionRange("postCeremonyPartyInvited", 2, optionColumns)],
+      showErrorMessage: true,
+      errorStyle: "stop",
+      errorTitle: "Chỉ chọn Có hoặc để trống",
+      error: "Để trống nếu không hỏi. Chỉ chọn Có với khách được mời dự tiệc sau Hôn phối.",
+    };
+
     applyFormulaCells(row, rowIndex, options);
   }
 }
@@ -570,7 +589,7 @@ function buildGuideSheet(workbook: ExcelJS.Workbook, options: ReturnType<typeof 
   worksheet.getCell("A2").value = "Bước 1";
   worksheet.getCell("B2").value = "Chỉ điền các cột cần thiết ở sheet Danh sách khách mời.";
   worksheet.getCell("A3").value = "Bước 2";
-  worksheet.getCell("B3").value = "Cụm danh xưng và Nhóm khách là chọn bằng dropdown. Tên khách là cột gõ tay.";
+  worksheet.getCell("B3").value = "Cụm danh xưng, Nhóm khách và tùy chọn tiệc sau Hôn phối dùng dropdown. Tên khách là cột gõ tay.";
   worksheet.getCell("A4").value = "Bước 3";
   worksheet.getCell("B4").value = "Nhìn các cột preview để kiểm tra dòng phong bì, lời mời trong thiệp và trạng thái sẵn sàng upload.";
   worksheet.getCell("A5").value = "Bước 4";
@@ -589,12 +608,15 @@ function buildGuideSheet(workbook: ExcelJS.Workbook, options: ReturnType<typeof 
   worksheet.getCell("B13").value = "Cụm danh xưng = Gia đình dì/Gia đình anh chị/Gia đình bạn..., Tên khách = phần tên riêng.";
   worksheet.getCell("A14").value = "Ba mẹ mời ông bà";
   worksheet.getCell("B14").value = "Chọn Cụm danh xưng = Bố mẹ hoặc Ông bà, có thể để trống Tên khách.";
+  worksheet.getCell("A15").value = "Tiệc sau Hôn phối";
+  worksheet.getCell("B15").value = "Mặc định để trống. Chỉ chọn Có cho khách cần được hỏi thêm trong phần RSVP sau khi xác nhận dự Thánh lễ.";
 
   const explanations = [
     ["Cụm danh xưng", "Chọn cách gọi khách: Anh, Vợ chồng bác, Gia đình dì, Gia đình anh chị, Cô chú..."],
     ["Tên khách", "Chỉ gõ phần tên riêng. Có thể để trống với các cụm như Bố mẹ, Ba mẹ, Ông bà."],
     ["Cụm tên khách", "Cột công thức tự động kết hợp cụm danh xưng và tên khách để tạo thành tên đầy đủ."],
     ["Nhóm khách", "Nhóm đã được gom theo tiền tố [Nhà Trai], [Nhà Gái], [Nhật], [Phương] để dễ dò và dễ lọc chia bàn."],
+    ["Tham gia tiệc sau Hôn phối", "Để trống với khách thông thường. Chọn Có để hiện câu hỏi phụ trên RSVP khi khách xác nhận dự Thánh lễ."],
     ["Lời mời trong thiệp", "Cột preview, đây là lời mời sẽ lưu cho link riêng của khách."],
   ];
 
@@ -724,7 +746,7 @@ function buildExampleSheet(workbook: ExcelJS.Workbook, options: ReturnType<typeo
   applyWorksheetColumns(worksheet);
   worksheet.autoFilter = {
     from: { row: 1, column: 1 },
-    to: { row: 1, column: 5 },
+    to: { row: 1, column: 6 },
   };
   applyHeaderRow(worksheet, 1);
   hideHelperColumns(worksheet);
@@ -737,10 +759,11 @@ function buildExampleSheet(workbook: ExcelJS.Workbook, options: ReturnType<typeo
     styleInputCell(row.getCell(1), true);
     styleInputCell(row.getCell(2), false);
     styleInputCell(row.getCell(4), true);
+    styleInputCell(row.getCell(5), true);
     applyFormulaCells(row, rowIndex, options, values);
   });
 
-  worksheet.getColumn(5).font = { color: { argb: "FF2E2A25" } };
+  worksheet.getColumn(6).font = { color: { argb: "FF2E2A25" } };
 }
 
 export async function buildInviteTemplateWorkbook(spreadsheetOptions: SpreadsheetOptions = {}) {
@@ -757,7 +780,7 @@ export async function buildInviteTemplateWorkbook(spreadsheetOptions: Spreadshee
   applyWorksheetColumns(worksheet);
   worksheet.autoFilter = {
     from: { row: 1, column: 1 },
-    to: { row: 1, column: 5 },
+    to: { row: 1, column: 6 },
   };
 
   const headerRowIndex = 1;
@@ -768,7 +791,7 @@ export async function buildInviteTemplateWorkbook(spreadsheetOptions: Spreadshee
   buildExampleSheet(workbook, options);
   applyTemplateRows(worksheet, options, firstDataRow);
 
-  worksheet.getColumn(5).font = { color: { argb: "FF2E2A25" } };
+  worksheet.getColumn(6).font = { color: { argb: "FF2E2A25" } };
 
   return workbook;
 }
@@ -797,11 +820,13 @@ export async function parseInviteWorkbook(buffer: ArrayBuffer, existingInvitees:
     relationship: findKeyByHeader(headers, ["Quan hệ với cô dâu chú rể", "relationship"]),
     householdMode: findKeyByHeader(headers, ["Mời đi cùng", "household_mode", "householdMode"]),
     guestGroup: findKeyByHeader(headers, ["Nhóm khách", "Nhóm khách mời", "guest_group", "guestGroup"]),
+    postCeremonyPartyInvited: findKeyByHeader(headers, ["Tham gia tiệc sau Hôn phối", "post_ceremony_party_invited", "postCeremonyPartyInvited"]),
     audienceTags: findKeyByHeader(headers, ["Nhóm xem album", "audience_tags", "audienceTags"]),
     token: findKeyByHeader(headers, ["token", "Mã link riêng", "ma link rieng"]),
   };
 
   const isSimplifiedWorkbook = Boolean(indexes.salutationCluster && indexes.guestNameCore && indexes.guestGroup);
+  const hasPostCeremonyPartyColumn = Boolean(indexes.postCeremonyPartyInvited);
   if (!indexes.guestName && !isSimplifiedWorkbook) {
     return { invitees: [], errors: ["File Excel thiếu cột Cụm tên khách hoặc bộ 3 cột rút gọn."] };
   }
@@ -820,6 +845,7 @@ export async function parseInviteWorkbook(buffer: ArrayBuffer, existingInvitees:
         salutationCluster: read(indexes.salutationCluster),
         guestNameCore: read(indexes.guestNameCore),
         guestGroup: read(indexes.guestGroup),
+        postCeremonyPartyInvited: read(indexes.postCeremonyPartyInvited),
       };
       if (!simplifiedValues.salutationCluster && !simplifiedValues.guestNameCore && !simplifiedValues.guestGroup) return;
 
@@ -838,6 +864,11 @@ export async function parseInviteWorkbook(buffer: ArrayBuffer, existingInvitees:
       }
       if (inferred.needsName && !clean(simplifiedValues.guestNameCore)) {
         errors.push(`Dòng ${rowIndex}: thiếu tên khách.`);
+        return;
+      }
+      const postCeremonyPartyValue = normalizeText(simplifiedValues.postCeremonyPartyInvited);
+      if (postCeremonyPartyValue && postCeremonyPartyValue !== "co") {
+        errors.push(`Dòng ${rowIndex}: cột Tham gia tiệc sau Hôn phối chỉ nhận giá trị Có hoặc để trống.`);
         return;
       }
 
@@ -864,6 +895,7 @@ export async function parseInviteWorkbook(buffer: ArrayBuffer, existingInvitees:
         guestGroup: inferred.guestGroup,
         audienceTags: parseAudienceTags(inferred.audienceTagsText),
         expectedGuestCount: deriveExpectedGuestCount(inferred.householdMode),
+        postCeremonyPartyInvited: postCeremonyPartyValue === "co",
         phone: "",
         email: "",
         notes: "",
@@ -897,9 +929,14 @@ export async function parseInviteWorkbook(buffer: ArrayBuffer, existingInvitees:
     const guestGroup = dropdownValues.guestGroup || legacyFallbackRowValues.guestGroup;
     const audienceTagsText = dropdownValues.audienceTags || legacyFallbackRowValues.audienceTagsText;
     const audienceTags = parseAudienceTags(audienceTagsText);
+    const postCeremonyPartyValue = normalizeText(read(indexes.postCeremonyPartyInvited));
 
     if (missingDropdowns || audienceTags.length === 0) {
       errors.push(`Dòng ${rowIndex}: thiếu lựa chọn dropdown.`);
+    }
+    if (postCeremonyPartyValue && postCeremonyPartyValue !== "co") {
+      errors.push(`Dòng ${rowIndex}: cột Tham gia tiệc sau Hôn phối chỉ nhận giá trị Có hoặc để trống.`);
+      return;
     }
 
         const preview = buildInvitationCopy({
@@ -938,6 +975,7 @@ export async function parseInviteWorkbook(buffer: ArrayBuffer, existingInvitees:
       guestGroup,
       audienceTags,
       expectedGuestCount: deriveExpectedGuestCount(householdMode),
+      postCeremonyPartyInvited: postCeremonyPartyValue === "co",
       phone: "",
       email: "",
       notes: "",
@@ -947,7 +985,7 @@ export async function parseInviteWorkbook(buffer: ArrayBuffer, existingInvitees:
     invitees.push(invitee);
   });
 
-  return { invitees, errors };
+  return { invitees, errors, hasPostCeremonyPartyColumn };
 }
 
 export async function buildInviteLinksWorkbook(invitees: Invitee[], origin = "") {
@@ -963,9 +1001,10 @@ export async function buildInviteLinksWorkbook(invitees: Invitee[], origin = "")
   worksheet.columns = [
     { key: "guestName", header: "Tên khách", width: 28 },
     { key: "relationship", header: "Mối quan hệ với cô dâu chú rể", width: 34 },
+    { key: "postCeremonyPartyInvited", header: "Hỏi tiệc sau Hôn phối", width: 24 },
     { key: "inviteUrl", header: "Link thiệp mời độc bản", width: 68 },
   ];
-  worksheet.autoFilter = "A1:C1";
+  worksheet.autoFilter = "A1:D1";
 
   const headerRow = worksheet.getRow(1);
   headerRow.height = 28;
@@ -979,6 +1018,7 @@ export async function buildInviteLinksWorkbook(invitees: Invitee[], origin = "")
     worksheet.addRow({
       guestName: invitee.invitationName || invitee.guestName || invitee.displayLabel,
       relationship: invitee.relationship || invitee.hostRelationship || invitee.guestGroup,
+      postCeremonyPartyInvited: invitee.postCeremonyPartyInvited ? "Có" : "",
       inviteUrl: buildInviteUrl(invitee.token, origin),
     });
   });
@@ -997,7 +1037,7 @@ export async function buildInviteLinksWorkbook(invitees: Invitee[], origin = "")
     });
   });
 
-  worksheet.getColumn(3).eachCell((cell, rowIndex) => {
+  worksheet.getColumn(4).eachCell((cell, rowIndex) => {
     if (rowIndex === 1) return;
     const url = cellText(cell);
     cell.value = { text: url, hyperlink: url };

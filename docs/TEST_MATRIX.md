@@ -19,7 +19,7 @@ implemented until tests or validation evidence exist.
 
 | Story | Contract | Unit | Integration | E2E | Platform | Status | Evidence |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| TBD | Add rows when story packets are created | no | no | no | no | planned | none |
+| US-004 | Invite-scoped post-ceremony-party RSVP from Excel through Admin | yes | yes | yes | yes | implemented | `npm run check:post-ceremony-rsvp`; `npm run check:rsvp-resilience`; mobile and iPad browser checks; production migration verification |
 
 ## Evidence Rules
 
