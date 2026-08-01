@@ -62,6 +62,14 @@ The answer is cleared when the question no longer applies.
 Admin estimates the post-ceremony headcount from the existing RSVP guest count;
 guests are not asked for another number.
 
+## Lodging Input Presentation
+
+Lodging guest-card headings stay visually prominent, while guest-entered names,
+ages, notes, dietary notes, and placeholders use normal font weight. When a
+guest is marked as a child, RSVP explains that the numeric age helps the family
+arrange a suitable room and bed, keeps `VD: 5` in the age input, and reports a
+missing value as `Nhập tuổi của bé`.
+
 ## Compatibility
 
 Existing imported invitees may not have a stored `Cụm danh xưng`. A

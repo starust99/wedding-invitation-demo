@@ -93,7 +93,7 @@ const rsvpSchema = rsvpFormFieldsSchema
           ctx.addIssue({ code: "custom", path: ["lodgingGuests", index, "fullName"], message: "Nhập họ tên người lưu trú." });
         }
         if (guest.isChild && (typeof guest.age !== "number" || isNaN(guest.age))) {
-          ctx.addIssue({ code: "custom", path: ["lodgingGuests", index, "age"], message: "Nhập tuổi của bé để resort sắp xếp." });
+          ctx.addIssue({ code: "custom", path: ["lodgingGuests", index, "age"], message: "Nhập tuổi của bé" });
         }
       });
     }
@@ -118,7 +118,7 @@ const rsvpDraftSchema = z.object({
 });
 
 const inputClass =
-  "min-h-13 w-full rounded-2xl border border-serenity/22 bg-white/75 px-4 text-base text-center text-[#252934] outline-none transition placeholder:text-[#252934]/36 focus:border-serenity focus:bg-white/86 focus:ring-4 focus:ring-serenity/18";
+  "min-h-13 w-full rounded-2xl border border-serenity/22 bg-white/75 px-4 text-base font-normal text-center text-[#252934] outline-none transition placeholder:font-normal placeholder:text-[#252934]/36 focus:border-serenity focus:bg-white/86 focus:ring-4 focus:ring-serenity/18";
 
 function createLodgingGuest(fullName = ""): LodgingGuestForm {
   return {
@@ -1589,7 +1589,7 @@ export default function RSVPPage() {
                                     <div key={field.id} className="relative rounded-2xl border border-serenity/12 bg-white/45 p-4 text-left shadow-[0_2px_8px_rgba(146,168,209,0.06)]">
                                       {/* Header with Title & Close/Delete Button */}
                                       <div className="mb-3.5 flex items-center justify-between">
-                                        <p className="text-[11px] font-bold tracking-widest text-[#252934]/40 uppercase">Người lưu trú {index + 1}</p>
+                                        <p className="text-sm font-bold tracking-[0.08em] text-[#252934] uppercase">Người lưu trú {index + 1}</p>
                                         <button
                                           type="button"
                                           onClick={() => {
@@ -1639,10 +1639,19 @@ export default function RSVPPage() {
                                               label={<span className="text-xs font-bold tracking-wider text-[#252934]/68">Tuổi của bé</span>}
                                               error={guestErrors?.age?.message}
                                             >
+                                              <p
+                                                id={`lodging-guest-${index}-age-help`}
+                                                className="mx-auto max-w-xl text-center text-xs font-normal leading-relaxed text-[#252934]/58 sm:text-sm"
+                                              >
+                                                Vui lòng điền số tuổi của bé để gia đình sắp xếp phòng và giường phù hợp cho Quý khách
+                                              </p>
                                               <input
                                                 type="number"
+                                                inputMode="numeric"
                                                 min={0}
                                                 max={10}
+                                                step={1}
+                                                aria-describedby={`lodging-guest-${index}-age-help`}
                                                 onWheel={(e) => e.currentTarget.blur()}
                                                 className={`${inputClass} [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none`}
                                                 placeholder="VD: 5"
