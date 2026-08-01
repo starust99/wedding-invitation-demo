@@ -1,4 +1,5 @@
 import type { SiteVersion } from "@/lib/site-versions";
+import { CoupleNameText } from "@/components/ui/CoupleNameText";
 
 const sourceMeta = {
   manual: "Tự tạo",
@@ -38,7 +39,12 @@ export function VersionSnapshotsPanel({ versions, label, backend, busy, onLabelC
                   {version.publishedAt ? <span className="rounded-full bg-[#EEF4FF] px-3 py-1 text-xs font-bold uppercase tracking-[0.12em] text-[#3538CD]">Đã xuất bản</span> : null}
                 </div>
                 <p className="mt-1 text-xs leading-5 text-[#8A8178]">Tạo lúc {new Date(version.createdAt).toLocaleString("vi-VN")}{version.publishedAt ? ` · Đã xuất bản ${new Date(version.publishedAt).toLocaleString("vi-VN")}` : ""}</p>
-                <p className="mt-2 text-sm leading-6 text-[#8A8178]">{version.settings.content.couple.displayName} · {version.settings.content.event.dateLabel} · {version.settings.themeKey}</p>
+                <p className="mt-2 text-sm leading-6 text-[#8A8178]">
+                  <CoupleNameText
+                    text={`${version.settings.content.couple.displayName} · ${version.settings.content.event.dateLabel} · ${version.settings.themeKey}`}
+                    coupleName={version.settings.content.couple.displayName}
+                  />
+                </p>
               </div>
               <div className="flex flex-wrap gap-2">
                 <button type="button" disabled={busy} onClick={() => onDuplicate(version)} className="rounded-full border border-[#D6BFA3] px-3 py-2 text-xs font-bold uppercase tracking-[0.12em] text-[#2E2A25] disabled:opacity-60">Nhân bản</button>

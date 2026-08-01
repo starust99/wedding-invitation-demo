@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { CoupleNameText } from "@/components/ui/CoupleNameText";
 
 type InviteAccessGateProps = {
   variant: "home" | "invalid-token" | "rsvp-missing-token";
@@ -35,7 +36,10 @@ export function InviteAccessGate({ variant }: InviteAccessGateProps) {
         <h1 className="wedding-type-title mt-4 text-[#252934]">{title}</h1>
         <p className="wedding-type-body mt-5 text-[#252934]/62">{body}</p>
         <p className="wedding-type-body mt-6 text-sm text-[#252934]/48">
-          Nhật & Phương · Terracotta Đà Lạt
+          <CoupleNameText
+            text="Nhật & Phương · Terracotta Đà Lạt"
+            coupleName="Nhật & Phương"
+          />
         </p>
         {variant === "rsvp-missing-token" ? (
           <Link

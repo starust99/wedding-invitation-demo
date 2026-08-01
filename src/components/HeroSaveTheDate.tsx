@@ -36,6 +36,7 @@ export function HeroSaveTheDate({ config, guestIdentity }: { config: WeddingConf
       viewport={viewport}
       summary={{
         invitationLine: hasGuestIdentity ? inviteCopy.heroInvitationLine : undefined,
+        coupleDisplayName: config.couple.displayName,
         venueName: config.venue.name,
         venueArea: config.venue.area,
         venueLocation: config.venue.location,

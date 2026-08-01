@@ -36,6 +36,11 @@ For `/rsvp?invite={token}`:
 Public copy must not infer these two values from `hostRelationship` or
 `kinshipPronoun`.
 
+The configured couple display name is one visual phrase everywhere it appears
+in the interface. Surrounding copy may wrap normally, but the browser must not
+split the two names around the ampersand. This is a presentation rule and must
+not add non-breaking characters to stored invitation data.
+
 ## Guest Capacity
 
 - `Bố` and `Mẹ` are single-person invitations with expected count `1`.

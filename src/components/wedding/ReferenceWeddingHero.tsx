@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import { ChevronDown } from "lucide-react";
 import { LineReveal, checkIsIntroDone } from "@/components/ui/CinematicReveal";
+import { CoupleNameText } from "@/components/ui/CoupleNameText";
 import type { WeddingHeroEditorConfig } from "@/lib/wedding/hero-types";
 
 type ReferenceWeddingHeroProps = {
@@ -14,6 +15,7 @@ type ReferenceWeddingHeroProps = {
 export type ReferenceWeddingHeroSummary = {
   guestName?: string;
   invitationLine?: string;
+  coupleDisplayName?: string;
   venueName?: string;
   venueArea?: string;
   venueLocation?: string;
@@ -198,7 +200,12 @@ export function ReferenceWeddingHero({ config, summary }: ReferenceWeddingHeroPr
             </div>
           </LineReveal>
           <LineReveal delay={textBodyDelay} type="body" className="w-full">
-            <p className="save-date-copy save-date-copy-arch">{invitationText}</p>
+            <p className="save-date-copy save-date-copy-arch">
+              <CoupleNameText
+                text={invitationText}
+                coupleName={summary?.coupleDisplayName || config.content.names}
+              />
+            </p>
           </LineReveal>
         </article>
       </div>

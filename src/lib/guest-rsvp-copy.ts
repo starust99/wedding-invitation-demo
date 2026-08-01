@@ -40,11 +40,13 @@ export function buildRsvpSubmissionCopy(input: {
   attendingBanquet: AttendanceValue;
   salutationCluster?: string;
   fullGuestName?: string;
+  coupleDisplayName?: string;
   fallbackClosingLine: string;
 }) {
   const cluster = resolveSalutationCluster(input.salutationCluster, input.fullGuestName ?? "");
   const recipient = capitalizeFirst(cluster);
   const recipientLower = lowercaseFirst(cluster);
+  const coupleDisplayName = input.coupleDisplayName?.trim() || "Nhật & Phương";
 
   if (isNo(input.attending)) {
     return {
@@ -56,21 +58,21 @@ export function buildRsvpSubmissionCopy(input: {
   if (isYes(input.attendingCeremony) && isYes(input.attendingBanquet)) {
     return {
       title: "Đã xác nhận",
-      body: `Lời hồi đáp đã được gửi thành công!\n\nThật hạnh phúc khi biết ${recipientLower} sẽ có mặt ở cả Thánh lễ Hôn phối lẫn Tiệc cưới để chung vui cùng Nhật & Phương.\n\nSự hiện diện của ${recipientLower} chính là món quà ý nghĩa nhất. Chân thành cảm ơn!`,
+      body: `Lời hồi đáp đã được gửi thành công!\n\nThật hạnh phúc khi biết ${recipientLower} sẽ có mặt ở cả Thánh lễ Hôn phối lẫn Tiệc cưới để chung vui cùng ${coupleDisplayName}.\n\nSự hiện diện của ${recipientLower} chính là món quà ý nghĩa nhất. Chân thành cảm ơn!`,
       showCalendar: true,
     };
   }
   if (isYes(input.attendingCeremony) && isNo(input.attendingBanquet)) {
     return {
       title: "Đã xác nhận",
-      body: `Lời hồi đáp đã được gửi thành công!\n\nCảm ơn ${recipient} đã sắp xếp thời gian đến chứng kiến và hiệp thông trong Thánh lễ Hôn phối của Nhật & Phương.\n\nDù rất tiếc không thể đồng hành trong buổi Tiệc cưới, sự hiện diện và lời cầu nguyện của ${recipientLower} tại Thánh đường đã là món quà vô cùng trân quý.`,
+      body: `Lời hồi đáp đã được gửi thành công!\n\nCảm ơn ${recipient} đã sắp xếp thời gian đến chứng kiến và hiệp thông trong Thánh lễ Hôn phối của ${coupleDisplayName}.\n\nDù rất tiếc không thể đồng hành trong buổi Tiệc cưới, sự hiện diện và lời cầu nguyện của ${recipientLower} tại Thánh đường đã là món quà vô cùng trân quý.`,
       showCalendar: true,
     };
   }
   if (isNo(input.attendingCeremony) && isYes(input.attendingBanquet)) {
     return {
       title: "Đã xác nhận",
-      body: `Lời hồi đáp đã được gửi thành công!\n\nCảm ơn ${recipient} đã sắp xếp thời gian đến chung vui tại Tiệc cưới của Nhật & Phương.\n\nSự đồng hành của ${recipientLower} chắc chắn sẽ giúp ngày vui thêm trọn vẹn và đong đầy ý nghĩa. Hẹn sớm gặp tại Đà Lạt!`,
+      body: `Lời hồi đáp đã được gửi thành công!\n\nCảm ơn ${recipient} đã sắp xếp thời gian đến chung vui tại Tiệc cưới của ${coupleDisplayName}.\n\nSự đồng hành của ${recipientLower} chắc chắn sẽ giúp ngày vui thêm trọn vẹn và đong đầy ý nghĩa. Hẹn sớm gặp tại Đà Lạt!`,
       showCalendar: true,
     };
   }

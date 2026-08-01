@@ -1,17 +1,12 @@
 "use client";
 
 import type { WeddingHeroEditorConfig } from "@/lib/wedding/hero-types";
+import { CoupleNameText } from "@/components/ui/CoupleNameText";
 
 type HeroContentProps = {
   config: WeddingHeroEditorConfig;
   mode?: "preview" | "public";
 };
-
-function splitNames(names: string) {
-  const parts = names.split(/\s*&\s*/);
-  if (parts.length === 2) return `${parts[0]} &\n${parts[1]}`;
-  return names;
-}
 
 export function HeroContent({ config, mode = "public" }: HeroContentProps) {
   const compact = mode === "preview";
@@ -28,8 +23,8 @@ export function HeroContent({ config, mode = "public" }: HeroContentProps) {
           {config.content.eyebrow}
         </p>
 
-        <h1 className="wedding-type-title mt-7 whitespace-pre-line text-text-primary">
-          {splitNames(config.content.names)}
+        <h1 className="wedding-type-title mt-7 text-text-primary">
+          <CoupleNameText text={config.content.names} coupleName={config.content.names} />
         </h1>
 
         <p className="wedding-type-meta mt-8 text-text-primary/72">
@@ -37,7 +32,7 @@ export function HeroContent({ config, mode = "public" }: HeroContentProps) {
         </p>
 
         <p className="wedding-type-body mx-auto mt-5 max-w-[calc(100vw-3rem)] text-text-primary/72 lg:max-w-[32rem]">
-          {config.content.description}
+          <CoupleNameText text={config.content.description} coupleName={config.content.names} />
         </p>
 
         <div className="mt-9 flex w-full flex-wrap items-center justify-center gap-4 max-sm:flex-col max-sm:items-stretch">
@@ -66,7 +61,10 @@ export function HeroContent({ config, mode = "public" }: HeroContentProps) {
             Giữ ngày cưới
           </p>
           <p suppressHydrationWarning className="wedding-type-body mt-3 text-text-primary/70">
-            Cùng chung vui trong lễ cưới của Nhật & Phương, tháng 12.2026.
+            <CoupleNameText
+              text="Cùng chung vui trong lễ cưới của Nhật & Phương, tháng 12.2026."
+              coupleName={config.content.names}
+            />
           </p>
         </div>
       </div>

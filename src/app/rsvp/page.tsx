@@ -29,6 +29,8 @@ import {
 } from "@/lib/rsvp-storage";
 import { buildInvitationCopy, resolveGuestIdentity, type GuestIdentity, type InvitationCopy } from "@/lib/guest-personalization";
 import { buildRsvpSubmissionCopy } from "@/lib/guest-rsvp-copy";
+import { keepExactPhraseTogether } from "@/lib/couple-name-display";
+import { weddingConfig } from "@/config/wedding.config";
 import {
   CALENDAR_HANDOFF_HELP_DELAY_MS,
   getCalendarHandoffGuidance,
@@ -36,6 +38,7 @@ import {
 } from "@/lib/calendar-handoff";
 import { getInviteStatusFromRsvp, readLocalInvitees, upsertLocalInvitees, type Invitee } from "@/lib/invites";
 import { usePageTransition } from "@/components/PageTransitionEffect";
+import { CoupleNameText } from "@/components/ui/CoupleNameText";
 import { findAnyStoredInviteToken } from "@/lib/guest-personalization";
 
 const lodgingGuestSchema = z.object({
@@ -290,6 +293,7 @@ function buildSubmissionCopy(
     attendingBanquet,
     salutationCluster: guestIdentity?.salutationCluster,
     fullGuestName: guestIdentity?.displayLabel || guestIdentity?.name,
+    coupleDisplayName: weddingConfig.couple.displayName,
     fallbackClosingLine: inviteCopy.closingLine,
   });
 }
@@ -983,7 +987,10 @@ export default function RSVPPage() {
               <div className="w-full bg-white/40 border border-white/50 shadow-[0_8px_32px_rgba(63,70,66,0.04)] rounded-[2rem] p-6 sm:p-10 mb-8 flex flex-col items-center backdrop-blur-md">
                 <h2 className="wedding-type-title text-[#252934] font-serif italic text-2xl sm:text-3xl font-bold mb-4">{submissionCopy.title}</h2>
                 <p className="wedding-type-body max-w-lg text-[#252934]/75 leading-relaxed whitespace-pre-line text-center">
-                  {submissionCopy.body}
+                  <CoupleNameText
+                    text={submissionCopy.body}
+                    coupleName={weddingConfig.couple.displayName}
+                  />
                 </p>
               </div>
 
@@ -1691,7 +1698,10 @@ export default function RSVPPage() {
                             className={`${inputClass} min-h-28 py-4 text-left`}
                             placeholder={
                               attending === "no"
-                                ? "Quý khách có thể để lại lời chúc mừng hoặc nhắn gửi cho Nhật & Phương"
+                                ? keepExactPhraseTogether(
+                                    "Quý khách có thể để lại lời chúc mừng hoặc nhắn gửi cho Nhật & Phương",
+                                    weddingConfig.couple.displayName,
+                                  )
                                 : "Quý khách có thể nhắn giờ đến dự kiến, yêu cầu ghế trẻ em, hỗ trợ đi lại hoặc hỗ trợ người lớn tuổi,... nếu có"
                             }
                             {...register("notes")}
