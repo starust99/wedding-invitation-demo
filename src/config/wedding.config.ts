@@ -201,7 +201,7 @@ export const weddingConfig = {
     { time: "20:50", title: "Chụp ảnh kỷ niệm", description: "Chụp hình lưu niệm cùng cô dâu chú rể." },
   ],
   dressCode: {
-    title: "Sắc màu vườn xuân",
+    title: "Khu vườn mùa xuân",
     note: "Khách mời có thể chọn trang phục thanh lịch theo sắc hồng pastel, xanh dương pastel, trắng kem hoặc xanh lá tự nhiên. Nên ưu tiên chất liệu thoải mái vì buổi tiệc diễn ra ngoài trời.",
     colors: ["#FADCD9", "#D4E4F7", "#FEF8E7", "#B5D5A4", "#5C5247"],
   },

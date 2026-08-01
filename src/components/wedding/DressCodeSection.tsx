@@ -153,9 +153,9 @@ export function DressCodeSection({
           <div className="h-[1px] flex-grow bg-[#b4975a]/35" />
         </div>
 
-        {/* "{title}" (Sắc màu vườn xuân) - Serif, italic, larger, elegant */}
+        {/* "{title}" (Khu vườn mùa xuân) - Serif, italic, larger, elegant */}
         <span className="font-serif italic text-[1.65rem] sm:text-[1.9rem] md:text-[2.1rem] font-medium text-[#3f4642] leading-tight mb-4.5 block">
-          {title && !title.includes("pastel") && title !== "Trang phục chủ đề" ? title : "Sắc màu vườn xuân"}
+          {title && !title.includes("pastel") && title !== "Trang phục chủ đề" ? title : "Khu vườn mùa xuân"}
         </span>
 
         <p className="font-sans text-[#4e443c]/90 font-normal text-[0.96rem] sm:text-[1.04rem] md:text-[1.1rem] leading-relaxed max-w-[30rem] mx-auto whitespace-pre-line mb-3">

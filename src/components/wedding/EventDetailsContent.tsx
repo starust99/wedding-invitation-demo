@@ -279,7 +279,7 @@ export function EventDetailsContent({
     year: "2026",
     weekday: "THỨ BẢY",
   };
-  const dressCodeTitle = publicData?.dressCodeTitle && !publicData.dressCodeTitle.includes("pastel") && publicData.dressCodeTitle !== "Trang phục chủ đề" ? publicData.dressCodeTitle : "Sắc màu vườn xuân";
+  const dressCodeTitle = publicData?.dressCodeTitle && !publicData.dressCodeTitle.includes("pastel") && publicData.dressCodeTitle !== "Trang phục chủ đề" ? publicData.dressCodeTitle : "Khu vườn mùa xuân";
   const dressCodeNote = publicData?.dressCodeNote || content.dressCodeText;
 
   return (

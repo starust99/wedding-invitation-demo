@@ -41,7 +41,7 @@ type SettingsInput = Partial<Omit<SiteSettings, "content">> & {
 
 export const draftStorageKey = "wedding-demo-draft-settings";
 export const publishedStorageKey = "wedding-demo-published-settings";
-export const settingsSchemaVersion = 17;
+export const settingsSchemaVersion = 18;
 
 export const defaultSettings: SiteSettings = {
   schemaVersion: settingsSchemaVersion,
@@ -454,6 +454,17 @@ export function normalizeSettings(settings: SettingsInput | null): SiteSettings 
         },
       };
     }
+  }
+
+  // Migration v18: Rename the legacy dress-code theme title.
+  if ((settings.schemaVersion ?? 0) < 18 && content.dressCode?.title === "Sắc màu vườn xuân") {
+    content = {
+      ...content,
+      dressCode: {
+        ...content.dressCode,
+        title: "Khu vườn mùa xuân",
+      },
+    };
   }
 
   return {
