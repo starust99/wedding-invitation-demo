@@ -20,43 +20,43 @@ const DRESS_COLORS: DressCodeColor[] = [
     id: "pink",
     name: "Hồng phấn",
     hex: "#d39a9c",
-    imgSrc: "/assets/dresscode-pink-v3.jpg",
+    imgSrc: "/assets/dresscode-pink-v5.webp",
   },
   {
     id: "blue",
     name: "Xanh biển nhạt",
     hex: "#9bb4c5",
-    imgSrc: "/assets/dresscode-blue-v3.jpg",
+    imgSrc: "/assets/dresscode-blue-v5.webp",
   },
   {
     id: "yellow",
     name: "Vàng nhạt",
     hex: "#e8c691",
-    imgSrc: "/assets/dresscode-yellow-v3.jpg",
+    imgSrc: "/assets/dresscode-yellow-v5.webp",
   },
   {
     id: "green",
     name: "Xanh lá nhạt",
     hex: "#a9bc99",
-    imgSrc: "/assets/dresscode-green-v4.jpg",
+    imgSrc: "/assets/dresscode-green-v5.webp",
   },
   {
     id: "cream",
     name: "Kem",
     hex: "#f5e9d2",
-    imgSrc: "/assets/dresscode-cream-v3.jpg",
+    imgSrc: "/assets/dresscode-cream-v5.webp",
   },
   {
     id: "beige",
     name: "Be",
     hex: "#ddd1be",
-    imgSrc: "/assets/dresscode-beige-v3.jpg",
+    imgSrc: "/assets/dresscode-beige-v5.webp",
   },
   {
     id: "brown",
     name: "Nâu nhạt",
     hex: "#b3967d",
-    imgSrc: "/assets/dresscode-brown-v3.jpg",
+    imgSrc: "/assets/dresscode-brown-v5.webp",
   },
 ];
 
@@ -86,8 +86,8 @@ export function DressCodeSection({
   // Preload all dress code images to make color transitions instantaneous
   useEffect(() => {
     const imagesToPreload = [
-      "/assets/dresscode-theme-v4.webp?v=10",
-      ...DRESS_COLORS.map((c) => `${c.imgSrc}?v=8`),
+      "/assets/dresscode-theme-v5.webp",
+      ...DRESS_COLORS.map((c) => c.imgSrc),
     ];
     imagesToPreload.forEach((src) => {
       const img = new window.Image();
@@ -184,7 +184,7 @@ export function DressCodeSection({
                 className="absolute inset-0 w-full h-full"
               >
                 <Image
-                  src={selectedColor ? `${selectedColor.imgSrc}?v=8` : "/assets/dresscode-theme-v4.webp?v=10"}
+                  src={selectedColor ? selectedColor.imgSrc : "/assets/dresscode-theme-v5.webp"}
                   alt={selectedColor ? `Gợi ý phối đồ màu ${selectedColor.name}` : "Gợi ý phối đồ theo bảng màu vườn xuân"}
                   fill
                   unoptimized

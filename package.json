@@ -9,6 +9,8 @@
     "lint": "eslint",
     "check:guest-copy": "node scripts/check-guest-copy.mjs",
     "check:couple-name-wrap": "node scripts/check-couple-name-wrap.mjs",
+    "check:dresscode-assets": "node scripts/check-dresscode-assets.mjs",
+    "check:dresscode-browser": "node scripts/check-dresscode-browser.mjs",
     "check:post-ceremony-rsvp": "node scripts/check-post-ceremony-rsvp.mjs",
     "check:rsvp-resilience": "node scripts/check-rsvp-resilience.mjs",
     "check:rsvp-lodging-copy": "node scripts/check-rsvp-lodging-copy.mjs",
