@@ -299,6 +299,7 @@ export function InviteAdminPanel() {
       invitee.guestName,
       invitee.invitationName,
       invitee.guestGroup,
+      householdModeLabels[invitee.householdMode],
       invitee.relationship,
       invitee.hostRelationship,
       invitee.token,
@@ -342,6 +343,16 @@ export function InviteAdminPanel() {
       ? { ...item, ...patch, updatedAt: now }
       : item);
     setInvitees(nextInvitees);
+  }
+
+  function patchSelectedGuestUnit(householdMode: Invitee["householdMode"]) {
+    const isHousehold = householdMode === "couple" || householdMode === "family";
+    patchSelectedInvitee({
+      householdMode,
+      inviteUnit: isHousehold ? "household" : "individual",
+      plusOnePolicy: householdMode === "family" ? "family" : householdMode === "couple" ? "spouse" : "none",
+      expectedGuestCount: householdMode === "family" ? 4 : householdMode === "couple" ? 2 : 1,
+    });
   }
 
   function regenerateSelectedInviteCopy() {
@@ -1333,7 +1344,7 @@ export function InviteAdminPanel() {
                           <div className="flex items-start justify-between gap-3">
                             <div className="min-w-0">
                               <h3 className="truncate font-semibold text-[#2E2A25]">{invitee.displayLabel}</h3>
-                              <p className="text-[11px] text-[#8A8178]">{invitee.guestGroup || "Chưa phân nhóm"}</p>
+                              <p className="text-[11px] text-[#8A8178]">{householdModeLabels[invitee.householdMode]} · {invitee.guestGroup || "Chưa phân nhóm"}</p>
                             </div>
                             <button type="button" aria-label="Sao chép link thiệp" onClick={(event) => { event.stopPropagation(); void navigator.clipboard.writeText(buildInviteUrl(invitee.token, window.location.origin)); setMessage("Đã sao chép link."); }} className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-[#E8DDCC] bg-white text-[#5F6F4E]"><Copy className="h-4 w-4" /></button>
                           </div>
@@ -1390,7 +1401,7 @@ export function InviteAdminPanel() {
                             </td>
                             <td className="p-3">
                               <p className="font-semibold text-[#2E2A25]">{invitee.displayLabel}</p>
-                              <span className="text-[10px] text-[#8A8178]">{inviteUnitLabels[invitee.inviteUnit]}</span>
+                              <span className="text-[10px] text-[#8A8178]">{householdModeLabels[invitee.householdMode]}</span>
                             </td>
                             <td className="p-3 text-xs font-mono">{invitee.token}</td>
                             <td className="p-3 text-xs">{invitee.guestGroup}</td>
@@ -1481,6 +1492,15 @@ export function InviteAdminPanel() {
                         <input className={panelInput} value={selectedInvitee.guestGroup} onChange={(event) => patchSelectedInvitee({ guestGroup: event.target.value })} />
                       </label>
                       <label className="grid gap-1.5 font-semibold text-[#8A8178] uppercase tracking-wider">
+                        Đơn vị khách
+                        <select className={panelSelect} value={selectedInvitee.householdMode} onChange={(event) => patchSelectedGuestUnit(event.target.value as Invitee["householdMode"])}>
+                          <option value="single">{householdModeLabels.single}</option>
+                          <option value="couple">{householdModeLabels.couple}</option>
+                          <option value="family">{householdModeLabels.family}</option>
+                          <option value="widowed">{householdModeLabels.widowed}</option>
+                        </select>
+                      </label>
+                      <label className="grid gap-1.5 font-semibold text-[#8A8178] uppercase tracking-wider">
                         Số người (ước lượng)
                         <input className={panelInput} type="number" min={1} value={selectedInvitee.expectedGuestCount} onChange={(event) => patchSelectedInvitee({ expectedGuestCount: Math.max(1, Number(event.target.value) || 1) })} />
                       </label>
@@ -1528,15 +1548,6 @@ export function InviteAdminPanel() {
                           <label className="grid gap-1.5 font-semibold text-[#8A8178] uppercase tracking-wider">
                             Mối quan hệ
                             <input className={panelInput} value={selectedInvitee.relationship} onChange={(event) => patchSelectedInvitee({ relationship: event.target.value })} />
-                          </label>
-                          <label className="grid gap-1.5 font-semibold text-[#8A8178] uppercase tracking-wider">
-                            Chế độ mời kèm
-                            <select className={panelSelect} value={selectedInvitee.householdMode} onChange={(event) => patchSelectedInvitee({ householdMode: event.target.value as Invitee["householdMode"] })}>
-                              <option value="single">{householdModeLabels.single}</option>
-                              <option value="couple">{householdModeLabels.couple}</option>
-                              <option value="family">{householdModeLabels.family}</option>
-                              <option value="widowed">{householdModeLabels.widowed}</option>
-                            </select>
                           </label>
                           <label className="grid gap-1.5 font-semibold text-[#8A8178] uppercase tracking-wider">
                             Chính sách +1

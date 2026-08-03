@@ -128,7 +128,7 @@ export const inviteCsvColumnLabels: Record<InviteCsvColumn, string> = {
   host_relationship: "Quan hệ với người mời",
   host_pronoun: "Người mời xưng là",
   couple_reference: "Người mời gọi cô dâu chú rể",
-  household_mode: "Mời đi cùng",
+  household_mode: "Đơn vị khách",
   plus_one_policy: "Người đi kèm",
   guest_group: "Nhóm khách mời",
   audience_tags: "Nhóm xem album",
@@ -155,7 +155,7 @@ const inviteCsvColumnAliases: Record<InviteCsvColumn, string[]> = {
   host_relationship: ["host_relationship", "hostRelationship", "quan he voi nguoi moi", "quan hệ với người mời", "quan he voi nguoi dung moi", "quan hệ với người đứng mời"],
   host_pronoun: ["host_pronoun", "hostPronoun", "cach nguoi moi xung ho", "cách người mời xưng hô", "vai xung nguoi moi", "vai xưng người mời", "nguoi moi xung", "người mời xưng", "nguoi dung moi xung la", "người đứng mời xưng là"],
   couple_reference: ["couple_reference", "coupleReference", "cach nguoi moi goi co dau chu re", "cách người mời gọi cô dâu chú rể", "cach goi co dau chu re", "cách gọi cô dâu chú rể", "nguoi moi goi co dau chu re la", "người mời gọi cô dâu chú rể là", "hai chau", "hai cháu"],
-  household_mode: ["household_mode", "householdMode", "thanh phan duoc moi", "thành phần được mời", "moi di cung", "mời đi cùng", "moi ai di cung", "mời ai đi cùng"],
+  household_mode: ["household_mode", "householdMode", "don vi khach", "đơn vị khách", "thanh phan duoc moi", "thành phần được mời", "moi di cung", "mời đi cùng", "moi ai di cung", "mời ai đi cùng"],
   plus_one_policy: ["plus_one_policy", "plusOnePolicy", "nguoi di cung", "người đi cùng", "nguoi di kem", "người đi kèm", "quyen di kem", "quyền đi kèm"],
   guest_group: ["guest_group", "guestGroup", "nhom khach", "nhóm khách", "nhom khach moi", "nhóm khách mời"],
   audience_tags: ["audience_tags", "audienceTags", "nhom xem album", "nhóm xem album", "nhom duoc xem album", "nhóm được xem album", "tag album"],
@@ -177,10 +177,10 @@ export const invitedByLabels: Record<InvitedBy, string> = {
 };
 
 export const householdModeLabels: Record<HouseholdMode, string> = {
-  single: "Một khách",
-  couple: "Hai vợ chồng",
-  family: "Cả gia đình",
-  widowed: "Một người, vợ/chồng đã mất",
+  single: "Cá nhân",
+  couple: "Cặp đôi",
+  family: "Gia đình",
+  widowed: "Cá nhân (góa)",
 };
 
 export const plusOnePolicyLabels: Record<PlusOnePolicy, string> = {
@@ -202,8 +202,8 @@ const invitedByAliases: Record<InvitedBy, string[]> = {
 };
 
 const householdModeAliases: Record<HouseholdMode, string[]> = {
-  single: ["single", "mot khach", "một khách", "mot nguoi", "một người"],
-  couple: ["couple", "hai vo chong", "hai vợ chồng", "vo chong", "vợ chồng"],
+  single: ["single", "mot khach", "một khách", "mot nguoi", "một người", "ca nhan", "cá nhân"],
+  couple: ["couple", "hai vo chong", "hai vợ chồng", "vo chong", "vợ chồng", "cap doi", "cặp đôi"],
   family: ["family", "ca gia dinh", "cả gia đình", "gia dinh", "gia đình"],
   widowed: ["widowed", "vo chong da mat", "vợ chồng đã mất", "mot nguoi vo chong da mat"],
 };

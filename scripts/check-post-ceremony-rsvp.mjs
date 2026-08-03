@@ -38,47 +38,65 @@ assert.equal(workbook.getWorksheet("_Dữ liệu hệ thống")?.state, "veryHid
 assert.equal(sheet.getCell("A1").text, "DANH SÁCH KHÁCH MỜI");
 assert.equal(sheet.getCell("A2").text, "Lễ thành hôn Nhật & Phương");
 assert.equal(sheet.getCell("A1").isMerged, true);
-assert.equal(sheet.views[0]?.xSplit, 6);
+assert.equal(sheet.views[0]?.xSplit, 7);
 assert.equal(sheet.views[0]?.ySplit, 4);
 assert(sheet.sheetProtection, "The input sheet must protect formula and presentation cells.");
 assert.deepEqual(
-  [1, 2, 3, 4, 5, 6].map((column) => sheet.getCell(4, column).text),
-  ["Cụm danh xưng", "Tên khách", "Cụm tên khách", "Nhóm khách", "Tham gia tiệc sau Hôn phối", "Lời mời trong thiệp"],
+  [1, 2, 3, 4, 5, 6, 7].map((column) => sheet.getCell(4, column).text),
+  ["Cụm danh xưng", "Tên khách", "Cụm tên khách", "Đơn vị khách", "Nhóm khách", "Tham gia tiệc sau Hôn phối", "Lời mời trong thiệp"],
 );
-assert.equal(sheet.getCell("E5").text, "", "New rows must leave the optional field blank.");
-assert.equal(sheet.getCell("E5").dataValidation.allowBlank, true);
-assert.equal(sheet.getCell("E5").dataValidation.type, "list");
-assert.notEqual(sheet.getCell("E5").dataValidation.showInputMessage, true);
+assert.equal(sheet.getCell("F5").text, "", "New rows must leave the optional field blank.");
+assert.equal(sheet.getCell("F5").dataValidation.allowBlank, true);
+assert.equal(sheet.getCell("F5").dataValidation.type, "list");
+assert.notEqual(sheet.getCell("F5").dataValidation.showInputMessage, true);
 assert.equal(sheet.getCell("A5").protection.locked, false);
 assert.equal(sheet.getCell("C5").protection.locked, true);
+assert.equal(sheet.getCell("D5").protection.locked, true);
 assert.match(sheet.getCell("C5").formula, /VLOOKUP.*6,FALSE/);
+assert.match(sheet.getCell("C5").formula, /VLOOKUP.*7,FALSE/);
+assert.match(sheet.getCell("D5").formula, /VLOOKUP.*4,FALSE/);
 
 sheet.getCell("A5").value = "Gia đình anh chị";
 sheet.getCell("B5").value = "Tuấn";
-sheet.getCell("D5").value = "[Nhật] Bạn bè & Đồng nghiệp";
-sheet.getCell("E5").value = "Có";
-sheet.getCell("A6").value = "Anh";
-sheet.getCell("B6").value = "Dũng";
-sheet.getCell("D6").value = "[Nhật] Bạn bè & Đồng nghiệp";
-sheet.getCell("E6").value = "";
+sheet.getCell("E5").value = "[Nhật] Bạn bè & Đồng nghiệp";
+sheet.getCell("F5").value = "Có";
+sheet.getCell("A6").value = "Chị + Người thương";
+sheet.getCell("B6").value = "Chi";
+sheet.getCell("E6").value = "[Nhật] Bạn bè & Đồng nghiệp";
+sheet.getCell("A7").value = "Anh";
+sheet.getCell("B7").value = "Dũng";
+sheet.getCell("E7").value = "[Nhật] Bạn bè & Đồng nghiệp";
+sheet.getCell("A8").value = "Vợ chồng bạn";
+sheet.getCell("B8").value = "Bảo";
+sheet.getCell("E8").value = "[Nhật] Bạn bè & Đồng nghiệp";
+await workbook.xlsx.writeFile(join(outputDir, "mau-danh-sach-khach-moi-co-du-lieu.xlsx"));
 
 const parsed = await spreadsheet.parseInviteWorkbook(await workbook.xlsx.writeBuffer());
 assert.deepEqual(parsed.errors, []);
 assert.equal(parsed.hasPostCeremonyPartyColumn, true);
-assert.equal(parsed.invitees.length, 2);
+assert.equal(parsed.invitees.length, 4);
 assert.equal(parsed.invitees[0].postCeremonyPartyInvited, true);
 assert.equal(parsed.invitees[1].postCeremonyPartyInvited, false);
+assert.equal(parsed.invitees[1].displayLabel, "Chị Chi & Người thương");
+assert.equal(parsed.invitees[1].salutationCluster, "Anh chị");
+assert.equal(parsed.invitees[1].householdMode, "couple");
+assert.equal(parsed.invitees[1].plusOnePolicy, "lover");
+assert.equal(parsed.invitees[1].expectedGuestCount, 2);
+assert.equal(parsed.invitees[3].displayLabel, "Vợ chồng bạn Bảo");
+assert.equal(parsed.invitees[3].householdMode, "family");
+assert.equal(parsed.invitees[3].plusOnePolicy, "family");
+assert.equal(parsed.invitees[3].expectedGuestCount, 4);
 
-sheet.getCell("E6").value = "Không";
+sheet.getCell("F7").value = "Không";
 const invalid = await spreadsheet.parseInviteWorkbook(await workbook.xlsx.writeBuffer());
 assert.match(invalid.errors.join(" "), /chỉ nhận giá trị Có hoặc để trống/);
 
 const legacyWorkbook = await spreadsheet.buildInviteTemplateWorkbook({ coupleDisplayName: "Nhật & Phương" });
 const legacySheet = legacyWorkbook.getWorksheet("Danh sách khách mời");
-legacySheet.spliceColumns(5, 1);
+legacySheet.spliceColumns(6, 1);
 legacySheet.getCell("A5").value = "Anh";
 legacySheet.getCell("B5").value = "Dũng";
-legacySheet.getCell("D5").value = "[Nhật] Bạn bè & Đồng nghiệp";
+legacySheet.getCell("E5").value = "[Nhật] Bạn bè & Đồng nghiệp";
 const legacyParsed = await spreadsheet.parseInviteWorkbook(await legacyWorkbook.xlsx.writeBuffer());
 assert.deepEqual(legacyParsed.errors, []);
 assert.equal(legacyParsed.hasPostCeremonyPartyColumn, false);

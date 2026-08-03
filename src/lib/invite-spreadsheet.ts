@@ -24,7 +24,7 @@ const headerRowIndex = 4;
 const firstDataRow = headerRowIndex + 1;
 const optionStartColumn = 1;
 const termLookupStartColumn = 5;
-const termLookupColumnCount = 6;
+const termLookupColumnCount = 7;
 const groupLookupStartColumn = termLookupStartColumn + termLookupColumnCount;
 const palette = {
   olive: "FF5F6F4E",
@@ -43,9 +43,12 @@ const palette = {
 type SalutationDefinition = {
   label: string;
   displayPrefix?: string;
+  displaySuffix?: string;
+  sentenceSalutation?: string;
   hostRelationship: string;
   relationship: string;
   householdMode: HouseholdMode;
+  plusOnePolicy?: PlusOnePolicy;
   needsName: boolean;
   coupleHostPronoun: string;
   parentsHostPronoun: string;
@@ -64,7 +67,7 @@ const salutationDefinitions: SalutationDefinition[] = [
   { label: "Bố", hostRelationship: "bố", relationship: "bố/mẹ của cô dâu/chú rể", householdMode: "single", needsName: false, coupleHostPronoun: "chúng con", parentsHostPronoun: "gia đình chúng con" },
   { label: "Mẹ", hostRelationship: "mẹ", relationship: "bố/mẹ của cô dâu/chú rể", householdMode: "single", needsName: false, coupleHostPronoun: "chúng con", parentsHostPronoun: "gia đình chúng con" },
   { label: "Bác", hostRelationship: "bác", relationship: "bác của cô dâu/chú rể", householdMode: "single", needsName: true, coupleHostPronoun: "chúng con", parentsHostPronoun: "gia đình chúng con" },
-  { label: "Vợ chồng bác", hostRelationship: "vợ chồng bác", relationship: "vợ chồng bác của cô dâu/chú rể", householdMode: "couple", needsName: true, coupleHostPronoun: "chúng con", parentsHostPronoun: "gia đình chúng con" },
+  { label: "Vợ chồng bác", hostRelationship: "vợ chồng bác", relationship: "vợ chồng bác của cô dâu/chú rể", householdMode: "family", needsName: true, coupleHostPronoun: "chúng con", parentsHostPronoun: "gia đình chúng con" },
   { label: "Gia đình bác", hostRelationship: "bác", relationship: "bác của cô dâu/chú rể", householdMode: "family", needsName: true, coupleHostPronoun: "chúng con", parentsHostPronoun: "gia đình chúng con" },
   { label: "Cô", hostRelationship: "cô", relationship: "cô/chú của cô dâu/chú rể", householdMode: "single", needsName: true, coupleHostPronoun: "chúng con", parentsHostPronoun: "gia đình chúng con" },
   { label: "Gia đình cô", hostRelationship: "cô", relationship: "cô/chú của cô dâu/chú rể", householdMode: "family", needsName: true, coupleHostPronoun: "chúng con", parentsHostPronoun: "gia đình chúng con" },
@@ -87,24 +90,28 @@ const salutationDefinitions: SalutationDefinition[] = [
   { label: "Mợ", hostRelationship: "mợ", relationship: "dì/cậu/mợ/thím của cô dâu/chú rể", householdMode: "single", needsName: true, coupleHostPronoun: "chúng con", parentsHostPronoun: "gia đình chúng con" },
   { label: "Gia đình mợ", hostRelationship: "mợ", relationship: "dì/cậu/mợ/thím của cô dâu/chú rể", householdMode: "family", needsName: true, coupleHostPronoun: "chúng con", parentsHostPronoun: "gia đình chúng con" },
   { label: "Anh", hostRelationship: "anh", relationship: "anh/chị/em của cô dâu/chú rể", householdMode: "single", needsName: true, coupleHostPronoun: "chúng em", parentsHostPronoun: "em" },
-  { label: "Vợ chồng anh", hostRelationship: "vợ chồng anh", relationship: "vợ chồng anh/chị/em của cô dâu/chú rể", householdMode: "couple", needsName: true, coupleHostPronoun: "chúng em", parentsHostPronoun: "em" },
+  { label: "Anh + Người thương", displayPrefix: "Anh", displaySuffix: " & Người thương", sentenceSalutation: "Anh chị", hostRelationship: "anh", relationship: "anh và người thương của cô dâu/chú rể", householdMode: "couple", plusOnePolicy: "lover", needsName: true, coupleHostPronoun: "chúng em", parentsHostPronoun: "em" },
+  { label: "Vợ chồng anh", hostRelationship: "vợ chồng anh", relationship: "vợ chồng anh/chị/em của cô dâu/chú rể", householdMode: "family", needsName: true, coupleHostPronoun: "chúng em", parentsHostPronoun: "em" },
   { label: "Gia đình anh", hostRelationship: "anh", relationship: "anh/chị/em của cô dâu/chú rể", householdMode: "family", needsName: true, coupleHostPronoun: "chúng em", parentsHostPronoun: "em" },
   { label: "Chị", hostRelationship: "chị", relationship: "anh/chị/em của cô dâu/chú rể", householdMode: "single", needsName: true, coupleHostPronoun: "chúng em", parentsHostPronoun: "em" },
-  { label: "Vợ chồng chị", hostRelationship: "vợ chồng chị", relationship: "vợ chồng anh/chị/em của cô dâu/chú rể", householdMode: "couple", needsName: true, coupleHostPronoun: "chúng em", parentsHostPronoun: "em" },
+  { label: "Chị + Người thương", displayPrefix: "Chị", displaySuffix: " & Người thương", sentenceSalutation: "Anh chị", hostRelationship: "chị", relationship: "chị và người thương của cô dâu/chú rể", householdMode: "couple", plusOnePolicy: "lover", needsName: true, coupleHostPronoun: "chúng em", parentsHostPronoun: "em" },
+  { label: "Vợ chồng chị", hostRelationship: "vợ chồng chị", relationship: "vợ chồng anh/chị/em của cô dâu/chú rể", householdMode: "family", needsName: true, coupleHostPronoun: "chúng em", parentsHostPronoun: "em" },
   { label: "Gia đình chị", hostRelationship: "chị", relationship: "anh/chị/em của cô dâu/chú rể", householdMode: "family", needsName: true, coupleHostPronoun: "chúng em", parentsHostPronoun: "em" },
   { label: "Anh chị", hostRelationship: "anh chị", relationship: "anh chị của cô dâu/chú rể", householdMode: "couple", needsName: true, coupleHostPronoun: "chúng em", parentsHostPronoun: "em" },
   { label: "Gia đình anh chị", hostRelationship: "anh chị", relationship: "anh chị của cô dâu/chú rể", householdMode: "family", needsName: true, coupleHostPronoun: "chúng em", parentsHostPronoun: "em" },
   { label: "Em", hostRelationship: "em", relationship: "anh/chị/em của cô dâu/chú rể", householdMode: "single", needsName: true, coupleHostPronoun: "anh chị", parentsHostPronoun: "gia đình anh chị" },
-  { label: "Vợ chồng em", hostRelationship: "vợ chồng em", relationship: "vợ chồng anh/chị/em của cô dâu/chú rể", householdMode: "couple", needsName: true, coupleHostPronoun: "anh chị", parentsHostPronoun: "gia đình anh chị" },
+  { label: "Em + Người thương", displayPrefix: "Em", displaySuffix: " & Người thương", sentenceSalutation: "Hai em", hostRelationship: "em", relationship: "em và người thương của cô dâu/chú rể", householdMode: "couple", plusOnePolicy: "lover", needsName: true, coupleHostPronoun: "anh chị", parentsHostPronoun: "gia đình anh chị" },
+  { label: "Vợ chồng em", hostRelationship: "vợ chồng em", relationship: "vợ chồng anh/chị/em của cô dâu/chú rể", householdMode: "family", needsName: true, coupleHostPronoun: "anh chị", parentsHostPronoun: "gia đình anh chị" },
   { label: "Gia đình em", hostRelationship: "em", relationship: "anh/chị/em của cô dâu/chú rể", householdMode: "family", needsName: true, coupleHostPronoun: "anh chị", parentsHostPronoun: "gia đình anh chị" },
   { label: "Cháu", hostRelationship: "cháu", relationship: "cháu của cô dâu/chú rể", householdMode: "single", needsName: true, coupleHostPronoun: "anh chị", parentsHostPronoun: "cô chú", parentsCoupleReference: "hai anh chị" },
-  { label: "Vợ chồng cháu", hostRelationship: "vợ chồng cháu", relationship: "vợ chồng cháu của cô dâu/chú rể", householdMode: "couple", needsName: true, coupleHostPronoun: "anh chị", parentsHostPronoun: "cô chú", parentsCoupleReference: "hai anh chị" },
+  { label: "Vợ chồng cháu", hostRelationship: "vợ chồng cháu", relationship: "vợ chồng cháu của cô dâu/chú rể", householdMode: "family", needsName: true, coupleHostPronoun: "anh chị", parentsHostPronoun: "cô chú", parentsCoupleReference: "hai anh chị" },
   { label: "Gia đình cháu", hostRelationship: "cháu", relationship: "cháu của cô dâu/chú rể", householdMode: "family", needsName: true, coupleHostPronoun: "anh chị", parentsHostPronoun: "cô chú", parentsCoupleReference: "hai anh chị" },
   { label: "Hai bạn", hostRelationship: "bạn", relationship: "bạn của cô dâu/chú rể", householdMode: "couple", needsName: true, coupleHostPronoun: "chúng mình", parentsHostPronoun: "gia đình chúng tôi" },
   { label: "Gia đình", hostRelationship: "bạn", relationship: "khách mời của cô dâu/chú rể", householdMode: "family", needsName: true, coupleHostPronoun: "chúng mình", parentsHostPronoun: "gia đình chúng tôi" },
   { label: "Bà", hostRelationship: "bà", relationship: "ông bà của cô dâu/chú rể", householdMode: "single", needsName: true, coupleHostPronoun: "chúng con", parentsHostPronoun: "gia đình chúng con" },
   { label: "Bạn", hostRelationship: "bạn", relationship: "bạn của cô dâu/chú rể", householdMode: "single", needsName: true, coupleHostPronoun: "chúng mình", parentsHostPronoun: "gia đình chúng tôi" },
-  { label: "Vợ chồng bạn", hostRelationship: "vợ chồng bạn", relationship: "vợ chồng bạn của cô dâu/chú rể", householdMode: "couple", needsName: true, coupleHostPronoun: "chúng mình", parentsHostPronoun: "gia đình chúng tôi" },
+  { label: "Bạn + Người thương", displayPrefix: "Bạn", displaySuffix: " & Người thương", sentenceSalutation: "Hai bạn", hostRelationship: "bạn", relationship: "bạn và người thương của cô dâu/chú rể", householdMode: "couple", plusOnePolicy: "lover", needsName: true, coupleHostPronoun: "chúng mình", parentsHostPronoun: "gia đình chúng tôi" },
+  { label: "Vợ chồng bạn", hostRelationship: "vợ chồng bạn", relationship: "vợ chồng bạn của cô dâu/chú rể", householdMode: "family", needsName: true, coupleHostPronoun: "chúng mình", parentsHostPronoun: "gia đình chúng tôi" },
   { label: "Gia đình bạn", hostRelationship: "bạn", relationship: "bạn của cô dâu/chú rể", householdMode: "family", needsName: true, coupleHostPronoun: "chúng mình", parentsHostPronoun: "gia đình chúng tôi" },
 ] as const;
 
@@ -126,6 +133,7 @@ const columns = [
   { key: "salutationCluster", header: "Cụm danh xưng", width: 30 },
   { key: "guestNameCore", header: "Tên khách", width: 24 },
   { key: "guestName", header: "Cụm tên khách", width: 34 },
+  { key: "guestUnit", header: "Đơn vị khách", width: 22 },
   { key: "guestGroup", header: "Nhóm khách", width: 40 },
   { key: "postCeremonyPartyInvited", header: "Tham gia tiệc sau Hôn phối", width: 32 },
   { key: "insideInviteLine", header: "Lời mời trong thiệp", width: 66 },
@@ -186,6 +194,7 @@ type InferredTemplateValues = {
   coupleReference: string;
   relationship: string;
   householdMode: HouseholdMode;
+  plusOnePolicy: PlusOnePolicy;
   guestGroup: string;
   audienceTagsText: string;
   needsName: boolean;
@@ -253,7 +262,8 @@ function buildDisplayGuestName(salutationCluster: string, guestNameCore: string)
   const cleanedName = cleanRedundantPrefix(salutationCluster, rawName);
   const salutation = findSalutationDefinition(cluster);
   const normalizedCluster = salutation ? displayPrefixForSalutation(salutation) : cluster;
-  return `${normalizedCluster} ${cleanedName}`.replace(/\s+/g, " ").trim();
+  const suffix = salutation?.displaySuffix ?? "";
+  return `${normalizedCluster} ${cleanedName}${suffix}`.replace(/\s+/g, " ").trim();
 }
 
 function findSalutationDefinition(value: string) {
@@ -283,15 +293,16 @@ function inferTemplateValues(values: TemplateRowValues): InferredTemplateValues 
   const coupleReference = invitedBy === "parents" ? salutation.parentsCoupleReference ?? resolveParentsCoupleReference() : salutation.coupleHostPronoun;
 
   return {
-    salutationCluster: displayPrefixForSalutation(salutation),
-    guestName: buildDisplayGuestName(salutation.displayPrefix ?? values.salutationCluster, values.guestNameCore),
-    displaySalutation: buildDisplayGuestName(salutation.displayPrefix ?? values.salutationCluster, values.guestNameCore),
+    salutationCluster: clean(salutation.sentenceSalutation) || displayPrefixForSalutation(salutation),
+    guestName: buildDisplayGuestName(values.salutationCluster, values.guestNameCore),
+    displaySalutation: buildDisplayGuestName(values.salutationCluster, values.guestNameCore),
     hostRelationship: salutation.hostRelationship,
     invitedBy,
     hostPronoun,
     coupleReference,
     relationship: salutation.relationship,
     householdMode: salutation.householdMode,
+    plusOnePolicy: salutation.plusOnePolicy ?? derivePlusOnePolicy(salutation.householdMode),
     guestGroup: guestGroup.label,
     audienceTagsText: guestGroup.audienceTags,
     needsName: salutation.needsName,
@@ -344,7 +355,7 @@ function rowPreview(values: TemplateRowValues, options: ReturnType<typeof resolv
     hostPronoun: inferred.hostPronoun,
     coupleReference: inferred.coupleReference,
     householdMode: inferred.householdMode,
-    plusOnePolicy: derivePlusOnePolicy(inferred.householdMode),
+    plusOnePolicy: inferred.plusOnePolicy,
     guestGroup: inferred.guestGroup,
     coupleDisplayName: options.coupleDisplayName,
   });
@@ -367,7 +378,13 @@ function rowPreview(values: TemplateRowValues, options: ReturnType<typeof resolv
 function displayNameCombinedFormula(rowIndex: number) {
   const clusterCell = `$A${rowIndex}`;
   const nameCell = `$B${rowIndex}`;
-  return `IF(${clusterCell}="","",IF(${nameCell}="",IFERROR(VLOOKUP(${clusterCell},${termLookupRange()},6,FALSE),${clusterCell}),TRIM(IFERROR(VLOOKUP(${clusterCell},${termLookupRange()},6,FALSE),${clusterCell})&" "&${nameCell})))`;
+  const suffixLookup = `VLOOKUP(${clusterCell},${termLookupRange()},7,FALSE)`;
+  return `IF(${clusterCell}="","",TRIM(IFERROR(VLOOKUP(${clusterCell},${termLookupRange()},6,FALSE),${clusterCell})&IF(${nameCell}="",""," "&${nameCell})&IFERROR(IF(${suffixLookup}="|","",${suffixLookup}),"")))`;
+}
+
+function guestUnitFormula(rowIndex: number) {
+  const clusterCell = `$A${rowIndex}`;
+  return `IF(${clusterCell}="","",IFERROR(VLOOKUP(${clusterCell},${termLookupRange()},4,FALSE),${excelText("Chưa xác định")}))`;
 }
 
 function insideInviteFormula(rowIndex: number, options: ReturnType<typeof resolveSpreadsheetOptions>) {
@@ -457,7 +474,7 @@ function styleFormulaCell(cell: ExcelJS.Cell) {
 }
 
 function buildTitleBanner(worksheet: ExcelJS.Worksheet, options: ReturnType<typeof resolveSpreadsheetOptions>) {
-  worksheet.mergeCells(`A${titleRowIndex}:F${titleRowIndex}`);
+  worksheet.mergeCells(`A${titleRowIndex}:G${titleRowIndex}`);
   const titleCell = worksheet.getCell(titleRowIndex, 1);
   titleCell.value = "DANH SÁCH KHÁCH MỜI";
   titleCell.font = { name: "Georgia", size: 24, bold: true, color: { argb: palette.white } };
@@ -465,7 +482,7 @@ function buildTitleBanner(worksheet: ExcelJS.Worksheet, options: ReturnType<type
   titleCell.alignment = { horizontal: "center", vertical: "middle" };
   worksheet.getRow(titleRowIndex).height = 48;
 
-  worksheet.mergeCells(`A${subtitleRowIndex}:F${subtitleRowIndex}`);
+  worksheet.mergeCells(`A${subtitleRowIndex}:G${subtitleRowIndex}`);
   const subtitleCell = worksheet.getCell(subtitleRowIndex, 1);
   subtitleCell.value = `Lễ thành hôn ${options.coupleDisplayName}`;
   subtitleCell.font = { name: "Arial", size: 13, italic: true, color: { argb: palette.text } };
@@ -485,7 +502,11 @@ function applyFormulaCells(row: ExcelJS.Row, rowIndex: number, options: ReturnTy
   displayNameCombinedCell.value = { formula: displayNameCombinedFormula(rowIndex), result: inferred?.guestName ?? "" };
   styleFormulaCell(displayNameCombinedCell);
 
-  const insideCell = row.getCell(6);
+  const guestUnitCell = row.getCell(4);
+  guestUnitCell.value = { formula: guestUnitFormula(rowIndex), result: inferred ? householdModeLabels[inferred.householdMode] : "" };
+  styleFormulaCell(guestUnitCell);
+
+  const insideCell = row.getCell(7);
   insideCell.value = { formula: insideInviteFormula(rowIndex, options), result: preview?.insideInviteLine ?? "" };
   styleFormulaCell(insideCell);
 }
@@ -514,10 +535,10 @@ function applyTemplateRows(worksheet: ExcelJS.Worksheet, options: ReturnType<typ
     const cell2 = row.getCell(2);
     styleInputCell(cell2, false);
 
-    // 4. guestGroup
-    const cell4 = row.getCell(4);
-    styleInputCell(cell4, true);
-    cell4.dataValidation = {
+    // 5. guestGroup
+    const cell5 = row.getCell(5);
+    styleInputCell(cell5, true);
+    cell5.dataValidation = {
       type: "list",
       allowBlank: true,
       formulae: [optionRange("guestGroup", 1, optionColumns)],
@@ -527,10 +548,10 @@ function applyTemplateRows(worksheet: ExcelJS.Worksheet, options: ReturnType<typ
       error: "Ô này dùng danh sách chọn để tránh nhập sai.",
     };
 
-    // 5. postCeremonyPartyInvited
-    const cell5 = row.getCell(5);
-    styleInputCell(cell5, true);
-    cell5.dataValidation = {
+    // 6. postCeremonyPartyInvited
+    const cell6 = row.getCell(6);
+    styleInputCell(cell6, true);
+    cell6.dataValidation = {
       type: "list",
       allowBlank: true,
       formulae: [optionRange("postCeremonyPartyInvited", 2, optionColumns)],
@@ -558,7 +579,7 @@ function buildSystemSheet(workbook: ExcelJS.Workbook, options: ReturnType<typeof
     });
   });
 
-  const termHeaders = ["Cụm danh xưng", "Quan hệ với người mời", "Quan hệ với cô dâu chú rể", "Mời đi cùng", "Cần tên khách", "Cụm in trên thiệp"];
+  const termHeaders = ["Cụm danh xưng", "Quan hệ với người mời", "Quan hệ với cô dâu chú rể", "Đơn vị khách", "Cần tên khách", "Cụm in trên thiệp", "Hậu tố hiển thị"];
   termHeaders.forEach((header, index) => {
     worksheet.getCell(1, termLookupStartColumn + index).value = header;
     worksheet.getColumn(termLookupStartColumn + index).width = index === 2 ? 34 : 24;
@@ -571,6 +592,7 @@ function buildSystemSheet(workbook: ExcelJS.Workbook, options: ReturnType<typeof
     worksheet.getCell(targetRow, termLookupStartColumn + 3).value = householdModeLabels[item.householdMode];
     worksheet.getCell(targetRow, termLookupStartColumn + 4).value = item.needsName;
     worksheet.getCell(targetRow, termLookupStartColumn + 5).value = displayPrefixForSalutation(item);
+    worksheet.getCell(targetRow, termLookupStartColumn + 6).value = item.displaySuffix ?? "|";
   });
 
   const groupHeaders = ["Nhóm khách", "Nhóm xem album"];
@@ -624,7 +646,7 @@ function applyInputConditionalFormatting(worksheet: ExcelJS.Worksheet) {
     rules: [{
       type: "expression",
       priority: 1,
-      formulae: [`AND($A${firstDataRow}="",OR($B${firstDataRow}<>"",$D${firstDataRow}<>""))`],
+      formulae: [`AND($A${firstDataRow}="",OR($B${firstDataRow}<>"",$E${firstDataRow}<>""))`],
       style: warningStyle,
     }],
   });
@@ -638,11 +660,11 @@ function applyInputConditionalFormatting(worksheet: ExcelJS.Worksheet) {
     }],
   });
   worksheet.addConditionalFormatting({
-    ref: `D${firstDataRow}:D${lastDataRow}`,
+    ref: `E${firstDataRow}:E${lastDataRow}`,
     rules: [{
       type: "expression",
       priority: 3,
-      formulae: [`AND(OR($A${firstDataRow}<>"",$B${firstDataRow}<>""),$D${firstDataRow}="")`],
+      formulae: [`AND(OR($A${firstDataRow}<>"",$B${firstDataRow}<>""),$E${firstDataRow}="")`],
       style: warningStyle,
     }],
   });
@@ -694,10 +716,10 @@ export async function buildInviteTemplateWorkbook(spreadsheetOptions: Spreadshee
   const worksheet = workbook.addWorksheet(inviteSheetName, {
     views: [{
       state: "frozen",
-      xSplit: 6,
+      xSplit: 7,
       ySplit: headerRowIndex,
       activeCell: `A${firstDataRow}`,
-      topLeftCell: `G${firstDataRow}`,
+      topLeftCell: `H${firstDataRow}`,
       showGridLines: false,
       zoomScale: 85,
     }],
@@ -707,7 +729,7 @@ export async function buildInviteTemplateWorkbook(spreadsheetOptions: Spreadshee
   buildTitleBanner(worksheet, options);
   worksheet.autoFilter = {
     from: { row: headerRowIndex, column: 1 },
-    to: { row: headerRowIndex, column: 6 },
+    to: { row: headerRowIndex, column: 7 },
   };
 
   applyHeaderRow(worksheet, headerRowIndex);
@@ -756,7 +778,7 @@ export async function parseInviteWorkbook(buffer: ArrayBuffer, existingInvitees:
     hostPronoun: findKeyByHeader(headers, ["Người mời xưng là", "Người đứng mời xưng là", "host_pronoun", "hostPronoun"]),
     coupleReference: findKeyByHeader(headers, ["Người mời gọi cô dâu chú rể là", "Người mời gọi cô dâu chú rể", "couple_reference", "coupleReference"]),
     relationship: findKeyByHeader(headers, ["Quan hệ với cô dâu chú rể", "relationship"]),
-    householdMode: findKeyByHeader(headers, ["Mời đi cùng", "household_mode", "householdMode"]),
+    householdMode: findKeyByHeader(headers, ["Đơn vị khách", "Mời đi cùng", "household_mode", "householdMode"]),
     guestGroup: findKeyByHeader(headers, ["Nhóm khách", "Nhóm khách mời", "guest_group", "guestGroup"]),
     postCeremonyPartyInvited: findKeyByHeader(headers, ["Tham gia tiệc sau Hôn phối", "post_ceremony_party_invited", "postCeremonyPartyInvited"]),
     audienceTags: findKeyByHeader(headers, ["Nhóm xem album", "audience_tags", "audienceTags"]),
@@ -829,7 +851,7 @@ export async function parseInviteWorkbook(buffer: ArrayBuffer, existingInvitees:
         hostPronoun: inferred.hostPronoun,
         coupleReference: inferred.coupleReference,
         householdMode: inferred.householdMode,
-        plusOnePolicy: derivePlusOnePolicy(inferred.householdMode),
+        plusOnePolicy: inferred.plusOnePolicy,
         guestGroup: inferred.guestGroup,
         audienceTags: parseAudienceTags(inferred.audienceTagsText),
         expectedGuestCount: deriveExpectedGuestCount(inferred.householdMode),

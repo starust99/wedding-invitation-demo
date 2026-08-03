@@ -7,6 +7,8 @@ The current Excel template defines:
 - `Cụm danh xưng`: the short form used to address the invited party in a sentence.
 - `Tên khách`: the manually entered proper name or paired names.
 - `Cụm tên khách`: `Cụm danh xưng` plus `Tên khách`, preserving the salutation casing and the entered proper-name casing.
+- `Đơn vị khách`: an automatically derived planning label backed by
+  `householdMode`: `Cá nhân`, `Cặp đôi`, or `Gia đình`.
 
 Example:
 
@@ -35,6 +37,36 @@ For `/rsvp?invite={token}`:
 
 Public copy must not infer these two values from `hostRelationship` or
 `kinshipPronoun`.
+
+## Couple With An Unnamed Partner
+
+The salutation dropdown supports `Anh + Người thương`, `Chị + Người thương`,
+`Em + Người thương`, and `Bạn + Người thương`.
+
+- The full display label is compact, for example `Chị Chi & Người thương`.
+- Sentence copy uses `Anh chị` for `Anh/Chị + Người thương`, `Hai em` for
+  `Em + Người thương`, and `Hai bạn` for `Bạn + Người thương`.
+- These rows are couple invitations with expected count `2` and
+  `plusOnePolicy = lover`.
+- RSVP does not ask whether both people will attend.
+
+## Guest Unit Classification
+
+`Đơn vị khách` is derived from the selected salutation definition rather than
+parsing the full guest name:
+
+- single-person salutations produce `Cá nhân`;
+- `+ Người thương` and explicit two-person salutations produce `Cặp đôi`;
+- salutations beginning with `Vợ chồng` produce `Gia đình`, because children may
+  be included and the actual party is confirmed through RSVP;
+- family salutations produce `Gia đình`.
+
+The generated workbook shows this as a locked formula cell. Import repeats the
+same deterministic derivation, so a stale or missing Excel formula result does
+not corrupt the stored value. Existing workbooks without the visible column
+remain compatible. Admin may edit the stored classification for exceptional
+cases. The classification is planning metadata and must not replace actual
+lodging names or room-capacity decisions.
 
 The configured couple display name is one visual phrase everywhere it appears
 in the interface. Surrounding copy may wrap normally, but the browser must not

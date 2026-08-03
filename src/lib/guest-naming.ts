@@ -41,6 +41,7 @@ const knownSalutationClusters = [
   "Cậu mợ",
   "Anh chị",
   "Hai bạn",
+  "Hai em",
   "Đồng nghiệp",
   "Dượng",
   "Thím",

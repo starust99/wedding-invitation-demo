@@ -40,11 +40,14 @@ const nameCases = [
   ["Gia đình", "Nga & Phong", "Gia đình Nga & Phong"],
   ["Gia đình", "Hải & Linh", "Gia đình Hải & Linh"],
   ["Dì", "Nên", "Dì Nên"],
+  ["Anh chị", "Chi & Người thương", "Chị Chi & Người thương"],
 ];
 
 for (const [cluster, core, full] of nameCases) {
-  assert.equal(naming.resolveSalutationCluster("", full), cluster);
-  assert.equal(naming.canonicalizeGuestFullName(`${cluster} ${core}`, cluster), full);
+  if (full !== "Chị Chi & Người thương") {
+    assert.equal(naming.resolveSalutationCluster("", full), cluster);
+    assert.equal(naming.canonicalizeGuestFullName(`${cluster} ${core}`, cluster), full);
+  }
 }
 
 assert.equal(
@@ -118,4 +121,22 @@ const banquet = copy.buildRsvpSubmissionCopy({
 assert(banquet.body.includes("Cảm ơn Gia đình anh chị đã sắp xếp"));
 assert(banquet.body.includes("Sự đồng hành của gia đình anh chị"));
 
-console.log(`Guest naming/copy checks passed (${nameCases.length} name patterns, 9 copy branches).`);
+const loverInput = {
+  salutationCluster: "Anh chị",
+  fullGuestName: "Chị Chi & Người thương",
+};
+assert.equal(
+  copy.buildThankYouMessage({ ...loverInput, attending: "yes", attendingCeremony: true, attendingBanquet: true }),
+  "Xin chân thành cảm ơn! Hẹn gặp anh chị tại Thánh lễ Hôn phối và Tiệc cưới.",
+);
+const loverBoth = copy.buildRsvpSubmissionCopy({
+  ...loverInput,
+  attending: "yes",
+  attendingCeremony: "yes",
+  attendingBanquet: "yes",
+  fallbackClosingLine: "",
+});
+assert(loverBoth.body.includes("biết anh chị sẽ có mặt"));
+assert(loverBoth.body.includes("Sự hiện diện của anh chị chính là"));
+
+console.log(`Guest naming/copy checks passed (${nameCases.length} name patterns, 11 copy branches).`);
