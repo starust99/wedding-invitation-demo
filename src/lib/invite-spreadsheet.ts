@@ -130,6 +130,7 @@ const guestGroupDefinitions: GuestGroupDefinition[] = [
 
 
 const columns = [
+  { key: "sequence", header: "STT", width: 10 },
   { key: "salutationCluster", header: "Cụm danh xưng", width: 30 },
   { key: "guestNameCore", header: "Tên khách", width: 24 },
   { key: "guestName", header: "Cụm tên khách", width: 34 },
@@ -138,6 +139,17 @@ const columns = [
   { key: "postCeremonyPartyInvited", header: "Tham gia tiệc sau Hôn phối", width: 32 },
   { key: "insideInviteLine", header: "Lời mời trong thiệp", width: 66 },
 ] as const;
+
+const inviteColumn = {
+  sequence: 1,
+  salutationCluster: 2,
+  guestNameCore: 3,
+  guestName: 4,
+  guestUnit: 5,
+  guestGroup: 6,
+  postCeremonyPartyInvited: 7,
+  insideInviteLine: 8,
+} as const;
 
 type TemplateRowValues = {
   salutationCluster: string;
@@ -376,21 +388,26 @@ function rowPreview(values: TemplateRowValues, options: ReturnType<typeof resolv
 }
 
 function displayNameCombinedFormula(rowIndex: number) {
-  const clusterCell = `$A${rowIndex}`;
-  const nameCell = `$B${rowIndex}`;
+  const clusterCell = `$B${rowIndex}`;
+  const nameCell = `$C${rowIndex}`;
   const suffixLookup = `VLOOKUP(${clusterCell},${termLookupRange()},7,FALSE)`;
   return `IF(${clusterCell}="","",TRIM(IFERROR(VLOOKUP(${clusterCell},${termLookupRange()},6,FALSE),${clusterCell})&IF(${nameCell}="",""," "&${nameCell})&IFERROR(IF(${suffixLookup}="|","",${suffixLookup}),"")))`;
 }
 
 function guestUnitFormula(rowIndex: number) {
-  const clusterCell = `$A${rowIndex}`;
+  const clusterCell = `$B${rowIndex}`;
   return `IF(${clusterCell}="","",IFERROR(VLOOKUP(${clusterCell},${termLookupRange()},4,FALSE),${excelText("Chưa xác định")}))`;
 }
 
 function insideInviteFormula(rowIndex: number, options: ReturnType<typeof resolveSpreadsheetOptions>) {
-  const guestCell = `$C${rowIndex}`;
+  const guestCell = `$D${rowIndex}`;
   const coupleName = options.coupleDisplayName;
   return `IF(${guestCell}="","",${excelText(spreadsheetInsideInviteHeading)}&CHAR(10)&${guestCell}&${excelText(" đến chung vui và ghi dấu những khoảnh khắc đáng nhớ cùng ")}&${excelText(coupleName)}&${excelText(".")})`;
+}
+
+function sequenceFormula(rowIndex: number) {
+  const guestCell = `$D${rowIndex}`;
+  return `IF(${guestCell}="","",COUNTIF($D$${firstDataRow}:${guestCell},"<>"))`;
 }
 
 function findKeyByHeader(headers: Map<string, number>, labels: string[]) {
@@ -474,7 +491,7 @@ function styleFormulaCell(cell: ExcelJS.Cell) {
 }
 
 function buildTitleBanner(worksheet: ExcelJS.Worksheet, options: ReturnType<typeof resolveSpreadsheetOptions>) {
-  worksheet.mergeCells(`A${titleRowIndex}:G${titleRowIndex}`);
+  worksheet.mergeCells(`A${titleRowIndex}:H${titleRowIndex}`);
   const titleCell = worksheet.getCell(titleRowIndex, 1);
   titleCell.value = "DANH SÁCH KHÁCH MỜI";
   titleCell.font = { name: "Georgia", size: 24, bold: true, color: { argb: palette.white } };
@@ -482,7 +499,7 @@ function buildTitleBanner(worksheet: ExcelJS.Worksheet, options: ReturnType<type
   titleCell.alignment = { horizontal: "center", vertical: "middle" };
   worksheet.getRow(titleRowIndex).height = 48;
 
-  worksheet.mergeCells(`A${subtitleRowIndex}:G${subtitleRowIndex}`);
+  worksheet.mergeCells(`A${subtitleRowIndex}:H${subtitleRowIndex}`);
   const subtitleCell = worksheet.getCell(subtitleRowIndex, 1);
   subtitleCell.value = `Lễ thành hôn ${options.coupleDisplayName}`;
   subtitleCell.font = { name: "Arial", size: 13, italic: true, color: { argb: palette.text } };
@@ -498,15 +515,21 @@ function applyFormulaCells(row: ExcelJS.Row, rowIndex: number, options: ReturnTy
   const preview = values ? rowPreview(values, options) : undefined;
   const inferred = values ? inferTemplateValues(values) : undefined;
 
-  const displayNameCombinedCell = row.getCell(3);
+  const sequenceCell = row.getCell(inviteColumn.sequence);
+  sequenceCell.value = { formula: sequenceFormula(rowIndex), result: inferred?.guestName ? rowIndex - firstDataRow + 1 : "" };
+  styleFormulaCell(sequenceCell);
+  sequenceCell.alignment = { vertical: "middle", horizontal: "center" };
+  sequenceCell.font = { name: "Arial", size: 12, bold: true, color: { argb: palette.muted } };
+
+  const displayNameCombinedCell = row.getCell(inviteColumn.guestName);
   displayNameCombinedCell.value = { formula: displayNameCombinedFormula(rowIndex), result: inferred?.guestName ?? "" };
   styleFormulaCell(displayNameCombinedCell);
 
-  const guestUnitCell = row.getCell(4);
+  const guestUnitCell = row.getCell(inviteColumn.guestUnit);
   guestUnitCell.value = { formula: guestUnitFormula(rowIndex), result: inferred ? householdModeLabels[inferred.householdMode] : "" };
   styleFormulaCell(guestUnitCell);
 
-  const insideCell = row.getCell(7);
+  const insideCell = row.getCell(inviteColumn.insideInviteLine);
   insideCell.value = { formula: insideInviteFormula(rowIndex, options), result: preview?.insideInviteLine ?? "" };
   styleFormulaCell(insideCell);
 }
@@ -518,10 +541,9 @@ function applyTemplateRows(worksheet: ExcelJS.Worksheet, options: ReturnType<typ
     const row = worksheet.getRow(rowIndex);
     row.height = 54;
 
-    // 1. salutationCluster
-    const cell1 = row.getCell(1);
-    styleInputCell(cell1, true);
-    cell1.dataValidation = {
+    const salutationCell = row.getCell(inviteColumn.salutationCluster);
+    styleInputCell(salutationCell, true);
+    salutationCell.dataValidation = {
       type: "list",
       allowBlank: true,
       formulae: [optionRange("salutationCluster", 0, optionColumns)],
@@ -531,14 +553,12 @@ function applyTemplateRows(worksheet: ExcelJS.Worksheet, options: ReturnType<typ
       error: "Ô này dùng danh sách chọn để tránh nhập sai.",
     };
 
-    // 2. guestNameCore
-    const cell2 = row.getCell(2);
-    styleInputCell(cell2, false);
+    const guestNameCoreCell = row.getCell(inviteColumn.guestNameCore);
+    styleInputCell(guestNameCoreCell, false);
 
-    // 5. guestGroup
-    const cell5 = row.getCell(5);
-    styleInputCell(cell5, true);
-    cell5.dataValidation = {
+    const guestGroupCell = row.getCell(inviteColumn.guestGroup);
+    styleInputCell(guestGroupCell, true);
+    guestGroupCell.dataValidation = {
       type: "list",
       allowBlank: true,
       formulae: [optionRange("guestGroup", 1, optionColumns)],
@@ -548,10 +568,9 @@ function applyTemplateRows(worksheet: ExcelJS.Worksheet, options: ReturnType<typ
       error: "Ô này dùng danh sách chọn để tránh nhập sai.",
     };
 
-    // 6. postCeremonyPartyInvited
-    const cell6 = row.getCell(6);
-    styleInputCell(cell6, true);
-    cell6.dataValidation = {
+    const postCeremonyPartyCell = row.getCell(inviteColumn.postCeremonyPartyInvited);
+    styleInputCell(postCeremonyPartyCell, true);
+    postCeremonyPartyCell.dataValidation = {
       type: "list",
       allowBlank: true,
       formulae: [optionRange("postCeremonyPartyInvited", 2, optionColumns)],
@@ -642,29 +661,11 @@ function applyInputConditionalFormatting(worksheet: ExcelJS.Worksheet) {
   };
 
   worksheet.addConditionalFormatting({
-    ref: `A${firstDataRow}:A${lastDataRow}`,
-    rules: [{
-      type: "expression",
-      priority: 1,
-      formulae: [`AND($A${firstDataRow}="",OR($B${firstDataRow}<>"",$E${firstDataRow}<>""))`],
-      style: warningStyle,
-    }],
-  });
-  worksheet.addConditionalFormatting({
     ref: `B${firstDataRow}:B${lastDataRow}`,
     rules: [{
       type: "expression",
-      priority: 2,
-      formulae: [`AND($A${firstDataRow}<>"",$B${firstDataRow}="",NOT(OR($A${firstDataRow}="Ông bà",$A${firstDataRow}="Bố mẹ",$A${firstDataRow}="Ba mẹ",$A${firstDataRow}="Bố",$A${firstDataRow}="Mẹ")))`],
-      style: warningStyle,
-    }],
-  });
-  worksheet.addConditionalFormatting({
-    ref: `E${firstDataRow}:E${lastDataRow}`,
-    rules: [{
-      type: "expression",
-      priority: 3,
-      formulae: [`AND(OR($A${firstDataRow}<>"",$B${firstDataRow}<>""),$E${firstDataRow}="")`],
+      priority: 1,
+      formulae: [`AND($B${firstDataRow}="",OR($C${firstDataRow}<>"",$F${firstDataRow}<>""))`],
       style: warningStyle,
     }],
   });
@@ -672,8 +673,26 @@ function applyInputConditionalFormatting(worksheet: ExcelJS.Worksheet) {
     ref: `C${firstDataRow}:C${lastDataRow}`,
     rules: [{
       type: "expression",
+      priority: 2,
+      formulae: [`AND($B${firstDataRow}<>"",$C${firstDataRow}="",NOT(OR($B${firstDataRow}="Ông bà",$B${firstDataRow}="Bố mẹ",$B${firstDataRow}="Ba mẹ",$B${firstDataRow}="Bố",$B${firstDataRow}="Mẹ")))`],
+      style: warningStyle,
+    }],
+  });
+  worksheet.addConditionalFormatting({
+    ref: `F${firstDataRow}:F${lastDataRow}`,
+    rules: [{
+      type: "expression",
+      priority: 3,
+      formulae: [`AND(OR($B${firstDataRow}<>"",$C${firstDataRow}<>""),$F${firstDataRow}="")`],
+      style: warningStyle,
+    }],
+  });
+  worksheet.addConditionalFormatting({
+    ref: `D${firstDataRow}:D${lastDataRow}`,
+    rules: [{
+      type: "expression",
       priority: 4,
-      formulae: [`AND($C${firstDataRow}<>"",COUNTIF($C$${firstDataRow}:$C$${lastDataRow},$C${firstDataRow})>1)`],
+      formulae: [`AND($D${firstDataRow}<>"",COUNTIF($D$${firstDataRow}:$D$${lastDataRow},$D${firstDataRow})>1)`],
       style: {
         fill: { type: "pattern", pattern: "solid", fgColor: { argb: palette.duplicate } },
         font: { color: { argb: palette.text }, bold: true },
@@ -716,10 +735,10 @@ export async function buildInviteTemplateWorkbook(spreadsheetOptions: Spreadshee
   const worksheet = workbook.addWorksheet(inviteSheetName, {
     views: [{
       state: "frozen",
-      xSplit: 7,
+      xSplit: 4,
       ySplit: headerRowIndex,
-      activeCell: `A${firstDataRow}`,
-      topLeftCell: `H${firstDataRow}`,
+      activeCell: `B${firstDataRow}`,
+      topLeftCell: `E${firstDataRow}`,
       showGridLines: false,
       zoomScale: 85,
     }],
@@ -729,7 +748,7 @@ export async function buildInviteTemplateWorkbook(spreadsheetOptions: Spreadshee
   buildTitleBanner(worksheet, options);
   worksheet.autoFilter = {
     from: { row: headerRowIndex, column: 1 },
-    to: { row: headerRowIndex, column: 7 },
+    to: { row: headerRowIndex, column: columns.length },
   };
 
   applyHeaderRow(worksheet, headerRowIndex);
@@ -955,7 +974,7 @@ export async function buildInviteLinksWorkbook(invitees: Invitee[], origin = "")
   workbook.modified = new Date();
 
   const worksheet = workbook.addWorksheet("Link thiệp mời", {
-    views: [{ state: "frozen", xSplit: 1, ySplit: 4, topLeftCell: "B5", showGridLines: false }],
+    views: [{ state: "frozen", xSplit: 2, ySplit: 4, topLeftCell: "C5", showGridLines: false }],
     pageSetup: {
       orientation: "landscape",
       paperSize: 9,
@@ -967,12 +986,13 @@ export async function buildInviteLinksWorkbook(invitees: Invitee[], origin = "")
   });
 
   worksheet.columns = [
+    { key: "sequence", width: 10 },
     { key: "guestName", width: 38 },
     { key: "postCeremonyPartyInvited", width: 38 },
     { key: "inviteUrl", width: 76 },
   ];
 
-  worksheet.mergeCells("A1:C1");
+  worksheet.mergeCells("A1:D1");
   const titleCell = worksheet.getCell("A1");
   titleCell.value = "DANH SÁCH LINK THIỆP MỜI";
   titleCell.font = { name: "Georgia", size: 22, bold: true, color: { argb: palette.white } };
@@ -980,7 +1000,7 @@ export async function buildInviteLinksWorkbook(invitees: Invitee[], origin = "")
   titleCell.alignment = { vertical: "middle", horizontal: "center" };
   worksheet.getRow(1).height = 46;
 
-  worksheet.mergeCells("A2:C2");
+  worksheet.mergeCells("A2:D2");
   const subtitleCell = worksheet.getCell("A2");
   subtitleCell.value = `Lễ thành hôn ${defaultCoupleDisplayName}`;
   subtitleCell.font = { name: "Arial", size: 12, italic: true, color: { argb: palette.text } };
@@ -993,9 +1013,11 @@ export async function buildInviteLinksWorkbook(invitees: Invitee[], origin = "")
   worksheet.getCell("A3").fill = { type: "pattern", pattern: "solid", fgColor: { argb: palette.ivory } };
   worksheet.getCell("B3").fill = { type: "pattern", pattern: "solid", fgColor: { argb: palette.ivory } };
   worksheet.getCell("C3").fill = { type: "pattern", pattern: "solid", fgColor: { argb: palette.ivory } };
+  worksheet.getCell("D3").fill = { type: "pattern", pattern: "solid", fgColor: { argb: palette.ivory } };
 
   const headerRow = worksheet.getRow(4);
   headerRow.values = [
+    "STT",
     "Cụm tên khách",
     "Mời tham gia tiệc sau Hôn phối",
     "Link thiệp",
@@ -1010,14 +1032,18 @@ export async function buildInviteLinksWorkbook(invitees: Invitee[], origin = "")
       bottom: { style: "thin", color: { argb: palette.champagne } },
     };
   });
-  worksheet.autoFilter = "A4:C4";
+  worksheet.autoFilter = "A4:D4";
 
-  invitees.forEach((invitee) => {
-    worksheet.addRow({
+  invitees.forEach((invitee, inviteeIndex) => {
+    const row = worksheet.addRow({
       guestName: invitee.invitationName || invitee.guestName || invitee.displayLabel,
       postCeremonyPartyInvited: invitee.postCeremonyPartyInvited ? "Có" : "Không",
       inviteUrl: buildInviteUrl(invitee.token, origin),
     });
+    row.getCell(1).value = {
+      formula: `IF(B${row.number}="","",COUNTIF($B$5:B${row.number},"<>"))`,
+      result: inviteeIndex + 1,
+    };
   });
 
   worksheet.eachRow((row, rowIndex) => {
@@ -1037,10 +1063,14 @@ export async function buildInviteLinksWorkbook(invitees: Invitee[], origin = "")
       };
     });
 
-    const guestCell = row.getCell(1);
+    const sequenceCell = row.getCell(1);
+    sequenceCell.alignment = { vertical: "middle", horizontal: "center" };
+    sequenceCell.font = { name: "Arial", size: 12, bold: true, color: { argb: palette.muted } };
+
+    const guestCell = row.getCell(2);
     guestCell.font = { name: "Arial", size: 13, bold: true, color: { argb: palette.text } };
 
-    const postCeremonyCell = row.getCell(2);
+    const postCeremonyCell = row.getCell(3);
     const isInvited = cellText(postCeremonyCell) === "Có";
     postCeremonyCell.alignment = { vertical: "middle", horizontal: "center" };
     postCeremonyCell.font = {
@@ -1056,7 +1086,7 @@ export async function buildInviteLinksWorkbook(invitees: Invitee[], origin = "")
     };
   });
 
-  worksheet.getColumn(3).eachCell((cell, rowIndex) => {
+  worksheet.getColumn(4).eachCell((cell, rowIndex) => {
     if (rowIndex <= 4) return;
     const url = cellText(cell);
     cell.value = { text: url, hyperlink: url, tooltip: "Bấm để mở thiệp" };
@@ -1065,7 +1095,7 @@ export async function buildInviteLinksWorkbook(invitees: Invitee[], origin = "")
   });
 
   worksheet.pageSetup.printTitlesRow = "1:4";
-  worksheet.pageSetup.printArea = `A1:C${Math.max(4, worksheet.rowCount)}`;
+  worksheet.pageSetup.printArea = `A1:D${Math.max(4, worksheet.rowCount)}`;
 
   return workbook;
 }
