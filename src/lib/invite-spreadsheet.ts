@@ -955,54 +955,117 @@ export async function buildInviteLinksWorkbook(invitees: Invitee[], origin = "")
   workbook.modified = new Date();
 
   const worksheet = workbook.addWorksheet("Link thiệp mời", {
-    views: [{ state: "frozen", ySplit: 1 }],
+    views: [{ state: "frozen", xSplit: 1, ySplit: 4, topLeftCell: "B5", showGridLines: false }],
+    pageSetup: {
+      orientation: "landscape",
+      paperSize: 9,
+      fitToPage: true,
+      fitToWidth: 1,
+      fitToHeight: 0,
+      margins: { left: 0.35, right: 0.35, top: 0.5, bottom: 0.5, header: 0.2, footer: 0.2 },
+    },
   });
 
   worksheet.columns = [
-    { key: "guestName", header: "Tên khách", width: 28 },
-    { key: "relationship", header: "Mối quan hệ với cô dâu chú rể", width: 34 },
-    { key: "postCeremonyPartyInvited", header: "Hỏi tiệc sau Hôn phối", width: 24 },
-    { key: "inviteUrl", header: "Link thiệp mời độc bản", width: 68 },
+    { key: "guestName", width: 38 },
+    { key: "postCeremonyPartyInvited", width: 38 },
+    { key: "inviteUrl", width: 76 },
   ];
-  worksheet.autoFilter = "A1:D1";
 
-  const headerRow = worksheet.getRow(1);
-  headerRow.height = 28;
+  worksheet.mergeCells("A1:C1");
+  const titleCell = worksheet.getCell("A1");
+  titleCell.value = "DANH SÁCH LINK THIỆP MỜI";
+  titleCell.font = { name: "Georgia", size: 22, bold: true, color: { argb: palette.white } };
+  titleCell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: palette.olive } };
+  titleCell.alignment = { vertical: "middle", horizontal: "center" };
+  worksheet.getRow(1).height = 46;
+
+  worksheet.mergeCells("A2:C2");
+  const subtitleCell = worksheet.getCell("A2");
+  subtitleCell.value = `Lễ thành hôn ${defaultCoupleDisplayName}`;
+  subtitleCell.font = { name: "Arial", size: 12, italic: true, color: { argb: palette.text } };
+  subtitleCell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: palette.ivory } };
+  subtitleCell.alignment = { vertical: "middle", horizontal: "center" };
+  subtitleCell.border = { bottom: { style: "thin", color: { argb: palette.champagne } } };
+  worksheet.getRow(2).height = 28;
+
+  worksheet.getRow(3).height = 9;
+  worksheet.getCell("A3").fill = { type: "pattern", pattern: "solid", fgColor: { argb: palette.ivory } };
+  worksheet.getCell("B3").fill = { type: "pattern", pattern: "solid", fgColor: { argb: palette.ivory } };
+  worksheet.getCell("C3").fill = { type: "pattern", pattern: "solid", fgColor: { argb: palette.ivory } };
+
+  const headerRow = worksheet.getRow(4);
+  headerRow.values = [
+    "Cụm tên khách",
+    "Mời tham gia tiệc sau Hôn phối",
+    "Link thiệp",
+  ];
+  headerRow.height = 44;
   headerRow.eachCell((cell) => {
-    cell.font = { bold: true, color: { argb: "FFFFFFFF" } };
-    cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FF5F6F4E" } };
+    cell.font = { name: "Arial", size: 12, bold: true, color: { argb: palette.white } };
+    cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: palette.oliveDark } };
     cell.alignment = { vertical: "middle", horizontal: "center", wrapText: true };
+    cell.border = {
+      right: { style: "thin", color: { argb: palette.champagne } },
+      bottom: { style: "thin", color: { argb: palette.champagne } },
+    };
   });
+  worksheet.autoFilter = "A4:C4";
 
   invitees.forEach((invitee) => {
     worksheet.addRow({
       guestName: invitee.invitationName || invitee.guestName || invitee.displayLabel,
-      relationship: invitee.relationship || invitee.hostRelationship || invitee.guestGroup,
-      postCeremonyPartyInvited: invitee.postCeremonyPartyInvited ? "Có" : "",
+      postCeremonyPartyInvited: invitee.postCeremonyPartyInvited ? "Có" : "Không",
       inviteUrl: buildInviteUrl(invitee.token, origin),
     });
   });
 
   worksheet.eachRow((row, rowIndex) => {
-    if (rowIndex === 1) return;
-    row.height = 36;
+    if (rowIndex <= 4) return;
+    row.height = 42;
     row.eachCell((cell) => {
-      cell.alignment = { vertical: "middle", wrapText: true };
+      cell.font = { name: "Arial", size: 12, color: { argb: palette.text } };
+      cell.fill = {
+        type: "pattern",
+        pattern: "solid",
+        fgColor: { argb: rowIndex % 2 === 0 ? palette.ivory : palette.white },
+      };
+      cell.alignment = { vertical: "middle", horizontal: "left", wrapText: true };
       cell.border = {
-        top: { style: "thin", color: { argb: "FFE8DDCC" } },
-        left: { style: "thin", color: { argb: "FFE8DDCC" } },
-        bottom: { style: "thin", color: { argb: "FFE8DDCC" } },
-        right: { style: "thin", color: { argb: "FFE8DDCC" } },
+        bottom: { style: "thin", color: { argb: palette.border } },
+        right: { style: "thin", color: { argb: palette.border } },
       };
     });
+
+    const guestCell = row.getCell(1);
+    guestCell.font = { name: "Arial", size: 13, bold: true, color: { argb: palette.text } };
+
+    const postCeremonyCell = row.getCell(2);
+    const isInvited = cellText(postCeremonyCell) === "Có";
+    postCeremonyCell.alignment = { vertical: "middle", horizontal: "center" };
+    postCeremonyCell.font = {
+      name: "Arial",
+      size: 12,
+      bold: isInvited,
+      color: { argb: isInvited ? palette.oliveDark : palette.muted },
+    };
+    postCeremonyCell.fill = {
+      type: "pattern",
+      pattern: "solid",
+      fgColor: { argb: isInvited ? "FFEAF0E3" : rowIndex % 2 === 0 ? palette.ivory : palette.white },
+    };
   });
 
-  worksheet.getColumn(4).eachCell((cell, rowIndex) => {
-    if (rowIndex === 1) return;
+  worksheet.getColumn(3).eachCell((cell, rowIndex) => {
+    if (rowIndex <= 4) return;
     const url = cellText(cell);
-    cell.value = { text: url, hyperlink: url };
-    cell.font = { color: { argb: "FF3B6EA8" }, underline: true };
+    cell.value = { text: url, hyperlink: url, tooltip: "Bấm để mở thiệp" };
+    cell.font = { name: "Arial", size: 12, color: { argb: "FF3B6EA8" }, underline: true };
+    cell.alignment = { vertical: "middle", horizontal: "left", wrapText: false };
   });
+
+  worksheet.pageSetup.printTitlesRow = "1:4";
+  worksheet.pageSetup.printArea = `A1:C${Math.max(4, worksheet.rowCount)}`;
 
   return workbook;
 }
