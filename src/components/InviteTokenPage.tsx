@@ -9,7 +9,7 @@ import { ThankYouSection } from "@/components/ThankYouSection";
 
 import { WeddingDetailsSection } from "@/components/WeddingDetailsSection";
 import { WeddingSplashIntro } from "@/components/WeddingSplashIntro";
-import { resolveGuestIdentity, type GuestIdentity } from "@/lib/guest-personalization";
+import { removeStoredGuestIdentityForToken, resolveGuestIdentity, type GuestIdentity } from "@/lib/guest-personalization";
 import { InviteAccessGate } from "@/components/InviteAccessGate";
 import { readLocalInvitees, writeLocalInvitees, type Invitee } from "@/lib/invites";
 import { readRSVPResponses, removeRSVPResponses } from "@/lib/rsvp-storage";
@@ -94,8 +94,17 @@ export function InviteTokenPage({ token, initialInvitee }: { token: string; init
         if (response.status === 404) {
           if (!cancelled) {
             setFetchStatus("not-found");
-            if (!localInvitee) {
-              setPayload({ backend: "local" });
+            setPayload({ backend: "local" });
+            if (typeof window !== "undefined") {
+              try {
+                syncLocalCache(() => {
+                  writeLocalInvitees(readLocalInvitees().filter((item) => item.token !== token));
+                  removeRSVPResponses((response) => response.inviteToken === token);
+                  removeStoredGuestIdentityForToken(token);
+                });
+              } catch {
+                // The server result still invalidates this page if browser storage is blocked.
+              }
             }
           }
         } else if (response.ok) {

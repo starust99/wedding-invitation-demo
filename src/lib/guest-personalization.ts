@@ -102,6 +102,15 @@ export function writeStoredGuestIdentityForToken(token: string, identity: GuestI
   window.localStorage.setItem(identityStorageKeyForToken(token), JSON.stringify(identity));
 }
 
+export function removeStoredGuestIdentityForToken(token: string) {
+  if (typeof window === "undefined" || !token) return;
+  try {
+    window.localStorage.removeItem(identityStorageKeyForToken(token));
+  } catch {
+    // Invalidating a deleted invitation must not fail when storage is blocked.
+  }
+}
+
 export function findAnyStoredInviteToken(): string | undefined {
   if (typeof window === "undefined") return undefined;
 

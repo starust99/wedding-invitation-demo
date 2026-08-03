@@ -24,10 +24,11 @@ import {
   formatLodgingGuestLabel,
   saveRSVPResponse,
   readRSVPResponses,
+  removeRSVPResponses,
   type LodgingGuest,
   type RSVPResponse,
 } from "@/lib/rsvp-storage";
-import { buildInvitationCopy, resolveGuestIdentity, type GuestIdentity, type InvitationCopy } from "@/lib/guest-personalization";
+import { buildInvitationCopy, removeStoredGuestIdentityForToken, resolveGuestIdentity, type GuestIdentity, type InvitationCopy } from "@/lib/guest-personalization";
 import { buildRsvpSubmissionCopy } from "@/lib/guest-rsvp-copy";
 import { keepExactPhraseTogether } from "@/lib/couple-name-display";
 import { weddingConfig } from "@/config/wedding.config";
@@ -36,7 +37,7 @@ import {
   getCalendarHandoffGuidance,
   type CalendarHandoffGuidance,
 } from "@/lib/calendar-handoff";
-import { getInviteStatusFromRsvp, readLocalInvitees, upsertLocalInvitees, type Invitee } from "@/lib/invites";
+import { getInviteStatusFromRsvp, readLocalInvitees, upsertLocalInvitees, writeLocalInvitees, type Invitee } from "@/lib/invites";
 import { usePageTransition } from "@/components/PageTransitionEffect";
 import { CoupleNameText } from "@/components/ui/CoupleNameText";
 import { findAnyStoredInviteToken } from "@/lib/guest-personalization";
@@ -642,6 +643,26 @@ export default function RSVPPage() {
             `/api/invites/${encodeURIComponent(token)}`,
             RSVP_INVITE_FETCH_TIMEOUT_MS,
           );
+          if (response.status === 404) {
+            try {
+              writeLocalInvitees(readLocalInvitees().filter((invitee) => invitee.token !== token));
+              removeRSVPResponses((savedResponse) => savedResponse.inviteToken === token);
+              removeStoredGuestIdentityForToken(token);
+              clearRsvpDraft(token);
+              if (sessionStorage.getItem("last_invite_token") === token) {
+                sessionStorage.removeItem("last_invite_token");
+              }
+            } catch {
+              // The invalid-token gate must still work when browser storage is blocked.
+            }
+            if (!cancelled) {
+              setInviteeContext(null);
+              setGuestIdentity({});
+              setMissingInviteToken(true);
+              finishHydration();
+            }
+            return;
+          }
           if (response.ok) {
             const result = await response.json() as { invitee?: Invitee };
             if (result.invitee && !cancelled) {

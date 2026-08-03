@@ -33,6 +33,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ tok
             mediaAssets: [],
           });
         }
+        return NextResponse.json({ error: "Invite not found" }, { status: 404 });
       }
     } catch (err) {
       console.error("Failed to read invitees cache:", err);

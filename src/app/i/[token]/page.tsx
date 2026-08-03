@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { notFound } from "next/navigation";
+import { cache } from "react";
 import { InviteTokenPage } from "@/components/InviteTokenPage";
 import { getSupabaseServerClient, hasSupabaseEnv } from "@/lib/supabase-server";
 import { mapInviteeRow } from "@/lib/invite-mapper";
@@ -13,7 +15,10 @@ const ogImage = {
   alt: "Nhật & Phương Wedding Thumbnail",
 };
 
-async function fetchInviteeDataFromServer(token: string) {
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
+const fetchInviteeDataFromServer = cache(async (token: string) => {
   if (!hasSupabaseEnv()) {
     try {
       const fs = require("fs");
@@ -29,76 +34,55 @@ async function fetchInviteeDataFromServer(token: string) {
     }
     return null;
   }
-  try {
-    const supabase = getSupabaseServerClient();
-    const { data: inviteeRow } = await supabase
-      .from("invitees")
-      .select("*")
-      .eq("token", token)
-      .maybeSingle();
+  const supabase = getSupabaseServerClient();
+  const { data: inviteeRow, error: inviteeError } = await supabase
+    .from("invitees")
+    .select("*")
+    .eq("token", token)
+    .maybeSingle();
 
-    if (!inviteeRow) return null;
+  if (inviteeError) throw inviteeError;
 
-    const invitee = inviteeRow as InviteeDatabaseRow;
-    const rsvpResult = await supabase
-      .from("rsvp_responses")
-      .select("*")
-      .or(`invite_token.eq.${token},invitee_id.eq.${invitee.id}`)
-      .order("submitted_at", { ascending: false })
-      .limit(1)
-      .maybeSingle();
+  if (!inviteeRow) return null;
 
-    const rsvp = rsvpResult.data ? mapRSVPRow(rsvpResult.data as RSVPDatabaseRow) : undefined;
-    return mapInviteeRow(invitee, undefined, rsvp);
-  } catch (err) {
-    console.error("Error fetching invitee on server:", err);
-    return null;
-  }
+  const invitee = inviteeRow as InviteeDatabaseRow;
+  const rsvpResult = await supabase
+    .from("rsvp_responses")
+    .select("*")
+    .or(`invite_token.eq.${token},invitee_id.eq.${invitee.id}`)
+    .order("submitted_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  const rsvp = rsvpResult.data ? mapRSVPRow(rsvpResult.data as RSVPDatabaseRow) : undefined;
+  return mapInviteeRow(invitee, undefined, rsvp);
+});
+
+function resolveMetadataGuestName(invitee: Awaited<ReturnType<typeof fetchInviteeDataFromServer>>) {
+  if (!invitee) return "";
+  return String(
+    invitee.displayLabel
+      || invitee.invitationName
+      || invitee.guestName
+      || "",
+  ).trim();
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ token: string }> }): Promise<Metadata> {
   const { token } = await params;
-  let guestName = "bạn";
+  const invitee = await fetchInviteeDataFromServer(token);
+  const guestName = resolveMetadataGuestName(invitee);
 
-  if (hasSupabaseEnv()) {
-    try {
-      const supabase = getSupabaseServerClient();
-      const { data } = await supabase
-        .from("invitees")
-        .select("honorific, guest_name")
-        .eq("token", token)
-        .maybeSingle();
-
-      if (data) {
-        const honorific = data.honorific?.trim();
-        const guestNameVal = data.guest_name?.trim();
-        guestName = [honorific, guestNameVal].filter(Boolean).join(" ") || "bạn";
-      }
-    } catch {
-      // Fallback to "bạn" if DB fails
-    }
-  } else {
-    try {
-      const fs = require("fs");
-      const path = require("path");
-      const cachePath = path.join(process.cwd(), "invitees-cache.json");
-      if (fs.existsSync(cachePath)) {
-        const raw = fs.readFileSync(cachePath, "utf8");
-        const invitees = JSON.parse(raw) as any[];
-        const match = invitees.find((item) => item.token === token);
-        if (match) {
-          const honorific = match.honorific?.trim();
-          const guestNameVal = match.guestName?.trim() || match.displayLabel?.trim();
-          guestName = [honorific, guestNameVal].filter(Boolean).join(" ") || "bạn";
-        }
-      }
-    } catch {
-      // Fallback to "bạn"
-    }
+  if (!guestName) {
+    return {
+      title: "Thiệp mời không còn hiệu lực | Nhật & Phương",
+      description: "Link thiệp mời này không còn hiệu lực.",
+      robots: { index: false, follow: false },
+    };
   }
 
   const title = `Thiệp mời: ${guestName} | Nhật & Phương`;
-  const description = `Mời ${guestName} cùng đến chung vui trong ngày trọng đại của Nhật & Phương.`;
+  const description = `Trân trọng kính mời ${guestName} đến chung vui trong ngày trọng đại của Nhật & Phương.`;
 
   return {
     title,
@@ -107,6 +91,9 @@ export async function generateMetadata({ params }: { params: Promise<{ token: st
       title,
       description,
       url: `/i/${token}`,
+      siteName: "Nhật & Phương",
+      locale: "vi_VN",
+      type: "website",
       images: [ogImage],
     },
     twitter: {
@@ -121,5 +108,6 @@ export async function generateMetadata({ params }: { params: Promise<{ token: st
 export default async function TokenInviteRoute({ params }: { params: Promise<{ token: string }> }) {
   const { token } = await params;
   const initialInvitee = await fetchInviteeDataFromServer(token);
-  return <InviteTokenPage token={token} initialInvitee={initialInvitee ?? undefined} />;
+  if (!initialInvitee) notFound();
+  return <InviteTokenPage token={token} initialInvitee={initialInvitee} />;
 }
