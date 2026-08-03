@@ -28,36 +28,39 @@ const galleryBlurSvg = `
 const galleryBlurDataUrl = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(galleryBlurSvg)}`;
 
 const galleryContainerVariant: Variants = {
-  hidden: { opacity: 1 },
+  hidden: { opacity: 0 },
   visible: {
     opacity: 1,
     transition: {
-      staggerChildren: 0.1,
-      delayChildren: 0.05,
+      staggerChildren: 0.14,
+      delayChildren: 0.1,
     },
   },
 };
 
 const galleryTileVariant: Variants = {
-  hidden: { opacity: 1, y: 0 },
-  visible: {
+  hidden: { opacity: 0, y: 18, filter: "blur(8px)" },
+  visible: (i: number) => ({
     opacity: 1,
     y: 0,
+    filter: "blur(0px)",
     transition: {
-      duration: 0.5,
-      ease: [0.25, 0.1, 0.25, 1],
+      delay: i * 0.18,
+      duration: 1.2,
+      ease: [0.22, 1, 0.36, 1],
     },
-  },
+  }),
 };
 
 const galleryIntroVariant: Variants = {
-  hidden: { opacity: 1, y: 0 },
+  hidden: { opacity: 0, y: 15, filter: "blur(6px)" },
   visible: {
     opacity: 1,
     y: 0,
+    filter: "blur(0px)",
     transition: {
-      duration: 0.5,
-      ease: "easeOut",
+      duration: 1.3,
+      ease: [0.22, 1, 0.36, 1],
     },
   },
 };
@@ -141,13 +144,87 @@ export function GallerySection({ config }: { config: WeddingConfig }) {
     };
   }, [scale, dimensions]);
 
-  const handleZoomIn = useCallback(() => {
-    setScale((prev) => Math.min(prev + 0.5, 3.5));
+  const stepZoomIn = useCallback((currentScale: number): number => {
+    const next = [1.0, 1.5, 2.0, 2.5, 3.0, 3.5].find((lvl) => lvl > currentScale + 0.05);
+    return next ?? 3.5;
   }, []);
 
-  const handleZoomOut = useCallback(() => {
-    setScale((prev) => Math.max(prev - 0.5, 1));
+  const stepZoomOut = useCallback((currentScale: number): number => {
+    const prev = [3.5, 3.0, 2.5, 2.0, 1.5, 1.0].find((lvl) => lvl < currentScale - 0.05);
+    return prev ?? 1.0;
   }, []);
+
+  const handleZoomIn = useCallback(() => {
+    setScale((prev) => stepZoomIn(prev));
+  }, [stepZoomIn]);
+
+  const handleZoomOut = useCallback(() => {
+    setScale((prev) => stepZoomOut(prev));
+  }, [stepZoomOut]);
+
+  const initialPinchDistRef = useRef<number | null>(null);
+  const lastTapTimeRef = useRef<number>(0);
+  const lastWheelTimeRef = useRef<number>(0);
+  const lastPinchStepTimeRef = useRef<number>(0);
+
+  const getTouchDistance = (touches: React.TouchList) => {
+    const dx = touches[0].clientX - touches[1].clientX;
+    const dy = touches[0].clientY - touches[1].clientY;
+    return Math.hypot(dx, dy);
+  };
+
+  const handlePinchTouchStart = useCallback((e: React.TouchEvent) => {
+    if (e.touches.length === 2) {
+      const dist = getTouchDistance(e.touches);
+      initialPinchDistRef.current = dist;
+    } else if (e.touches.length === 1) {
+      const now = Date.now();
+      if (now - lastTapTimeRef.current < 300) {
+        setScale((prev) => (prev > 1.2 ? 1 : 2.5));
+      }
+      lastTapTimeRef.current = now;
+    }
+  }, []);
+
+  const handlePinchTouchMove = useCallback((e: React.TouchEvent) => {
+    if (e.cancelable) e.preventDefault();
+    if (e.touches.length === 2 && initialPinchDistRef.current !== null) {
+      const currentDist = getTouchDistance(e.touches);
+      if (initialPinchDistRef.current > 0) {
+        const ratio = currentDist / initialPinchDistRef.current;
+        const now = Date.now();
+
+        if (ratio > 1.22 && now - lastPinchStepTimeRef.current > 180) {
+          setScale((prev) => stepZoomIn(prev));
+          initialPinchDistRef.current = currentDist;
+          lastPinchStepTimeRef.current = now;
+        } else if (ratio < 0.82 && now - lastPinchStepTimeRef.current > 180) {
+          setScale((prev) => stepZoomOut(prev));
+          initialPinchDistRef.current = currentDist;
+          lastPinchStepTimeRef.current = now;
+        }
+      }
+    }
+  }, [stepZoomIn, stepZoomOut]);
+
+  const handlePinchTouchEnd = useCallback((e: React.TouchEvent) => {
+    if (e.touches.length < 2) {
+      initialPinchDistRef.current = null;
+    }
+  }, []);
+
+  const handleWheel = useCallback((e: React.WheelEvent) => {
+    if (e.cancelable) e.preventDefault();
+    const now = Date.now();
+    if (now - lastWheelTimeRef.current < 160) return;
+    lastWheelTimeRef.current = now;
+
+    if (e.deltaY < 0) {
+      setScale((prev) => stepZoomIn(prev));
+    } else if (e.deltaY > 0) {
+      setScale((prev) => stepZoomOut(prev));
+    }
+  }, [stepZoomIn, stepZoomOut]);
 
   const closeLightbox = useCallback(() => setSelectedImageIndex(null), []);
 
@@ -173,37 +250,44 @@ export function GallerySection({ config }: { config: WeddingConfig }) {
     if (!activeImage) return;
 
     const previousOverflow = document.body.style.overflow;
+    const previousTouchAction = document.documentElement.style.touchAction;
+
+    document.body.style.overflow = "hidden";
+    document.documentElement.style.touchAction = "none";
+
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") closeLightbox();
       if (event.key === "ArrowLeft") showPrevious();
       if (event.key === "ArrowRight") showNext();
     };
 
-    document.body.style.overflow = "hidden";
+    const blockGlobalScrollAndZoom = (event: Event) => {
+      if (event.cancelable) {
+        event.preventDefault();
+      }
+    };
+
     window.addEventListener("keydown", handleKeyDown);
+    window.addEventListener("wheel", blockGlobalScrollAndZoom, { passive: false });
+    window.addEventListener("touchmove", blockGlobalScrollAndZoom, { passive: false });
+    window.addEventListener("touchstart", blockGlobalScrollAndZoom, { passive: false });
+    window.addEventListener("gesturestart", blockGlobalScrollAndZoom, { passive: false });
+    window.addEventListener("gesturechange", blockGlobalScrollAndZoom, { passive: false });
+    window.addEventListener("gestureend", blockGlobalScrollAndZoom, { passive: false });
 
     return () => {
       document.body.style.overflow = previousOverflow;
+      document.documentElement.style.touchAction = previousTouchAction;
+
       window.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener("wheel", blockGlobalScrollAndZoom);
+      window.removeEventListener("touchmove", blockGlobalScrollAndZoom);
+      window.removeEventListener("touchstart", blockGlobalScrollAndZoom);
+      window.removeEventListener("gesturestart", blockGlobalScrollAndZoom);
+      window.removeEventListener("gesturechange", blockGlobalScrollAndZoom);
+      window.removeEventListener("gestureend", blockGlobalScrollAndZoom);
     };
   }, [activeImage, closeLightbox, showNext, showPrevious]);
-
-  useEffect(() => {
-    if (!activeImage) return;
-
-    const element = lightboxRef.current;
-    if (!element) return;
-
-    const handleTouchMove = (event: TouchEvent) => {
-      event.preventDefault();
-    };
-
-    element.addEventListener("touchmove", handleTouchMove, { passive: false });
-
-    return () => {
-      element.removeEventListener("touchmove", handleTouchMove);
-    };
-  }, [activeImage]);
 
   const lightbox = (
     <AnimatePresence>
@@ -228,6 +312,11 @@ export function GallerySection({ config }: { config: WeddingConfig }) {
             key={`lightbox-img-${selectedImageIndex}`}
             className={`gallery-lightbox-frame ${activeFrameClass}`}
             onClick={(event) => event.stopPropagation()}
+            onTouchStart={handlePinchTouchStart}
+            onTouchMove={handlePinchTouchMove}
+            onTouchEnd={handlePinchTouchEnd}
+            onTouchCancel={handlePinchTouchEnd}
+            onWheel={handleWheel}
             initial={{ opacity: 0, scale: 0.95, y: 15 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 10, transition: { duration: 0.2 } }}
@@ -312,10 +401,9 @@ export function GallerySection({ config }: { config: WeddingConfig }) {
           {/* Header inside the card */}
           <motion.div
             className="flex flex-col items-center text-center w-full px-4 pt-6 pb-6 md:pt-8 md:pb-8"
-            initial="visible"
-            animate="visible"
+            initial="hidden"
             whileInView="visible"
-            viewport={{ once: true, amount: 0.01 }}
+            viewport={{ once: true, margin: "-40px" }}
             variants={galleryIntroVariant}
           >
             <h3 className="font-serif text-[1.12rem] sm:text-[1.25rem] md:text-[1.38rem] font-bold gold-foil-text uppercase leading-tight mt-0.5 mb-1.5">
@@ -331,10 +419,9 @@ export function GallerySection({ config }: { config: WeddingConfig }) {
 
           <motion.div
             className="gallery-mosaic-grid"
-            initial="visible"
-            animate="visible"
+            initial="hidden"
             whileInView="visible"
-            viewport={{ once: true, amount: 0.01 }}
+            viewport={{ once: true, margin: "-50px" }}
             variants={galleryContainerVariant}
           >
             {tiles.map((tile, index) => {
@@ -345,10 +432,12 @@ export function GallerySection({ config }: { config: WeddingConfig }) {
               } as CSSProperties;
 
               return (
-                <figure
+                <motion.figure
                   key={`${tile.src || "placeholder"}-${index}`}
                   className={`gallery-mosaic-tile ${tile.aspectClass} lg:aspect-auto`}
                   style={style}
+                  custom={index}
+                  variants={galleryTileVariant}
                   suppressHydrationWarning
                 >
                   <button
@@ -376,7 +465,7 @@ export function GallerySection({ config }: { config: WeddingConfig }) {
                       />
                     )}
                   </button>
-                </figure>
+                </motion.figure>
               );
             })}
           </motion.div>

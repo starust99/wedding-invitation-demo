@@ -4347,8 +4347,8 @@ html.splash-skipped body {
     linear-gradient(to bottom, transparent 0%, transparent 2%, rgba(0,0,0,0.3) 6%, black 14%, black 88%, rgba(0,0,0,0.4) 95%, transparent 100%),
     linear-gradient(to right, transparent 0%, transparent 10%, rgba(0,0,0,0.3) 18%, rgba(0,0,0,0.85) 26%, black 34%, black 80%, rgba(0,0,0,0.85) 88%, rgba(0,0,0,0.35) 94%, transparent 98%, transparent 100%);
   mask-composite: intersect;
-  mix-blend-mode: normal;
-  filter: saturate(1.35) contrast(1.12) brightness(1.03);
+  mix-blend-mode: multiply;
+  filter: contrast(1.18) brightness(1.04) saturate(1.22);
   opacity: 1;
 }
 

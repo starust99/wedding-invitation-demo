@@ -5,7 +5,7 @@ import { useReducedMotion } from "framer-motion";
 import { GlobalImageCache } from "@/lib/global-image-cache";
 
 const TOTAL_FRAMES = 108;
-const FRAME_RATE = 12;
+const FRAME_RATE = 10;
 const FRAME_DURATION = 1000 / FRAME_RATE;
 const GHOST_WINDOW = 12;
 const WARMUP_CONCURRENCY = 6;
