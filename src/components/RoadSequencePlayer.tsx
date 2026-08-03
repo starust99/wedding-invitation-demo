@@ -7,7 +7,10 @@ import { GlobalImageCache } from "@/lib/global-image-cache";
 const TOTAL_FRAMES = 108;
 const FRAME_RATE = 10;
 const FRAME_DURATION = 1000 / FRAME_RATE;
-const GHOST_WINDOW = 5;
+const LOOP_OVERLAP_FRAMES = 7;
+const FIRST_CYCLE_DURATION = TOTAL_FRAMES * FRAME_DURATION;
+const REPEATING_CYCLE_FRAMES = TOTAL_FRAMES - LOOP_OVERLAP_FRAMES;
+const REPEATING_CYCLE_DURATION = REPEATING_CYCLE_FRAMES * FRAME_DURATION;
 const WARMUP_CONCURRENCY = 6;
 const DECODE_CONCURRENCY = 8;
 
@@ -17,6 +20,68 @@ const FRAME_SRCS = Array.from({ length: TOTAL_FRAMES }, (_, index) => {
 });
 
 let timelineWarmupPromise: Promise<void> | null = null;
+
+function smootherStep(progress: number) {
+  const value = Math.min(1, Math.max(0, progress));
+  return value * value * value * (value * (value * 6 - 15) + 10);
+}
+
+type RenderFrame = {
+  primaryIndex: number;
+  secondaryIndex?: number;
+  secondaryAlpha: number;
+  key: string;
+};
+
+function getLoopRenderFrame(elapsed: number): RenderFrame {
+  if (elapsed < FIRST_CYCLE_DURATION) {
+    const firstCycleIndex = Math.min(
+      TOTAL_FRAMES - 1,
+      Math.floor(elapsed / FRAME_DURATION),
+    );
+    const overlapStart = TOTAL_FRAMES - LOOP_OVERLAP_FRAMES;
+
+    if (firstCycleIndex < overlapStart) {
+      return {
+        primaryIndex: firstCycleIndex,
+        secondaryAlpha: 0,
+        key: `first:${firstCycleIndex}`,
+      };
+    }
+
+    const overlapIndex = firstCycleIndex - overlapStart;
+    const progress = overlapIndex / (LOOP_OVERLAP_FRAMES - 1);
+    return {
+      primaryIndex: firstCycleIndex,
+      secondaryIndex: overlapIndex,
+      secondaryAlpha: smootherStep(progress),
+      key: `first-overlap:${overlapIndex}`,
+    };
+  }
+
+  const repeatingElapsed =
+    (elapsed - FIRST_CYCLE_DURATION) % REPEATING_CYCLE_DURATION;
+  const repeatingIndex = Math.floor(repeatingElapsed / FRAME_DURATION);
+  const normalFrameCount = TOTAL_FRAMES - LOOP_OVERLAP_FRAMES * 2;
+
+  if (repeatingIndex < normalFrameCount) {
+    const primaryIndex = repeatingIndex + LOOP_OVERLAP_FRAMES;
+    return {
+      primaryIndex,
+      secondaryAlpha: 0,
+      key: `repeat:${primaryIndex}`,
+    };
+  }
+
+  const overlapIndex = repeatingIndex - normalFrameCount;
+  const progress = overlapIndex / (LOOP_OVERLAP_FRAMES - 1);
+  return {
+    primaryIndex: TOTAL_FRAMES - LOOP_OVERLAP_FRAMES + overlapIndex,
+    secondaryIndex: overlapIndex,
+    secondaryAlpha: smootherStep(progress),
+    key: `repeat-overlap:${overlapIndex}`,
+  };
+}
 
 function warmTimelineFrameBytes() {
   if (timelineWarmupPromise) return timelineWarmupPromise;
@@ -200,6 +265,7 @@ export function RoadSequencePlayer({
 
     let animationId = 0;
     let startTime: number | null = null;
+    let lastRenderedKey: string | null = null;
     const canvas = canvasRef.current;
     if (!canvas) return;
     const context = canvas.getContext("2d");
@@ -208,14 +274,21 @@ export function RoadSequencePlayer({
     const render = (timestamp: number) => {
       if (document.hidden) {
         startTime = null;
+        lastRenderedKey = null;
         animationId = window.requestAnimationFrame(render);
         return;
       }
       if (startTime === null) startTime = timestamp;
 
       const elapsed = timestamp - startTime;
-      const frameIndex = Math.floor(elapsed / FRAME_DURATION) % TOTAL_FRAMES;
-      const currentImage = imagesRef.current[frameIndex];
+      const renderFrame = getLoopRenderFrame(elapsed);
+
+      if (renderFrame.key === lastRenderedKey) {
+        animationId = window.requestAnimationFrame(render);
+        return;
+      }
+
+      const currentImage = imagesRef.current[renderFrame.primaryIndex];
 
       if (currentImage) {
         if (
@@ -228,33 +301,22 @@ export function RoadSequencePlayer({
 
         context.clearRect(0, 0, canvas.width, canvas.height);
         context.filter = "none";
-        const isEndWindow = frameIndex >= TOTAL_FRAMES - GHOST_WINDOW;
-        const firstImage = imagesRef.current[0];
+        const secondaryImage =
+          renderFrame.secondaryIndex === undefined
+            ? undefined
+            : imagesRef.current[renderFrame.secondaryIndex];
 
-        if (isEndWindow && firstImage) {
-          const progress =
-            (frameIndex - (TOTAL_FRAMES - GHOST_WINDOW)) / GHOST_WINDOW;
-          const alphaNext = progress * progress * (3 - 2 * progress);
-
-          context.globalAlpha = 1.0;
+        if (secondaryImage && renderFrame.secondaryAlpha >= 1) {
+          context.globalAlpha = 1;
           context.drawImage(
-            currentImage,
-            0,
-            0,
-            canvas.width,
-            canvas.height,
-          );
-
-          context.globalAlpha = alphaNext;
-          context.drawImage(
-            firstImage,
+            secondaryImage,
             0,
             0,
             canvas.width,
             canvas.height,
           );
         } else {
-          context.globalAlpha = 1.0;
+          context.globalAlpha = 1;
           context.drawImage(
             currentImage,
             0,
@@ -262,9 +324,21 @@ export function RoadSequencePlayer({
             canvas.width,
             canvas.height,
           );
+
+          if (secondaryImage && renderFrame.secondaryAlpha > 0) {
+            context.globalAlpha = renderFrame.secondaryAlpha;
+            context.drawImage(
+              secondaryImage,
+              0,
+              0,
+              canvas.width,
+              canvas.height,
+            );
+          }
         }
 
         context.globalAlpha = 1;
+        lastRenderedKey = renderFrame.key;
       }
 
       animationId = window.requestAnimationFrame(render);
