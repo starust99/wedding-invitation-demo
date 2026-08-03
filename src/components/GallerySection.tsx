@@ -250,10 +250,8 @@ export function GallerySection({ config }: { config: WeddingConfig }) {
     if (!activeImage) return;
 
     const previousOverflow = document.body.style.overflow;
-    const previousTouchAction = document.documentElement.style.touchAction;
 
     document.body.style.overflow = "hidden";
-    document.documentElement.style.touchAction = "none";
 
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") closeLightbox();
@@ -262,6 +260,17 @@ export function GallerySection({ config }: { config: WeddingConfig }) {
     };
 
     const blockGlobalScrollAndZoom = (event: Event) => {
+      const target = event.target as HTMLElement | null;
+      if (target && (target.closest("button") || target.closest(".gallery-lightbox-controls") || target.closest(".gallery-lightbox-close"))) {
+        return;
+      }
+
+      if (event.type === "touchmove" && event instanceof TouchEvent) {
+        if (event.touches.length === 1 && scale > 1) {
+          return;
+        }
+      }
+
       if (event.cancelable) {
         event.preventDefault();
       }
@@ -270,24 +279,21 @@ export function GallerySection({ config }: { config: WeddingConfig }) {
     window.addEventListener("keydown", handleKeyDown);
     window.addEventListener("wheel", blockGlobalScrollAndZoom, { passive: false });
     window.addEventListener("touchmove", blockGlobalScrollAndZoom, { passive: false });
-    window.addEventListener("touchstart", blockGlobalScrollAndZoom, { passive: false });
     window.addEventListener("gesturestart", blockGlobalScrollAndZoom, { passive: false });
     window.addEventListener("gesturechange", blockGlobalScrollAndZoom, { passive: false });
     window.addEventListener("gestureend", blockGlobalScrollAndZoom, { passive: false });
 
     return () => {
       document.body.style.overflow = previousOverflow;
-      document.documentElement.style.touchAction = previousTouchAction;
 
       window.removeEventListener("keydown", handleKeyDown);
       window.removeEventListener("wheel", blockGlobalScrollAndZoom);
       window.removeEventListener("touchmove", blockGlobalScrollAndZoom);
-      window.removeEventListener("touchstart", blockGlobalScrollAndZoom);
       window.removeEventListener("gesturestart", blockGlobalScrollAndZoom);
       window.removeEventListener("gesturechange", blockGlobalScrollAndZoom);
       window.removeEventListener("gestureend", blockGlobalScrollAndZoom);
     };
-  }, [activeImage, closeLightbox, showNext, showPrevious]);
+  }, [activeImage, closeLightbox, showNext, showPrevious, scale]);
 
   const lightbox = (
     <AnimatePresence>
