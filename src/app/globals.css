@@ -4340,15 +4340,15 @@ html.splash-skipped body {
 
 .timeline-path-video {
   -webkit-mask-image:
-    linear-gradient(to bottom, transparent 0%, transparent 2%, rgba(0,0,0,0.3) 6%, black 14%, black 88%, rgba(0,0,0,0.4) 95%, transparent 100%),
-    linear-gradient(to right, transparent 0%, transparent 10%, rgba(0,0,0,0.3) 18%, rgba(0,0,0,0.85) 26%, black 34%, black 80%, rgba(0,0,0,0.85) 88%, rgba(0,0,0,0.35) 94%, transparent 98%, transparent 100%);
+    linear-gradient(to bottom, transparent 0%, transparent 2%, rgba(0,0,0,0.2) 6%, black 14%, black 88%, rgba(0,0,0,0.3) 95%, transparent 100%),
+    linear-gradient(to right, transparent 0%, transparent 4%, rgba(0,0,0,0.2) 12%, rgba(0,0,0,0.7) 22%, black 32%, black 78%, rgba(0,0,0,0.7) 88%, rgba(0,0,0,0.2) 94%, transparent 100%);
   -webkit-mask-composite: source-in;
   mask-image:
-    linear-gradient(to bottom, transparent 0%, transparent 2%, rgba(0,0,0,0.3) 6%, black 14%, black 88%, rgba(0,0,0,0.4) 95%, transparent 100%),
-    linear-gradient(to right, transparent 0%, transparent 10%, rgba(0,0,0,0.3) 18%, rgba(0,0,0,0.85) 26%, black 34%, black 80%, rgba(0,0,0,0.85) 88%, rgba(0,0,0,0.35) 94%, transparent 98%, transparent 100%);
+    linear-gradient(to bottom, transparent 0%, transparent 2%, rgba(0,0,0,0.2) 6%, black 14%, black 88%, rgba(0,0,0,0.3) 95%, transparent 100%),
+    linear-gradient(to right, transparent 0%, transparent 4%, rgba(0,0,0,0.2) 12%, rgba(0,0,0,0.7) 22%, black 32%, black 78%, rgba(0,0,0,0.7) 88%, rgba(0,0,0,0.2) 94%, transparent 100%);
   mask-composite: intersect;
   mix-blend-mode: multiply;
-  filter: contrast(1.18) brightness(1.04) saturate(1.22);
+  filter: contrast(1.28) brightness(1.06) saturate(1.24);
   opacity: 1;
 }
 
@@ -4403,28 +4403,28 @@ html.splash-skipped body {
 .timeline-path-media::after {
   content: "";
   position: absolute;
-  inset: -2.5%;
+  inset: -3.5%;
   z-index: 2;
   pointer-events: none;
   background: radial-gradient(
-    ellipse 78% 91% at center,
-    transparent 64%,
-    rgba(247, 242, 234, 0.28) 78%,
-    rgba(247, 242, 234, 0.78) 91%,
+    ellipse 82% 93% at center,
+    transparent 46%,
+    rgba(247, 242, 234, 0.35) 68%,
+    rgba(247, 242, 234, 0.85) 86%,
     var(--wedding-cream, #f7f2ea) 100%
   );
-  -webkit-backdrop-filter: blur(7px);
-  backdrop-filter: blur(7px);
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
   -webkit-mask-image: radial-gradient(
-    ellipse 78% 91% at center,
-    transparent 59%,
-    rgba(0, 0, 0, 0.42) 75%,
+    ellipse 82% 93% at center,
+    transparent 42%,
+    rgba(0, 0, 0, 0.5) 68%,
     black 100%
   );
   mask-image: radial-gradient(
-    ellipse 78% 91% at center,
-    transparent 59%,
-    rgba(0, 0, 0, 0.42) 75%,
+    ellipse 82% 93% at center,
+    transparent 42%,
+    rgba(0, 0, 0, 0.5) 68%,
     black 100%
   );
 }
