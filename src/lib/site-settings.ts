@@ -171,6 +171,24 @@ export function normalizeSettings(settings: SettingsInput | null): SiteSettings 
   if (!settings) return structuredClone(defaultSettings);
 
   let content = mergeDefaults(defaultSettings.content, settings.content);
+  const inputGroupLinks = settings.content?.postWeddingGallery?.groupLinks;
+
+  // `groupLinks` is a dynamic record populated from the Excel guest groups.
+  // It cannot be merged by the fixed-shape default merger above because new
+  // group names are not known at build time.
+  if (inputGroupLinks && typeof inputGroupLinks === "object" && !Array.isArray(inputGroupLinks)) {
+    content = {
+      ...content,
+      postWeddingGallery: {
+        ...content.postWeddingGallery,
+        groupLinks: Object.fromEntries(
+          Object.entries(inputGroupLinks)
+            .map(([group, url]) => [group.trim(), typeof url === "string" ? url.trim() : ""])
+            .filter(([group]) => Boolean(group)),
+        ),
+      },
+    };
+  }
 
   // Migration: Force Vietnamese text unification but preserve user's gallery and media assets
   if ((settings.schemaVersion ?? 0) < 3) {

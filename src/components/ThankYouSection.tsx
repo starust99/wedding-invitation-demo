@@ -9,6 +9,17 @@ import { usePageTransition } from "@/components/PageTransitionEffect";
 import type { RSVPResponse } from "@/lib/rsvp-storage";
 import { motion } from "framer-motion";
 
+function normalizeGuestGroup(value?: string) {
+  return value?.trim().toLocaleLowerCase("vi") ?? "";
+}
+
+function resolveGalleryLink(groupLinks: Record<string, string>, guestGroup?: string) {
+  const target = normalizeGuestGroup(guestGroup);
+  if (!target) return "";
+
+  return Object.entries(groupLinks).find(([group]) => normalizeGuestGroup(group) === target)?.[1] ?? "";
+}
+
 export function ThankYouSection({
   config,
   guestIdentity,
@@ -33,7 +44,7 @@ export function ThankYouSection({
 
   const { postWeddingGallery } = config;
   const isPostWedding = postWeddingGallery?.enabled && new Date() >= new Date(postWeddingGallery.availableAfter);
-  const galleryLink = postWeddingGallery?.groupLinks[guestIdentity.group || ""] || postWeddingGallery?.defaultUrl;
+  const galleryLink = resolveGalleryLink(postWeddingGallery?.groupLinks ?? {}, guestIdentity.group) || postWeddingGallery?.defaultUrl;
 
   const isDeclined = rsvpAttending === "no";
   const isCeremonyOnly = rsvpAttending !== "no" && rsvpAttendingBanquet === false;

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { hasAdminSession } from "@/lib/admin-auth";
-import { defaultSettings, normalizeSettings, type SiteSettings } from "@/lib/site-settings";
+import { defaultSettings, normalizeSettings, settingsSchemaVersion, type SiteSettings } from "@/lib/site-settings";
 import { getSupabaseServerClient, hasSupabaseEnv } from "@/lib/supabase-server";
 
 export async function GET(request: Request) {
@@ -31,8 +31,14 @@ export async function GET(request: Request) {
   }
 
   const settings = normalizeSettings(draft
-    ? { content: data.content, themeKey: data.theme_key, publishedAt: data.published_at ?? undefined }
+    ? {
+        schemaVersion: settingsSchemaVersion,
+        content: data.content,
+        themeKey: data.theme_key,
+        publishedAt: data.published_at ?? undefined,
+      }
     : {
+        schemaVersion: settingsSchemaVersion,
         content: data.published_content ?? data.content,
         themeKey: data.published_theme_key ?? data.theme_key,
         publishedAt: data.published_at ?? undefined,

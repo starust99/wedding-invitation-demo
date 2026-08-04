@@ -1,7 +1,5 @@
 "use client";
 
-/* eslint-disable @next/next/no-img-element */
-
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -15,7 +13,6 @@ import {
   Plus,
   RefreshCw,
   Search,
-  Save,
   Square,
   Trash2,
   ClipboardList,
@@ -29,27 +26,16 @@ import {
 } from "lucide-react";
 import {
   buildInviteUrl,
-  createMediaAsset,
-  defaultAlbumRules,
-  filterMediaAssetsForInvitee,
   generateInviteToken,
   householdModeLabels,
   invitedByLabels,
   inviteUnitLabels,
-  joinAudienceTags,
-  parseAudienceTags,
   plusOnePolicyLabels,
-  readLocalAlbumRules,
   readLocalInvitees,
-  readLocalMediaAssets,
   upsertLocalInvitees,
-  writeLocalAlbumRules,
   writeLocalInvitees,
-  writeLocalMediaAssets,
-  type AlbumRule,
   type Invitee,
   type InviteImportResult,
-  type MediaAsset,
 } from "@/lib/invites";
 import { buildInvitationCopy } from "@/lib/guest-personalization";
 import { toInviteeUpsert } from "@/lib/invite-mapper";
@@ -64,6 +50,7 @@ import {
 } from "@/lib/rsvp-storage";
 import { applyTheme } from "@/lib/site-settings";
 import { usePublishedSettings } from "@/lib/use-published-settings";
+import { AlbumGroupManager } from "@/components/admin/AlbumGroupManager";
 
 type SimpleInviteEntry = {
   salutationCluster: string;
@@ -80,8 +67,6 @@ type SimpleInviteEntryOptions = {
 type InviteAdminApiResponse = {
   backend: "local" | "supabase";
   invitees?: Invitee[];
-  mediaAssets?: MediaAsset[];
-  albumRules?: AlbumRule[];
   simpleInviteEntryOptions?: SimpleInviteEntryOptions;
 };
 
@@ -159,8 +144,6 @@ export function InviteAdminPanel() {
   const config = applyTheme(publishedSettings.content, publishedSettings.themeKey);
   const [backend, setBackend] = useState<"local" | "supabase">("local");
   const [invitees, setInvitees] = useState<Invitee[]>([]);
-  const [mediaAssets, setMediaAssets] = useState<MediaAsset[]>([]);
-  const [albumRules, setAlbumRules] = useState<AlbumRule[]>(defaultAlbumRules);
   const [responses, setResponses] = useState<RSVPResponse[]>([]);
   const [selectedInviteeId, setSelectedInviteeId] = useState<string>("");
   const [busy, setBusy] = useState(false);
@@ -168,7 +151,6 @@ export function InviteAdminPanel() {
   const [importNotice, setImportNotice] = useState("");
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
-  const [mediaMessage, setMediaMessage] = useState("");
   const [tab, setTab] = useState<"rsvps" | "invitees" | "album">("rsvps");
   const [searchQuery, setSearchQuery] = useState("");
   const [lastImportedInviteeIds, setLastImportedInviteeIds] = useState<string[]>([]);
@@ -205,14 +187,10 @@ export function InviteAdminPanel() {
         }
 
         const localInvitees = readLocalInvitees();
-        const localMedia = readLocalMediaAssets();
-        const localRules = readLocalAlbumRules();
         const localResponses = readRSVPResponses();
 
         let nextBackend: "local" | "supabase" = "local";
         let nextInvitees = localInvitees;
-        let nextMediaAssets = localMedia;
-        let nextAlbumRules = localRules;
         let nextResponses = localResponses;
         let nextSimpleInviteEntryOptions: SimpleInviteEntryOptions = { salutationClusters: [], guestGroups: [] };
 
@@ -222,8 +200,6 @@ export function InviteAdminPanel() {
           if (result.backend === "supabase") {
             nextBackend = "supabase";
             nextInvitees = result.invitees ?? [];
-            nextMediaAssets = result.mediaAssets ?? [];
-            nextAlbumRules = result.albumRules?.length ? result.albumRules : defaultAlbumRules;
             nextResponses = result.responses ?? [];
           }
         }
@@ -245,8 +221,6 @@ export function InviteAdminPanel() {
         if (!cancelled) {
           setBackend(nextBackend);
           setInvitees(nextInvitees);
-          setMediaAssets(nextMediaAssets);
-          setAlbumRules(nextAlbumRules);
           setResponses(nextResponses);
           setSimpleInviteEntryOptions(nextSimpleInviteEntryOptions);
           setSelectedInviteeId((current) => current || nextInvitees[0]?.id || "");
@@ -255,8 +229,6 @@ export function InviteAdminPanel() {
         if (cancelled) return;
         setBackend("local");
         setInvitees(readLocalInvitees());
-        setMediaAssets(readLocalMediaAssets());
-        setAlbumRules(readLocalAlbumRules());
         setResponses(readRSVPResponses());
       }
     }
@@ -266,16 +238,12 @@ export function InviteAdminPanel() {
     const handleStorage = () => void refresh();
     window.addEventListener("storage", handleStorage);
     window.addEventListener("wedding-invitees-updated", handleStorage);
-    window.addEventListener("wedding-media-assets-updated", handleStorage);
-    window.addEventListener("wedding-album-rules-updated", handleStorage);
     window.addEventListener("wedding-rsvp-updated", handleStorage);
 
     return () => {
       cancelled = true;
       window.removeEventListener("storage", handleStorage);
       window.removeEventListener("wedding-invitees-updated", handleStorage);
-      window.removeEventListener("wedding-media-assets-updated", handleStorage);
-      window.removeEventListener("wedding-album-rules-updated", handleStorage);
       window.removeEventListener("wedding-rsvp-updated", handleStorage);
     };
   }, [router]);
@@ -313,7 +281,6 @@ export function InviteAdminPanel() {
   }, [inviteeForResponse]);
 
   const selectedRsvp = selectedInvitee?.id ? rsvpByInviteeId.get(selectedInvitee.id) : undefined;
-  const visibleAlbumAssets = selectedInvitee ? filterMediaAssetsForInvitee(mediaAssets, selectedInvitee, albumRules) : mediaAssets.filter((asset) => asset.status === "published");
   const visibleInvitees = useMemo(() => {
     const normalizedQuery = normalizeInviteeMatchKey(searchQuery);
     if (!normalizedQuery) return invitees;
@@ -339,26 +306,6 @@ export function InviteAdminPanel() {
     () => invitees.filter((invitee) => selectedInviteeIds.has(invitee.id)),
     [invitees, selectedInviteeIds],
   );
-
-  function persistMedia(nextMediaAssets: MediaAsset[], nextAlbumRules: AlbumRule[]) {
-    setMediaAssets(nextMediaAssets);
-    setAlbumRules(nextAlbumRules);
-
-    if (backend === "supabase") {
-      return fetch("/api/admin/media-assets", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ assets: nextMediaAssets, albumRules: nextAlbumRules }),
-      }).then((response) => {
-        if (!response.ok) throw new Error("Không lưu được album.");
-        return response.json() as Promise<{ ok: boolean }>;
-      }).then(() => undefined);
-    }
-
-    writeLocalMediaAssets(nextMediaAssets);
-    writeLocalAlbumRules(nextAlbumRules);
-    return Promise.resolve();
-  }
 
   function patchSelectedInvitee(patch: Partial<Invitee>) {
     if (!selectedInvitee) return;
@@ -724,51 +671,6 @@ export function InviteAdminPanel() {
     } finally {
       setBusy(false);
       if (importFileRef.current) importFileRef.current.value = "";
-    }
-  }
-
-  async function addMediaAsset() {
-    const nextMedia = [createMediaAsset({ src: "", title: "Ảnh album", alt: "Ảnh album cưới", photoTags: ["public"] }), ...mediaAssets];
-    await persistMedia(nextMedia, albumRules);
-    setMediaMessage("Đã thêm ảnh mới.");
-  }
-
-  function updateMediaAsset(index: number, patch: Partial<MediaAsset>) {
-    setMediaAssets((current) => current.map((asset, assetIndex) => assetIndex === index ? { ...asset, ...patch, updatedAt: new Date().toISOString() } : asset));
-  }
-
-  function removeMediaAsset(index: number) {
-    const nextMedia = mediaAssets.filter((_, assetIndex) => assetIndex !== index);
-    void persistMedia(nextMedia, albumRules);
-  }
-
-  function updateAlbumRule(index: number, patch: Partial<AlbumRule>) {
-    setAlbumRules((current) => current.map((rule, ruleIndex) => ruleIndex === index ? { ...rule, ...patch } : rule));
-  }
-
-  function addAlbumRule() {
-    const nextRules = [...albumRules, { audienceTag: `tag-${albumRules.length + 1}`, allowedPhotoTags: ["public"] }];
-    setAlbumRules(nextRules);
-  }
-
-  function removeAlbumRule(index: number) {
-    const nextRules = albumRules.filter((_, ruleIndex) => ruleIndex !== index);
-    setAlbumRules(nextRules);
-  }
-
-  async function saveAlbum() {
-    setBusy(true);
-    setMessage("");
-    setError("");
-
-    try {
-      await persistMedia(mediaAssets, albumRules);
-      setMediaMessage("Đã lưu album.");
-      setMessage("Đã lưu ảnh album và quy tắc album.");
-    } catch (saveError) {
-      setError(saveError instanceof Error ? saveError.message : "Không lưu được album.");
-    } finally {
-      setBusy(false);
     }
   }
 
@@ -1675,10 +1577,6 @@ export function InviteAdminPanel() {
                               <option value="open_plus_one">{plusOnePolicyLabels.open_plus_one}</option>
                             </select>
                           </label>
-                          <label className="grid gap-1.5 font-semibold text-[#8A8178] uppercase tracking-wider sm:col-span-2">
-                            Mã nhóm album
-                            <input className={panelInput} value={joinAudienceTags(selectedInvitee.audienceTags)} onChange={(event) => patchSelectedInvitee({ audienceTags: parseAudienceTags(event.target.value) })} />
-                          </label>
                         </div>
                       </details>
                       <label className="grid gap-1.5 font-semibold text-[#8A8178] uppercase tracking-wider">
@@ -1723,27 +1621,6 @@ export function InviteAdminPanel() {
                   </div>
                 </div>
 
-                {/* Album Preview */}
-                <div className="rounded-2xl border border-[#DED4C5] bg-white shadow-sm">
-                  <div className="p-4 sm:p-5">
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-[#b4975a] block mb-3">ẢNH ALBUM KHÁCH NÀY ĐƯỢC XEM</span>
-                    <div className="grid gap-3 sm:grid-cols-2">
-                      {visibleAlbumAssets.length === 0 ? (
-                        <p className="text-xs text-[#8A8178] py-2">Nhóm khách này chưa được phân quyền xem ảnh riêng tư nào.</p>
-                      ) : (
-                        visibleAlbumAssets.map((asset) => (
-                          <div key={asset.id} className="overflow-hidden rounded-2xl border border-[#E8DDCC] bg-white shadow-[0_2px_8px_rgba(63,70,66,0.02)]">
-                            <img src={asset.src} alt={asset.alt} className="h-32 w-full object-cover" />
-                            <div className="p-2.5 text-xs">
-                              <p className="font-semibold text-[#2E2A25] truncate">{asset.title}</p>
-                              <p className="mt-0.5 text-[10px] text-[#8A8178] truncate">Tags: {joinAudienceTags(asset.photoTags)}</p>
-                            </div>
-                          </div>
-                        ))
-                      )}
-                    </div>
-                  </div>
-                </div>
               </>
             ) : (
               <div className="p-6 rounded-[2.2rem] bg-white border border-[#E8DDCC] text-center text-sm text-[#8A8178] py-12">
@@ -1754,119 +1631,9 @@ export function InviteAdminPanel() {
         </div>
       )}
 
-      {/* Tab 3: Media Gallery & Album Rules */}
+      {/* Tab 3: Album links derived directly from Excel guest groups */}
       {tab === "album" && (
-        <div className="grid gap-5 xl:grid-cols-2">
-          {/* Left panel: Media Assets list */}
-          <section className="rounded-2xl border border-[#DED4C5] bg-white shadow-sm">
-            <div className="p-4 sm:p-5">
-              
-              <div className="flex items-center justify-between gap-4 border-b border-[#E8DDCC] pb-4 mb-4">
-                <div>
-                  <h2 className="text-lg font-bold text-[#2E2A25]">Ảnh album</h2>
-                  <p className="mt-0.5 text-xs text-[#7B7168]">Ảnh riêng tư theo từng nhóm khách</p>
-                </div>
-                <button type="button" onClick={() => void addMediaAsset()} className="inline-flex min-h-10 items-center gap-1.5 rounded-lg bg-[#5F6F4E] px-4 text-xs font-bold text-white active:scale-[0.98] transition">
-                  <Plus className="h-3.5 w-3.5" /> Thêm ảnh
-                </button>
-              </div>
-
-              <div className="grid gap-4 max-h-[46rem] overflow-y-auto pr-1">
-                {mediaAssets.length === 0 ? (
-                  <p className="text-sm text-[#8A8178] py-8 text-center bg-[#FCFAF4] rounded-2xl border border-[#E8DDCC]">Chưa có ảnh nào trong Album.</p>
-                ) : (
-                  mediaAssets.map((asset, index) => (
-                    <div key={asset.id} className="rounded-2xl border border-[#E8DDCC] bg-[#FCFAF4] p-4 flex flex-col md:flex-row gap-4 relative">
-                      <div className="w-full md:w-36 h-28 shrink-0 rounded-xl overflow-hidden border border-[#E8DDCC] bg-white">
-                        {asset.src ? (
-                          <img src={asset.src} alt={asset.title} className="w-full h-full object-cover" />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center text-xs text-[#8A8178] italic">Chưa có link</div>
-                        )}
-                      </div>
-                      
-                      <div className="flex-1 space-y-2.5 text-xs">
-                        <label className="grid gap-1 font-semibold text-[#8A8178] uppercase tracking-wider">
-                          Đường dẫn ảnh (URL Cloudinary / Drive)
-                          <input className={panelInput} value={asset.src} onChange={(event) => updateMediaAsset(index, { src: event.target.value })} />
-                        </label>
-                        <div className="grid gap-3 sm:grid-cols-2">
-                          <label className="grid gap-1 font-semibold text-[#8A8178] uppercase tracking-wider">
-                            Tiêu đề
-                            <input className={panelInput} value={asset.title} onChange={(event) => updateMediaAsset(index, { title: event.target.value })} />
-                          </label>
-                          <label className="grid gap-1 font-semibold text-[#8A8178] uppercase tracking-wider">
-                            Từ khoá tìm kiếm / Alt
-                            <input className={panelInput} value={asset.alt} onChange={(event) => updateMediaAsset(index, { alt: event.target.value })} />
-                          </label>
-                        </div>
-                        <label className="grid gap-1 font-semibold text-[#8A8178] uppercase tracking-wider">
-                          Quyền xem (Tags nhóm được xem, cách nhau bởi dấu phẩy)
-                          <input className={panelInput} value={joinAudienceTags(asset.photoTags)} onChange={(event) => updateMediaAsset(index, { photoTags: parseAudienceTags(event.target.value) })} />
-                        </label>
-                        <div className="flex items-center justify-between pt-2 border-t border-[#E8DDCC]/60 text-[10px] text-[#8A8178]">
-                          <span>Cập nhật: {formatDate(asset.updatedAt)}</span>
-                          <span className="font-semibold uppercase text-[#5F6F4E]">{asset.status === "published" ? "Hoạt động" : "Nháp"}</span>
-                        </div>
-                      </div>
-
-                      <button type="button" onClick={() => removeMediaAsset(index)} className="absolute top-4 right-4 h-8 w-8 rounded-full border border-[#E8DDCC] bg-white flex items-center justify-center text-[#9B4E5C] hover:bg-red-50 active:scale-[0.92] transition">
-                        <Trash2 className="h-4 w-4" />
-                      </button>
-                    </div>
-                  ))
-                )}
-              </div>
-
-            </div>
-          </section>
-
-          {/* Right panel: Album Rules manager */}
-          <section className="rounded-2xl border border-[#DED4C5] bg-white shadow-sm">
-            <div className="p-4 sm:p-5">
-              
-              <div className="flex items-center justify-between gap-4 border-b border-[#E8DDCC] pb-4 mb-4">
-                <div>
-                  <h2 className="text-lg font-bold text-[#2E2A25]">Quy tắc xem ảnh</h2>
-                  <p className="mt-0.5 text-xs text-[#7B7168]">Phân quyền album theo nhóm khách</p>
-                </div>
-                <button type="button" onClick={() => addAlbumRule()} className="inline-flex min-h-10 items-center gap-1.5 rounded-lg bg-[#5F6F4E] px-4 text-xs font-bold text-white active:scale-[0.98] transition">
-                  <Plus className="h-3.5 w-3.5" /> Thêm quy tắc
-                </button>
-              </div>
-
-              <div className="space-y-4 max-h-[40rem] overflow-y-auto pr-1">
-                {albumRules.map((rule, index) => (
-                  <div key={`${rule.audienceTag}-${index}`} className="rounded-2xl border border-[#E8DDCC] bg-white p-4 relative shadow-[0_2px_8px_rgba(63,70,66,0.02)]">
-                    <div className="grid gap-3.5 sm:grid-cols-[1fr_1.2fr_auto] sm:items-end text-xs">
-                      <label className="grid gap-1.5 font-semibold text-[#8A8178] uppercase tracking-wider">
-                        Nhóm khách xem (audienceTag)
-                        <input className={panelInput} value={joinAudienceTags([rule.audienceTag])} onChange={(event) => updateAlbumRule(index, { audienceTag: parseAudienceTags(event.target.value)[0] || event.target.value.trim() })} />
-                      </label>
-                      <label className="grid gap-1.5 font-semibold text-[#8A8178] uppercase tracking-wider">
-                        Các tag ảnh được phép xem
-                        <input className={panelInput} value={joinAudienceTags(rule.allowedPhotoTags)} onChange={(event) => updateAlbumRule(index, { allowedPhotoTags: parseAudienceTags(event.target.value) })} />
-                      </label>
-                      <button type="button" onClick={() => removeAlbumRule(index)} className="inline-flex h-10 items-center justify-center gap-1.5 rounded-full border border-[#E8DDCC] bg-white px-4 text-xs font-semibold text-[#9B4E5C] hover:bg-red-50 active:scale-[0.98] transition">
-                        <Trash2 className="h-3.5 w-3.5" /> Xoá
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              <div className="mt-6 pt-5 border-t border-[#E8DDCC] flex items-center justify-between gap-4">
-                <div className="flex items-center gap-3">
-                  <button type="button" onClick={() => void saveAlbum()} className="inline-flex min-h-11 items-center gap-2 rounded-lg bg-[#2E2A25] px-5 text-sm font-bold text-white transition hover:bg-[#1a1714] active:scale-[0.98]" disabled={busy}>
-                    <Save className="h-4 w-4" /> Lưu cấu hình album
-                  </button>
-                  {mediaMessage && <p className="text-xs font-semibold text-[#5F6F4E]">{mediaMessage}</p>}
-                </div>
-              </div>
-
-            </div>
-          </section>
-        </div>
+        <AlbumGroupManager invitees={invitees} />
       )}
     </div>
   );

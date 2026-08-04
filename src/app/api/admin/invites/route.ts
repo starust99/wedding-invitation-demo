@@ -2,13 +2,9 @@ import { NextResponse } from "next/server";
 import { hasAdminSession } from "@/lib/admin-auth";
 import { parseInviteCsv, type Invitee } from "@/lib/invites";
 import {
-  mapMediaAssetRow,
-  mapAlbumRuleRow,
   mapInviteeRow as mapInviteRow,
   toInviteeUpsert,
-  type AlbumRuleDatabaseRow,
   type InviteeDatabaseRow,
-  type MediaAssetDatabaseRow,
 } from "@/lib/invite-mapper";
 import { mapRSVPRow, type RSVPDatabaseRow } from "@/lib/rsvp-mapper";
 import { getSupabaseServerClient, hasSupabaseEnv } from "@/lib/supabase-server";
@@ -37,8 +33,6 @@ export async function GET() {
     return NextResponse.json({
       backend: "local",
       invitees: [],
-      mediaAssets: [],
-      albumRules: [],
       simpleInviteEntryOptions: getSimpleInviteEntryOptions(),
     });
   }
@@ -47,19 +41,13 @@ export async function GET() {
   const [
     inviteesResult,
     responsesResult,
-    mediaResult,
-    albumRulesResult,
   ] = await Promise.all([
     supabase.from("invitees").select("*").order("updated_at", { ascending: false }),
     supabase.from("rsvp_responses").select("*").order("submitted_at", { ascending: false }),
-    supabase.from("media_assets").select("*").order("updated_at", { ascending: false }),
-    supabase.from("album_rules").select("*"),
   ]);
 
   if (inviteesResult.error) return NextResponse.json({ error: inviteesResult.error.message }, { status: 500 });
   if (responsesResult.error) return NextResponse.json({ error: responsesResult.error.message }, { status: 500 });
-  if (mediaResult.error) return NextResponse.json({ error: mediaResult.error.message }, { status: 500 });
-  if (albumRulesResult.error) return NextResponse.json({ error: albumRulesResult.error.message }, { status: 500 });
 
   const responsesByKey = new Map<string, RSVPDatabaseRow>();
   for (const response of (responsesResult.data ?? []) as RSVPDatabaseRow[]) {
@@ -88,8 +76,6 @@ export async function GET() {
     backend: "supabase",
     invitees,
     responses: rawResponses,
-    mediaAssets: (mediaResult.data ?? []).map((row) => mapMediaAssetRow(row as MediaAssetDatabaseRow)),
-    albumRules: (albumRulesResult.data ?? []).map((row) => mapAlbumRuleRow(row as AlbumRuleDatabaseRow)),
     simpleInviteEntryOptions: getSimpleInviteEntryOptions(),
   });
 }
