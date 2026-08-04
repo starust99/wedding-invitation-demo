@@ -941,12 +941,8 @@ export default function RSVPPage() {
     : hasCeremony
       ? "Thánh lễ Hôn phối"
       : "Tiệc cưới";
-  const albumReminderCopy = shouldShowAttendanceCalendar
-    ? `Album ảnh của ${albumEventLabel} sẽ được cập nhật tại chính thiệp mời này. ${albumRecipient} hãy quay lại vào ngày ${albumAvailableDate} để xem album.`
-    : "";
-  const submittedMessage = albumReminderCopy
-    ? `${submissionCopy.body}\n\n${albumReminderCopy}`
-    : submissionCopy.body;
+  const albumReminderIntro = `Album hình ảnh kỷ niệm ${albumEventLabel} sẽ được đăng tải tại thiệp mời này.`;
+  const albumReminderEmphasis = `Rất mong ${albumRecipient} quay lại ghé thăm vào ngày ${albumAvailableDate} để cùng chia sẻ những khoảnh khắc đáng nhớ nhất.`;
   
   if (isHydratingGuest) {
     return <RsvpHydrationState />;
@@ -1056,11 +1052,20 @@ export default function RSVPPage() {
                 <h2 className="wedding-type-title text-[#252934] font-serif italic text-2xl sm:text-3xl font-bold mb-4">{submissionCopy.title}</h2>
                 <p className="wedding-type-body max-w-lg text-[#252934]/75 leading-relaxed whitespace-pre-line text-center">
                   <CoupleNameText
-                    text={submittedMessage}
+                    text={submissionCopy.body}
                     coupleName={weddingConfig.couple.displayName}
                   />
                 </p>
               </div>
+
+              {shouldShowAttendanceCalendar ? (
+                <div className="w-full bg-white/40 border border-white/50 shadow-[0_8px_32px_rgba(63,70,66,0.04)] rounded-[2rem] p-6 sm:p-10 mb-8 flex flex-col items-center backdrop-blur-md">
+                  <p className="wedding-type-body max-w-lg text-[#252934]/75 leading-relaxed text-center">
+                    {albumReminderIntro}{" "}
+                    {albumReminderEmphasis}
+                  </p>
+                </div>
+              ) : null}
 
               {shouldShowAttendanceCalendar ? (
                 <div className="w-full max-w-md mx-auto bg-white/40 border border-white/50 shadow-[0_8px_32px_rgba(63,70,66,0.04)] rounded-[2rem] p-5 sm:p-6 mb-6 text-center backdrop-blur-md">

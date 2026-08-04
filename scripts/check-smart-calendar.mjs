@@ -91,8 +91,9 @@ const rsvpSource = await readFile(new URL("../src/app/rsvp/page.tsx", import.met
 assert.match(rsvpSource, /\/calendar\/thanh-le/);
 assert.match(rsvpSource, /\/calendar\/tiec-cuoi/);
 assert.match(rsvpSource, /\/calendar\/album/);
-assert.match(rsvpSource, /Album ảnh của \$\{albumEventLabel\} sẽ được cập nhật tại chính thiệp mời này/);
-assert.match(rsvpSource, /hãy quay lại vào ngày \$\{albumAvailableDate\} để xem album/);
+assert.match(rsvpSource, /Album hình ảnh kỷ niệm \$\{albumEventLabel\} sẽ được đăng tải tại thiệp mời này/);
+assert.match(rsvpSource, /Rất mong \$\{albumRecipient\} quay lại ghé thăm vào ngày \$\{albumAvailableDate\}/);
+assert.match(rsvpSource, /để cùng chia sẻ những khoảnh khắc đáng nhớ nhất/);
 assert.doesNotMatch(rsvpSource, /\/calendar\/album-thanh-le/);
 assert.doesNotMatch(rsvpSource, /\/calendar\/album-tiec-cuoi/);
 assert.doesNotMatch(rsvpSource, /const openCalendar/);

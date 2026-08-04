@@ -256,7 +256,7 @@ export const weddingConfig = {
   },
   postWeddingGallery: {
     enabled: true,
-    availableAfter: "2027-01-30T00:00:00+07:00",
+    availableAfter: "2027-01-29T00:00:00+07:00",
     ceremonyDefaultUrl: "",
     banquetDefaultUrl: "",
     ceremonyGroupLinks: {} as Record<string, string>,

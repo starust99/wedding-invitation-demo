@@ -47,14 +47,14 @@ const defaultWeddingCalendarEvents: Record<WeddingCalendarEventId, WeddingCalend
   album: {
     id: "album",
     title: `Xem album ảnh ${weddingConfig.couple.displayName}`,
-    startUtc: "20270129T170000Z",
-    endUtc: "20270129T173000Z",
-    timeLabel: "00:00 ngày 30/01/2027",
+    startUtc: "20270128T170000Z",
+    endUtc: "20270128T173000Z",
+    timeLabel: "00:00 ngày 29/01/2027",
     location: "Thiệp cưới trực tuyến Nhật & Phương",
     mapUrl: invitationUrl,
     description: "Album ảnh sẽ được cập nhật tại thiệp mời. Mở lại thiệp để xem ảnh.",
     fileName: "Xem-Album-Anh-Nhat-Phuong.ics",
-    uid: "album-20270130@nhatphuong.love",
+    uid: "album-20270129@nhatphuong.love",
   },
 };
 
@@ -86,7 +86,7 @@ function formatDateLabel(date: string) {
 
 function createAlbumCalendarTime(value: string) {
   const start = new Date(value);
-  const safeStart = Number.isNaN(start.getTime()) ? new Date("2027-01-30T00:00:00+07:00") : start;
+  const safeStart = Number.isNaN(start.getTime()) ? new Date("2027-01-29T00:00:00+07:00") : start;
   const end = new Date(safeStart.getTime() + 30 * 60_000);
   const stamp = (date: Date) => date.toISOString().replace(/[-:]/g, "").replace(/\.\d{3}Z$/, "Z");
   const timeLabel = new Intl.DateTimeFormat("vi-VN", {
