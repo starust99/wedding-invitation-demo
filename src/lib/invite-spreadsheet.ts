@@ -151,12 +151,14 @@ const inviteColumn = {
   insideInviteLine: 8,
 } as const;
 
-type TemplateRowValues = {
+export type SimpleInviteEntry = {
   salutationCluster: string;
   guestNameCore: string;
   guestGroup: string;
   postCeremonyPartyInvited?: string;
 };
+
+type TemplateRowValues = SimpleInviteEntry;
 
 type OptionKey =
   | "salutationCluster"
@@ -385,6 +387,83 @@ function rowPreview(values: TemplateRowValues, options: ReturnType<typeof resolv
         ? "Thiếu tên khách"
         : "OK - sẵn sàng upload",
   };
+}
+
+export function getSimpleInviteEntryOptions() {
+  return {
+    salutationClusters: salutationDefinitions.map((item) => item.label),
+    guestGroups: guestGroupDefinitions.map((item) => item.label),
+  };
+}
+
+export function previewSimpleInviteEntry(values: SimpleInviteEntry, spreadsheetOptions: SpreadsheetOptions = {}) {
+  const options = resolveSpreadsheetOptions(spreadsheetOptions);
+  const salutation = findSalutationDefinition(values.salutationCluster);
+  const guestGroup = findGuestGroupDefinition(values.guestGroup);
+  const inferred = inferTemplateValues(values);
+  const preview = rowPreview(values, options);
+  const errors: string[] = [];
+
+  if (!values.salutationCluster) errors.push("Chọn cụm danh xưng.");
+  else if (!salutation) errors.push("Cụm danh xưng không hợp lệ.");
+
+  if (inferred.needsName && !clean(values.guestNameCore)) errors.push("Nhập tên khách.");
+
+  if (!values.guestGroup) errors.push("Chọn nhóm khách.");
+  else if (!guestGroup) errors.push("Nhóm khách không hợp lệ.");
+
+  const postCeremonyPartyValue = normalizeText(values.postCeremonyPartyInvited);
+  if (postCeremonyPartyValue && postCeremonyPartyValue !== "co") {
+    errors.push("Mời tiệc sau Hôn phối chỉ nhận Có hoặc để trống.");
+  }
+
+  return {
+    guestName: salutation ? inferred.guestName : "",
+    householdMode: inferred.householdMode,
+    householdModeLabel: salutation ? householdModeLabels[inferred.householdMode] : "",
+    insideInviteLine: salutation && guestGroup ? preview.insideInviteLine : "",
+    needsName: inferred.needsName,
+    errors,
+  };
+}
+
+export function createInviteeFromSimpleEntry(
+  values: SimpleInviteEntry,
+  existingTokens: Set<string>,
+  spreadsheetOptions: SpreadsheetOptions = {},
+) {
+  const options = resolveSpreadsheetOptions(spreadsheetOptions);
+  const entryPreview = previewSimpleInviteEntry(values, options);
+  if (entryPreview.errors.length > 0) throw new Error(entryPreview.errors[0]);
+
+  const inferred = inferTemplateValues(values);
+  const preview = rowPreview(values, options);
+
+  return createInvitee({
+    inviteUnit: deriveInviteUnit(inferred.householdMode),
+    salutationCluster: inferred.salutationCluster,
+    displayLabel: inferred.guestName,
+    displaySalutation: inferred.displaySalutation,
+    guestName: inferred.guestName,
+    invitationName: inferred.guestName,
+    honorific: deriveHonorific(inferred.hostRelationship),
+    envelopeLine: preview.envelopeLine,
+    insideInviteLine: preview.insideInviteLine,
+    invitedBy: inferred.invitedBy,
+    relationship: inferred.relationship,
+    hostRelationship: inferred.hostRelationship,
+    hostPronoun: inferred.hostPronoun,
+    coupleReference: inferred.coupleReference,
+    householdMode: inferred.householdMode,
+    plusOnePolicy: inferred.plusOnePolicy,
+    guestGroup: inferred.guestGroup,
+    audienceTags: parseAudienceTags(inferred.audienceTagsText),
+    expectedGuestCount: deriveExpectedGuestCount(inferred.householdMode),
+    postCeremonyPartyInvited: normalizeText(values.postCeremonyPartyInvited) === "co",
+    phone: "",
+    email: "",
+    notes: "",
+  }, existingTokens);
 }
 
 function displayNameCombinedFormula(rowIndex: number) {

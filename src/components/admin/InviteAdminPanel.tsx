@@ -29,7 +29,6 @@ import {
 } from "lucide-react";
 import {
   buildInviteUrl,
-  createInvitee,
   createMediaAsset,
   defaultAlbumRules,
   filterMediaAssetsForInvitee,
@@ -66,17 +65,37 @@ import {
 import { applyTheme } from "@/lib/site-settings";
 import { usePublishedSettings } from "@/lib/use-published-settings";
 
+type SimpleInviteEntry = {
+  salutationCluster: string;
+  guestNameCore: string;
+  guestGroup: string;
+  postCeremonyPartyInvited?: string;
+};
+
+type SimpleInviteEntryOptions = {
+  salutationClusters: string[];
+  guestGroups: string[];
+};
+
 type InviteAdminApiResponse = {
   backend: "local" | "supabase";
   invitees?: Invitee[];
   mediaAssets?: MediaAsset[];
   albumRules?: AlbumRule[];
+  simpleInviteEntryOptions?: SimpleInviteEntryOptions;
 };
 
 const panelInput =
   "min-h-11 w-full rounded-2xl border border-[#E8DDCC] bg-white px-4 text-sm font-normal normal-case tracking-normal text-[#2E2A25] outline-none transition placeholder:text-[#8A8178] focus:border-[#6B7A5A] focus:ring-4 focus:ring-[#6B7A5A]/12";
 
 const panelSelect = `${panelInput} pr-8`;
+
+const emptySimpleInviteEntry: SimpleInviteEntry = {
+  salutationCluster: "",
+  guestNameCore: "",
+  guestGroup: "",
+  postCeremonyPartyInvited: "",
+};
 
 const inviteStatusLabels: Record<Invitee["inviteStatus"], string> = {
   invited: "Chưa gửi",
@@ -154,6 +173,9 @@ export function InviteAdminPanel() {
   const [searchQuery, setSearchQuery] = useState("");
   const [lastImportedInviteeIds, setLastImportedInviteeIds] = useState<string[]>([]);
   const [selectedInviteeIds, setSelectedInviteeIds] = useState<Set<string>>(() => new Set());
+  const [isAddingInvitee, setIsAddingInvitee] = useState(false);
+  const [simpleInviteEntry, setSimpleInviteEntry] = useState<SimpleInviteEntry>(emptySimpleInviteEntry);
+  const [simpleInviteEntryOptions, setSimpleInviteEntryOptions] = useState<SimpleInviteEntryOptions>({ salutationClusters: [], guestGroups: [] });
   const importFileRef = useRef<HTMLInputElement | null>(null);
 
   const [attendingFilter, setAttendingFilter] = useState("all");
@@ -167,7 +189,6 @@ export function InviteAdminPanel() {
   const selectedInvitee = useMemo(() => {
     return invitees.find((item) => item.id === selectedInviteeId) ?? invitees[0] ?? null;
   }, [invitees, selectedInviteeId]);
-
   useEffect(() => {
     let cancelled = false;
 
@@ -193,9 +214,11 @@ export function InviteAdminPanel() {
         let nextMediaAssets = localMedia;
         let nextAlbumRules = localRules;
         let nextResponses = localResponses;
+        let nextSimpleInviteEntryOptions: SimpleInviteEntryOptions = { salutationClusters: [], guestGroups: [] };
 
         if (inviteResponse.ok) {
           const result = await inviteResponse.json() as InviteAdminApiResponse & { responses?: RSVPResponse[] };
+          nextSimpleInviteEntryOptions = result.simpleInviteEntryOptions ?? nextSimpleInviteEntryOptions;
           if (result.backend === "supabase") {
             nextBackend = "supabase";
             nextInvitees = result.invitees ?? [];
@@ -225,6 +248,7 @@ export function InviteAdminPanel() {
           setMediaAssets(nextMediaAssets);
           setAlbumRules(nextAlbumRules);
           setResponses(nextResponses);
+          setSimpleInviteEntryOptions(nextSimpleInviteEntryOptions);
           setSelectedInviteeId((current) => current || nextInvitees[0]?.id || "");
         }
       } catch {
@@ -531,45 +555,57 @@ export function InviteAdminPanel() {
     }
   }
 
+  function startAddingInvitee() {
+    setSimpleInviteEntry(emptySimpleInviteEntry);
+    setIsAddingInvitee(true);
+    setMessage("");
+    setError("");
+  }
+
+  function cancelAddingInvitee() {
+    setIsAddingInvitee(false);
+    setSimpleInviteEntry(emptySimpleInviteEntry);
+    setError("");
+  }
+
   async function addInvitee() {
+    if (!simpleInviteEntry.salutationCluster) {
+      setError("Chọn cụm danh xưng.");
+      return;
+    }
+    if (!simpleInviteEntry.guestGroup) {
+      setError("Chọn nhóm khách.");
+      return;
+    }
+
     setBusy(true);
     setMessage("");
     setError("");
 
-    const existingTokens = new Set(invitees.map((item) => item.token));
-    const nextInvitee = createInvitee({
-      displayLabel: "Khách chưa đặt tên",
-      salutationCluster: "Quý khách",
-      guestName: "Khách chưa đặt tên",
-      invitationName: "Khách chưa đặt tên",
-      guestGroup: "Khác",
-      audienceTags: ["friends"],
-    }, existingTokens);
-
     try {
-      let nextInvitees = [nextInvitee, ...invitees];
-      let nextSelectedId = nextInvitee.id;
+      const response = await fetch("/api/admin/invites", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          simpleInviteEntry,
+          coupleDisplayName: config.couple.displayName,
+          existingTokens: backend === "local" ? invitees.map((item) => item.token) : undefined,
+        }),
+      });
+      const result = await response.json() as InviteAdminApiResponse & { error?: string };
+      if (!response.ok) throw new Error(result.error || "Không tạo được khách mời.");
+      const savedInvitee = result.invitees?.[0];
+      if (!savedInvitee) throw new Error("Không nhận được thông tin khách vừa tạo.");
 
-      if (backend === "supabase") {
-        const response = await fetch("/api/admin/invites", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ invitees: [nextInvitee] }),
-        });
-        if (!response.ok) throw new Error("Không tạo được khách mời.");
-        const result = await response.json() as InviteAdminApiResponse;
-        const savedInvitee = result.invitees?.[0];
-        if (savedInvitee) {
-          nextInvitees = [savedInvitee, ...invitees];
-          nextSelectedId = savedInvitee.id;
-        }
-      } else {
-        writeLocalInvitees(nextInvitees);
-      }
+      const nextInvitees = [savedInvitee, ...invitees];
+      const nextSelectedId = savedInvitee.id;
+      if (backend === "local") writeLocalInvitees(nextInvitees);
 
       setInvitees(nextInvitees);
       setSelectedInviteeId(nextSelectedId);
       setLastImportedInviteeIds([nextSelectedId]);
+      setIsAddingInvitee(false);
+      setSimpleInviteEntry(emptySimpleInviteEntry);
       setMessage("Đã tạo khách mời mới.");
     } catch (addError) {
       setError(addError instanceof Error ? addError.message : "Không tạo được khách mời.");
@@ -1284,7 +1320,7 @@ export function InviteAdminPanel() {
                   <button type="button" onClick={() => void exportInviteLinksWorkbook()} className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-lg border border-[#D6BFA3] bg-white px-3 text-xs font-semibold text-[#2E2A25] active:scale-[0.98] transition disabled:opacity-40" disabled={busy || invitees.length === 0}>
                     <Link2 className="h-3.5 w-3.5" /> Xuất toàn bộ link
                   </button>
-                  <button type="button" onClick={() => void addInvitee()} className="col-span-2 inline-flex min-h-11 items-center justify-center gap-1.5 rounded-lg border border-[#E8DDCC] bg-white px-3 text-xs font-semibold text-[#2E2A25] active:scale-[0.98] transition lg:col-span-1" disabled={busy}>
+                  <button type="button" onClick={startAddingInvitee} className="col-span-2 inline-flex min-h-11 items-center justify-center gap-1.5 rounded-lg border border-[#E8DDCC] bg-white px-3 text-xs font-semibold text-[#2E2A25] active:scale-[0.98] transition lg:col-span-1" disabled={busy}>
                     <Plus className="h-3.5 w-3.5 text-[#5F6F4E]" /> Thêm khách
                   </button>
                 </div>
@@ -1438,7 +1474,87 @@ export function InviteAdminPanel() {
 
           {/* Right panel: Invitee Editor */}
           <div className="flex flex-col gap-6">
-            {selectedInvitee ? (
+            {isAddingInvitee ? (
+              <div className="rounded-2xl border border-[#DED4C5] bg-white p-4 shadow-sm sm:p-5">
+                <div className="border-b border-[#E8DDCC] pb-4">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-[#b4975a]">THÊM KHÁCH</span>
+                  <h3 className="mt-1 text-xl font-bold text-[#2E2A25]">Nhập như file Excel</h3>
+                  <p className="mt-1 text-xs leading-relaxed text-[#7B7168]">Chỉ điền các mục cần thiết. Cụm tên khách, đơn vị khách và lời mời sẽ được tạo tự động.</p>
+                </div>
+
+                <form
+                  className="mt-4"
+                  onSubmit={(event) => {
+                    event.preventDefault();
+                    void addInvitee();
+                  }}
+                >
+                  <div className="grid gap-3.5 sm:grid-cols-2 text-xs">
+                    <label className="grid gap-1.5 font-semibold uppercase tracking-wider text-[#8A8178]">
+                      Cụm danh xưng
+                      <select
+                        className={panelSelect}
+                        value={simpleInviteEntry.salutationCluster}
+                        onChange={(event) => setSimpleInviteEntry((current) => ({ ...current, salutationCluster: event.target.value }))}
+                        required
+                      >
+                        <option value="">Chọn cụm danh xưng</option>
+                        {simpleInviteEntryOptions.salutationClusters.map((value) => <option key={value} value={value}>{value}</option>)}
+                      </select>
+                    </label>
+
+                    <label className="grid gap-1.5 font-semibold uppercase tracking-wider text-[#8A8178]">
+                      Tên khách
+                      <input
+                        className={panelInput}
+                        value={simpleInviteEntry.guestNameCore}
+                        onChange={(event) => setSimpleInviteEntry((current) => ({ ...current, guestNameCore: event.target.value }))}
+                        placeholder="VD: Tuấn (nếu cần)"
+                      />
+                    </label>
+
+                    <label className="grid gap-1.5 font-semibold uppercase tracking-wider text-[#8A8178] sm:col-span-2">
+                      Nhóm khách
+                      <select
+                        className={panelSelect}
+                        value={simpleInviteEntry.guestGroup}
+                        onChange={(event) => setSimpleInviteEntry((current) => ({ ...current, guestGroup: event.target.value }))}
+                        required
+                      >
+                        <option value="">Chọn nhóm khách</option>
+                        {simpleInviteEntryOptions.guestGroups.map((value) => <option key={value} value={value}>{value}</option>)}
+                      </select>
+                    </label>
+
+                    <label className="flex min-h-12 cursor-pointer items-center gap-3 rounded-2xl border border-[#E8DDCC] bg-[#FCFAF4] px-4 text-sm font-semibold text-[#2E2A25] sm:col-span-2">
+                      <input
+                        type="checkbox"
+                        checked={simpleInviteEntry.postCeremonyPartyInvited === "Có"}
+                        onChange={(event) => setSimpleInviteEntry((current) => ({ ...current, postCeremonyPartyInvited: event.target.checked ? "Có" : "" }))}
+                        className="h-4 w-4 rounded accent-[#5F6F4E]"
+                      />
+                      Mời tham gia tiệc sau Hôn phối
+                    </label>
+                  </div>
+
+                  <p className="mt-4 rounded-xl border border-[#E8DDCC] bg-[#FCFAF4] px-4 py-3 text-xs leading-relaxed text-[#665D54]">
+                    Hệ thống sẽ tự tạo cụm tên khách, đơn vị khách, lời mời và link thiệp sau khi lưu.
+                  </p>
+
+                  {error && <p className="mt-3 text-xs font-semibold text-[#9B4E5C]">{error}</p>}
+
+                  <div className="mt-4 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+                    <button type="button" onClick={cancelAddingInvitee} className="inline-flex min-h-11 items-center justify-center rounded-full border border-[#E8DDCC] bg-white px-5 text-sm font-semibold text-[#665D54]" disabled={busy}>
+                      Huỷ
+                    </button>
+                    <button type="submit" className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-[#5F6F4E] px-5 text-sm font-bold text-white shadow-sm disabled:opacity-50" disabled={busy}>
+                      {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
+                      Thêm khách
+                    </button>
+                  </div>
+                </form>
+              </div>
+            ) : selectedInvitee ? (
               <>
                 {/* Panel 1: Basic Info */}
                 <div className="rounded-2xl border border-[#DED4C5] bg-white shadow-sm">

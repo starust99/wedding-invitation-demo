@@ -12,12 +12,20 @@ import {
 } from "@/lib/invite-mapper";
 import { mapRSVPRow, type RSVPDatabaseRow } from "@/lib/rsvp-mapper";
 import { getSupabaseServerClient, hasSupabaseEnv } from "@/lib/supabase-server";
+import {
+  createInviteeFromSimpleEntry,
+  getSimpleInviteEntryOptions,
+  type SimpleInviteEntry,
+} from "@/lib/invite-spreadsheet";
 
 export const dynamic = "force-dynamic";
 
 type AdminInvitePayload = {
   invitees?: Invitee[];
   csv?: string;
+  simpleInviteEntry?: SimpleInviteEntry;
+  coupleDisplayName?: string;
+  existingTokens?: string[];
 };
 
 export async function GET() {
@@ -26,7 +34,13 @@ export async function GET() {
   }
 
   if (!hasSupabaseEnv()) {
-    return NextResponse.json({ backend: "local", invitees: [], mediaAssets: [], albumRules: [] });
+    return NextResponse.json({
+      backend: "local",
+      invitees: [],
+      mediaAssets: [],
+      albumRules: [],
+      simpleInviteEntryOptions: getSimpleInviteEntryOptions(),
+    });
   }
 
   const supabase = getSupabaseServerClient();
@@ -76,6 +90,7 @@ export async function GET() {
     responses: rawResponses,
     mediaAssets: (mediaResult.data ?? []).map((row) => mapMediaAssetRow(row as MediaAssetDatabaseRow)),
     albumRules: (albumRulesResult.data ?? []).map((row) => mapAlbumRuleRow(row as AlbumRuleDatabaseRow)),
+    simpleInviteEntryOptions: getSimpleInviteEntryOptions(),
   });
 }
 
@@ -84,15 +99,35 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  if (!hasSupabaseEnv()) {
-    return NextResponse.json({ error: "Supabase is not configured" }, { status: 503 });
-  }
-
   const body = await request.json() as AdminInvitePayload;
-  const invitees = body.invitees ?? (body.csv ? parseInviteCsv(body.csv).invitees : []);
+  let invitees = body.invitees ?? (body.csv ? parseInviteCsv(body.csv).invitees : []);
+
+  if (body.simpleInviteEntry) {
+    try {
+      const existingTokens = new Set(body.existingTokens ?? []);
+      if (hasSupabaseEnv()) {
+        const tokenResult = await getSupabaseServerClient().from("invitees").select("token");
+        if (tokenResult.error) return NextResponse.json({ error: tokenResult.error.message }, { status: 500 });
+        for (const row of tokenResult.data ?? []) {
+          if (typeof row.token === "string") existingTokens.add(row.token);
+        }
+      }
+      invitees = [createInviteeFromSimpleEntry(
+        body.simpleInviteEntry,
+        existingTokens,
+        { coupleDisplayName: body.coupleDisplayName },
+      )];
+    } catch (error) {
+      return NextResponse.json({ error: error instanceof Error ? error.message : "Thông tin khách không hợp lệ." }, { status: 400 });
+    }
+  }
 
   if (invitees.length === 0) {
     return NextResponse.json({ error: "No invitees provided" }, { status: 400 });
+  }
+
+  if (!hasSupabaseEnv()) {
+    return NextResponse.json({ ok: true, backend: "local", invitees });
   }
 
   const supabase = getSupabaseServerClient();
