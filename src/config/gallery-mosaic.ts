@@ -104,6 +104,7 @@ export const galleryLayoutKeys = [
 ] as const;
 
 export type GalleryLayoutKey = (typeof galleryLayoutKeys)[number];
+export type ResponsiveGalleryLayouts = Record<GalleryViewportKey, GalleryLayoutKey>;
 
 export type GalleryLayoutOption = {
   id: GalleryLayoutKey;
@@ -278,6 +279,18 @@ const definitions: Record<GalleryLayoutKey, GalleryLayoutDefinition> = {
 
 export function normalizeGalleryLayoutKey(layout: string | undefined): GalleryLayoutKey {
   return galleryLayoutKeys.includes(layout as GalleryLayoutKey) ? layout as GalleryLayoutKey : "mosaic";
+}
+
+export function resolveResponsiveGalleryLayouts(
+  layouts: Partial<Record<GalleryViewportKey, string>> | undefined,
+  legacyLayout: string | undefined = "mosaic",
+): ResponsiveGalleryLayouts {
+  const fallback = normalizeGalleryLayoutKey(legacyLayout);
+  return {
+    mobile: normalizeGalleryLayoutKey(layouts?.mobile ?? fallback),
+    tablet: normalizeGalleryLayoutKey(layouts?.tablet ?? fallback),
+    desktop: normalizeGalleryLayoutKey(layouts?.desktop ?? fallback),
+  };
 }
 
 export function getGalleryLayoutOption(layout: string | undefined) {

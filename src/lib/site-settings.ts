@@ -5,7 +5,7 @@ import type { AiTweakSuggestion } from "@/lib/ai-tweak-schema";
 import { normalizeEventDetailsEditorConfig } from "@/lib/wedding/event-details-config";
 import { normalizeWeddingHeroEditorConfig } from "@/lib/wedding/hero-config";
 import { resolveTimelineIcon } from "@/config/timeline-icons";
-import { normalizeGalleryLayoutKey } from "@/config/gallery-mosaic";
+import { normalizeGalleryLayoutKey, resolveResponsiveGalleryLayouts } from "@/config/gallery-mosaic";
 
 type Editable<T> = T extends string
   ? string
@@ -43,7 +43,7 @@ type SettingsInput = Partial<Omit<SiteSettings, "content">> & {
 
 export const draftStorageKey = "wedding-demo-draft-settings";
 export const publishedStorageKey = "wedding-demo-published-settings";
-export const settingsSchemaVersion = 19;
+export const settingsSchemaVersion = 20;
 
 export const defaultSettings: SiteSettings = {
   schemaVersion: settingsSchemaVersion,
@@ -136,6 +136,7 @@ function normalizeMediaLayers(content: WeddingConfig): WeddingConfig {
 
   const heroCoverImage = cleanBundledPublicAssetSrc(content.hero.coverImage);
   const mobileHeroCoverImage = cleanBundledPublicAssetSrc(content.hero.mobileCoverImage || content.hero.coverImage);
+  const galleryLayouts = resolveResponsiveGalleryLayouts(content.appearance.galleryLayouts, content.appearance.galleryLayout);
 
   if (mediaLayers.hero.length === 0 && heroCoverImage) {
     mediaLayers.hero = [normalizeMediaLayer({
@@ -163,7 +164,8 @@ function normalizeMediaLayers(content: WeddingConfig): WeddingConfig {
     eventDetailsConfig: normalizeEventDetailsEditorConfig(content.eventDetailsConfig),
     appearance: {
       ...content.appearance,
-      galleryLayout: normalizeGalleryLayoutKey(content.appearance.galleryLayout),
+      galleryLayout: galleryLayouts.desktop,
+      galleryLayouts,
       mediaLayers: mediaLayers as unknown as WeddingConfig["appearance"]["mediaLayers"],
     },
   };
@@ -173,6 +175,10 @@ export function normalizeSettings(settings: SettingsInput | null): SiteSettings 
   if (!settings) return structuredClone(defaultSettings);
 
   let content = mergeDefaults(defaultSettings.content, settings.content);
+  const inputAppearance = settings.content?.appearance as Partial<WeddingConfig["appearance"]> | undefined;
+  const legacyGalleryLayout = normalizeGalleryLayoutKey(inputAppearance?.galleryLayout ?? content.appearance.galleryLayout);
+  content.appearance.galleryLayouts = resolveResponsiveGalleryLayouts(inputAppearance?.galleryLayouts, legacyGalleryLayout);
+  content.appearance.galleryLayout = content.appearance.galleryLayouts.desktop;
   const inputGallery = settings.content?.postWeddingGallery;
   const legacyGroupLinks = inputGallery?.groupLinks;
   const ceremonyGroupLinks = inputGallery?.ceremonyGroupLinks;

@@ -7,7 +7,12 @@ import { ChevronLeft, ChevronRight, X, ZoomIn, ZoomOut } from "lucide-react";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence, Variants } from "framer-motion";
 import { SectionMediaLayers } from "@/components/SectionMediaLayers";
-import { galleryMosaicSlotCount, getGalleryMosaicSlots, normalizeGalleryLayoutKey } from "@/config/gallery-mosaic";
+import {
+  galleryMosaicSlotCount,
+  getGalleryMosaicSlots,
+  resolveResponsiveGalleryLayouts,
+  type GalleryViewportKey,
+} from "@/config/gallery-mosaic";
 import { cleanBundledPublicAssetSrc } from "@/lib/asset-cleanup";
 import { defaultSettings, type WeddingConfig } from "@/lib/site-settings";
 
@@ -67,6 +72,7 @@ const galleryIntroVariant: Variants = {
 
 export function GallerySection({ config }: { config: WeddingConfig }) {
   const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(null);
+  const [activeViewport, setActiveViewport] = useState<GalleryViewportKey>("mobile");
   const lightboxRef = useRef<HTMLDivElement>(null);
   const constraintsRef = useRef<HTMLElement>(null);
   const section = config.sections.gallery;
@@ -89,19 +95,44 @@ export function GallerySection({ config }: { config: WeddingConfig }) {
     () => Array.from({ length: galleryMosaicSlotCount }, (_, index) => config.appearance.galleryObjectPositions[index] || "center center"),
     [config.appearance.galleryObjectPositions],
   );
-  const layoutSlots = useMemo(
-    () => getGalleryMosaicSlots(config.appearance.galleryLayout),
-    [config.appearance.galleryLayout],
+  const galleryLayouts = useMemo(
+    () => resolveResponsiveGalleryLayouts(config.appearance.galleryLayouts, config.appearance.galleryLayout),
+    [config.appearance.galleryLayout, config.appearance.galleryLayouts],
+  );
+  const slotsByViewport = useMemo(
+    () => ({
+      mobile: getGalleryMosaicSlots(galleryLayouts.mobile),
+      tablet: getGalleryMosaicSlots(galleryLayouts.tablet),
+      desktop: getGalleryMosaicSlots(galleryLayouts.desktop),
+    }),
+    [galleryLayouts],
   );
   const tiles = useMemo(
-    () => layoutSlots.map((layout, index) => ({ ...layout, src: images[index] ?? "", objectPosition: positions[index] ?? "center center" })),
-    [images, layoutSlots, positions],
+    () => slotsByViewport.desktop.map((layout, index) => ({
+      ...layout,
+      placements: {
+        mobile: slotsByViewport.mobile[index].placements.mobile,
+        tablet: slotsByViewport.tablet[index].placements.tablet,
+        desktop: slotsByViewport.desktop[index].placements.desktop,
+      },
+      src: images[index] ?? "",
+      objectPosition: positions[index] ?? "center center",
+    })),
+    [images, positions, slotsByViewport],
   );
   const activeImage = selectedImageIndex === null || selectedImageIndex >= images.length ? "" : images[selectedImageIndex] || "";
   const activeAlt = activeImage && selectedImageIndex !== null ? `${section.imageAltPrefix} ${selectedImageIndex + 1}` : "";
-  const activeSlot = selectedImageIndex === null ? null : layoutSlots[selectedImageIndex] ?? null;
+  const activeSlot = selectedImageIndex === null ? null : slotsByViewport[activeViewport][selectedImageIndex] ?? null;
   const activeFrameClass = activeSlot ? `gallery-lightbox-frame-${activeSlot.lightboxFrame}` : "gallery-lightbox-frame-landscape";
-  const galleryLayout = normalizeGalleryLayoutKey(config.appearance.galleryLayout);
+
+  useEffect(() => {
+    const updateViewport = () => {
+      setActiveViewport(window.innerWidth >= 1024 ? "desktop" : window.innerWidth >= 768 ? "tablet" : "mobile");
+    };
+    updateViewport();
+    window.addEventListener("resize", updateViewport, { passive: true });
+    return () => window.removeEventListener("resize", updateViewport);
+  }, []);
 
   const [scale, setScale] = useState(1);
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
@@ -426,7 +457,9 @@ export function GallerySection({ config }: { config: WeddingConfig }) {
 
           <motion.div
             className="gallery-mosaic-grid"
-            data-gallery-layout={galleryLayout}
+            data-gallery-layout-mobile={galleryLayouts.mobile}
+            data-gallery-layout-tablet={galleryLayouts.tablet}
+            data-gallery-layout-desktop={galleryLayouts.desktop}
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true, margin: "-50px" }}

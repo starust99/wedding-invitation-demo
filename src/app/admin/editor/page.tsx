@@ -26,7 +26,7 @@ import {
   galleryMosaicSlots,
   getGalleryLayoutOption,
   getGalleryMosaicSlots,
-  normalizeGalleryLayoutKey,
+  resolveResponsiveGalleryLayouts,
   type GalleryLayoutKey,
   type GalleryViewportKey,
 } from "@/config/gallery-mosaic";
@@ -250,7 +250,8 @@ export default function AdminEditorPage() {
   const selectedPositionValue = galleryPositions[activeIndex] || defaultObjectPosition;
   const selectedPosition = parseObjectPosition(selectedPositionValue);
   const isUploadingSelected = uploadingIndex === activeIndex;
-  const galleryLayout: GalleryLayoutKey = normalizeGalleryLayoutKey(settings?.content.appearance.galleryLayout);
+  const galleryLayouts = resolveResponsiveGalleryLayouts(settings?.content.appearance.galleryLayouts, settings?.content.appearance.galleryLayout);
+  const galleryLayout: GalleryLayoutKey = galleryLayouts[galleryPreviewViewport];
   const galleryLayoutOption = getGalleryLayoutOption(galleryLayout);
   const layoutSlots = getGalleryMosaicSlots(galleryLayout);
   const selectedSlot = layoutSlots[activeIndex] ?? layoutSlots[0];
@@ -385,7 +386,11 @@ export default function AdminEditorPage() {
     setSettings((current) => {
       if (!current) return current;
       const next = normalizeGallerySettings(current);
-      next.content.appearance.galleryLayout = value;
+      next.content.appearance.galleryLayouts = {
+        ...next.content.appearance.galleryLayouts,
+        [galleryPreviewViewport]: value,
+      };
+      next.content.appearance.galleryLayout = next.content.appearance.galleryLayouts.desktop;
       return next;
     });
   }
@@ -718,24 +723,12 @@ export default function AdminEditorPage() {
               <div className="grid gap-2">
                 <p className="text-[0.68rem] font-black uppercase tracking-[0.32em] text-[#2F3A35]/48">Khoảnh khắc</p>
                 <h2 className="font-serif text-[clamp(2rem,3vw,3rem)] leading-none">Bố cục gallery</h2>
-                <p className="max-w-3xl text-sm font-semibold leading-6 text-[#2F3A35]/55">Mỗi bố cục đã có nhịp riêng cho mobile, tablet và desktop. Chọn thiết bị phía dưới để xem đúng cách ảnh sẽ xuất hiện.</p>
+                <p className="max-w-3xl text-sm font-semibold leading-6 text-[#2F3A35]/55">Chọn thiết bị trước, sau đó chọn bố cục riêng cho thiết bị đó. Ba lựa chọn mobile, tablet và desktop được lưu độc lập.</p>
               </div>
-            </div>
-            <div className="grid gap-3 md:grid-cols-3">
-              {galleryLayoutOptions.map((option) => (
-                <button key={option.id} type="button" onClick={() => updateGalleryLayout(option.id)} className={`grid gap-1 rounded-[1.3rem] border p-4 text-left transition ${galleryLayout === option.id ? "border-[#586A4E]/45 bg-[#EEF4E9] ring-4 ring-[#586A4E]/10" : "border-[#2F3A35]/12 bg-[#fffdf8]/54"}`}>
-                  <span className="font-black text-[#2F3A35]">{option.label}</span>
-                  <span className="text-xs font-semibold leading-5 text-[#2F3A35]/52">{option.description}</span>
-                </button>
-              ))}
             </div>
 
-            <div className="grid gap-4 rounded-[1.55rem] border border-[#2F3A35]/12 bg-[#fffdf8]/54 p-4 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
-              <div className="grid gap-1 text-left">
-                <p className="text-sm font-black text-[#2F3A35]">Ảnh phù hợp: {galleryLayoutOption.bestFor}</p>
-                <p className="text-xs font-semibold leading-5 text-[#2F3A35]/52">Trên mobile: {galleryLayoutOption.mobileNote}</p>
-              </div>
-              <div className="grid grid-cols-3 gap-2 rounded-full border border-[#2F3A35]/10 bg-white/60 p-1.5" aria-label="Chọn viewport xem thử">
+            <div className="grid gap-4 rounded-[1.55rem] border border-[#2F3A35]/12 bg-[#fffdf8]/54 p-4 lg:grid-cols-[auto_minmax(0,1fr)] lg:items-center">
+              <div className="grid grid-cols-3 gap-2 rounded-full border border-[#2F3A35]/10 bg-white/60 p-1.5" aria-label="Chọn viewport để chỉnh bố cục">
                 {(["mobile", "tablet", "desktop"] as GalleryViewportKey[]).map((viewport) => {
                   const Icon = viewport === "mobile" ? Smartphone : viewport === "tablet" ? Tablet : Monitor;
                   const active = galleryPreviewViewport === viewport;
@@ -753,7 +746,25 @@ export default function AdminEditorPage() {
                   );
                 })}
               </div>
+              <div className="grid gap-1 text-left">
+                <p className="text-sm font-black text-[#2F3A35]">Đang chỉnh {previewViewportLabels[galleryPreviewViewport].label}: {galleryLayoutOption.label}</p>
+                <p className="text-xs font-semibold leading-5 text-[#2F3A35]/52">Ảnh phù hợp: {galleryLayoutOption.bestFor}</p>
+              </div>
             </div>
+
+            <div className="grid gap-3 md:grid-cols-3">
+              {galleryLayoutOptions.map((option) => (
+                <button key={option.id} type="button" onClick={() => updateGalleryLayout(option.id)} className={`grid gap-1 rounded-[1.3rem] border p-4 text-left transition ${galleryLayout === option.id ? "border-[#586A4E]/45 bg-[#EEF4E9] ring-4 ring-[#586A4E]/10" : "border-[#2F3A35]/12 bg-[#fffdf8]/54"}`}>
+                  <span className="font-black text-[#2F3A35]">{option.label}</span>
+                  <span className="text-xs font-semibold leading-5 text-[#2F3A35]/52">{option.description}</span>
+                </button>
+              ))}
+            </div>
+            <p className="text-left text-xs font-semibold leading-5 text-[#2F3A35]/52">
+              {galleryPreviewViewport === "mobile"
+                ? `Cách hiển thị trên mobile: ${galleryLayoutOption.mobileNote}`
+                : `Bản xem thử bên dưới mô phỏng đúng nhịp ảnh trên ${previewViewportLabels[galleryPreviewViewport].label.toLowerCase()}.`}
+            </p>
           </div>
 
           <div className={`${shellClass} overflow-hidden p-4 sm:p-5 lg:p-6 xl:col-span-2`}>

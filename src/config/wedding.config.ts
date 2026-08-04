@@ -137,6 +137,11 @@ export const weddingConfig = {
     },
     galleryObjectPositions: ["center center", "center center", "center center", "center center", "50% 50%"],
     galleryLayout: "mosaic" as "mosaic" | "editorial" | "columns" | "spotlight" | "story" | "magazine" | "panorama" | "portraits" | "rhythm",
+    galleryLayouts: {
+      mobile: "mosaic" as "mosaic" | "editorial" | "columns" | "spotlight" | "story" | "magazine" | "panorama" | "portraits" | "rhythm",
+      tablet: "mosaic" as "mosaic" | "editorial" | "columns" | "spotlight" | "story" | "magazine" | "panorama" | "portraits" | "rhythm",
+      desktop: "mosaic" as "mosaic" | "editorial" | "columns" | "spotlight" | "story" | "magazine" | "panorama" | "portraits" | "rhythm",
+    },
     mediaLayers: {
       hero: [
         {
