@@ -1633,7 +1633,10 @@ export function InviteAdminPanel() {
 
       {/* Tab 3: Album links derived directly from Excel guest groups */}
       {tab === "album" && (
-        <AlbumGroupManager invitees={invitees} />
+        <AlbumGroupManager
+          invitees={invitees}
+          availableGroups={simpleInviteEntryOptions.guestGroups}
+        />
       )}
     </div>
   );

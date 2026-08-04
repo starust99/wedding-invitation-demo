@@ -43,7 +43,13 @@ function isUsableLink(value: string) {
   }
 }
 
-export function AlbumGroupManager({ invitees }: { invitees: Invitee[] }) {
+export function AlbumGroupManager({
+  invitees,
+  availableGroups = [],
+}: {
+  invitees: Invitee[];
+  availableGroups?: string[];
+}) {
   const [settings, setSettings] = useState<SiteSettings | null>(null);
   const [ceremonyGroupLinks, setCeremonyGroupLinks] = useState<Record<string, string>>({});
   const [banquetGroupLinks, setBanquetGroupLinks] = useState<Record<string, string>>({});
@@ -57,6 +63,14 @@ export function AlbumGroupManager({ invitees }: { invitees: Invitee[] }) {
 
   const groups = useMemo<GroupSummary[]>(() => {
     const counts = new Map<string, number>();
+    const predefinedGroups: string[] = [];
+
+    for (const value of availableGroups) {
+      const group = value.trim();
+      if (!group || counts.has(group)) continue;
+      counts.set(group, 0);
+      predefinedGroups.push(group);
+    }
 
     for (const invitee of invitees) {
       const group = invitee.guestGroup.trim();
@@ -64,9 +78,16 @@ export function AlbumGroupManager({ invitees }: { invitees: Invitee[] }) {
       counts.set(group, (counts.get(group) ?? 0) + 1);
     }
 
-    return Array.from(counts, ([name, invitationCount]) => ({ name, invitationCount }))
-      .sort((a, b) => a.name.localeCompare(b.name, "vi"));
-  }, [invitees]);
+    const predefined = new Set(predefinedGroups);
+    const customGroups = Array.from(counts.keys())
+      .filter((name) => !predefined.has(name))
+      .sort((a, b) => a.localeCompare(b, "vi"));
+
+    return [...predefinedGroups, ...customGroups].map((name) => ({
+      name,
+      invitationCount: counts.get(name) ?? 0,
+    }));
+  }, [availableGroups, invitees]);
 
   useEffect(() => {
     let cancelled = false;
