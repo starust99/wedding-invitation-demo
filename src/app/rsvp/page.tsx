@@ -41,6 +41,7 @@ import { getInviteStatusFromRsvp, readLocalInvitees, upsertLocalInvitees, writeL
 import { usePageTransition } from "@/components/PageTransitionEffect";
 import { CoupleNameText } from "@/components/ui/CoupleNameText";
 import { findAnyStoredInviteToken } from "@/lib/guest-personalization";
+import { usePublishedSettings } from "@/lib/use-published-settings";
 
 const lodgingGuestSchema = z.object({
   fullName: z.string().trim().optional(),
@@ -309,9 +310,22 @@ function normalizeBoolean(value: boolean | undefined): "yes" | "no" | null {
   return null;
 }
 
+function formatRsvpEventDate(dateLabel: string, time: string, separator = "•") {
+  const dateMatch = dateLabel.match(/(\d{1,2})[.\/-](\d{1,2})[.\/-](\d{4})/);
+  const date = dateMatch ? `${dateMatch[1].padStart(2, "0")}/${dateMatch[2].padStart(2, "0")}/${dateMatch[3]}` : dateLabel;
+  const weekday = dateLabel.match(/(Chúa Nhật|Chủ Nhật|Thứ Hai|Thứ Ba|Thứ Tư|Thứ Năm|Thứ Sáu|Thứ Bảy)/i)?.[0];
+  return `${time} ${separator} ${weekday ? `${weekday}, ` : ""}${date}`;
+}
+
 
 
 export default function RSVPPage() {
+  const publishedSettings = usePublishedSettings();
+  const runtimeConfig = publishedSettings.content;
+  const churchDateLine = formatRsvpEventDate(runtimeConfig.eventDetailsConfig.content.churchDate, runtimeConfig.eventDetailsConfig.content.churchTime);
+  const churchReviewDateLine = formatRsvpEventDate(runtimeConfig.eventDetailsConfig.content.churchDate, runtimeConfig.eventDetailsConfig.content.churchTime, "—");
+  const banquetDateLine = formatRsvpEventDate(runtimeConfig.event.dateLabel, runtimeConfig.event.welcomeTime);
+  const banquetReviewDateLine = formatRsvpEventDate(runtimeConfig.event.dateLabel, runtimeConfig.event.welcomeTime, "—");
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isReviewing, setIsReviewing] = useState(false);
   const [guestIdentity, setGuestIdentity] = useState<GuestIdentity>({});
@@ -1111,7 +1125,7 @@ export default function RSVPPage() {
                     <div className="flex items-center justify-between py-3.5 px-4.5 sm:px-5.5 rounded-2xl bg-serenity/8 border border-serenity/14">
                       <div className="text-left">
                         <p className="font-bold text-[#252934] text-base sm:text-lg">Thánh lễ Hôn phối</p>
-                        <p className="text-xs sm:text-sm text-[#7a6a5d] font-medium mt-0.5">10:00 • Chủ Nhật, 20/12/2026</p>
+                        <p className="text-xs sm:text-sm text-[#7a6a5d] font-medium mt-0.5">{churchDateLine}</p>
                       </div>
                       <span className={`inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs sm:text-sm font-semibold shadow-xs shrink-0 ${
                         formValues.attendingCeremony === "yes" 
@@ -1149,7 +1163,7 @@ export default function RSVPPage() {
                     <div className="flex items-center justify-between py-3.5 px-4.5 sm:px-5.5 rounded-2xl bg-serenity/8 border border-serenity/14">
                       <div className="text-left">
                         <p className="font-bold text-[#252934] text-base sm:text-lg">Tiệc cưới</p>
-                        <p className="text-xs sm:text-sm text-[#7a6a5d] font-medium mt-0.5">17:30 • Thứ Bảy, 26/12/2026</p>
+                        <p className="text-xs sm:text-sm text-[#7a6a5d] font-medium mt-0.5">{banquetDateLine}</p>
                       </div>
                       <span className={`inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs sm:text-sm font-semibold shadow-xs shrink-0 ${
                         formValues.attendingBanquet === "yes" 
@@ -1308,7 +1322,7 @@ export default function RSVPPage() {
                         THÁNH LỄ HÔN PHỐI
                       </p>
                       <p className="text-sm sm:text-sm font-semibold text-[#252934] mb-0.5 whitespace-nowrap">
-                        10:00 — Chủ Nhật, 20/12/2026
+                        {churchReviewDateLine}
                       </p>
                       <p className="text-sm sm:text-sm text-[#252934]/72 whitespace-nowrap">
                         Nhà Thờ Giáo Xứ Tam Hải
@@ -1447,7 +1461,7 @@ export default function RSVPPage() {
                         TIỆC CƯỚI
                       </p>
                       <p className="text-sm sm:text-sm font-semibold text-[#252934] mb-0.5 whitespace-nowrap">
-                        17:30 — Thứ Bảy, 26/12/2026
+                        {banquetReviewDateLine}
                       </p>
                       <p className="text-sm sm:text-sm text-[#252934]/72 whitespace-nowrap">
                         Terracotta Hotel & Resort Đà Lạt

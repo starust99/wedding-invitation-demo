@@ -7,20 +7,10 @@ const timelinePathVideo = "/assets/timeline-path.mp4";
 const timelinePathWebm = "/assets/timeline-path-web.webm";
 
 import SeamlessVideoPlayer from "@/components/SeamlessVideoPlayer";
+import { resolveTimelineIcon } from "@/config/timeline-icons";
 
-function getTimelineIconPath(title: string): string | null {
-  const t = title.toLowerCase();
-  if (t.includes("đón khách")) return "/assets/wedding/timeline/icon-1730.png";
-  if (t.includes("khai mạc")) return "/assets/wedding/timeline/icon-1900.png";
-  if (t.includes("nghi lễ") || t.includes("nghi thức")) return "/assets/wedding/timeline/icon-1910.png";
-  if (t.includes("nâng ly") || t.includes("khai tiệc") || t.includes("dùng tiệc")) return "/assets/wedding/timeline/icon-1920.png";
-  if (t.includes("giao lưu")) return "/assets/wedding/timeline/icon-2000.png";
-  if (t.includes("chụp ảnh") || t.includes("chụp hình") || t.includes("cảm ơn") || t.includes("kỷ niệm")) return "/assets/wedding/timeline/icon-2050.png";
-  return null;
-}
-
-function TimelineIcon({ title, className }: { title: string; className?: string }) {
-  const iconPath = getTimelineIconPath(title);
+function TimelineIcon({ title, icon, className }: { title: string; icon?: string; className?: string }) {
+  const iconPath = resolveTimelineIcon(title, icon);
   if (!iconPath) return null;
   return (
     <img
@@ -70,7 +60,7 @@ export function TimelineSection({ config }: { config: WeddingConfig }) {
                   className={`timeline-garden-node !m-0 flex w-full ${isRight ? "justify-end" : "justify-start"}`}
                 >
                   <div className="timeline-garden-card !py-3 !pl-4 !pr-14 !gap-1 shadow-[0_6px_16px_rgba(63,70,66,0.04)] text-left flex flex-col items-start justify-center bg-[#fdfbf7]/35 border border-[#b4975a]/20 backdrop-blur-md rounded-2xl relative overflow-hidden w-full min-w-[11rem]">
-                    <TimelineIcon title={item.title} className="!absolute !right-2.5 !top-1/2 !-translate-y-1/2 !w-11 !h-11 !m-0 opacity-85 pointer-events-none" />
+                    <TimelineIcon title={item.title} icon={item.icon} className="!absolute !right-2.5 !top-1/2 !-translate-y-1/2 !w-11 !h-11 !m-0 opacity-85 pointer-events-none" />
                     <p className="!text-[1.1rem] !font-bold text-[#8d713a] tracking-wider mb-0.5 relative z-10">{item.time}</p>
                     <h3 className="!text-[1.1rem] !font-semibold text-[#2f3532] font-serif leading-snug relative z-10">{item.title}</h3>
                   </div>

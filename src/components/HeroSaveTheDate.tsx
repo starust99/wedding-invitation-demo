@@ -18,6 +18,7 @@ export function HeroSaveTheDate({ config, guestIdentity }: { config: WeddingConf
     ...guestIdentity,
     coupleDisplayName: config.couple.displayName,
     venueDisplayName: compactVenueDisplayName(config.venue.name),
+    heroTemplate: config.invitation.heroTemplate,
   });
 
   useEffect(() => {

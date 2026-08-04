@@ -28,6 +28,8 @@ export type EventDetailsSectionProps = {
 export type EventDetailsPublicData = {
   dateLabel?: string;
   welcomeTime?: string;
+  churchDate?: string;
+  churchTime?: string;
   venueName?: string;
   venueArea?: string;
   venueLocation?: string;
@@ -36,7 +38,7 @@ export type EventDetailsPublicData = {
   dressCodeNote?: string;
   dressCodeColors?: string[];
   dressCodeImageSrc?: string;
-  timeline?: { time: string; title: string; description: string }[];
+  timeline?: { time: string; title: string; description: string; icon?: string }[];
 };
 
 function SafeGuides({ viewport }: { viewport: EventDetailsViewportMode }) {

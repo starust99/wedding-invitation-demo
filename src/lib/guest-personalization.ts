@@ -241,6 +241,7 @@ export type InvitationCopyInput = GuestIdentity & {
   plusOnePolicy?: string;
   coupleDisplayName?: string;
   venueDisplayName?: string;
+  heroTemplate?: string;
 };
 
 export type InvitationCopy = {
@@ -845,7 +846,11 @@ export function buildInvitationCopy(input?: InvitationCopyInput): InvitationCopy
   const personalInviteLine = `${guestLabel} đến chung vui và ghi dấu những khoảnh khắc đáng nhớ cùng ${coupleDisplayName}.`;
   const insideInviteLine = `${personalInviteHeading}\n${personalInviteLine}`;
   const guestFullNamePrefix = guestFullName.charAt(0).toUpperCase() + guestFullName.slice(1);
-  const heroInvitationLine = `${guestFullNamePrefix} đến chung vui và ghi dấu những khoảnh khắc đáng nhớ cùng ${coupleDisplayName}.`;
+  const defaultHeroTemplate = `[Cụm tên khách] đến chung vui và ghi dấu những khoảnh khắc đáng nhớ cùng ${coupleDisplayName}.`;
+  const heroTemplate = cleanString(input?.heroTemplate) || defaultHeroTemplate;
+  const heroInvitationLine = heroTemplate
+    .replace(/\[\s*cụm tên khách\s*\]/gi, guestFullNamePrefix)
+    .replace(/\[\s*quý khách\s*\]/gi, guestFullNamePrefix);
   const rsvpLead = tone === "parents_host"
     ? `${hostSubject} mong nhận được lời hồi đáp để chuẩn bị đón tiếp chu đáo`
     : tone === "elder"

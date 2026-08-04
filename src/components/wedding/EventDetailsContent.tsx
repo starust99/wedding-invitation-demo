@@ -8,20 +8,10 @@ import type { Variants } from "framer-motion";
 import type { EventDetailsViewportMode, WeddingEventDetailsEditorConfig } from "@/lib/wedding/event-details-types";
 import { DressCodeSection, type DressColorId } from "./DressCodeSection";
 import { RoadSequencePlayer } from "@/components/RoadSequencePlayer";
+import { resolveTimelineIcon } from "@/config/timeline-icons";
 
-function getTimelineIconPath(title: string): string | null {
-  const t = title.toLowerCase();
-  if (t.includes("đón khách")) return "/assets/wedding/timeline/icon-1730.png";
-  if (t.includes("khai mạc")) return "/assets/wedding/timeline/icon-1900.png";
-  if (t.includes("nghi lễ") || t.includes("nghi thức")) return "/assets/wedding/timeline/icon-1910.png";
-  if (t.includes("nâng ly") || t.includes("khai tiệc") || t.includes("dùng tiệc")) return "/assets/wedding/timeline/icon-1920.png";
-  if (t.includes("giao lưu")) return "/assets/wedding/timeline/icon-2000.png";
-  if (t.includes("chụp ảnh") || t.includes("chụp hình") || t.includes("cảm ơn") || t.includes("kỷ niệm")) return "/assets/wedding/timeline/icon-2050.png";
-  return null;
-}
-
-function TimelineIcon({ title, className }: { title: string; className?: string }) {
-  const iconPath = getTimelineIconPath(title);
+function TimelineIcon({ title, icon, className }: { title: string; icon?: string; className?: string }) {
+  const iconPath = resolveTimelineIcon(title, icon);
   if (!iconPath) return null;
   return (
     <img
@@ -37,11 +27,14 @@ type EventDetailsTimelineItem = {
   time: string;
   title: string;
   description?: string;
+  icon?: string;
 };
 
 type EventDetailsPublicData = {
   dateLabel?: string;
   welcomeTime?: string;
+  churchDate?: string;
+  churchTime?: string;
   venueName?: string;
   venueArea?: string;
   venueLocation?: string;
@@ -64,18 +57,18 @@ type EventDetailsContentProps = {
 
 
 
-function parseChurchDate(churchDate?: string) {
-  if (!churchDate) {
-    return { day: "20", month: "12", year: "2026", weekday: "CHỦ NHẬT" };
+function parseEventDate(dateLabel?: string, fallback = { day: "20", month: "12", year: "2026", weekday: "CHỦ NHẬT" }) {
+  if (!dateLabel) {
+    return fallback;
   }
 
-  const dateMatch = churchDate.match(/(\d{1,2})\.(\d{1,2})\.(\d{4})/);
-  const weekdayMatch = churchDate.match(/(Chúa Nhật|Chủ Nhật|Thứ Hai|Thứ Ba|Thứ Tư|Thứ Năm|Thứ Sáu|Thứ Bảy)/i);
+  const dateMatch = dateLabel.match(/(\d{1,2})[.\/-](\d{1,2})[.\/-](\d{4})/);
+  const weekdayMatch = dateLabel.match(/(Chúa Nhật|Chủ Nhật|Thứ Hai|Thứ Ba|Thứ Tư|Thứ Năm|Thứ Sáu|Thứ Bảy)/i);
 
-  const day = dateMatch ? dateMatch[1] : "20";
-  const month = dateMatch ? dateMatch[2] : "12";
-  const year = dateMatch ? dateMatch[3] : "2026";
-  const weekday = weekdayMatch ? weekdayMatch[0].toUpperCase() : "CHỦ NHẬT";
+  const day = dateMatch ? dateMatch[1] : fallback.day;
+  const month = dateMatch ? dateMatch[2] : fallback.month;
+  const year = dateMatch ? dateMatch[3] : fallback.year;
+  const weekday = weekdayMatch ? weekdayMatch[0].toUpperCase() : fallback.weekday;
 
   return { day, month, year, weekday };
 }
@@ -272,13 +265,8 @@ export function EventDetailsContent({
   const [selectedColorId, setSelectedColorId] = useState<DressColorId | null>(null);
   const [isRoadReady, setIsRoadReady] = useState(false);
   const content = config.content;
-  const churchDateParsed = parseChurchDate(content.churchDate);
-  const banquetDateParsed = {
-    day: "26",
-    month: "12",
-    year: "2026",
-    weekday: "THỨ BẢY",
-  };
+  const churchDateParsed = parseEventDate(publicData?.churchDate || content.churchDate);
+  const banquetDateParsed = parseEventDate(publicData?.dateLabel, { day: "26", month: "12", year: "2026", weekday: "THỨ BẢY" });
   const dressCodeTitle = publicData?.dressCodeTitle && !publicData.dressCodeTitle.includes("pastel") && publicData.dressCodeTitle !== "Trang phục chủ đề" ? publicData.dressCodeTitle : "Khu vườn mùa xuân";
   const dressCodeNote = publicData?.dressCodeNote || content.dressCodeText;
 
@@ -508,7 +496,7 @@ export function EventDetailsContent({
               Cử Hành
             </span>
             <div className="font-serif text-[2.35rem] sm:text-[2.89rem] md:text-[3.32rem] font-light text-[#3f4642] tracking-wider leading-none mb-3">
-              {content.churchTime || "10:00"}
+              {publicData?.churchTime || content.churchTime || "10:00"}
             </div>
           </motion.div>
 
@@ -576,7 +564,7 @@ export function EventDetailsContent({
               Đón Khách
             </span>
             <div className="font-serif text-[2.35rem] sm:text-[2.89rem] md:text-[3.32rem] font-light text-[#3f4642] tracking-wider leading-none mb-3">
-              17:30
+              {publicData?.welcomeTime || "17:30"}
             </div>
           </motion.div>
 
@@ -650,7 +638,7 @@ export function EventDetailsContent({
                         className={`timeline-garden-node !m-0 flex w-full ${isRight ? "justify-end" : "justify-start"}`}
                       >
                         <div className="timeline-garden-card !py-3 !pl-3.5 !pr-11 sm:!pl-4 sm:!pr-14 !gap-1 shadow-[0_6px_16px_rgba(63,70,66,0.04)] text-left flex flex-col items-start justify-center bg-[#fdfbf7]/35 border border-[#b4975a]/20 backdrop-blur-md rounded-2xl relative overflow-hidden w-full min-w-[11rem]">
-                          <TimelineIcon title={item.title} className="!absolute !right-2 sm:!right-2.5 !top-1/2 !-translate-y-1/2 !w-9 !h-9 sm:!w-11 sm:!h-11 !m-0 opacity-85 pointer-events-none" />
+                          <TimelineIcon title={item.title} icon={item.icon} className="!absolute !right-2 sm:!right-2.5 !top-1/2 !-translate-y-1/2 !w-9 !h-9 sm:!w-11 sm:!h-11 !m-0 opacity-85 pointer-events-none" />
                           <p className="!text-[0.95rem] sm:!text-[1.1rem] !font-bold text-[#8d713a] tracking-wider mb-0.5 relative z-10">{item.time}</p>
                           <h3 className="!text-[0.9rem] sm:!text-[1.1rem] !font-semibold text-[#2f3532] font-serif leading-snug relative z-10">{item.title}</h3>
                         </div>

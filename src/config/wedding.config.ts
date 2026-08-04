@@ -136,6 +136,7 @@ export const weddingConfig = {
       cta: "primaryGradient",
     },
     galleryObjectPositions: ["center center", "center center", "center center", "center center", "50% 50%"],
+    galleryLayout: "mosaic" as "mosaic" | "editorial" | "columns",
     mediaLayers: {
       hero: [
         {
@@ -168,6 +169,7 @@ export const weddingConfig = {
   },
   invitation: {
     title: "Trân trọng kính mời",
+    heroTemplate: "[Cụm tên khách] đến chung vui và ghi dấu những khoảnh khắc đáng nhớ cùng Nhật & Phương.",
     message:
       "Quý khách đến chung vui và ghi dấu những khoảnh khắc đáng nhớ cùng Nhật & Phương.",
     closing: "Sự hiện diện của quý khách là niềm vinh hạnh và là niềm vui rất lớn với gia đình.",
@@ -193,12 +195,12 @@ export const weddingConfig = {
     afterPartyTime: "20:00",
   },
   timeline: [
-    { time: "17:30", title: "Đón khách", description: "Gia đình đón khách, chụp ảnh lưu niệm và mời khách ổn định chỗ ngồi." },
-    { time: "19:00", title: "Khai mạc", description: "Bắt đầu buổi tiệc tối ấm cúng." },
-    { time: "19:10", title: "Nghi lễ", description: "Các nghi thức cưới chính thức của Nhật & Phương." },
-    { time: "19:20", title: "Nâng ly khai tiệc", description: "Cùng nâng ly và dùng bữa tối ấm cúng." },
-    { time: "20:00", title: "Giao lưu", description: "Âm nhạc, trò chuyện và những khoảnh khắc thân tình." },
-    { time: "20:50", title: "Chụp ảnh kỷ niệm", description: "Chụp hình lưu niệm cùng cô dâu chú rể." },
+    { time: "17:30", title: "Đón khách", description: "Gia đình đón khách, chụp ảnh lưu niệm và mời khách ổn định chỗ ngồi.", icon: "/assets/wedding/timeline/icon-1730.png" },
+    { time: "19:00", title: "Khai mạc", description: "Bắt đầu buổi tiệc tối ấm cúng.", icon: "/assets/wedding/timeline/icon-1900.png" },
+    { time: "19:10", title: "Nghi lễ", description: "Các nghi thức cưới chính thức của Nhật & Phương.", icon: "/assets/wedding/timeline/icon-1910.png" },
+    { time: "19:20", title: "Nâng ly khai tiệc", description: "Cùng nâng ly và dùng bữa tối ấm cúng.", icon: "/assets/wedding/timeline/icon-1920.png" },
+    { time: "20:00", title: "Giao lưu", description: "Âm nhạc, trò chuyện và những khoảnh khắc thân tình.", icon: "/assets/wedding/timeline/icon-2000.png" },
+    { time: "20:50", title: "Chụp ảnh kỷ niệm", description: "Chụp hình lưu niệm cùng cô dâu chú rể.", icon: "/assets/wedding/timeline/icon-2050.png" },
   ],
   dressCode: {
     title: "Khu vườn mùa xuân",

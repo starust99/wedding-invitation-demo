@@ -5,6 +5,8 @@ import {
   shouldPresentIcsInline,
   shouldUseGoogleCalendar,
 } from "@/lib/wedding-calendar";
+import { defaultSettings, normalizeSettings } from "@/lib/site-settings";
+import { getSupabaseServerClient, hasSupabaseEnv } from "@/lib/supabase-server";
 
 export const dynamic = "force-dynamic";
 
@@ -21,7 +23,25 @@ export async function GET(
   { params }: { params: Promise<{ event: string }> },
 ) {
   const { event: eventId } = await params;
-  const event = getWeddingCalendarEvent(eventId);
+  let settings = defaultSettings;
+
+  if (hasSupabaseEnv()) {
+    const { data } = await getSupabaseServerClient()
+      .from("site_settings")
+      .select("content, theme_key, published_content, published_theme_key, published_at")
+      .eq("id", "main")
+      .maybeSingle();
+
+    if (data) {
+      settings = normalizeSettings({
+        content: data.published_content ?? data.content,
+        themeKey: data.published_theme_key ?? data.theme_key,
+        publishedAt: data.published_at ?? undefined,
+      });
+    }
+  }
+
+  const event = getWeddingCalendarEvent(eventId, settings.content);
 
   if (!event) {
     return new Response("Không tìm thấy sự kiện.", {

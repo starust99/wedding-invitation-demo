@@ -75,6 +75,40 @@ export const galleryMosaicSlots: GalleryMosaicSlot[] = [
 
 export const galleryMosaicSlotCount = galleryMosaicSlots.length;
 
+export type GalleryLayoutKey = "mosaic" | "editorial" | "columns";
+
+export const galleryLayoutOptions: { id: GalleryLayoutKey; label: string; description: string }[] = [
+  { id: "mosaic", label: "Mosaic hiện tại", description: "Giữ nguyên bố cục đang hiển thị trên thiệp." },
+  { id: "editorial", label: "Ảnh bìa + 4 ảnh", description: "Một ảnh lớn mở đầu, bốn ảnh phụ cân đối phía dưới." },
+  { id: "columns", label: "Dải ảnh đều", description: "Năm ảnh cùng nhịp, phù hợp bộ ảnh đồng nhất." },
+];
+
+const galleryLayoutCoordinates: Record<GalleryLayoutKey, { gridColumn: string; gridRow: string; aspectClass: string }[]> = {
+  mosaic: galleryMosaicSlots.map(({ gridColumn, gridRow, aspectClass }) => ({ gridColumn, gridRow, aspectClass })),
+  editorial: [
+    { gridColumn: "1 / span 12", gridRow: "1 / span 3", aspectClass: "aspect-[16/7]" },
+    { gridColumn: "1 / span 3", gridRow: "4 / span 3", aspectClass: "aspect-[3/4]" },
+    { gridColumn: "4 / span 3", gridRow: "4 / span 3", aspectClass: "aspect-[3/4]" },
+    { gridColumn: "7 / span 3", gridRow: "4 / span 3", aspectClass: "aspect-[3/4]" },
+    { gridColumn: "10 / span 3", gridRow: "4 / span 3", aspectClass: "aspect-[3/4]" },
+  ],
+  columns: [
+    { gridColumn: "1 / span 2", gridRow: "1 / span 6", aspectClass: "aspect-[3/4]" },
+    { gridColumn: "3 / span 3", gridRow: "1 / span 6", aspectClass: "aspect-[3/4]" },
+    { gridColumn: "6 / span 2", gridRow: "1 / span 6", aspectClass: "aspect-[3/4]" },
+    { gridColumn: "8 / span 3", gridRow: "1 / span 6", aspectClass: "aspect-[3/4]" },
+    { gridColumn: "11 / span 2", gridRow: "1 / span 6", aspectClass: "aspect-[3/4]" },
+  ],
+};
+
+export function getGalleryMosaicSlots(layout: GalleryLayoutKey | string | undefined = "mosaic") {
+  const safeLayout = layout === "editorial" || layout === "columns" ? layout : "mosaic";
+  return galleryMosaicSlots.map((slot, index) => ({
+    ...slot,
+    ...galleryLayoutCoordinates[safeLayout][index],
+  }));
+}
+
 export function getGalleryTileSizes(index: number) {
   const mobileSize = galleryMosaicSlots[index]?.mobileWide ? "94vw" : "46vw";
   return `(max-width: 767px) ${mobileSize}, (max-width: 1023px) 50vw, 33vw`;

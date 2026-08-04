@@ -4,6 +4,7 @@ import { cleanBundledPublicAssetSrc } from "@/lib/asset-cleanup";
 import type { AiTweakSuggestion } from "@/lib/ai-tweak-schema";
 import { normalizeEventDetailsEditorConfig } from "@/lib/wedding/event-details-config";
 import { normalizeWeddingHeroEditorConfig } from "@/lib/wedding/hero-config";
+import { resolveTimelineIcon } from "@/config/timeline-icons";
 
 type Editable<T> = T extends string
   ? string
@@ -41,7 +42,7 @@ type SettingsInput = Partial<Omit<SiteSettings, "content">> & {
 
 export const draftStorageKey = "wedding-demo-draft-settings";
 export const publishedStorageKey = "wedding-demo-published-settings";
-export const settingsSchemaVersion = 18;
+export const settingsSchemaVersion = 19;
 
 export const defaultSettings: SiteSettings = {
   schemaVersion: settingsSchemaVersion,
@@ -147,6 +148,10 @@ function normalizeMediaLayers(content: WeddingConfig): WeddingConfig {
 
   return {
     ...content,
+    timeline: content.timeline.map((item) => ({
+      ...item,
+      icon: resolveTimelineIcon(item.title, item.icon) || defaultSettings.content.timeline[0].icon,
+    })),
     gallery: content.gallery.map(cleanBundledPublicAssetSrc),
     hero: {
       ...content.hero,

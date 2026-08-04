@@ -7,7 +7,7 @@ import { ChevronLeft, ChevronRight, X, ZoomIn, ZoomOut } from "lucide-react";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence, Variants } from "framer-motion";
 import { SectionMediaLayers } from "@/components/SectionMediaLayers";
-import { galleryMosaicSlotCount, galleryMosaicSlots, getGalleryTileSizes } from "@/config/gallery-mosaic";
+import { galleryMosaicSlotCount, galleryMosaicSlots, getGalleryMosaicSlots, getGalleryTileSizes } from "@/config/gallery-mosaic";
 import { cleanBundledPublicAssetSrc } from "@/lib/asset-cleanup";
 import { defaultSettings, type WeddingConfig } from "@/lib/site-settings";
 
@@ -89,9 +89,13 @@ export function GallerySection({ config }: { config: WeddingConfig }) {
     () => Array.from({ length: galleryMosaicSlotCount }, (_, index) => config.appearance.galleryObjectPositions[index] || "center center"),
     [config.appearance.galleryObjectPositions],
   );
+  const layoutSlots = useMemo(
+    () => getGalleryMosaicSlots(config.appearance.galleryLayout),
+    [config.appearance.galleryLayout],
+  );
   const tiles = useMemo(
-    () => galleryMosaicSlots.map((layout, index) => ({ ...layout, src: images[index] ?? "", objectPosition: positions[index] ?? "center center" })),
-    [images, positions],
+    () => layoutSlots.map((layout, index) => ({ ...layout, src: images[index] ?? "", objectPosition: positions[index] ?? "center center" })),
+    [images, layoutSlots, positions],
   );
   const activeImage = selectedImageIndex === null || selectedImageIndex >= images.length ? "" : images[selectedImageIndex] || "";
   const activeAlt = activeImage && selectedImageIndex !== null ? `${section.imageAltPrefix} ${selectedImageIndex + 1}` : "";

@@ -6,15 +6,19 @@ import Link from "next/link";
 import { type CSSProperties, useEffect, useMemo, useRef, useState } from "react";
 import {
   ArrowLeft,
+  ChevronDown,
+  ChevronUp,
   Check,
   Eye,
   ImagePlus,
   Loader2,
+  Plus,
   Save,
   Trash2,
   UploadCloud,
 } from "lucide-react";
-import { galleryMosaicSlotCount, galleryMosaicSlots } from "@/config/gallery-mosaic";
+import { galleryLayoutOptions, galleryMosaicSlotCount, galleryMosaicSlots, type GalleryLayoutKey } from "@/config/gallery-mosaic";
+import { timelineIconOptions } from "@/config/timeline-icons";
 import { cleanBundledPublicAssetSrc } from "@/lib/asset-cleanup";
 import { prepareImageFileForUpload } from "@/lib/image-compression";
 import {
@@ -43,6 +47,8 @@ const shellClass =
   "rounded-[2rem] border border-[#2F3A35]/12 bg-[#fffdf8]/68 shadow-[0_26px_90px_rgba(47,58,53,0.12)] backdrop-blur-2xl";
 const fieldClass =
   "min-h-12 w-full rounded-full border border-[#2F3A35]/12 bg-[#fffdf8]/78 px-4 text-center text-sm font-semibold text-[#2F3A35] outline-none transition placeholder:text-[#2F3A35]/34 focus:border-[#8FAADC]/70 focus:bg-[#fffdf8] focus:ring-4 focus:ring-[#8FAADC]/18";
+const textareaClass =
+  "min-h-28 w-full resize-y rounded-[1.4rem] border border-[#2F3A35]/12 bg-[#fffdf8]/78 px-4 py-3 text-left text-sm font-semibold leading-6 text-[#2F3A35] outline-none transition placeholder:text-[#2F3A35]/34 focus:border-[#8FAADC]/70 focus:bg-[#fffdf8] focus:ring-4 focus:ring-[#8FAADC]/18";
 const primaryButton =
   "inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-[#2F3A35] px-5 text-xs font-black uppercase tracking-[0.16em] text-[#FDFBF7] shadow-[0_18px_46px_rgba(47,58,53,0.18)] transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-45 disabled:hover:translate-y-0";
 const softButton =
@@ -55,6 +61,24 @@ const adminSlotClasses = [
   "col-span-2 aspect-[3/4] lg:aspect-auto lg:col-[1/span_4] lg:row-[3/span_4]",
   "col-span-2 aspect-[4/3] lg:aspect-auto lg:col-[8/span_5] lg:row-[3/span_4]",
 ];
+
+const adminLayoutClasses: Record<GalleryLayoutKey, string[]> = {
+  mosaic: adminSlotClasses,
+  editorial: [
+    "col-span-2 aspect-[16/7] lg:aspect-auto lg:col-[1/span_12] lg:row-[1/span_3]",
+    "col-span-1 aspect-[3/4] lg:aspect-auto lg:col-[1/span_3] lg:row-[4/span_3]",
+    "col-span-1 aspect-[3/4] lg:aspect-auto lg:col-[4/span_3] lg:row-[4/span_3]",
+    "col-span-1 aspect-[3/4] lg:aspect-auto lg:col-[7/span_3] lg:row-[4/span_3]",
+    "col-span-1 aspect-[3/4] lg:aspect-auto lg:col-[10/span_3] lg:row-[4/span_3]",
+  ],
+  columns: [
+    "col-span-1 aspect-[3/4] lg:aspect-auto lg:col-[1/span_2] lg:row-[1/span_6]",
+    "col-span-1 aspect-[3/4] lg:aspect-auto lg:col-[3/span_3] lg:row-[1/span_6]",
+    "col-span-1 aspect-[3/4] lg:aspect-auto lg:col-[6/span_2] lg:row-[1/span_6]",
+    "col-span-1 aspect-[3/4] lg:aspect-auto lg:col-[8/span_3] lg:row-[1/span_6]",
+    "col-span-1 aspect-[3/4] lg:aspect-auto lg:col-[11/span_2] lg:row-[1/span_6]",
+  ],
+};
 
 function clampPercent(value: number) {
   if (!Number.isFinite(value)) return 50;
@@ -160,6 +184,25 @@ function getGalleryPositions(settings: SiteSettings | null) {
   );
 }
 
+function validatePublishSettings(settings: SiteSettings) {
+  if (!/\[\s*cụm tên khách\s*\]/i.test(settings.content.invitation.heroTemplate)) {
+    return "Câu mời Hero cần giữ token [Cụm tên khách].";
+  }
+
+  const datePattern = /\d{1,2}[.\/-]\d{1,2}[.\/-]\d{4}/;
+  if (!datePattern.test(settings.content.eventDetailsConfig.content.churchDate)) return "Ngày Thánh lễ chưa đúng định dạng ngày/tháng/năm.";
+  if (!datePattern.test(settings.content.event.dateLabel)) return "Ngày Tiệc cưới chưa đúng định dạng ngày/tháng/năm.";
+
+  const timePattern = /^\d{1,2}:\d{2}$/;
+  if (!timePattern.test(settings.content.eventDetailsConfig.content.churchTime.trim())) return "Giờ Thánh lễ cần có dạng 10:00.";
+  if (!timePattern.test(settings.content.event.welcomeTime.trim())) return "Giờ Tiệc cưới cần có dạng 17:30.";
+  if (settings.content.timeline.some((item) => !timePattern.test(item.time.trim()) || !item.title.trim() || !(item.icon || "").trim())) {
+    return "Mỗi mốc timeline cần đủ giờ, nội dung và icon.";
+  }
+
+  return "";
+}
+
 
 
 export default function AdminEditorPage() {
@@ -209,6 +252,10 @@ export default function AdminEditorPage() {
   const selectedPositionValue = galleryPositions[activeIndex] || defaultObjectPosition;
   const selectedPosition = parseObjectPosition(selectedPositionValue);
   const isUploadingSelected = uploadingIndex === activeIndex;
+  const galleryLayout: GalleryLayoutKey = settings?.content.appearance.galleryLayout === "editorial" || settings?.content.appearance.galleryLayout === "columns"
+    ? settings.content.appearance.galleryLayout
+    : "mosaic";
+  const activeAdminSlotClasses = adminLayoutClasses[galleryLayout];
 
   function markDirty() {
     setDirty(true);
@@ -257,6 +304,109 @@ export default function AdminEditorPage() {
       }
       return next;
     });
+  }
+
+  function updateHeroTemplate(value: string) {
+    markDirty();
+    setSettings((current) => {
+      if (!current) return current;
+      const next = normalizeGallerySettings(current);
+      next.content.invitation.heroTemplate = value;
+      return next;
+    });
+  }
+
+  function updateBanquetInfo(field: "dateLabel" | "welcomeTime", value: string) {
+    markDirty();
+    setSettings((current) => {
+      if (!current) return current;
+      const next = normalizeGallerySettings(current);
+      next.content.event[field] = value;
+
+      if (field === "dateLabel") {
+        const match = value.match(/(\d{1,2})[.\/-](\d{1,2})[.\/-](\d{4})/);
+        if (match) {
+          next.content.couple.date = `${match[3]}-${match[2].padStart(2, "0")}-${match[1].padStart(2, "0")}`;
+        }
+      }
+
+      return next;
+    });
+  }
+
+  function updateTimelineItem(index: number, field: "time" | "title" | "description" | "icon", value: string) {
+    markDirty();
+    setSettings((current) => {
+      if (!current) return current;
+      const next = normalizeGallerySettings(current);
+      if (next.content.timeline[index]) next.content.timeline[index][field] = value;
+      return next;
+    });
+  }
+
+  function moveTimelineItem(index: number, direction: -1 | 1) {
+    const target = index + direction;
+    if (target < 0 || target >= (settings?.content.timeline.length ?? 0)) return;
+    markDirty();
+    setSettings((current) => {
+      if (!current) return current;
+      const next = normalizeGallerySettings(current);
+      [next.content.timeline[index], next.content.timeline[target]] = [next.content.timeline[target], next.content.timeline[index]];
+      return next;
+    });
+  }
+
+  function addTimelineItem() {
+    markDirty();
+    setSettings((current) => {
+      if (!current) return current;
+      const next = normalizeGallerySettings(current);
+      next.content.timeline.push({
+        time: "20:30",
+        title: "Mốc thời gian mới",
+        description: "",
+        icon: timelineIconOptions[6].src,
+      });
+      return next;
+    });
+  }
+
+  function removeTimelineItem(index: number) {
+    if ((settings?.content.timeline.length ?? 0) <= 1) return;
+    markDirty();
+    setSettings((current) => {
+      if (!current) return current;
+      const next = normalizeGallerySettings(current);
+      next.content.timeline.splice(index, 1);
+      return next;
+    });
+  }
+
+  function updateGalleryLayout(value: GalleryLayoutKey) {
+    markDirty();
+    setSettings((current) => {
+      if (!current) return current;
+      const next = normalizeGallerySettings(current);
+      next.content.appearance.galleryLayout = value;
+      return next;
+    });
+  }
+
+  function moveGallerySlot(index: number, direction: -1 | 1) {
+    const target = index + direction;
+    if (target < 0 || target >= galleryMosaicSlotCount) return;
+    markDirty();
+    setSettings((current) => {
+      if (!current) return current;
+      const next = normalizeGallerySettings(current);
+      [next.content.gallery[index], next.content.gallery[target]] = [next.content.gallery[target], next.content.gallery[index]];
+      [next.content.appearance.galleryObjectPositions[index], next.content.appearance.galleryObjectPositions[target]] = [
+        next.content.appearance.galleryObjectPositions[target],
+        next.content.appearance.galleryObjectPositions[index],
+      ];
+      return next;
+    });
+    setActiveIndex(target);
   }
 
   async function uploadGalleryImage(index: number, file: File | undefined) {
@@ -343,7 +493,7 @@ export default function AdminEditorPage() {
 
       setSettings(next);
       setDirty(false);
-      setNotice(localSaved ? "Đã lưu draft gallery." : "Đã lưu server, nhưng browser storage đang đầy nên local draft bị bỏ qua.");
+      setNotice(localSaved ? "Đã lưu bản nháp. Website công khai chưa thay đổi." : "Đã lưu server, nhưng browser storage đang đầy nên local draft bị bỏ qua.");
     } catch (saveError) {
       setError(saveError instanceof Error ? saveError.message : "Không lưu được draft.");
     } finally {
@@ -353,6 +503,11 @@ export default function AdminEditorPage() {
 
   async function publishGallery() {
     if (!settings) return;
+    const validationError = validatePublishSettings(settings);
+    if (validationError) {
+      setError(validationError);
+      return;
+    }
     setPublishing(true);
     setError("");
 
@@ -366,9 +521,21 @@ export default function AdminEditorPage() {
         throw new Error("Không publish được lên Supabase.");
       }
 
+      if (backend === "supabase") {
+        await fetch("/api/site-versions", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            settings: next,
+            label: `Content Editor · ${new Date().toLocaleString("vi-VN")}`,
+            source: "manual",
+          }),
+        }).catch(() => null);
+      }
+
       setSettings(next);
       setDirty(false);
-      setNotice(draftSaved && publishedSaved ? "Đã publish gallery. Public page sẽ đọc 5 ô theo đúng thứ tự này." : "Đã publish server, nhưng browser storage đang đầy nên local copy có thể thiếu.");
+      setNotice(draftSaved && publishedSaved ? "Đã xuất bản nội dung mới. Giao diện giữ nguyên, chỉ dữ liệu đã chọn được cập nhật." : "Đã publish server, nhưng browser storage đang đầy nên local copy có thể thiếu.");
     } catch (publishError) {
       setError(publishError instanceof Error ? publishError.message : "Không publish được gallery.");
     } finally {
@@ -382,7 +549,7 @@ export default function AdminEditorPage() {
         <div className={shellClass}>
           <div className="grid gap-4 p-8">
             <Loader2 className="mx-auto h-6 w-6 animate-spin" />
-            <p className="text-sm font-bold">Đang mở Gallery Editor...</p>
+            <p className="text-sm font-bold">Đang mở trình chỉnh sửa nội dung...</p>
           </div>
         </div>
       </main>
@@ -411,10 +578,10 @@ export default function AdminEditorPage() {
             </div>
 
             <div className="grid justify-items-center gap-1">
-              <p className="text-[0.68rem] font-black uppercase tracking-[0.32em] text-[#2F3A35]/48">Gallery Editor</p>
-              <h1 className="font-serif text-[clamp(2.2rem,4vw,4rem)] leading-none">Chỉnh từng ô ảnh cưới</h1>
+              <p className="text-[0.68rem] font-black uppercase tracking-[0.32em] text-[#2F3A35]/48">Content Editor</p>
+              <h1 className="font-serif text-[clamp(2.2rem,4vw,4rem)] leading-none">Tinh chỉnh nội dung thiệp</h1>
               <p className="max-w-xl text-sm font-semibold leading-6 text-[#2F3A35]/56">
-                {filledCount}/{galleryMosaicSlotCount} ô đã có ảnh. Backend: {backend === "supabase" ? "Supabase" : "Local"}.
+                Hero, ngày giờ, chương trình tiệc và {filledCount}/{galleryMosaicSlotCount} ảnh Khoảnh khắc. Backend: {backend === "supabase" ? "Supabase" : "Local"}.
                 {dirty ? " Có thay đổi chưa lưu." : ""}
               </p>
             </div>
@@ -447,19 +614,30 @@ export default function AdminEditorPage() {
 
           <div className={`${shellClass} grid gap-5 p-4 sm:p-5 lg:p-6 xl:col-span-2`}>
             <div className="grid gap-2 text-left">
-              <p className="text-[0.68rem] font-black uppercase tracking-[0.32em] text-[#2F3A35]/48">Cử Hành</p>
-              <h2 className="font-serif text-[clamp(2rem,3vw,3rem)] leading-none">Thông tin Nhà thờ</h2>
+              <p className="text-[0.68rem] font-black uppercase tracking-[0.32em] text-[#2F3A35]/48">Hero</p>
+              <h2 className="font-serif text-[clamp(2rem,3vw,3rem)] leading-none">Câu mời khách</h2>
+              <p className="max-w-3xl text-sm font-semibold leading-6 text-[#2F3A35]/55">
+                Giữ nguyên token <strong>[Cụm tên khách]</strong>; hệ thống tự thay bằng đúng tên trên từng link thiệp. Tên Nhật &amp; Phương không chỉnh tại đây.
+              </p>
             </div>
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              <label className="grid gap-2 text-sm font-black text-[#2F3A35]/60 text-left">
-                Tên Nhà Thờ
-                <input
-                  className={fieldClass}
-                  value={settings?.content.eventDetailsConfig?.content?.churchLocation || ""}
-                  placeholder="Nhà Thờ Giáo Xứ Tam Hải"
-                  onChange={(e) => updateChurchInfo("churchLocation", e.target.value)}
-                />
-              </label>
+            <textarea
+              className={textareaClass}
+              value={settings.content.invitation.heroTemplate}
+              onChange={(event) => updateHeroTemplate(event.target.value)}
+              placeholder="[Cụm tên khách] đến chung vui và ghi dấu những khoảnh khắc đáng nhớ cùng Nhật & Phương."
+            />
+          </div>
+
+
+          <div className={`${shellClass} grid gap-5 p-4 sm:p-5 lg:p-6 xl:col-span-2`}>
+            <div className="grid gap-2 text-left">
+              <p className="text-[0.68rem] font-black uppercase tracking-[0.32em] text-[#2F3A35]/48">Ngày giờ sự kiện</p>
+              <h2 className="font-serif text-[clamp(2rem,3vw,3rem)] leading-none">Thánh lễ Hôn phối &amp; Tiệc cưới</h2>
+              <p className="text-sm font-semibold leading-6 text-[#2F3A35]/55">Tên địa điểm, thẻ Lễ Thành Hôn và toàn bộ thiết kế hiện tại được khóa nguyên vẹn.</p>
+            </div>
+            <div className="grid gap-4 md:grid-cols-2">
+              <fieldset className="grid gap-4 rounded-[1.55rem] border border-[#2F3A35]/12 bg-[#fffdf8]/54 p-4 text-left sm:grid-cols-2">
+                <legend className="px-2 text-sm font-black uppercase tracking-[0.14em] text-[#2F3A35]/58">Thánh lễ Hôn phối</legend>
               <label className="grid gap-2 text-sm font-black text-[#2F3A35]/60 text-left">
                 Ngày diễn ra
                 <input
@@ -478,6 +656,77 @@ export default function AdminEditorPage() {
                   onChange={(e) => updateChurchInfo("churchTime", e.target.value)}
                 />
               </label>
+              </fieldset>
+              <fieldset className="grid gap-4 rounded-[1.55rem] border border-[#2F3A35]/12 bg-[#fffdf8]/54 p-4 text-left sm:grid-cols-2">
+                <legend className="px-2 text-sm font-black uppercase tracking-[0.14em] text-[#2F3A35]/58">Tiệc cưới</legend>
+                <label className="grid gap-2 text-sm font-black text-[#2F3A35]/60 text-left">
+                  Ngày diễn ra
+                  <input
+                    className={fieldClass}
+                    value={settings.content.event.dateLabel}
+                    placeholder="Thứ Bảy, 26.12.2026"
+                    onChange={(event) => updateBanquetInfo("dateLabel", event.target.value)}
+                  />
+                </label>
+                <label className="grid gap-2 text-sm font-black text-[#2F3A35]/60 text-left">
+                  Giờ đón khách
+                  <input
+                    className={fieldClass}
+                    value={settings.content.event.welcomeTime}
+                    placeholder="17:30"
+                    onChange={(event) => updateBanquetInfo("welcomeTime", event.target.value)}
+                  />
+                </label>
+              </fieldset>
+            </div>
+          </div>
+
+          <div className={`${shellClass} grid gap-5 p-4 sm:p-5 lg:p-6 xl:col-span-2`}>
+            <div className="flex flex-col gap-4 text-left sm:flex-row sm:items-end sm:justify-between">
+              <div className="grid gap-2">
+                <p className="text-[0.68rem] font-black uppercase tracking-[0.32em] text-[#2F3A35]/48">Tiệc cưới</p>
+                <h2 className="font-serif text-[clamp(2rem,3vw,3rem)] leading-none">Nội dung timeline</h2>
+                <p className="text-sm font-semibold leading-6 text-[#2F3A35]/55">Sửa giờ, nội dung, icon hoặc thứ tự. Con đường 108 frame và hiệu ứng hiện tại không bị chỉnh sửa.</p>
+              </div>
+              <button type="button" className={softButton} onClick={addTimelineItem} disabled={settings.content.timeline.length >= 10}>
+                <Plus className="h-4 w-4" /> Thêm mốc
+              </button>
+            </div>
+
+            <div className="grid gap-3">
+              {settings.content.timeline.map((item, index) => (
+                <div key={`${index}-${item.icon}`} className="grid gap-3 rounded-[1.55rem] border border-[#2F3A35]/12 bg-[#fffdf8]/54 p-3 md:grid-cols-[6rem_minmax(0,1fr)_minmax(0,1.2fr)_10rem_auto] md:items-center">
+                  <input className={fieldClass} value={item.time} aria-label={`Giờ mốc ${index + 1}`} onChange={(event) => updateTimelineItem(index, "time", event.target.value)} />
+                  <input className={fieldClass} value={item.title} aria-label={`Nội dung mốc ${index + 1}`} onChange={(event) => updateTimelineItem(index, "title", event.target.value)} />
+                  <input className={fieldClass} value={item.description} aria-label={`Mô tả mốc ${index + 1}`} onChange={(event) => updateTimelineItem(index, "description", event.target.value)} />
+                  <label className="relative grid grid-cols-[2.6rem_1fr] items-center gap-2 rounded-full border border-[#2F3A35]/12 bg-[#fffdf8]/78 px-2 py-1">
+                    <img src={item.icon || timelineIconOptions[0].src} alt="" className="h-9 w-9 object-contain" />
+                    <select className="min-h-10 min-w-0 bg-transparent text-xs font-bold text-[#2F3A35] outline-none" value={item.icon || timelineIconOptions[0].src} onChange={(event) => updateTimelineItem(index, "icon", event.target.value)} aria-label={`Icon mốc ${index + 1}`}>
+                      {timelineIconOptions.map((icon) => <option key={icon.id} value={icon.src}>{icon.label}</option>)}
+                    </select>
+                  </label>
+                  <div className="flex justify-center gap-1">
+                    <button type="button" className="grid h-10 w-10 place-items-center rounded-full border border-[#2F3A35]/12 bg-white/70 disabled:opacity-30" onClick={() => moveTimelineItem(index, -1)} disabled={index === 0} aria-label="Đưa lên"><ChevronUp className="h-4 w-4" /></button>
+                    <button type="button" className="grid h-10 w-10 place-items-center rounded-full border border-[#2F3A35]/12 bg-white/70 disabled:opacity-30" onClick={() => moveTimelineItem(index, 1)} disabled={index === settings.content.timeline.length - 1} aria-label="Đưa xuống"><ChevronDown className="h-4 w-4" /></button>
+                    <button type="button" className="grid h-10 w-10 place-items-center rounded-full border border-[#9B4E5C]/15 bg-white/70 text-[#9B4E5C] disabled:opacity-30" onClick={() => removeTimelineItem(index)} disabled={settings.content.timeline.length <= 1} aria-label="Xóa mốc"><Trash2 className="h-4 w-4" /></button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className={`${shellClass} grid gap-5 p-4 sm:p-5 lg:p-6 xl:col-span-2`}>
+            <div className="grid gap-2 text-left">
+              <p className="text-[0.68rem] font-black uppercase tracking-[0.32em] text-[#2F3A35]/48">Khoảnh khắc</p>
+              <h2 className="font-serif text-[clamp(2rem,3vw,3rem)] leading-none">Bố cục gallery</h2>
+            </div>
+            <div className="grid gap-3 md:grid-cols-3">
+              {galleryLayoutOptions.map((option) => (
+                <button key={option.id} type="button" onClick={() => updateGalleryLayout(option.id)} className={`grid gap-1 rounded-[1.3rem] border p-4 text-left transition ${galleryLayout === option.id ? "border-[#586A4E]/45 bg-[#EEF4E9] ring-4 ring-[#586A4E]/10" : "border-[#2F3A35]/12 bg-[#fffdf8]/54"}`}>
+                  <span className="font-black text-[#2F3A35]">{option.label}</span>
+                  <span className="text-xs font-semibold leading-5 text-[#2F3A35]/52">{option.description}</span>
+                </button>
+              ))}
             </div>
           </div>
 
@@ -507,7 +756,7 @@ export default function AdminEditorPage() {
                     }}
                     className={[
                       "group relative overflow-hidden rounded-[1.45rem] border bg-[#fffdf8]/54 text-center shadow-[0_18px_48px_rgba(47,58,53,0.1)] outline-none transition",
-                      adminSlotClasses[index],
+                      activeAdminSlotClasses[index],
                       active ? "border-[#2F3A35]/42 ring-4 ring-[#8FAADC]/22" : "border-[#2F3A35]/12 hover:-translate-y-0.5 hover:border-[#8FAADC]/54",
                       dragging ? "scale-[0.985] border-[#8FAADC] ring-4 ring-[#8FAADC]/22" : "",
                     ].join(" ")}
@@ -590,6 +839,14 @@ export default function AdminEditorPage() {
                 <Trash2 className="h-4 w-4" />
                 Xoá ảnh ô này
               </button>
+              <div className="grid grid-cols-2 gap-2">
+                <button type="button" className={softButton} disabled={activeIndex === 0} onClick={() => moveGallerySlot(activeIndex, -1)}>
+                  <ChevronUp className="h-4 w-4" /> Đổi lên
+                </button>
+                <button type="button" className={softButton} disabled={activeIndex === galleryMosaicSlotCount - 1} onClick={() => moveGallerySlot(activeIndex, 1)}>
+                  <ChevronDown className="h-4 w-4" /> Đổi xuống
+                </button>
+              </div>
             </div>
 
             <label className="grid gap-2 text-center text-sm font-black text-[#2F3A35]/60">

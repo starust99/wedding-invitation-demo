@@ -33,6 +33,8 @@ export function WeddingDetailsSection({ config, guestIdentity }: { config: Weddi
       publicData={{
         dateLabel: config.event.dateLabel,
         welcomeTime: config.event.welcomeTime,
+        churchDate: config.eventDetailsConfig.content.churchDate,
+        churchTime: config.eventDetailsConfig.content.churchTime,
         venueName: config.venue.name,
         venueArea: "Quảng trường Terrace Montagne",
         dressCodeTitle: config.dressCode.title || "Khu vườn mùa xuân",

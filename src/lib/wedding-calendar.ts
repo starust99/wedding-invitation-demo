@@ -1,4 +1,5 @@
 import { weddingConfig } from "@/config/wedding.config";
+import type { WeddingConfig } from "@/lib/site-settings";
 
 export type WeddingCalendarEventId = "thanh-le" | "tiec-cuoi";
 
@@ -17,7 +18,7 @@ export type WeddingCalendarEvent = {
 
 const invitationUrl = "https://nhatphuong.love";
 
-const weddingCalendarEvents: Record<WeddingCalendarEventId, WeddingCalendarEvent> = {
+const defaultWeddingCalendarEvents: Record<WeddingCalendarEventId, WeddingCalendarEvent> = {
   "thanh-le": {
     id: "thanh-le",
     title: `Thánh lễ Hôn phối ${weddingConfig.couple.displayName}`,
@@ -44,8 +45,67 @@ const weddingCalendarEvents: Record<WeddingCalendarEventId, WeddingCalendarEvent
   },
 };
 
-export function getWeddingCalendarEvent(value: string) {
-  return weddingCalendarEvents[value as WeddingCalendarEventId] ?? null;
+function parseDate(value: string, fallback: string) {
+  const iso = value.match(/(\d{4})-(\d{1,2})-(\d{1,2})/);
+  if (iso) return `${iso[1]}-${iso[2].padStart(2, "0")}-${iso[3].padStart(2, "0")}`;
+  const vi = value.match(/(\d{1,2})[.\/-](\d{1,2})[.\/-](\d{4})/);
+  if (vi) return `${vi[3]}-${vi[2].padStart(2, "0")}-${vi[1].padStart(2, "0")}`;
+  return fallback;
+}
+
+function parseTime(value: string, fallback: string) {
+  return /^\d{1,2}:\d{2}$/.test(value.trim()) ? value.trim() : fallback;
+}
+
+function toUtcStamp(date: string, time: string, durationMinutes = 90) {
+  const [year, month, day] = date.split("-").map(Number);
+  const [hour, minute] = time.split(":").map(Number);
+  const start = new Date(Date.UTC(year, month - 1, day, hour - 7, minute));
+  const end = new Date(start.getTime() + durationMinutes * 60_000);
+  const format = (dateValue: Date) => dateValue.toISOString().replace(/[-:]/g, "").replace(/\.\d{3}Z$/, "Z");
+  return { startUtc: format(start), endUtc: format(end) };
+}
+
+function formatDateLabel(date: string) {
+  const [year, month, day] = date.split("-");
+  return `${day}/${month}/${year}`;
+}
+
+export function createWeddingCalendarEvents(config: WeddingConfig): Record<WeddingCalendarEventId, WeddingCalendarEvent> {
+  const churchDate = parseDate(config.eventDetailsConfig.content.churchDate, "2026-12-20");
+  const churchTime = parseTime(config.eventDetailsConfig.content.churchTime, "10:00");
+  const banquetDate = parseDate(config.couple.date || config.event.dateLabel, "2026-12-26");
+  const banquetTime = parseTime(config.event.welcomeTime, "17:30");
+  const churchUtc = toUtcStamp(churchDate, churchTime, 90);
+  const banquetUtc = toUtcStamp(banquetDate, banquetTime, 210);
+
+  return {
+    "thanh-le": {
+      ...defaultWeddingCalendarEvents["thanh-le"],
+      title: `Thánh lễ Hôn phối ${config.couple.displayName}`,
+      ...churchUtc,
+      timeLabel: `${churchTime} ngày ${formatDateLabel(churchDate)}`,
+      location: `${config.church.name} (${config.church.address})`,
+      mapUrl: config.church.mapUrl,
+      description: `Thánh lễ Hôn phối của ${config.couple.displayName}.`,
+      uid: `thanh-le-${churchDate.replaceAll("-", "")}@nhatphuong.love`,
+    },
+    "tiec-cuoi": {
+      ...defaultWeddingCalendarEvents["tiec-cuoi"],
+      title: `Tiệc cưới ${config.couple.displayName}`,
+      ...banquetUtc,
+      timeLabel: `${banquetTime} ngày ${formatDateLabel(banquetDate)}`,
+      location: `${config.venue.name} (${config.venue.address})`,
+      mapUrl: config.venue.mapUrl,
+      description: `Tiệc cưới của ${config.couple.displayName}.`,
+      uid: `tiec-cuoi-${banquetDate.replaceAll("-", "")}@nhatphuong.love`,
+    },
+  };
+}
+
+export function getWeddingCalendarEvent(value: string, config?: WeddingConfig) {
+  const runtimeConfig = config ?? weddingConfig as unknown as WeddingConfig;
+  return createWeddingCalendarEvents(runtimeConfig)[value as WeddingCalendarEventId] ?? null;
 }
 
 export function shouldUseGoogleCalendar(userAgent: string) {
