@@ -5,7 +5,7 @@ import {
   shouldPresentIcsInline,
   shouldUseGoogleCalendar,
 } from "@/lib/wedding-calendar";
-import { defaultSettings, normalizeSettings } from "@/lib/site-settings";
+import { defaultSettings, normalizeSettings, settingsSchemaVersion } from "@/lib/site-settings";
 import { getSupabaseServerClient, hasSupabaseEnv } from "@/lib/supabase-server";
 
 export const dynamic = "force-dynamic";
@@ -34,6 +34,7 @@ export async function GET(
 
     if (data) {
       settings = normalizeSettings({
+        schemaVersion: settingsSchemaVersion,
         content: data.published_content ?? data.content,
         themeKey: data.published_theme_key ?? data.theme_key,
         publishedAt: data.published_at ?? undefined,
@@ -53,6 +54,16 @@ export async function GET(
     });
   }
 
+  const requestUrl = new URL(request.url);
+  const inviteToken = requestUrl.searchParams.get("invite")?.trim();
+  const personalInvitationUrl = inviteToken
+    ? `https://nhatphuong.love/i/${encodeURIComponent(inviteToken)}`
+    : "https://nhatphuong.love";
+  const personalizedEvent = {
+    ...event,
+    invitationUrl: personalInvitationUrl,
+  };
+
   const userAgent = request.headers.get("user-agent") ?? "";
 
   if (shouldUseGoogleCalendar(userAgent)) {
@@ -60,16 +71,16 @@ export async function GET(
       status: 302,
       headers: {
         ...sharedHeaders,
-        Location: buildGoogleCalendarUrl(event),
+        Location: buildGoogleCalendarUrl(personalizedEvent),
       },
     });
   }
 
-  return new Response(buildIcsCalendar(event), {
+  return new Response(buildIcsCalendar(personalizedEvent), {
     status: 200,
     headers: {
-      ...sharedHeaders,
-      "Content-Disposition": `${shouldPresentIcsInline(userAgent) ? "inline" : "attachment"}; filename="${event.fileName}"`,
+        ...sharedHeaders,
+        "Content-Disposition": `${shouldPresentIcsInline(userAgent) ? "inline" : "attachment"}; filename="${personalizedEvent.fileName}"`,
       "Content-Language": "vi",
       "Content-Type": "text/calendar; charset=utf-8",
     },

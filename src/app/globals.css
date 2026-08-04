@@ -4408,23 +4408,23 @@ html.splash-skipped body {
   pointer-events: none;
   background: radial-gradient(
     ellipse 82% 93% at center,
-    transparent 46%,
-    rgba(247, 242, 234, 0.35) 68%,
-    rgba(247, 242, 234, 0.85) 86%,
+    transparent 58%,
+    rgba(247, 242, 234, 0.35) 78%,
+    rgba(247, 242, 234, 0.85) 90%,
     var(--wedding-cream, #f7f2ea) 100%
   );
   -webkit-backdrop-filter: blur(14px);
   backdrop-filter: blur(14px);
   -webkit-mask-image: radial-gradient(
     ellipse 82% 93% at center,
-    transparent 42%,
-    rgba(0, 0, 0, 0.5) 68%,
+    transparent 54%,
+    rgba(0, 0, 0, 0.5) 76%,
     black 100%
   );
   mask-image: radial-gradient(
     ellipse 82% 93% at center,
-    transparent 42%,
-    rgba(0, 0, 0, 0.5) 68%,
+    transparent 54%,
+    rgba(0, 0, 0, 0.5) 76%,
     black 100%
   );
 }

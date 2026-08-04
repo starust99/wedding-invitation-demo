@@ -155,7 +155,7 @@ for (const testCase of cases) {
 assert.equal(CALENDAR_HANDOFF_HELP_DELAY_MS, 2_800);
 
 const rsvpSource = await readFile(new URL("../src/app/rsvp/page.tsx", import.meta.url), "utf8");
-assert.equal((rsvpSource.match(/onClick=\{handleCalendarHandoffAttempt\}/g) || []).length, 2);
+assert.equal((rsvpSource.match(/onClick=\{handleCalendarHandoffAttempt\}/g) || []).length, 3);
 assert.match(rsvpSource, /aria-live="polite"/);
 assert.match(rsvpSource, /Chưa mở được lịch\?/);
 

@@ -44,7 +44,16 @@ export function ThankYouSection({
 
   const { postWeddingGallery } = config;
   const isPostWedding = postWeddingGallery?.enabled && new Date() >= new Date(postWeddingGallery.availableAfter);
-  const galleryLink = resolveGalleryLink(postWeddingGallery?.groupLinks ?? {}, guestIdentity.group) || postWeddingGallery?.defaultUrl;
+  const ceremonyGalleryLink = rsvpAttendingCeremony === true
+    ? resolveGalleryLink(postWeddingGallery?.ceremonyGroupLinks ?? {}, guestIdentity.group) || postWeddingGallery?.ceremonyDefaultUrl
+    : "";
+  const banquetGalleryLink = rsvpAttendingBanquet === true
+    ? resolveGalleryLink(postWeddingGallery?.banquetGroupLinks ?? {}, guestIdentity.group) || postWeddingGallery?.banquetDefaultUrl
+    : "";
+  const availableGalleries = [
+    ceremonyGalleryLink ? { label: "Album Thánh lễ", href: ceremonyGalleryLink } : null,
+    banquetGalleryLink ? { label: "Album Tiệc cưới", href: banquetGalleryLink } : null,
+  ].filter((gallery): gallery is { label: string; href: string } => Boolean(gallery));
 
   const isDeclined = rsvpAttending === "no";
   const isCeremonyOnly = rsvpAttending !== "no" && rsvpAttendingBanquet === false;
@@ -102,18 +111,23 @@ export function ThankYouSection({
                 <div className="mx-auto mt-5 w-full max-w-2xl">
                   <div className="flex flex-col items-center justify-center gap-3 sm:gap-3.5">
                     {/* Primary Action */}
-                    {isPostWedding && galleryLink ? (
-                       <a
-                        href={galleryLink}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="inline-flex h-[2.75rem] sm:h-[3.0rem] w-[14rem] sm:w-[15rem] items-center justify-center transition hover:-translate-y-0.5 save-date-watercolor-btn save-date-btn-equal-width"
-                      >
-                        <span className="save-date-btn-label">
-                          <ImageIcon aria-hidden="true" className="w-4 h-4 sm:w-4.5 sm:h-4.5" />
-                          <span>Xem ảnh tiệc cưới</span>
-                        </span>
-                      </a>
+                    {isPostWedding && availableGalleries.length > 0 ? (
+                      <div className="flex flex-row flex-wrap items-center justify-center gap-2.5 sm:gap-3.5">
+                        {availableGalleries.map((gallery) => (
+                          <a
+                            key={gallery.label}
+                            href={gallery.href}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="inline-flex h-[2.75rem] sm:h-[3.0rem] w-[14rem] sm:w-[15rem] items-center justify-center transition hover:-translate-y-0.5 save-date-watercolor-btn save-date-btn-equal-width"
+                          >
+                            <span className="save-date-btn-label">
+                              <ImageIcon aria-hidden="true" className="w-4 h-4 sm:w-4.5 sm:h-4.5" />
+                              <span>{gallery.label}</span>
+                            </span>
+                          </a>
+                        ))}
+                      </div>
                     ) : (
                       <button
                         type="button"

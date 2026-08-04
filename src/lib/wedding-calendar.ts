@@ -1,7 +1,7 @@
 import { weddingConfig } from "@/config/wedding.config";
 import type { WeddingConfig } from "@/lib/site-settings";
 
-export type WeddingCalendarEventId = "thanh-le" | "tiec-cuoi";
+export type WeddingCalendarEventId = "thanh-le" | "tiec-cuoi" | "album";
 
 export type WeddingCalendarEvent = {
   id: WeddingCalendarEventId;
@@ -14,6 +14,7 @@ export type WeddingCalendarEvent = {
   description: string;
   fileName: string;
   uid: string;
+  invitationUrl?: string;
 };
 
 const invitationUrl = "https://nhatphuong.love";
@@ -43,6 +44,18 @@ const defaultWeddingCalendarEvents: Record<WeddingCalendarEventId, WeddingCalend
     fileName: "Lich-Tiec-cuoi-Nhat-Phuong.ics",
     uid: "tiec-cuoi-20261226@nhatphuong.love",
   },
+  album: {
+    id: "album",
+    title: `Xem album ảnh ${weddingConfig.couple.displayName}`,
+    startUtc: "20270129T170000Z",
+    endUtc: "20270129T173000Z",
+    timeLabel: "00:00 ngày 30/01/2027",
+    location: "Thiệp cưới trực tuyến Nhật & Phương",
+    mapUrl: invitationUrl,
+    description: "Album ảnh sẽ được cập nhật tại thiệp mời. Mở lại thiệp để xem ảnh.",
+    fileName: "Xem-Album-Anh-Nhat-Phuong.ics",
+    uid: "album-20270130@nhatphuong.love",
+  },
 };
 
 function parseDate(value: string, fallback: string) {
@@ -71,6 +84,34 @@ function formatDateLabel(date: string) {
   return `${day}/${month}/${year}`;
 }
 
+function createAlbumCalendarTime(value: string) {
+  const start = new Date(value);
+  const safeStart = Number.isNaN(start.getTime()) ? new Date("2027-01-30T00:00:00+07:00") : start;
+  const end = new Date(safeStart.getTime() + 30 * 60_000);
+  const stamp = (date: Date) => date.toISOString().replace(/[-:]/g, "").replace(/\.\d{3}Z$/, "Z");
+  const timeLabel = new Intl.DateTimeFormat("vi-VN", {
+    timeZone: "Asia/Ho_Chi_Minh",
+    hour: "2-digit",
+    minute: "2-digit",
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour12: false,
+  }).format(safeStart).replace(",", " ngày");
+
+  return {
+    startUtc: stamp(safeStart),
+    endUtc: stamp(end),
+    timeLabel,
+    dateKey: new Intl.DateTimeFormat("en-CA", {
+      timeZone: "Asia/Ho_Chi_Minh",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    }).format(safeStart).replaceAll("-", ""),
+  };
+}
+
 export function createWeddingCalendarEvents(config: WeddingConfig): Record<WeddingCalendarEventId, WeddingCalendarEvent> {
   const churchDate = parseDate(config.eventDetailsConfig.content.churchDate, "2026-12-20");
   const churchTime = parseTime(config.eventDetailsConfig.content.churchTime, "10:00");
@@ -78,6 +119,7 @@ export function createWeddingCalendarEvents(config: WeddingConfig): Record<Weddi
   const banquetTime = parseTime(config.event.welcomeTime, "17:30");
   const churchUtc = toUtcStamp(churchDate, churchTime, 90);
   const banquetUtc = toUtcStamp(banquetDate, banquetTime, 210);
+  const albumTime = createAlbumCalendarTime(config.postWeddingGallery.availableAfter);
 
   return {
     "thanh-le": {
@@ -99,6 +141,15 @@ export function createWeddingCalendarEvents(config: WeddingConfig): Record<Weddi
       mapUrl: config.venue.mapUrl,
       description: `Tiệc cưới của ${config.couple.displayName}.`,
       uid: `tiec-cuoi-${banquetDate.replaceAll("-", "")}@nhatphuong.love`,
+    },
+    album: {
+      ...defaultWeddingCalendarEvents.album,
+      title: `Xem album ảnh ${config.couple.displayName}`,
+      startUtc: albumTime.startUtc,
+      endUtc: albumTime.endUtc,
+      timeLabel: albumTime.timeLabel,
+      description: "Album ảnh sẽ được cập nhật tại thiệp mời. Mở lại thiệp để xem ảnh.",
+      uid: `album-${albumTime.dateKey}@nhatphuong.love`,
     },
   };
 }
@@ -124,13 +175,14 @@ export function shouldPresentIcsInline(userAgent: string) {
 }
 
 function eventDetails(event: WeddingCalendarEvent) {
+  const eventInvitationUrl = event.invitationUrl || invitationUrl;
   return [
     event.description,
     `Thời gian: ${event.timeLabel}.`,
     `Địa điểm: ${event.location}.`,
-    `Chỉ đường: ${event.mapUrl}`,
-    `Thiệp cưới: ${invitationUrl}`,
-  ].join("\n");
+    event.mapUrl && event.id !== "album" ? `Chỉ đường: ${event.mapUrl}` : "",
+    `Thiệp cưới: ${eventInvitationUrl}`,
+  ].filter(Boolean).join("\n");
 }
 
 export function buildGoogleCalendarUrl(event: WeddingCalendarEvent) {
@@ -185,7 +237,7 @@ export function buildIcsCalendar(event: WeddingCalendarEvent) {
     `SUMMARY:${escapeIcsText(event.title)}`,
     `LOCATION:${escapeIcsText(event.location)}`,
     `DESCRIPTION:${escapeIcsText(eventDetails(event))}`,
-    `URL:${invitationUrl}`,
+    `URL:${event.invitationUrl || invitationUrl}`,
     "STATUS:CONFIRMED",
     "TRANSP:OPAQUE",
     "END:VEVENT",

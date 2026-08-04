@@ -55,6 +55,21 @@ assert.match(
   /^attachment; filename="Lich-Tiec-cuoi-Nhat-Phuong\.ics"$/i,
 );
 
+const albumReminder = await fetch(`${baseUrl}/calendar/album?invite=chu-hai-test-123`, {
+  headers: { "user-agent": userAgents.iphoneSafari },
+  redirect: "manual",
+});
+assert.equal(albumReminder.status, 200);
+assert.match(
+  albumReminder.headers.get("content-disposition") || "",
+  /^inline; filename="Xem-Album-Anh-Nhat-Phuong\.ics"$/i,
+);
+const albumBody = await albumReminder.text();
+assert.match(albumBody, /SUMMARY:Xem album ảnh Nhật & Phương/);
+assert.match(albumBody, /UID:album-\d{8}@nhatphuong\.love/);
+assert.match(albumBody, /Album ảnh sẽ được cập nhật tại thiệp mời/);
+assert.match(albumBody, /URL:https:\/\/nhatphuong\.love\/i\/chu-hai-test-123/);
+
 for (const userAgent of [userAgents.androidChrome, userAgents.androidZalo]) {
   const response = await requestCalendar("tiec-cuoi", userAgent);
   assert.equal(response.status, 302);
@@ -73,8 +88,13 @@ const missingResponse = await requestCalendar("khong-ton-tai", userAgents.window
 assert.equal(missingResponse.status, 404);
 
 const rsvpSource = await readFile(new URL("../src/app/rsvp/page.tsx", import.meta.url), "utf8");
-assert.match(rsvpSource, /href="\/calendar\/thanh-le"/);
-assert.match(rsvpSource, /href="\/calendar\/tiec-cuoi"/);
+assert.match(rsvpSource, /\/calendar\/thanh-le/);
+assert.match(rsvpSource, /\/calendar\/tiec-cuoi/);
+assert.match(rsvpSource, /\/calendar\/album/);
+assert.match(rsvpSource, /Album ảnh của \$\{albumEventLabel\} sẽ được cập nhật tại chính thiệp mời này/);
+assert.match(rsvpSource, /hãy quay lại vào ngày \$\{albumAvailableDate\} để xem album/);
+assert.doesNotMatch(rsvpSource, /\/calendar\/album-thanh-le/);
+assert.doesNotMatch(rsvpSource, /\/calendar\/album-tiec-cuoi/);
 assert.doesNotMatch(rsvpSource, /const openCalendar/);
 assert.doesNotMatch(rsvpSource, /URL\.createObjectURL/);
 assert.doesNotMatch(rsvpSource, /window\.open\(gcalUrl/);

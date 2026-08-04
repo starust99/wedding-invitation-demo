@@ -45,8 +45,10 @@ function isUsableLink(value: string) {
 
 export function AlbumGroupManager({ invitees }: { invitees: Invitee[] }) {
   const [settings, setSettings] = useState<SiteSettings | null>(null);
-  const [groupLinks, setGroupLinks] = useState<Record<string, string>>({});
-  const [defaultUrl, setDefaultUrl] = useState("");
+  const [ceremonyGroupLinks, setCeremonyGroupLinks] = useState<Record<string, string>>({});
+  const [banquetGroupLinks, setBanquetGroupLinks] = useState<Record<string, string>>({});
+  const [ceremonyDefaultUrl, setCeremonyDefaultUrl] = useState("");
+  const [banquetDefaultUrl, setBanquetDefaultUrl] = useState("");
   const [availableAfter, setAvailableAfter] = useState("");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -79,15 +81,19 @@ export function AlbumGroupManager({ invitees }: { invitees: Invitee[] }) {
 
         if (cancelled) return;
         setSettings(nextSettings);
-        setGroupLinks(nextSettings.content.postWeddingGallery.groupLinks ?? {});
-        setDefaultUrl(nextSettings.content.postWeddingGallery.defaultUrl ?? "");
+        setCeremonyGroupLinks(nextSettings.content.postWeddingGallery.ceremonyGroupLinks ?? {});
+        setBanquetGroupLinks(nextSettings.content.postWeddingGallery.banquetGroupLinks ?? {});
+        setCeremonyDefaultUrl(nextSettings.content.postWeddingGallery.ceremonyDefaultUrl ?? "");
+        setBanquetDefaultUrl(nextSettings.content.postWeddingGallery.banquetDefaultUrl ?? "");
         setAvailableAfter(toDateTimeLocal(nextSettings.content.postWeddingGallery.availableAfter));
       } catch {
         if (cancelled) return;
         const nextSettings = getDraftSettings();
         setSettings(nextSettings);
-        setGroupLinks(nextSettings.content.postWeddingGallery.groupLinks ?? {});
-        setDefaultUrl(nextSettings.content.postWeddingGallery.defaultUrl ?? "");
+        setCeremonyGroupLinks(nextSettings.content.postWeddingGallery.ceremonyGroupLinks ?? {});
+        setBanquetGroupLinks(nextSettings.content.postWeddingGallery.banquetGroupLinks ?? {});
+        setCeremonyDefaultUrl(nextSettings.content.postWeddingGallery.ceremonyDefaultUrl ?? "");
+        setBanquetDefaultUrl(nextSettings.content.postWeddingGallery.banquetDefaultUrl ?? "");
         setAvailableAfter(toDateTimeLocal(nextSettings.content.postWeddingGallery.availableAfter));
       } finally {
         if (!cancelled) setLoading(false);
@@ -100,10 +106,12 @@ export function AlbumGroupManager({ invitees }: { invitees: Invitee[] }) {
     };
   }, []);
 
-  const configuredCount = groups.filter((group) => Boolean(groupLinks[group.name]?.trim())).length;
+  const ceremonyConfiguredCount = groups.filter((group) => Boolean(ceremonyGroupLinks[group.name]?.trim() || ceremonyDefaultUrl.trim())).length;
+  const banquetConfiguredCount = groups.filter((group) => Boolean(banquetGroupLinks[group.name]?.trim() || banquetDefaultUrl.trim())).length;
 
-  function updateGroupLink(group: string, value: string) {
-    setGroupLinks((current) => ({ ...current, [group]: value }));
+  function updateGroupLink(event: "ceremony" | "banquet", group: string, value: string) {
+    const setter = event === "ceremony" ? setCeremonyGroupLinks : setBanquetGroupLinks;
+    setter((current) => ({ ...current, [group]: value }));
     setMessage("");
     setError("");
   }
@@ -111,9 +119,16 @@ export function AlbumGroupManager({ invitees }: { invitees: Invitee[] }) {
   async function save() {
     if (!settings) return;
 
-    const invalidGroup = groups.find((group) => !isUsableLink(groupLinks[group.name] ?? ""));
-    if (invalidGroup || !isUsableLink(defaultUrl)) {
-      setError(invalidGroup ? `Link của nhóm “${invalidGroup.name}” chưa đúng.` : "Link album chung chưa đúng.");
+    const invalidCeremonyGroup = groups.find((group) => !isUsableLink(ceremonyGroupLinks[group.name] ?? ""));
+    const invalidBanquetGroup = groups.find((group) => !isUsableLink(banquetGroupLinks[group.name] ?? ""));
+    if (invalidCeremonyGroup || invalidBanquetGroup || !isUsableLink(ceremonyDefaultUrl) || !isUsableLink(banquetDefaultUrl)) {
+      setError(
+        invalidCeremonyGroup
+          ? `Link album Thánh lễ của nhóm “${invalidCeremonyGroup.name}” chưa đúng.`
+          : invalidBanquetGroup
+            ? `Link album Tiệc cưới của nhóm “${invalidBanquetGroup.name}” chưa đúng.`
+            : "Link album dự phòng chưa đúng.",
+      );
       return;
     }
 
@@ -121,12 +136,16 @@ export function AlbumGroupManager({ invitees }: { invitees: Invitee[] }) {
     setMessage("");
     setError("");
 
-    const cleanedLinks = Object.fromEntries(
-      Object.entries(groupLinks)
+    const cleanLinks = (links: Record<string, string>) => Object.fromEntries(
+      Object.entries(links)
         .map(([group, url]) => [group.trim(), url.trim()])
         .filter(([group, url]) => Boolean(group && url)),
     );
-    const hasAnyLink = Boolean(defaultUrl.trim()) || Object.keys(cleanedLinks).length > 0;
+    const cleanedCeremonyLinks = cleanLinks(ceremonyGroupLinks);
+    const cleanedBanquetLinks = cleanLinks(banquetGroupLinks);
+    const hasAnyLink = Boolean(ceremonyDefaultUrl.trim() || banquetDefaultUrl.trim())
+      || Object.keys(cleanedCeremonyLinks).length > 0
+      || Object.keys(cleanedBanquetLinks).length > 0;
     const nextSettings = normalizeSettings({
       ...settings,
       content: {
@@ -135,8 +154,12 @@ export function AlbumGroupManager({ invitees }: { invitees: Invitee[] }) {
           ...settings.content.postWeddingGallery,
           enabled: hasAnyLink,
           availableAfter: toIsoWithLocalOffset(availableAfter, settings.content.postWeddingGallery.availableAfter),
-          defaultUrl: defaultUrl.trim(),
-          groupLinks: cleanedLinks,
+          ceremonyDefaultUrl: ceremonyDefaultUrl.trim(),
+          banquetDefaultUrl: banquetDefaultUrl.trim(),
+          ceremonyGroupLinks: cleanedCeremonyLinks,
+          banquetGroupLinks: cleanedBanquetLinks,
+          defaultUrl: "",
+          groupLinks: {},
         },
       },
     });
@@ -157,7 +180,8 @@ export function AlbumGroupManager({ invitees }: { invitees: Invitee[] }) {
       }
 
       setSettings(nextSettings);
-      setGroupLinks(cleanedLinks);
+      setCeremonyGroupLinks(cleanedCeremonyLinks);
+      setBanquetGroupLinks(cleanedBanquetLinks);
       setMessage(hasAnyLink ? "Đã lưu và cập nhật album trên thiệp." : "Đã tắt album vì chưa có link nào.");
     } catch (saveError) {
       setError(saveError instanceof Error ? saveError.message : "Không lưu được album.");
@@ -183,20 +207,23 @@ export function AlbumGroupManager({ invitees }: { invitees: Invitee[] }) {
               <ImageIcon className="h-5 w-5" />
               <p className="text-xs font-bold uppercase tracking-[0.14em]">Album sau tiệc</p>
             </div>
-            <h2 className="mt-2 text-xl font-bold text-[#2E2A25]">Mỗi nhóm khách, một link album</h2>
+            <h2 className="mt-2 text-xl font-bold text-[#2E2A25]">Album Thánh lễ và Tiệc cưới</h2>
             <p className="mt-1 max-w-2xl text-sm leading-6 text-[#7B7168]">
-              Nhóm được lấy thẳng từ file Excel. Chỉ cần dán link Google Drive; khách sẽ tự thấy đúng album trong link thiệp riêng của họ.
+              Nhóm được lấy thẳng từ file Excel. Quyền xem còn dựa trên RSVP: khách chỉ thấy album của sự kiện họ đã xác nhận tham dự.
             </p>
           </div>
-          <div className="flex shrink-0 items-center gap-2 rounded-xl bg-[#F4F0E7] px-3 py-2 text-xs font-semibold text-[#665D54]">
+          <div className="flex shrink-0 items-start gap-2 rounded-xl bg-[#F4F0E7] px-3 py-2 text-xs font-semibold leading-5 text-[#665D54]">
             <CheckCircle2 className="h-4 w-4 text-[#5F6F4E]" />
-            {configuredCount}/{groups.length} nhóm đã có link
+            <span>
+              Thánh lễ: {ceremonyConfiguredCount}/{groups.length}<br />
+              Tiệc cưới: {banquetConfiguredCount}/{groups.length}
+            </span>
           </div>
         </div>
       </div>
 
       <div className="space-y-5 p-4 sm:p-6">
-        <div className="grid gap-4 rounded-2xl border border-[#E8DDCC] bg-[#FCFAF4] p-4 sm:grid-cols-2 sm:p-5">
+        <div className="grid gap-4 rounded-2xl border border-[#E8DDCC] bg-[#FCFAF4] p-4 lg:grid-cols-3 sm:p-5">
           <label className="grid gap-1.5 text-xs font-semibold uppercase tracking-wider text-[#8A8178]">
             Hiện album từ
             <input
@@ -207,13 +234,23 @@ export function AlbumGroupManager({ invitees }: { invitees: Invitee[] }) {
             />
           </label>
           <label className="grid gap-1.5 text-xs font-semibold uppercase tracking-wider text-[#8A8178]">
-            Link chung dự phòng
+            Link dự phòng, Thánh lễ
             <input
               type="url"
               className={inputClass}
-              value={defaultUrl}
-              onChange={(event) => setDefaultUrl(event.target.value)}
-              placeholder="Dùng khi khách chưa có nhóm riêng"
+              value={ceremonyDefaultUrl}
+              onChange={(event) => setCeremonyDefaultUrl(event.target.value)}
+              placeholder="Dùng khi nhóm chưa có link riêng"
+            />
+          </label>
+          <label className="grid gap-1.5 text-xs font-semibold uppercase tracking-wider text-[#8A8178]">
+            Link dự phòng, Tiệc cưới
+            <input
+              type="url"
+              className={inputClass}
+              value={banquetDefaultUrl}
+              onChange={(event) => setBanquetDefaultUrl(event.target.value)}
+              placeholder="Dùng khi nhóm chưa có link riêng"
             />
           </label>
         </div>
@@ -222,7 +259,7 @@ export function AlbumGroupManager({ invitees }: { invitees: Invitee[] }) {
           <div className="mb-3 flex items-center justify-between gap-3">
             <div>
               <h3 className="font-bold text-[#2E2A25]">Album theo nhóm khách</h3>
-              <p className="mt-0.5 text-xs text-[#8A8178]">Nhóm mới import từ Excel sẽ tự xuất hiện tại đây.</p>
+              <p className="mt-0.5 text-xs text-[#8A8178]">Mỗi nhóm có hai link độc lập. Nhóm mới import từ Excel sẽ tự xuất hiện.</p>
             </div>
             <UsersRound className="h-5 w-5 text-[#8A8178]" />
           </div>
@@ -235,34 +272,43 @@ export function AlbumGroupManager({ invitees }: { invitees: Invitee[] }) {
           ) : (
             <div className="divide-y divide-[#E8DDCC] overflow-hidden rounded-2xl border border-[#E8DDCC]">
               {groups.map((group) => {
-                const link = groupLinks[group.name] ?? "";
+                const ceremonyLink = ceremonyGroupLinks[group.name] ?? "";
+                const banquetLink = banquetGroupLinks[group.name] ?? "";
                 return (
-                  <div key={group.name} className="grid gap-3 bg-white p-4 sm:grid-cols-[minmax(12rem,0.8fr)_minmax(16rem,1.4fr)] sm:items-center sm:p-5">
+                  <div key={group.name} className="grid gap-3 bg-white p-4 lg:grid-cols-[minmax(11rem,0.7fr)_minmax(14rem,1fr)_minmax(14rem,1fr)] lg:items-center sm:p-5">
                     <div>
                       <p className="font-semibold leading-5 text-[#2E2A25]">{group.name}</p>
                       <p className="mt-1 text-xs text-[#8A8178]">{group.invitationCount} thiệp</p>
                     </div>
-                    <div className="flex gap-2">
-                      <input
-                        type="url"
-                        aria-label={`Link album cho ${group.name}`}
-                        className={inputClass}
-                        value={link}
-                        onChange={(event) => updateGroupLink(group.name, event.target.value)}
-                        placeholder="Dán link Google Drive của nhóm"
-                      />
-                      {link.trim() ? (
-                        <a
-                          href={link}
-                          target="_blank"
-                          rel="noreferrer"
-                          aria-label={`Mở thử album ${group.name}`}
-                          className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-[#D6BFA3] bg-white text-[#5F6F4E] transition hover:bg-[#F8F3EA]"
-                        >
-                          <ExternalLink className="h-4 w-4" />
-                        </a>
-                      ) : null}
-                    </div>
+                    {([
+                      ["ceremony", "Thánh lễ Hôn phối", ceremonyLink],
+                      ["banquet", "Tiệc cưới", banquetLink],
+                    ] as const).map(([event, label, link]) => (
+                      <label key={event} className="grid gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-[#8A8178]">
+                        {label}
+                        <span className="flex gap-2">
+                          <input
+                            type="url"
+                            aria-label={`Link album ${label} cho ${group.name}`}
+                            className={inputClass}
+                            value={link}
+                            onChange={(changeEvent) => updateGroupLink(event, group.name, changeEvent.target.value)}
+                            placeholder="Dán link Google Drive"
+                          />
+                          {link.trim() ? (
+                            <a
+                              href={link}
+                              target="_blank"
+                              rel="noreferrer"
+                              aria-label={`Mở thử album ${label} của ${group.name}`}
+                              className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-[#D6BFA3] bg-white text-[#5F6F4E] transition hover:bg-[#F8F3EA]"
+                            >
+                              <ExternalLink className="h-4 w-4" />
+                            </a>
+                          ) : null}
+                        </span>
+                      </label>
+                    ))}
                   </div>
                 );
               })}

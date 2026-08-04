@@ -256,7 +256,12 @@ export const weddingConfig = {
   },
   postWeddingGallery: {
     enabled: true,
-    availableAfter: "2026-12-27T00:00:00+07:00",
+    availableAfter: "2027-01-30T00:00:00+07:00",
+    ceremonyDefaultUrl: "",
+    banquetDefaultUrl: "",
+    ceremonyGroupLinks: {} as Record<string, string>,
+    banquetGroupLinks: {} as Record<string, string>,
+    // Legacy fields are retained so older saved settings can be migrated safely.
     defaultUrl: "",
     groupLinks: {} as Record<string, string>,
   },

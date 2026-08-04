@@ -171,21 +171,33 @@ export function normalizeSettings(settings: SettingsInput | null): SiteSettings 
   if (!settings) return structuredClone(defaultSettings);
 
   let content = mergeDefaults(defaultSettings.content, settings.content);
-  const inputGroupLinks = settings.content?.postWeddingGallery?.groupLinks;
+  const inputGallery = settings.content?.postWeddingGallery;
+  const legacyGroupLinks = inputGallery?.groupLinks;
+  const ceremonyGroupLinks = inputGallery?.ceremonyGroupLinks;
+  const banquetGroupLinks = inputGallery?.banquetGroupLinks ?? legacyGroupLinks;
 
-  // `groupLinks` is a dynamic record populated from the Excel guest groups.
+  const normalizeDynamicLinks = (links: unknown) => {
+    if (!links || typeof links !== "object" || Array.isArray(links)) return {};
+    return Object.fromEntries(
+      Object.entries(links)
+        .map(([group, url]) => [group.trim(), typeof url === "string" ? url.trim() : ""])
+        .filter(([group]) => Boolean(group)),
+    );
+  };
+
+  // Album link records are populated dynamically from the Excel guest groups.
   // It cannot be merged by the fixed-shape default merger above because new
   // group names are not known at build time.
-  if (inputGroupLinks && typeof inputGroupLinks === "object" && !Array.isArray(inputGroupLinks)) {
+  if (inputGallery) {
     content = {
       ...content,
       postWeddingGallery: {
         ...content.postWeddingGallery,
-        groupLinks: Object.fromEntries(
-          Object.entries(inputGroupLinks)
-            .map(([group, url]) => [group.trim(), typeof url === "string" ? url.trim() : ""])
-            .filter(([group]) => Boolean(group)),
-        ),
+        ceremonyGroupLinks: normalizeDynamicLinks(ceremonyGroupLinks),
+        banquetGroupLinks: normalizeDynamicLinks(banquetGroupLinks),
+        ceremonyDefaultUrl: inputGallery.ceremonyDefaultUrl?.trim() ?? "",
+        banquetDefaultUrl: inputGallery.banquetDefaultUrl?.trim() || inputGallery.defaultUrl?.trim() || "",
+        groupLinks: normalizeDynamicLinks(legacyGroupLinks),
       },
     };
   }

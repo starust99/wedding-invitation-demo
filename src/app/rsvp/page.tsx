@@ -15,6 +15,7 @@ import {
   Church,
   Lock,
   Info,
+  Images,
   Wine,
   X,
   Check,
@@ -31,6 +32,7 @@ import {
 import { buildInvitationCopy, removeStoredGuestIdentityForToken, resolveGuestIdentity, type GuestIdentity, type InvitationCopy } from "@/lib/guest-personalization";
 import { buildRsvpSubmissionCopy } from "@/lib/guest-rsvp-copy";
 import { keepExactPhraseTogether } from "@/lib/couple-name-display";
+import { capitalizeFirst, resolveSalutationCluster } from "@/lib/guest-naming";
 import { weddingConfig } from "@/config/wedding.config";
 import {
   CALENDAR_HANDOFF_HELP_DELAY_MS,
@@ -315,6 +317,18 @@ function formatRsvpEventDate(dateLabel: string, time: string, separator = "•")
   const date = dateMatch ? `${dateMatch[1].padStart(2, "0")}/${dateMatch[2].padStart(2, "0")}/${dateMatch[3]}` : dateLabel;
   const weekday = dateLabel.match(/(Chúa Nhật|Chủ Nhật|Thứ Hai|Thứ Ba|Thứ Tư|Thứ Năm|Thứ Sáu|Thứ Bảy)/i)?.[0];
   return `${time} ${separator} ${weekday ? `${weekday}, ` : ""}${date}`;
+}
+
+function formatAlbumAvailableDate(value: string) {
+  const isoDate = value.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+  if (isoDate) return `${isoDate[3].padStart(2, "0")}/${isoDate[2].padStart(2, "0")}/${isoDate[1]}`;
+
+  const vietnameseDate = value.match(/(\d{1,2})[.\/-](\d{1,2})[.\/-](\d{4})/);
+  if (vietnameseDate) {
+    return `${vietnameseDate[1].padStart(2, "0")}/${vietnameseDate[2].padStart(2, "0")}/${vietnameseDate[3]}`;
+  }
+
+  return value;
 }
 
 
@@ -914,6 +928,25 @@ export default function RSVPPage() {
 
   const hasCeremony = formValues.attendingCeremony === "yes";
   const hasBanquet = formValues.attendingBanquet === "yes";
+  const activeInviteToken = inviteToken || inviteeContext?.token || "";
+  const calendarInviteQuery = activeInviteToken ? `?invite=${encodeURIComponent(activeInviteToken)}` : "";
+  const albumAvailableDate = formatAlbumAvailableDate(runtimeConfig.postWeddingGallery.availableAfter);
+  const albumRecipient = capitalizeFirst(resolveSalutationCluster(
+    inviteeContext?.salutationCluster || guestIdentity.salutationCluster,
+    inviteeContext?.displayLabel || inviteeContext?.guestName || guestIdentity.displayLabel || guestIdentity.name || "",
+  ));
+  const shouldShowAttendanceCalendar = submissionCopy.showCalendar && (hasCeremony || hasBanquet);
+  const albumEventLabel = hasCeremony && hasBanquet
+    ? "Thánh lễ Hôn phối và Tiệc cưới"
+    : hasCeremony
+      ? "Thánh lễ Hôn phối"
+      : "Tiệc cưới";
+  const albumReminderCopy = shouldShowAttendanceCalendar
+    ? `Album ảnh của ${albumEventLabel} sẽ được cập nhật tại chính thiệp mời này. ${albumRecipient} hãy quay lại vào ngày ${albumAvailableDate} để xem album.`
+    : "";
+  const submittedMessage = albumReminderCopy
+    ? `${submissionCopy.body}\n\n${albumReminderCopy}`
+    : submissionCopy.body;
   
   if (isHydratingGuest) {
     return <RsvpHydrationState />;
@@ -1023,13 +1056,13 @@ export default function RSVPPage() {
                 <h2 className="wedding-type-title text-[#252934] font-serif italic text-2xl sm:text-3xl font-bold mb-4">{submissionCopy.title}</h2>
                 <p className="wedding-type-body max-w-lg text-[#252934]/75 leading-relaxed whitespace-pre-line text-center">
                   <CoupleNameText
-                    text={submissionCopy.body}
+                    text={submittedMessage}
                     coupleName={weddingConfig.couple.displayName}
                   />
                 </p>
               </div>
 
-              {submissionCopy.showCalendar ? (
+              {shouldShowAttendanceCalendar ? (
                 <div className="w-full max-w-md mx-auto bg-white/40 border border-white/50 shadow-[0_8px_32px_rgba(63,70,66,0.04)] rounded-[2rem] p-5 sm:p-6 mb-6 text-center backdrop-blur-md">
                   <p className="text-[0.82rem] sm:text-sm font-bold tracking-[0.15em] text-[#7a6a5d] uppercase mb-4">
                     Thêm vào lịch
@@ -1037,9 +1070,8 @@ export default function RSVPPage() {
                   <div className="flex flex-row justify-center gap-3.5 flex-wrap">
                     {hasCeremony && (
                       // Calendar files require a full document navigation so in-app WebViews can hand them to the operating system.
-                      // eslint-disable-next-line @next/next/no-html-link-for-pages
                       <a
-                        href="/calendar/thanh-le"
+                        href={`/calendar/thanh-le${calendarInviteQuery}`}
                         onClick={handleCalendarHandoffAttempt}
                         className="wedding-type-button inline-flex h-11 items-center justify-center gap-2 rounded-full border border-serenity/24 bg-white/80 px-6 text-xs sm:text-sm font-bold text-[#252934] transition hover:bg-white hover:shadow-sm min-w-[130px]"
                       >
@@ -1048,16 +1080,23 @@ export default function RSVPPage() {
                     )}
                     {hasBanquet && (
                       // Calendar files require a full document navigation so in-app WebViews can hand them to the operating system.
-                      // eslint-disable-next-line @next/next/no-html-link-for-pages
                       <a
-                        href="/calendar/tiec-cuoi"
+                        href={`/calendar/tiec-cuoi${calendarInviteQuery}`}
                         onClick={handleCalendarHandoffAttempt}
                         className="wedding-type-button inline-flex h-11 items-center justify-center gap-2 rounded-full border border-serenity/24 bg-white/80 px-6 text-xs sm:text-sm font-bold text-[#252934] transition hover:bg-white hover:shadow-sm min-w-[130px]"
                       >
                         <CalendarDays className="w-4 h-4" /> TIỆC CƯỚI
                       </a>
                     )}
+                    <a
+                      href={`/calendar/album${calendarInviteQuery}`}
+                      onClick={handleCalendarHandoffAttempt}
+                      className="wedding-type-button inline-flex h-11 items-center justify-center gap-2 rounded-full border border-serenity/24 bg-white/80 px-6 text-xs sm:text-sm font-bold text-[#252934] transition hover:bg-white hover:shadow-sm min-w-[130px]"
+                    >
+                      <Images className="h-4 w-4" /> XEM ALBUM
+                    </a>
                   </div>
+
                   <AnimatePresence initial={false}>
                     {calendarHandoffHelp ? (
                       <motion.div
