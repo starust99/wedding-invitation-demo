@@ -14,10 +14,22 @@ import {
   Loader2,
   Plus,
   Save,
+  Smartphone,
+  Tablet,
+  Monitor,
   Trash2,
   UploadCloud,
 } from "lucide-react";
-import { galleryLayoutOptions, galleryMosaicSlotCount, galleryMosaicSlots, type GalleryLayoutKey } from "@/config/gallery-mosaic";
+import {
+  galleryLayoutOptions,
+  galleryMosaicSlotCount,
+  galleryMosaicSlots,
+  getGalleryLayoutOption,
+  getGalleryMosaicSlots,
+  normalizeGalleryLayoutKey,
+  type GalleryLayoutKey,
+  type GalleryViewportKey,
+} from "@/config/gallery-mosaic";
 import { timelineIconOptions } from "@/config/timeline-icons";
 import { cleanBundledPublicAssetSrc } from "@/lib/asset-cleanup";
 import { prepareImageFileForUpload } from "@/lib/image-compression";
@@ -54,30 +66,16 @@ const primaryButton =
 const softButton =
   "inline-flex min-h-11 items-center justify-center gap-2 rounded-full border border-[#2F3A35]/12 bg-[#fffdf8]/70 px-5 text-xs font-black uppercase tracking-[0.16em] text-[#2F3A35] shadow-[0_14px_40px_rgba(47,58,53,0.07)] backdrop-blur-xl transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-45 disabled:hover:translate-y-0";
 
-const adminSlotClasses = [
-  "col-span-2 aspect-[4/3] lg:aspect-auto lg:col-[1/span_4] lg:row-[1/span_2]",
-  "col-span-1 aspect-[3/4] lg:aspect-auto lg:col-[5/span_3] lg:row-[1/span_6]",
-  "col-span-1 aspect-[5/3] lg:aspect-auto lg:col-[8/span_5] lg:row-[1/span_2]",
-  "col-span-2 aspect-[3/4] lg:aspect-auto lg:col-[1/span_4] lg:row-[3/span_4]",
-  "col-span-2 aspect-[4/3] lg:aspect-auto lg:col-[8/span_5] lg:row-[3/span_4]",
-];
+const previewViewportClasses: Record<GalleryViewportKey, string> = {
+  mobile: "max-w-[390px] grid-cols-4 auto-rows-[4.1rem]",
+  tablet: "max-w-[768px] grid-cols-8 auto-rows-[4.8rem]",
+  desktop: "max-w-[1120px] grid-cols-12 auto-rows-[5.5rem]",
+};
 
-const adminLayoutClasses: Record<GalleryLayoutKey, string[]> = {
-  mosaic: adminSlotClasses,
-  editorial: [
-    "col-span-2 aspect-[16/7] lg:aspect-auto lg:col-[1/span_12] lg:row-[1/span_3]",
-    "col-span-1 aspect-[3/4] lg:aspect-auto lg:col-[1/span_3] lg:row-[4/span_3]",
-    "col-span-1 aspect-[3/4] lg:aspect-auto lg:col-[4/span_3] lg:row-[4/span_3]",
-    "col-span-1 aspect-[3/4] lg:aspect-auto lg:col-[7/span_3] lg:row-[4/span_3]",
-    "col-span-1 aspect-[3/4] lg:aspect-auto lg:col-[10/span_3] lg:row-[4/span_3]",
-  ],
-  columns: [
-    "col-span-1 aspect-[3/4] lg:aspect-auto lg:col-[1/span_2] lg:row-[1/span_6]",
-    "col-span-1 aspect-[3/4] lg:aspect-auto lg:col-[3/span_3] lg:row-[1/span_6]",
-    "col-span-1 aspect-[3/4] lg:aspect-auto lg:col-[6/span_2] lg:row-[1/span_6]",
-    "col-span-1 aspect-[3/4] lg:aspect-auto lg:col-[8/span_3] lg:row-[1/span_6]",
-    "col-span-1 aspect-[3/4] lg:aspect-auto lg:col-[11/span_2] lg:row-[1/span_6]",
-  ],
+const previewViewportLabels: Record<GalleryViewportKey, { label: string; size: string }> = {
+  mobile: { label: "Mobile", size: "390 px" },
+  tablet: { label: "Tablet", size: "768 px" },
+  desktop: { label: "Desktop", size: "1440 px" },
 };
 
 function clampPercent(value: number) {
@@ -216,6 +214,7 @@ export default function AdminEditorPage() {
   const [dirty, setDirty] = useState(false);
   const [notice, setNotice] = useState("");
   const [error, setError] = useState("");
+  const [galleryPreviewViewport, setGalleryPreviewViewport] = useState<GalleryViewportKey>("mobile");
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
@@ -247,15 +246,14 @@ export default function AdminEditorPage() {
   const gallerySources = useMemo(() => getGallerySources(settings), [settings]);
   const galleryPositions = useMemo(() => getGalleryPositions(settings), [settings]);
   const filledCount = gallerySources.filter(Boolean).length;
-  const selectedSlot = galleryMosaicSlots[activeIndex] ?? galleryMosaicSlots[0];
   const selectedSrc = gallerySources[activeIndex] || "";
   const selectedPositionValue = galleryPositions[activeIndex] || defaultObjectPosition;
   const selectedPosition = parseObjectPosition(selectedPositionValue);
   const isUploadingSelected = uploadingIndex === activeIndex;
-  const galleryLayout: GalleryLayoutKey = settings?.content.appearance.galleryLayout === "editorial" || settings?.content.appearance.galleryLayout === "columns"
-    ? settings.content.appearance.galleryLayout
-    : "mosaic";
-  const activeAdminSlotClasses = adminLayoutClasses[galleryLayout];
+  const galleryLayout: GalleryLayoutKey = normalizeGalleryLayoutKey(settings?.content.appearance.galleryLayout);
+  const galleryLayoutOption = getGalleryLayoutOption(galleryLayout);
+  const layoutSlots = getGalleryMosaicSlots(galleryLayout);
+  const selectedSlot = layoutSlots[activeIndex] ?? layoutSlots[0];
 
   function markDirty() {
     setDirty(true);
@@ -716,9 +714,12 @@ export default function AdminEditorPage() {
           </div>
 
           <div className={`${shellClass} grid gap-5 p-4 sm:p-5 lg:p-6 xl:col-span-2`}>
-            <div className="grid gap-2 text-left">
-              <p className="text-[0.68rem] font-black uppercase tracking-[0.32em] text-[#2F3A35]/48">Khoảnh khắc</p>
-              <h2 className="font-serif text-[clamp(2rem,3vw,3rem)] leading-none">Bố cục gallery</h2>
+            <div className="flex flex-col gap-4 text-left lg:flex-row lg:items-end lg:justify-between">
+              <div className="grid gap-2">
+                <p className="text-[0.68rem] font-black uppercase tracking-[0.32em] text-[#2F3A35]/48">Khoảnh khắc</p>
+                <h2 className="font-serif text-[clamp(2rem,3vw,3rem)] leading-none">Bố cục gallery</h2>
+                <p className="max-w-3xl text-sm font-semibold leading-6 text-[#2F3A35]/55">Mỗi bố cục đã có nhịp riêng cho mobile, tablet và desktop. Chọn thiết bị phía dưới để xem đúng cách ảnh sẽ xuất hiện.</p>
+              </div>
             </div>
             <div className="grid gap-3 md:grid-cols-3">
               {galleryLayoutOptions.map((option) => (
@@ -728,16 +729,49 @@ export default function AdminEditorPage() {
                 </button>
               ))}
             </div>
+
+            <div className="grid gap-4 rounded-[1.55rem] border border-[#2F3A35]/12 bg-[#fffdf8]/54 p-4 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
+              <div className="grid gap-1 text-left">
+                <p className="text-sm font-black text-[#2F3A35]">Ảnh phù hợp: {galleryLayoutOption.bestFor}</p>
+                <p className="text-xs font-semibold leading-5 text-[#2F3A35]/52">Trên mobile: {galleryLayoutOption.mobileNote}</p>
+              </div>
+              <div className="grid grid-cols-3 gap-2 rounded-full border border-[#2F3A35]/10 bg-white/60 p-1.5" aria-label="Chọn viewport xem thử">
+                {(["mobile", "tablet", "desktop"] as GalleryViewportKey[]).map((viewport) => {
+                  const Icon = viewport === "mobile" ? Smartphone : viewport === "tablet" ? Tablet : Monitor;
+                  const active = galleryPreviewViewport === viewport;
+                  return (
+                    <button
+                      key={viewport}
+                      type="button"
+                      onClick={() => setGalleryPreviewViewport(viewport)}
+                      className={`inline-flex min-h-10 items-center justify-center gap-2 rounded-full px-3 text-xs font-black transition ${active ? "bg-[#586A4E] text-white shadow-[0_8px_24px_rgba(88,106,78,0.2)]" : "text-[#2F3A35]/58 hover:bg-white"}`}
+                      aria-pressed={active}
+                    >
+                      <Icon className="h-4 w-4" />
+                      <span className="hidden sm:inline">{previewViewportLabels[viewport].label}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
           </div>
 
-          <div className={`${shellClass} overflow-hidden p-4 sm:p-5 lg:p-6`}>
-            <div className="grid grid-cols-2 gap-3 lg:grid-cols-12 lg:auto-rows-[5.6rem] xl:auto-rows-[6.1rem]">
-              {galleryMosaicSlots.map((slot, index) => {
+          <div className={`${shellClass} overflow-hidden p-4 sm:p-5 lg:p-6 xl:col-span-2`}>
+            <div className="mb-4 flex flex-wrap items-center justify-between gap-3 text-left">
+              <div>
+                <p className="text-sm font-black text-[#2F3A35]">Demo {previewViewportLabels[galleryPreviewViewport].label}</p>
+                <p className="text-xs font-semibold text-[#2F3A35]/48">Khung tham chiếu {previewViewportLabels[galleryPreviewViewport].size} · Bấm một ảnh để chỉnh crop</p>
+              </div>
+              <span className="rounded-full border border-[#2F3A35]/10 bg-white/60 px-3 py-1.5 text-xs font-black text-[#2F3A35]/58">{galleryLayoutOption.label}</span>
+            </div>
+            <div className={`mx-auto grid w-full gap-2 transition-[max-width] duration-500 ${previewViewportClasses[galleryPreviewViewport]}`}>
+              {layoutSlots.map((slot, index) => {
                 const src = gallerySources[index];
                 const position = galleryPositions[index] || defaultObjectPosition;
                 const active = activeIndex === index;
                 const uploading = uploadingIndex === index;
                 const dragging = draggingIndex === index;
+                const placement = slot.placements[galleryPreviewViewport];
 
                 return (
                   <button
@@ -756,10 +790,10 @@ export default function AdminEditorPage() {
                     }}
                     className={[
                       "group relative overflow-hidden rounded-[1.45rem] border bg-[#fffdf8]/54 text-center shadow-[0_18px_48px_rgba(47,58,53,0.1)] outline-none transition",
-                      activeAdminSlotClasses[index],
                       active ? "border-[#2F3A35]/42 ring-4 ring-[#8FAADC]/22" : "border-[#2F3A35]/12 hover:-translate-y-0.5 hover:border-[#8FAADC]/54",
                       dragging ? "scale-[0.985] border-[#8FAADC] ring-4 ring-[#8FAADC]/22" : "",
                     ].join(" ")}
+                    style={{ gridColumn: placement.gridColumn, gridRow: placement.gridRow }}
                     aria-pressed={active}
                   >
                     {src ? (
@@ -778,11 +812,10 @@ export default function AdminEditorPage() {
                       />
                     )}
 
-                    <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(47,58,53,0.08),rgba(47,58,53,0.34))] opacity-80" />
-                    <div className="absolute inset-x-3 bottom-3 grid gap-2 rounded-[1.1rem] border border-[#fffdf8]/58 bg-[#fffdf8]/58 px-3 py-3 text-[#2F3A35] shadow-[0_12px_30px_rgba(47,58,53,0.12)] backdrop-blur-xl">
-                      <p className="text-[0.62rem] font-black uppercase tracking-[0.18em] text-[#2F3A35]/52">{slot.label}</p>
-                      <p className="text-sm font-black leading-tight">{slot.title}</p>
-                      <p className="text-xs font-bold leading-5 text-[#2F3A35]/52">{src ? "Click để chỉnh ô này" : "Click rồi upload ảnh"}</p>
+                    <div className="absolute inset-0 bg-[linear-gradient(180deg,transparent_42%,rgba(47,58,53,0.3))] opacity-80" />
+                    <div className="absolute bottom-2 left-2 flex max-w-[calc(100%-1rem)] items-center gap-2 rounded-full border border-[#fffdf8]/58 bg-[#fffdf8]/72 px-2.5 py-1.5 text-left text-[#2F3A35] shadow-[0_8px_24px_rgba(47,58,53,0.12)] backdrop-blur-xl">
+                      <p className="shrink-0 text-[0.58rem] font-black uppercase tracking-[0.16em] text-[#2F3A35]/58">{slot.label}</p>
+                      {galleryPreviewViewport !== "mobile" ? <p className="truncate text-xs font-black">{slot.title}</p> : null}
                     </div>
 
                     {uploading ? (
@@ -796,11 +829,12 @@ export default function AdminEditorPage() {
             </div>
           </div>
 
-          <aside className={`${shellClass} grid content-start gap-5 p-5`}>
+          <aside className={`${shellClass} grid content-start gap-5 p-5 xl:col-span-2`}>
             <div className="grid justify-items-center gap-2">
               <p className="text-[0.68rem] font-black uppercase tracking-[0.28em] text-[#2F3A35]/48">{selectedSlot.label}</p>
               <h2 className="font-serif text-4xl leading-none">{selectedSlot.title}</h2>
               <p className="max-w-[18rem] text-sm font-semibold leading-6 text-[#2F3A35]/58">{selectedSlot.note}</p>
+              <span className="rounded-full border border-[#586A4E]/16 bg-[#EEF4E9] px-3 py-1 text-xs font-black text-[#586A4E]">Tỷ lệ gợi ý {selectedSlot.ratioLabel}</span>
             </div>
 
             <div className={`relative overflow-hidden rounded-[1.6rem] border border-[#2F3A35]/12 bg-[#fffdf8]/64 ${selectedSlot.aspectClass}`}>

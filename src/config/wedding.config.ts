@@ -136,7 +136,7 @@ export const weddingConfig = {
       cta: "primaryGradient",
     },
     galleryObjectPositions: ["center center", "center center", "center center", "center center", "50% 50%"],
-    galleryLayout: "mosaic" as "mosaic" | "editorial" | "columns",
+    galleryLayout: "mosaic" as "mosaic" | "editorial" | "columns" | "spotlight" | "story" | "magazine" | "panorama" | "portraits" | "rhythm",
     mediaLayers: {
       hero: [
         {

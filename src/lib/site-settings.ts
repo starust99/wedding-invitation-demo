@@ -5,6 +5,7 @@ import type { AiTweakSuggestion } from "@/lib/ai-tweak-schema";
 import { normalizeEventDetailsEditorConfig } from "@/lib/wedding/event-details-config";
 import { normalizeWeddingHeroEditorConfig } from "@/lib/wedding/hero-config";
 import { resolveTimelineIcon } from "@/config/timeline-icons";
+import { normalizeGalleryLayoutKey } from "@/config/gallery-mosaic";
 
 type Editable<T> = T extends string
   ? string
@@ -162,6 +163,7 @@ function normalizeMediaLayers(content: WeddingConfig): WeddingConfig {
     eventDetailsConfig: normalizeEventDetailsEditorConfig(content.eventDetailsConfig),
     appearance: {
       ...content.appearance,
+      galleryLayout: normalizeGalleryLayoutKey(content.appearance.galleryLayout),
       mediaLayers: mediaLayers as unknown as WeddingConfig["appearance"]["mediaLayers"],
     },
   };

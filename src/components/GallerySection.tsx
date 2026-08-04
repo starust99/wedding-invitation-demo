@@ -7,7 +7,7 @@ import { ChevronLeft, ChevronRight, X, ZoomIn, ZoomOut } from "lucide-react";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence, Variants } from "framer-motion";
 import { SectionMediaLayers } from "@/components/SectionMediaLayers";
-import { galleryMosaicSlotCount, galleryMosaicSlots, getGalleryMosaicSlots, getGalleryTileSizes } from "@/config/gallery-mosaic";
+import { galleryMosaicSlotCount, getGalleryMosaicSlots, normalizeGalleryLayoutKey } from "@/config/gallery-mosaic";
 import { cleanBundledPublicAssetSrc } from "@/lib/asset-cleanup";
 import { defaultSettings, type WeddingConfig } from "@/lib/site-settings";
 
@@ -99,12 +99,9 @@ export function GallerySection({ config }: { config: WeddingConfig }) {
   );
   const activeImage = selectedImageIndex === null || selectedImageIndex >= images.length ? "" : images[selectedImageIndex] || "";
   const activeAlt = activeImage && selectedImageIndex !== null ? `${section.imageAltPrefix} ${selectedImageIndex + 1}` : "";
-  const activeSlot = selectedImageIndex === null ? null : galleryMosaicSlots[selectedImageIndex] ?? null;
-  const activeFrameClass = activeSlot?.aspectClass.includes("3/4")
-    ? "gallery-lightbox-frame-portrait"
-    : activeSlot?.aspectClass.includes("5/3")
-      ? "gallery-lightbox-frame-wide"
-      : "gallery-lightbox-frame-landscape";
+  const activeSlot = selectedImageIndex === null ? null : layoutSlots[selectedImageIndex] ?? null;
+  const activeFrameClass = activeSlot ? `gallery-lightbox-frame-${activeSlot.lightboxFrame}` : "gallery-lightbox-frame-landscape";
+  const galleryLayout = normalizeGalleryLayoutKey(config.appearance.galleryLayout);
 
   const [scale, setScale] = useState(1);
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
@@ -429,6 +426,7 @@ export function GallerySection({ config }: { config: WeddingConfig }) {
 
           <motion.div
             className="gallery-mosaic-grid"
+            data-gallery-layout={galleryLayout}
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true, margin: "-50px" }}
@@ -437,14 +435,18 @@ export function GallerySection({ config }: { config: WeddingConfig }) {
             {tiles.map((tile, index) => {
               const hasImage = Boolean(tile.src);
               const style = {
-                gridColumn: tile.gridColumn,
-                gridRow: tile.gridRow,
+                "--gallery-column-mobile": tile.placements.mobile.gridColumn,
+                "--gallery-row-mobile": tile.placements.mobile.gridRow,
+                "--gallery-column-tablet": tile.placements.tablet.gridColumn,
+                "--gallery-row-tablet": tile.placements.tablet.gridRow,
+                "--gallery-column-desktop": tile.placements.desktop.gridColumn,
+                "--gallery-row-desktop": tile.placements.desktop.gridRow,
               } as CSSProperties;
 
               return (
                 <motion.figure
                   key={`${tile.src || "placeholder"}-${index}`}
-                  className={`gallery-mosaic-tile ${tile.aspectClass} lg:aspect-auto`}
+                  className="gallery-mosaic-tile"
                   style={style}
                   custom={index}
                   variants={galleryTileVariant}

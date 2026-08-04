@@ -1060,10 +1060,10 @@ export default function RSVPPage() {
 
               {shouldShowAttendanceCalendar ? (
                 <div className="w-full bg-white/40 border border-white/50 shadow-[0_8px_32px_rgba(63,70,66,0.04)] rounded-[2rem] p-6 sm:p-10 mb-8 flex flex-col items-center backdrop-blur-md">
-                  <p className="wedding-type-body max-w-lg text-[#252934]/75 leading-relaxed text-center">
-                    {albumReminderIntro}{" "}
-                    {albumReminderEmphasis}
-                  </p>
+                  <div className="wedding-type-body max-w-lg space-y-4 text-center text-[#252934]/75 sm:space-y-5">
+                    <p className="leading-relaxed">{albumReminderIntro}</p>
+                    <p className="leading-relaxed">{albumReminderEmphasis}</p>
+                  </div>
                 </div>
               ) : null}
 

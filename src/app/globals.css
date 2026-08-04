@@ -2487,7 +2487,8 @@ textarea {
 
 .gallery-mosaic-grid {
   display: grid;
-  grid-template-columns: minmax(0, 1fr);
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-auto-rows: clamp(3.75rem, 17vw, 4.75rem);
   grid-auto-flow: dense;
   gap: clamp(0.6rem, 0.9vw, 0.9rem);
 }
@@ -2498,6 +2499,8 @@ textarea {
   margin: 0;
   overflow: visible;
   border-radius: clamp(1rem, 2.1vw, 1.45rem);
+  grid-column: var(--gallery-column-mobile);
+  grid-row: var(--gallery-row-mobile);
 
   /* Bật tăng tốc phần cứng GPU */
   will-change: transform, opacity;
@@ -2650,13 +2653,19 @@ textarea {
 .gallery-lightbox-frame-wide {
   width: min(92vw, 74rem, 110vh);
   width: min(92vw, 74rem, 110dvh);
-  aspect-ratio: 5 / 3;
+  aspect-ratio: 16 / 9;
 }
 
 .gallery-lightbox-frame-portrait {
   width: min(88vw, 34rem, 50vh);
   width: min(88vw, 34rem, 50dvh);
   aspect-ratio: 3 / 4;
+}
+
+.gallery-lightbox-frame-square {
+  width: min(90vw, 44rem, 74vh);
+  width: min(90vw, 44rem, 74dvh);
+  aspect-ratio: 1;
 }
 
 .gallery-lightbox-image {
@@ -2778,13 +2787,26 @@ textarea {
 
 @media (min-width: 768px) {
   .gallery-mosaic-grid {
-    grid-template-columns: repeat(12, minmax(0, 1fr));
-    grid-auto-rows: clamp(4.15rem, 5.2vw, 5.55rem);
+    grid-template-columns: repeat(8, minmax(0, 1fr));
+    grid-auto-rows: clamp(4rem, 7.1vw, 5.3rem);
     gap: clamp(0.58rem, 0.8vw, 0.82rem);
   }
 
   .gallery-mosaic-tile {
-    aspect-ratio: auto;
+    grid-column: var(--gallery-column-tablet);
+    grid-row: var(--gallery-row-tablet);
+  }
+}
+
+@media (min-width: 1024px) {
+  .gallery-mosaic-grid {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    grid-auto-rows: clamp(4.15rem, 5.2vw, 5.55rem);
+  }
+
+  .gallery-mosaic-tile {
+    grid-column: var(--gallery-column-desktop);
+    grid-row: var(--gallery-row-desktop);
   }
 }
 
@@ -2799,27 +2821,13 @@ textarea {
   }
 
   .gallery-mosaic-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(4, minmax(0, 1fr));
     grid-auto-flow: dense;
     gap: 0.48rem;
   }
 
   .gallery-mosaic-tile {
-    grid-column: auto !important;
-    grid-row: auto !important;
     border-radius: 1.05rem;
-  }
-
-  .gallery-mosaic-tile:nth-child(1),
-  .gallery-mosaic-tile:nth-child(4),
-  .gallery-mosaic-tile:nth-child(5) {
-    grid-column: 1 / -1 !important;
-    aspect-ratio: 1.58 / 1;
-  }
-
-  .gallery-mosaic-tile:nth-child(2),
-  .gallery-mosaic-tile:nth-child(3) {
-    aspect-ratio: 0.78 / 1;
   }
 
   .gallery-mosaic-tile-shell {
@@ -2840,16 +2848,26 @@ textarea {
     border-radius: 1.35rem;
   }
 
-  .gallery-lightbox-frame-landscape,
-  .gallery-lightbox-frame-wide {
+  .gallery-lightbox-frame-landscape {
     width: min(92vw, 65vh);
     width: min(92vw, 65dvh);
     aspect-ratio: 4 / 3;
   }
 
+  .gallery-lightbox-frame-wide {
+    width: min(92vw, 72vh);
+    width: min(92vw, 72dvh);
+    aspect-ratio: 16 / 9;
+  }
+
   .gallery-lightbox-frame-portrait {
     width: min(86vw, 48vh);
     width: min(86vw, 48dvh);
+  }
+
+  .gallery-lightbox-frame-square {
+    width: min(88vw, 56vh);
+    width: min(88vw, 56dvh);
   }
 }
 
