@@ -122,7 +122,7 @@ const rsvpDraftSchema = z.object({
 });
 
 const inputClass =
-  "min-h-13 w-full rounded-2xl border border-serenity/22 bg-white/75 px-4 text-base font-normal text-center text-[#252934] outline-none transition placeholder:font-normal placeholder:text-[#252934]/36 focus:border-serenity focus:bg-white/86 focus:ring-4 focus:ring-serenity/18";
+  "min-h-13 w-full rounded-2xl border border-serenity/22 bg-white/75 px-4 text-base font-normal text-center leading-relaxed text-[#252934] outline-none transition placeholder:font-normal placeholder:leading-relaxed placeholder:text-[#252934]/36 focus:border-serenity focus:bg-white/86 focus:ring-4 focus:ring-serenity/18";
 
 function createLodgingGuest(fullName = ""): LodgingGuestForm {
   return {
@@ -1362,13 +1362,13 @@ export default function RSVPPage() {
                     
                     {/* Chữ */}
                     <div className="mb-2 sm:mb-0 sm:ml-5 sm:flex-1 text-center sm:text-left">
-                      <p className="text-lg sm:text-base font-bold tracking-[0.12em] text-[#7a6a5d] uppercase mb-1 whitespace-nowrap">
+                      <p className="text-lg sm:text-base font-bold tracking-[0.12em] text-[#7a6a5d] uppercase mb-1 leading-snug">
                         THÁNH LỄ HÔN PHỐI
                       </p>
-                      <p className="text-sm sm:text-sm font-semibold text-[#252934] mb-0.5 whitespace-nowrap">
+                      <p className="text-sm sm:text-sm font-semibold text-[#252934] mb-0.5 leading-relaxed">
                         {churchReviewDateLine}
                       </p>
-                      <p className="text-sm sm:text-sm text-[#252934]/72 whitespace-nowrap">
+                      <p className="text-sm sm:text-sm text-[#252934]/72 leading-relaxed">
                         Nhà Thờ Giáo Xứ Tam Hải
                       </p>
                     </div>
@@ -1501,13 +1501,13 @@ export default function RSVPPage() {
                     
                     {/* Chữ */}
                     <div className="mb-2 sm:mb-0 sm:ml-5 sm:flex-1 text-center sm:text-left">
-                      <p className="text-lg sm:text-base font-bold tracking-[0.12em] text-[#7a6a5d] uppercase mb-1 whitespace-nowrap">
+                      <p className="text-lg sm:text-base font-bold tracking-[0.12em] text-[#7a6a5d] uppercase mb-1 leading-snug">
                         TIỆC CƯỚI
                       </p>
-                      <p className="text-sm sm:text-sm font-semibold text-[#252934] mb-0.5 whitespace-nowrap">
+                      <p className="text-sm sm:text-sm font-semibold text-[#252934] mb-0.5 leading-relaxed">
                         {banquetReviewDateLine}
                       </p>
-                      <p className="text-sm sm:text-sm text-[#252934]/72 whitespace-nowrap">
+                      <p className="text-sm sm:text-sm text-[#252934]/72 leading-relaxed">
                         Terracotta Hotel & Resort Đà Lạt
                       </p>
                     </div>
@@ -1588,7 +1588,7 @@ export default function RSVPPage() {
                                 : "bg-white/80 border-serenity/22 hover:bg-white text-[#252934]"
                             ].join(" ")}
                           >
-                            <span className="text-sm sm:text-base font-bold">Đêm 25/12</span>
+                            <span className="text-sm sm:text-base font-bold leading-snug">Đêm 25/12</span>
                             <span className={`text-[11px] sm:text-xs mt-0.5 ${stayDecision === "25" ? "text-white/80" : "text-[#252934]/55"}`}>đêm trước tiệc</span>
                           </button>
 
@@ -1604,7 +1604,7 @@ export default function RSVPPage() {
                                 : "bg-white/80 border-serenity/22 hover:bg-white text-[#252934]"
                             ].join(" ")}
                           >
-                            <span className="text-sm sm:text-base font-bold">Đêm 26/12</span>
+                            <span className="text-sm sm:text-base font-bold leading-snug">Đêm 26/12</span>
                             <span className={`text-[11px] sm:text-xs mt-0.5 ${stayDecision === "26" ? "text-white/80" : "text-[#252934]/55"}`}>đêm sau tiệc</span>
                           </button>
 
@@ -1620,7 +1620,7 @@ export default function RSVPPage() {
                                 : "bg-white/80 border-serenity/22 hover:bg-white text-[#252934]"
                             ].join(" ")}
                           >
-                            <span className="text-sm sm:text-base font-bold">Cả hai đêm</span>
+                            <span className="text-sm sm:text-base font-bold leading-snug">Cả hai đêm</span>
                             <span className={`text-[11px] sm:text-xs mt-0.5 ${stayDecision === "both" ? "text-white/80" : "text-[#252934]/55"}`}>25/12 & 26/12</span>
                           </button>
 
@@ -1636,7 +1636,7 @@ export default function RSVPPage() {
                                 : "bg-[#fcfaf9]/90 border-rose-quartz/30 hover:bg-[#faf6f3] text-[#252934]/80"
                             ].join(" ")}
                           >
-                            <span className="text-sm sm:text-base font-bold">Không nghỉ lại</span>
+                            <span className="text-sm sm:text-base font-bold leading-snug">Không nghỉ lại</span>
                           </button>
                         </div>
                         {errors.stayDecision ? (
@@ -1783,7 +1783,7 @@ export default function RSVPPage() {
                         </p>
                         <div className="grid gap-5">
                           <textarea
-                            className={`${inputClass} min-h-28 py-4 text-left`}
+                            className={`${inputClass} min-h-[10rem] py-4 text-left`}
                             placeholder={
                               attending === "no"
                                 ? keepExactPhraseTogether(
@@ -1797,7 +1797,7 @@ export default function RSVPPage() {
                           {hasBanquet && attending !== "no" && (
                             <Field label="Lưu ý thực đơn">
                               <textarea
-                                className={`${inputClass} min-h-24 py-4 text-left`}
+                                className={`${inputClass} min-h-[9rem] py-4 text-left`}
                                 placeholder="Ăn chay, dị ứng, kiêng món, không dùng rượu/cồn, hoặc cần suất trẻ em nếu có."
                                 {...register("dietaryNote")}
                               />
@@ -1824,12 +1824,12 @@ export default function RSVPPage() {
                           type="button"
                           onClick={handleGoToReview}
                           disabled={guestRsvpLocked}
-                          className="light-sweep wedding-type-button inline-flex min-h-13 items-center justify-center rounded-full bg-rose-quartz px-10 text-base font-bold text-[#252934] shadow-[0_16px_48px_rgba(146,168,209,0.22)] ring-1 ring-rose-quartz/70 disabled:opacity-60 uppercase tracking-wide"
+                          className="light-sweep wedding-type-button rsvp-final-cta inline-flex min-h-13 items-center justify-center gap-2.5 rounded-full bg-rose-quartz text-base font-bold text-[#252934] shadow-[0_16px_48px_rgba(146,168,209,0.22)] ring-1 ring-rose-quartz/70 disabled:opacity-60 uppercase"
                           whileHover={{ scale: 1.03 }}
                           whileTap={{ scale: 0.97 }}
                         >
-                          <Mail className="mr-2.5 h-5 w-5" />
-                          XEM LẠI VÀ HOÀN TẤT
+                          <Mail className="h-5 w-5 shrink-0" />
+                          <span>XEM LẠI VÀ HOÀN TẤT</span>
                         </motion.button>
                       </div>
                     </motion.div>

@@ -121,6 +121,15 @@
 }
 
 html {
+  /*
+   * Android WebView/Samsung Internet can inflate text again when the device's
+   * accessibility font or display size is large. Keep the invitation's CSS
+   * baseline deterministic; users can still pinch-zoom because viewport zoom
+   * is not disabled.
+   */
+  font-size: 16px;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
   scroll-behavior: smooth;
   overflow-x: hidden;
 }
@@ -3833,7 +3842,21 @@ textarea {
 .rsvp-page p,
 .rsvp-page button,
 .rsvp-page label {
-  overflow-wrap: break-word;
+  overflow-wrap: anywhere;
+}
+
+.rsvp-page :is(input, textarea, select, button) {
+  max-width: 100%;
+  line-height: 1.45;
+}
+
+.rsvp-final-cta {
+  width: min(100%, 24rem);
+  padding-inline: clamp(1.25rem, 6vw, 2.5rem);
+  font-size: clamp(0.78rem, 3.4vw, 0.9rem);
+  line-height: 1.35;
+  letter-spacing: 0.1em;
+  white-space: normal;
 }
 
 @keyframes aurora-drift {

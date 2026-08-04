@@ -237,9 +237,9 @@ const definitions: Record<GalleryLayoutKey, GalleryLayoutDefinition> = {
   },
   story: {
     placements: {
-      mobile: [p("1 / span 4", "1 / span 3"), p("1 / span 3", "4 / span 4"), p("2 / span 3", "8 / span 3"), p("1 / span 3", "11 / span 4"), p("1 / span 4", "15 / span 3")],
-      tablet: [p("1 / span 5", "1 / span 3"), p("6 / span 3", "1 / span 5"), p("1 / span 5", "4 / span 3"), p("1 / span 3", "7 / span 5"), p("4 / span 5", "7 / span 3")],
-      desktop: [p("1 / span 7", "1 / span 3"), p("8 / span 5", "1 / span 5"), p("1 / span 7", "4 / span 3"), p("1 / span 5", "7 / span 5"), p("6 / span 7", "7 / span 3")],
+      mobile: [p("1 / span 4", "1 / span 3"), p("1 / span 2", "4 / span 4"), p("3 / span 2", "4 / span 3"), p("3 / span 2", "7 / span 4"), p("1 / span 2", "8 / span 3")],
+      tablet: [p("1 / span 5", "1 / span 3"), p("6 / span 3", "1 / span 6"), p("1 / span 5", "4 / span 3"), p("1 / span 3", "7 / span 5"), p("4 / span 5", "7 / span 5")],
+      desktop: [p("1 / span 7", "1 / span 3"), p("8 / span 5", "1 / span 6"), p("1 / span 7", "4 / span 3"), p("1 / span 5", "7 / span 6"), p("6 / span 7", "7 / span 6")],
     },
     guides: [standardGuides.wide, standardGuides.portrait, standardGuides.landscape, standardGuides.portrait, standardGuides.wide],
   },
@@ -255,25 +255,25 @@ const definitions: Record<GalleryLayoutKey, GalleryLayoutDefinition> = {
     placements: {
       mobile: [p("1 / span 4", "1 / span 3"), p("1 / span 4", "4 / span 3"), p("1 / span 2", "7 / span 4"), p("3 / span 2", "7 / span 4"), p("1 / span 4", "11 / span 3")],
       tablet: [p("1 / span 8", "1 / span 3"), p("1 / span 8", "4 / span 3"), p("1 / span 4", "7 / span 4"), p("5 / span 4", "7 / span 4"), p("1 / span 8", "11 / span 3")],
-      desktop: [p("1 / span 12", "1 / span 3"), p("1 / span 7", "4 / span 3"), p("8 / span 5", "4 / span 5"), p("1 / span 5", "7 / span 5"), p("6 / span 7", "9 / span 3")],
+      desktop: [p("1 / span 12", "1 / span 3"), p("1 / span 7", "4 / span 6"), p("8 / span 5", "4 / span 6"), p("1 / span 5", "10 / span 6"), p("6 / span 7", "10 / span 6")],
     },
     guides: [standardGuides.wide, standardGuides.wide, standardGuides.portrait, standardGuides.portrait, standardGuides.wide],
   },
   portraits: {
     placements: {
       mobile: [p("1 / span 2", "1 / span 4"), p("3 / span 2", "1 / span 5"), p("1 / span 2", "5 / span 5"), p("3 / span 2", "6 / span 4"), p("1 / span 4", "10 / span 3")],
-      tablet: [p("1 / span 3", "1 / span 6"), p("4 / span 2", "1 / span 5"), p("6 / span 3", "1 / span 6"), p("4 / span 2", "6 / span 5"), p("1 / span 8", "11 / span 3")],
-      desktop: [p("1 / span 4", "1 / span 6"), p("5 / span 4", "1 / span 5"), p("9 / span 4", "1 / span 6"), p("5 / span 4", "6 / span 5"), p("1 / span 12", "11 / span 3")],
+      tablet: [p("1 / span 2", "1 / span 6"), p("3 / span 2", "1 / span 6"), p("5 / span 2", "1 / span 6"), p("7 / span 2", "1 / span 6"), p("1 / span 8", "7 / span 3")],
+      desktop: [p("1 / span 3", "1 / span 6"), p("4 / span 3", "1 / span 6"), p("7 / span 3", "1 / span 6"), p("10 / span 3", "1 / span 6"), p("1 / span 12", "7 / span 3")],
     },
     guides: [standardGuides.portrait, standardGuides.portrait, standardGuides.portrait, standardGuides.portrait, standardGuides.landscape],
   },
   rhythm: {
     placements: {
-      mobile: [p("1 / span 2", "1 / span 4"), p("3 / span 2", "2 / span 4"), p("1 / span 4", "6 / span 3"), p("1 / span 2", "9 / span 4"), p("3 / span 2", "9 / span 4")],
-      tablet: [p("1 / span 3", "1 / span 5"), p("4 / span 5", "2 / span 4"), p("1 / span 8", "6 / span 3"), p("1 / span 4", "9 / span 4"), p("5 / span 4", "9 / span 4")],
-      desktop: [p("1 / span 5", "1 / span 5"), p("6 / span 7", "2 / span 4"), p("1 / span 12", "6 / span 3"), p("1 / span 6", "9 / span 4"), p("7 / span 6", "9 / span 4")],
+      mobile: [p("1 / span 2", "1 / span 4"), p("3 / span 2", "1 / span 3"), p("3 / span 2", "4 / span 2"), p("1 / span 2", "5 / span 4"), p("3 / span 2", "6 / span 3")],
+      tablet: [p("1 / span 3", "1 / span 5"), p("4 / span 5", "1 / span 3"), p("4 / span 5", "4 / span 3"), p("1 / span 3", "6 / span 5"), p("4 / span 5", "7 / span 4")],
+      desktop: [p("1 / span 5", "1 / span 5"), p("6 / span 7", "1 / span 3"), p("6 / span 7", "4 / span 3"), p("1 / span 5", "6 / span 5"), p("6 / span 7", "7 / span 4")],
     },
-    guides: [standardGuides.portrait, standardGuides.landscape, standardGuides.wide, standardGuides.landscape, standardGuides.landscape],
+    guides: [standardGuides.portrait, standardGuides.landscape, standardGuides.wide, standardGuides.portrait, standardGuides.landscape],
   },
 };
 

@@ -401,8 +401,8 @@ export function EventDetailsContent({
 
         {/* Greeting & Names Block */}
         <div className="relative w-full flex flex-col items-center z-10 mt-1 md:mt-2">
-          <motion.div variants={familyItemVariant} className="w-full text-center">
-            <p className="font-serif italic text-[#3f4642]/95 text-[1.06rem] [@media(min-width:375px)]:text-[1.13rem] [@media(min-width:390px)]:text-[1.18rem] [@media(min-width:412px)]:text-[1.25rem] sm:text-[1.57rem] md:text-[1.64rem] lg:text-[1.72rem] tracking-[-0.015em] sm:tracking-wide font-medium leading-relaxed whitespace-nowrap">
+          <motion.div variants={familyItemVariant} className="w-full min-w-0 px-2 text-center">
+            <p className="mx-auto max-w-[34rem] font-serif italic text-[#3f4642]/95 text-[clamp(0.98rem,4.6vw,1.25rem)] sm:text-[1.57rem] md:text-[1.64rem] lg:text-[1.72rem] tracking-[-0.015em] sm:tracking-wide font-medium leading-[1.55] text-balance">
               Trân trọng báo tin hôn lễ của hai con chúng tôi:
             </p>
           </motion.div>
