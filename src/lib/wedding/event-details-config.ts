@@ -330,7 +330,7 @@ export function createDefaultEventDetailsConfig(): WeddingEventDetailsEditorConf
       receptionTime: "Sảnh Quảng Trường",
       receptionLocation: "Terracotta Hotel & Resort Đà Lạt",
       dressCodeLabel: "Trang phục chủ đề",
-      dressCodeText: "Vì Đà Lạt vào đông rất lạnh, xin lưu ý quý khách mặc thật ấm.\n\nTông màu trang phục gợi ý: hồng phấn, xanh da trời, kem hoặc xanh lá dịu để khung hình thêm phần hài hòa.",
+      dressCodeText: "Quý khách hãy phối đồ theo bảng màu dưới đây trong ngày đặc biệt này\n\nLưu ý: Tiệc ngoài trời rất lạnh, Quý khách chuẩn bị trang phục đủ ấm để tận hưởng trọn vẹn bữa tiệc.",
       mapLabel: "",
       mapText: "",
     },

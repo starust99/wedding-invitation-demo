@@ -892,7 +892,7 @@ export function buildInvitationCopy(input?: InvitationCopyInput): InvitationCopy
     closingLine: `Sự hiện diện của ${presenceSubject} là niềm vinh hạnh và lời chúc phúc trọn vẹn nhất.`,
     signaturePrefix: tone === "elder" ? "Thương kính" : tone === "peer" || tone === "junior" ? "Thân mến" : "Trân trọng",
     salutationCluster: cleanString(input?.salutationCluster) || "Quý khách",
-    dressCodeLine: `Để cùng tạo nên những khung hình đẹp và hài hòa cho đêm tiệc, Quý khách có thể tham khảo các ý tưởng phối đồ dựa theo bảng màu dưới đây:\n\nLưu ý: Tiệc được tổ chức ngoài trời trong không khí se lạnh của mùa đông Đà Lạt, Quý khách hãy ưu tiên trang phục và phụ kiện đủ ấm để tận hưởng trọn vẹn buổi tiệc.`,
+    dressCodeLine: `Quý khách hãy phối đồ theo bảng màu dưới đây trong ngày đặc biệt này\n\nLưu ý: Tiệc ngoài trời rất lạnh, Quý khách chuẩn bị trang phục đủ ấm để tận hưởng trọn vẹn bữa tiệc.`,
     presenceSubject,
   };
 }

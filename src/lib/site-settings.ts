@@ -43,7 +43,7 @@ type SettingsInput = Partial<Omit<SiteSettings, "content">> & {
 
 export const draftStorageKey = "wedding-demo-draft-settings";
 export const publishedStorageKey = "wedding-demo-published-settings";
-export const settingsSchemaVersion = 20;
+export const settingsSchemaVersion = 21;
 
 export const defaultSettings: SiteSettings = {
   schemaVersion: settingsSchemaVersion,
@@ -508,6 +508,40 @@ export function normalizeSettings(settings: SettingsInput | null): SiteSettings 
         title: "Khu vườn mùa xuân",
       },
     };
+  }
+
+  // Migration v21: Apply the shorter dress-code invitation and stronger cold-weather note.
+  if ((settings.schemaVersion ?? 0) < 21) {
+    const invitationPattern = /Để cùng tạo nên những khung hình đẹp và hài hòa cho đêm tiệc, Quý khách có thể tham khảo các ý tưởng phối đồ dựa theo bảng màu dưới đây:/gi;
+    const weatherPattern = /Lưu ý: Tiệc được tổ chức ngoài trời trong không khí se lạnh của mùa đông Đà Lạt, quý khách hãy ưu tiên trang phục và phụ kiện đủ ấm để tận hưởng trọn vẹn buổi tiệc\./gi;
+    const newInvitation = "Quý khách hãy phối đồ theo bảng màu dưới đây trong ngày đặc biệt này";
+    const newWeather = "Lưu ý: Tiệc ngoài trời rất lạnh, Quý khách chuẩn bị trang phục đủ ấm để tận hưởng trọn vẹn bữa tiệc.";
+    const replaceDressCodeCopy = (value: string) => value
+      .replace(invitationPattern, newInvitation)
+      .replace(weatherPattern, newWeather);
+
+    if (content.eventDetailsConfig?.content?.dressCodeText) {
+      content = {
+        ...content,
+        eventDetailsConfig: {
+          ...content.eventDetailsConfig,
+          content: {
+            ...content.eventDetailsConfig.content,
+            dressCodeText: replaceDressCodeCopy(content.eventDetailsConfig.content.dressCodeText),
+          },
+        },
+      };
+    }
+
+    if (content.dressCode?.note) {
+      content = {
+        ...content,
+        dressCode: {
+          ...content.dressCode,
+          note: replaceDressCodeCopy(content.dressCode.note),
+        },
+      };
+    }
   }
 
   return {

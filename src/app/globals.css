@@ -2473,6 +2473,19 @@ textarea {
   padding: clamp(0.65rem, 1.35vw, 1.05rem);
 }
 
+@media (max-width: 639px) {
+  /* Trên mobile, gallery dùng đúng gutter 0.75rem của nhóm thẻ sự kiện. */
+  .gallery-mosaic-shell {
+    width: 100%;
+    max-width: 56rem;
+    padding: 0;
+  }
+
+  .gallery-mosaic-stage {
+    width: 100%;
+  }
+}
+
 .gallery-mosaic-intro {
   border-bottom: 1px solid rgba(255, 255, 255, 0.42);
   margin-inline: auto;
@@ -4474,6 +4487,22 @@ html.splash-skipped body {
   .timeline-path-video.timeline-road-motion {
     display: none;
   }
+}
+
+/* Một wrapper duy nhất giữ mọi thẻ sự kiện thẳng mép ở mọi viewport. */
+.event-details-card-stack {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(1.5rem, 3vw, 2rem);
+  width: 100%;
+  max-width: 56rem;
+  margin-inline: auto;
+}
+
+.event-details-card-stack > .luxury-wedding-stationery-card {
+  width: 100%;
 }
 
 .timeline-path-video-wrap::before,

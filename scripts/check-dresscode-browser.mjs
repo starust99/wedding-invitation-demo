@@ -8,7 +8,7 @@ const baseUrl = (process.env.DRESSCODE_TEST_BASE_URL || "http://127.0.0.1:3000")
 const token = process.env.DRESSCODE_TEST_TOKEN || "gia-dinh-anh-chi-hien-hong-b30c877d";
 const expectedAssets = [
   "/assets/dresscode-theme-v5.webp",
-  "/assets/dresscode-pink-v5.webp",
+  "/assets/dresscode-pink-v6.webp",
   "/assets/dresscode-blue-v5.webp",
   "/assets/dresscode-yellow-v5.webp",
   "/assets/dresscode-green-v5.webp",
@@ -17,10 +17,10 @@ const expectedAssets = [
   "/assets/dresscode-brown-v5.webp",
 ];
 const colorLabels = [
-  "Hồng phấn",
+  "Hồng nhạt",
   "Xanh biển nhạt",
   "Vàng nhạt",
-  "Xanh lá nhạt",
+  "Xanh lá xô thơm",
   "Kem",
   "Be",
   "Nâu nhạt",

@@ -430,7 +430,7 @@ export function GallerySection({ config }: { config: WeddingConfig }) {
   );
 
   return (
-    <section id="gallery" className="gallery-mosaic-section cinematic-stage relative px-5 py-28 text-ink sm:px-8 sm:py-32 lg:py-36">
+    <section id="gallery" className="gallery-mosaic-section cinematic-stage relative px-3 py-28 text-ink sm:px-8 sm:py-32 lg:py-36">
       <SectionMediaLayers config={config} section="gallery" className="gallery-mosaic-media opacity-[0.1]" />
       <div aria-hidden="true" className="paper-grain-luxury gallery-mosaic-grain opacity-15" />
 

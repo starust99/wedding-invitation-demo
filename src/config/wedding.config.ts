@@ -209,7 +209,7 @@ export const weddingConfig = {
   ],
   dressCode: {
     title: "Khu vườn mùa xuân",
-    note: "Khách mời có thể chọn trang phục thanh lịch theo sắc hồng pastel, xanh dương pastel, trắng kem hoặc xanh lá tự nhiên. Nên ưu tiên chất liệu thoải mái vì buổi tiệc diễn ra ngoài trời.",
+    note: "Quý khách hãy phối đồ theo bảng màu dưới đây trong ngày đặc biệt này\n\nLưu ý: Tiệc ngoài trời rất lạnh, Quý khách chuẩn bị trang phục đủ ấm để tận hưởng trọn vẹn bữa tiệc.",
     colors: ["#FADCD9", "#D4E4F7", "#FEF8E7", "#B5D5A4", "#5C5247"],
   },
   weatherNote: {

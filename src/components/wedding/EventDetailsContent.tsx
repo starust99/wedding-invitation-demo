@@ -294,8 +294,9 @@ export function EventDetailsContent({
         </motion.header>
       ) : null}
 
+      <div className="event-details-card-stack">
       <motion.div 
-        className="mb-8 md:mb-12 w-full max-w-4xl mx-auto luxury-wedding-stationery-card px-1.5 pt-10 pb-10 sm:px-10 sm:pt-14 sm:pb-14 md:px-12 md:pt-16 md:pb-16 text-center flex flex-col relative"
+        className="w-full luxury-wedding-stationery-card px-1.5 pt-10 pb-10 sm:px-10 sm:pt-14 sm:pb-14 md:px-12 md:pt-16 md:pb-16 text-center flex flex-col relative"
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true, margin: "-50px" }}
@@ -442,7 +443,6 @@ export function EventDetailsContent({
       </motion.div>
 
       {/* Unified Vertical Scrolling Layout for Mobile, Tablet, and Desktop */}
-      <div className="flex flex-col gap-6 md:gap-8 w-full max-w-4xl mx-auto relative z-10 px-1 md:px-0">
         {/* Card 1: Thánh lễ Hôn phối */}
         <motion.div 
           initial="hidden"
