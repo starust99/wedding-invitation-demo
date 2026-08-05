@@ -12,7 +12,11 @@ const FIRST_CYCLE_DURATION = TOTAL_FRAMES * FRAME_DURATION;
 const REPEATING_CYCLE_FRAMES = TOTAL_FRAMES - LOOP_OVERLAP_FRAMES;
 const REPEATING_CYCLE_DURATION = REPEATING_CYCLE_FRAMES * FRAME_DURATION;
 const WARMUP_CONCURRENCY = 6;
-const DECODE_CONCURRENCY = 8;
+const DECODE_CONCURRENCY = 4;
+const BUFFER_LOOK_BEHIND = 3;
+const BUFFER_LOOK_AHEAD = 20;
+const VIEWPORT_ZOOM_THRESHOLD = 1.02;
+const VIEWPORT_ZOOM_SETTLE_MS = 400;
 
 const FRAME_SRCS = Array.from({ length: TOTAL_FRAMES }, (_, index) => {
   const frameNumber = String(index + 1).padStart(3, "0");
@@ -122,13 +126,18 @@ export function RoadSequencePlayer({
   onReady?: () => void;
 }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const imagesRef = useRef<Array<HTMLImageElement | undefined>>(
-    new Array(TOTAL_FRAMES),
-  );
+  const imagesRef = useRef(new Map<number, HTMLImageElement>());
+  const imagePromisesRef = useRef(new Map<number, Promise<HTMLImageElement>>());
+  const pendingBufferCenterRef = useRef<number | null>(null);
+  const bufferUpdateRunningRef = useRef(false);
   const decodeStartedRef = useRef(false);
+  const readyRef = useRef(false);
   const cancelledRef = useRef(false);
+  const playbackElapsedRef = useRef(0);
+  const lastAnimationTickRef = useRef<number | null>(null);
   const [isReady, setIsReady] = useState(false);
   const [isNearViewport, setIsNearViewport] = useState(false);
+  const [isViewportZoomed, setIsViewportZoomed] = useState(false);
   const prefersReducedMotion = useReducedMotion();
 
   useEffect(() => {
@@ -156,64 +165,144 @@ export function RoadSequencePlayer({
     context.drawImage(image, 0, 0, canvas.width, canvas.height);
   }, []);
 
-  const decodeTimelineFrames = useCallback(async () => {
-    if (decodeStartedRef.current || isReady) return;
-    decodeStartedRef.current = true;
+  const loadFrame = useCallback((frameIndex: number) => {
+    const cachedFrame = imagesRef.current.get(frameIndex);
+    if (cachedFrame) return Promise.resolve(cachedFrame);
 
-    // Finish the network-only warmup before creating 108 decoded images. This
-    // prevents WebKit from issuing a second competing request for the same
-    // frame while the first one is still in flight.
-    await warmTimelineFrameBytes();
+    const pendingFrame = imagePromisesRef.current.get(frameIndex);
+    if (pendingFrame) return pendingFrame;
 
-    while (!cancelledRef.current) {
-      const pendingIndexes = FRAME_SRCS.map((_, index) => index).filter(
-        (index) => !imagesRef.current[index],
-      );
-      if (pendingIndexes.length === 0) {
-        setIsReady(true);
-        break;
-      }
+    const src = FRAME_SRCS[frameIndex];
+    const globallyCachedFrame = GlobalImageCache.get(src);
+    if (globallyCachedFrame?.complete && globallyCachedFrame.naturalWidth > 0) {
+      imagesRef.current.set(frameIndex, globallyCachedFrame);
+      return Promise.resolve(globallyCachedFrame);
+    }
 
-      let nextPending = 0;
-      const worker = async () => {
-        while (
-          nextPending < pendingIndexes.length &&
-          !cancelledRef.current
-        ) {
-          const frameIndex = pendingIndexes[nextPending++];
-          try {
-            const image = await GlobalImageCache.preloadRequired(
-              FRAME_SRCS[frameIndex],
-            );
-            imagesRef.current[frameIndex] = image;
-            if (frameIndex === 0) drawFrame(image);
-          } catch {
-            // Leave this slot empty. The next pass retries only missing frames.
+    const promise = new Promise<HTMLImageElement>((resolve, reject) => {
+      const image = new Image();
+      image.decoding = "async";
+      image.onload = () => {
+        const finish = () => {
+          if (image.naturalWidth <= 0) {
+            reject(new Error(`Timeline frame has no dimensions: ${src}`));
+            return;
           }
+          if (!cancelledRef.current) imagesRef.current.set(frameIndex, image);
+          resolve(image);
+        };
+        if (typeof image.decode === "function") {
+          image.decode().then(finish).catch(finish);
+        } else {
+          finish();
         }
       };
+      image.onerror = () => reject(new Error(`Unable to load timeline frame: ${src}`));
+      image.src = src;
+    }).finally(() => {
+      imagePromisesRef.current.delete(frameIndex);
+    });
 
-      await Promise.all(
-        Array.from({ length: DECODE_CONCURRENCY }, () => worker()),
-      );
+    imagePromisesRef.current.set(frameIndex, promise);
+    return promise;
+  }, []);
 
-      if (imagesRef.current.every(Boolean)) {
-        setIsReady(true);
-        break;
+  const getBufferIndexes = useCallback((centerIndex: number) => {
+    const ordered: number[] = [];
+    const included = new Set<number>();
+    const add = (index: number) => {
+      const normalized = (index + TOTAL_FRAMES) % TOTAL_FRAMES;
+      if (!included.has(normalized)) {
+        included.add(normalized);
+        ordered.push(normalized);
       }
+    };
 
-      await new Promise((resolve) => window.setTimeout(resolve, 1_000));
+    add(centerIndex);
+    for (let offset = 1; offset <= BUFFER_LOOK_AHEAD; offset += 1) {
+      add(centerIndex + offset);
+    }
+    // The first frames are permanently available for the end-of-loop blend.
+    for (let index = 0; index < LOOP_OVERLAP_FRAMES; index += 1) add(index);
+    for (let offset = 1; offset <= BUFFER_LOOK_BEHIND; offset += 1) {
+      add(centerIndex - offset);
+    }
+
+    return ordered;
+  }, []);
+
+  const ensureBuffer = useCallback(async (centerIndex: number) => {
+    const desiredIndexes = getBufferIndexes(centerIndex);
+    let nextIndex = 0;
+
+    const worker = async () => {
+      while (nextIndex < desiredIndexes.length && !cancelledRef.current) {
+        const frameIndex = desiredIndexes[nextIndex++];
+        try {
+          await loadFrame(frameIndex);
+        } catch {
+          // A later buffer pass retries frames that failed in a flaky WebView.
+        }
+      }
+    };
+
+    await Promise.all(
+      Array.from({ length: DECODE_CONCURRENCY }, () => worker()),
+    );
+
+    if (cancelledRef.current) return;
+    const retainedIndexes = new Set(getBufferIndexes(centerIndex));
+    for (const frameIndex of imagesRef.current.keys()) {
+      if (!retainedIndexes.has(frameIndex)) imagesRef.current.delete(frameIndex);
+    }
+  }, [getBufferIndexes, loadFrame]);
+
+  const scheduleBuffer = useCallback((centerIndex: number) => {
+    pendingBufferCenterRef.current = centerIndex;
+    if (bufferUpdateRunningRef.current) return;
+
+    bufferUpdateRunningRef.current = true;
+    void (async () => {
+      while (
+        pendingBufferCenterRef.current !== null &&
+        !cancelledRef.current
+      ) {
+        const nextCenter = pendingBufferCenterRef.current;
+        pendingBufferCenterRef.current = null;
+        await ensureBuffer(nextCenter);
+      }
+      bufferUpdateRunningRef.current = false;
+    })();
+  }, [ensureBuffer]);
+
+  const decodeTimelineFrames = useCallback(async () => {
+    if (decodeStartedRef.current || readyRef.current) return;
+    decodeStartedRef.current = true;
+
+    // Warm all encoded bytes into the browser cache, then decode only a small
+    // rolling window. This keeps all 108 frames and the exact loop while
+    // avoiding hundreds of MB of simultaneously decoded RGBA data on phones.
+    await warmTimelineFrameBytes();
+
+    await ensureBuffer(0);
+    const firstFrame = imagesRef.current.get(0);
+    if (!cancelledRef.current && firstFrame) {
+      drawFrame(firstFrame);
+      readyRef.current = true;
+      setIsReady(true);
     }
 
     decodeStartedRef.current = false;
-  }, [drawFrame, isReady]);
+  }, [drawFrame, ensureBuffer]);
 
   useEffect(() => {
     cancelledRef.current = false;
+    const decodedImages = imagesRef.current;
+    const pendingImages = imagePromisesRef.current;
 
     const cachedFirstFrame = GlobalImageCache.get(FRAME_SRCS[0]);
     if (cachedFirstFrame) {
-      imagesRef.current[0] = cachedFirstFrame;
+      imagesRef.current.set(0, cachedFirstFrame);
       drawFrame(cachedFirstFrame);
     }
 
@@ -237,6 +326,9 @@ export function RoadSequencePlayer({
 
     return () => {
       cancelledRef.current = true;
+      pendingBufferCenterRef.current = null;
+      decodedImages.clear();
+      pendingImages.clear();
       window.clearTimeout(initialCheck);
       window.removeEventListener("weddingTimelineWarmup", handleWarmup);
       window.removeEventListener("weddingTimelineDecode", handleDecode);
@@ -261,10 +353,48 @@ export function RoadSequencePlayer({
   }, []);
 
   useEffect(() => {
-    if (!isReady || !isNearViewport || prefersReducedMotion) return;
+    const viewport = window.visualViewport;
+    if (!viewport) return;
+
+    let settleTimer: number | null = null;
+    const updateZoomState = () => {
+      const zoomed = viewport.scale > VIEWPORT_ZOOM_THRESHOLD;
+      if (zoomed) {
+        if (settleTimer !== null) window.clearTimeout(settleTimer);
+        settleTimer = null;
+        setIsViewportZoomed(true);
+        return;
+      }
+
+      if (settleTimer !== null) window.clearTimeout(settleTimer);
+      settleTimer = window.setTimeout(() => {
+        setIsViewportZoomed(false);
+        settleTimer = null;
+      }, VIEWPORT_ZOOM_SETTLE_MS);
+    };
+
+    updateZoomState();
+    viewport.addEventListener("resize", updateZoomState, { passive: true });
+    viewport.addEventListener("scroll", updateZoomState, { passive: true });
+    return () => {
+      if (settleTimer !== null) window.clearTimeout(settleTimer);
+      viewport.removeEventListener("resize", updateZoomState);
+      viewport.removeEventListener("scroll", updateZoomState);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (
+      !isReady ||
+      !isNearViewport ||
+      prefersReducedMotion ||
+      isViewportZoomed
+    ) {
+      lastAnimationTickRef.current = null;
+      return;
+    }
 
     let animationId = 0;
-    let startTime: number | null = null;
     let lastRenderedKey: string | null = null;
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -273,22 +403,27 @@ export function RoadSequencePlayer({
 
     const render = (timestamp: number) => {
       if (document.hidden) {
-        startTime = null;
+        lastAnimationTickRef.current = null;
         lastRenderedKey = null;
         animationId = window.requestAnimationFrame(render);
         return;
       }
-      if (startTime === null) startTime = timestamp;
+      const previousTick = lastAnimationTickRef.current;
+      lastAnimationTickRef.current = timestamp;
+      if (previousTick !== null) {
+        playbackElapsedRef.current += Math.min(250, timestamp - previousTick);
+      }
 
-      const elapsed = timestamp - startTime;
-      const renderFrame = getLoopRenderFrame(elapsed);
+      const renderFrame = getLoopRenderFrame(playbackElapsedRef.current);
 
       if (renderFrame.key === lastRenderedKey) {
         animationId = window.requestAnimationFrame(render);
         return;
       }
 
-      const currentImage = imagesRef.current[renderFrame.primaryIndex];
+      scheduleBuffer(renderFrame.primaryIndex);
+
+      const currentImage = imagesRef.current.get(renderFrame.primaryIndex);
 
       if (currentImage) {
         if (
@@ -304,7 +439,7 @@ export function RoadSequencePlayer({
         const secondaryImage =
           renderFrame.secondaryIndex === undefined
             ? undefined
-            : imagesRef.current[renderFrame.secondaryIndex];
+            : imagesRef.current.get(renderFrame.secondaryIndex);
 
         if (secondaryImage && renderFrame.secondaryAlpha >= 1) {
           context.globalAlpha = 1;
@@ -345,8 +480,11 @@ export function RoadSequencePlayer({
     };
 
     animationId = window.requestAnimationFrame(render);
-    return () => window.cancelAnimationFrame(animationId);
-  }, [isNearViewport, isReady, prefersReducedMotion]);
+    return () => {
+      lastAnimationTickRef.current = null;
+      window.cancelAnimationFrame(animationId);
+    };
+  }, [isNearViewport, isReady, isViewportZoomed, prefersReducedMotion, scheduleBuffer]);
 
   return (
     <canvas

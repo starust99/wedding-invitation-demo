@@ -75,6 +75,7 @@ export function GallerySection({ config }: { config: WeddingConfig }) {
   const [activeViewport, setActiveViewport] = useState<GalleryViewportKey>("mobile");
   const lightboxRef = useRef<HTMLDivElement>(null);
   const constraintsRef = useRef<HTMLElement>(null);
+  const lightboxHistoryActiveRef = useRef(false);
   const section = config.sections.gallery;
   const lightboxHost = typeof document === "undefined" ? null : document.body;
 
@@ -258,7 +259,18 @@ export function GallerySection({ config }: { config: WeddingConfig }) {
     }
   }, [stepZoomIn, stepZoomOut]);
 
-  const closeLightbox = useCallback(() => setSelectedImageIndex(null), []);
+  const closeLightbox = useCallback(() => {
+    if (
+      lightboxHistoryActiveRef.current &&
+      window.history.state?.weddingGalleryLightbox === true
+    ) {
+      window.history.back();
+      return;
+    }
+
+    lightboxHistoryActiveRef.current = false;
+    setSelectedImageIndex(null);
+  }, []);
 
   const showPrevious = useCallback(() => {
     setSelectedImageIndex((current) => {
@@ -278,12 +290,44 @@ export function GallerySection({ config }: { config: WeddingConfig }) {
     });
   }, [availableImageIndexes]);
 
-  useEffect(() => {
-    if (!activeImage) return;
+  const isLightboxOpen = Boolean(activeImage);
 
+  useEffect(() => {
+    if (!isLightboxOpen) return;
+
+    if (!lightboxHistoryActiveRef.current) {
+      window.history.pushState(
+        {
+          ...(window.history.state ?? {}),
+          weddingGalleryLightbox: true,
+        },
+        "",
+        window.location.href,
+      );
+      lightboxHistoryActiveRef.current = true;
+    }
+
+    const handlePopState = () => {
+      lightboxHistoryActiveRef.current = false;
+      setSelectedImageIndex(null);
+    };
+
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, [isLightboxOpen]);
+
+  useEffect(() => {
+    if (!isLightboxOpen) return;
+
+    const root = document.documentElement;
     const previousOverflow = document.body.style.overflow;
+    const previousBodyOverscroll = document.body.style.overscrollBehavior;
+    const previousRootOverscroll = root.style.overscrollBehavior;
 
     document.body.style.overflow = "hidden";
+    document.body.style.overscrollBehavior = "none";
+    root.style.overscrollBehavior = "none";
+    root.classList.add("gallery-lightbox-open");
 
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") closeLightbox();
@@ -292,17 +336,6 @@ export function GallerySection({ config }: { config: WeddingConfig }) {
     };
 
     const blockGlobalScrollAndZoom = (event: Event) => {
-      const target = event.target as HTMLElement | null;
-      if (target && (target.closest("button") || target.closest(".gallery-lightbox-controls") || target.closest(".gallery-lightbox-close"))) {
-        return;
-      }
-
-      if (event.type === "touchmove" && event instanceof TouchEvent) {
-        if (event.touches.length === 1 && scale > 1) {
-          return;
-        }
-      }
-
       if (event.cancelable) {
         event.preventDefault();
       }
@@ -317,6 +350,9 @@ export function GallerySection({ config }: { config: WeddingConfig }) {
 
     return () => {
       document.body.style.overflow = previousOverflow;
+      document.body.style.overscrollBehavior = previousBodyOverscroll;
+      root.style.overscrollBehavior = previousRootOverscroll;
+      root.classList.remove("gallery-lightbox-open");
 
       window.removeEventListener("keydown", handleKeyDown);
       window.removeEventListener("wheel", blockGlobalScrollAndZoom);
@@ -325,7 +361,7 @@ export function GallerySection({ config }: { config: WeddingConfig }) {
       window.removeEventListener("gesturechange", blockGlobalScrollAndZoom);
       window.removeEventListener("gestureend", blockGlobalScrollAndZoom);
     };
-  }, [activeImage, closeLightbox, showNext, showPrevious, scale]);
+  }, [isLightboxOpen, closeLightbox, showNext, showPrevious]);
 
   const lightbox = (
     <AnimatePresence>
@@ -337,11 +373,23 @@ export function GallerySection({ config }: { config: WeddingConfig }) {
           aria-modal="true"
           aria-label="Xem ảnh cưới phóng lớn"
           onClick={closeLightbox}
-          initial={{ opacity: 0, backdropFilter: "blur(0px)" }}
-          animate={{ opacity: 1, backdropFilter: "blur(16px)" }}
-          exit={{ opacity: 0, backdropFilter: "blur(0px)", transition: { duration: 0.3 } }}
+          style={{
+            backdropFilter: "blur(16px)",
+            WebkitBackdropFilter: "blur(16px)",
+          }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0, transition: { duration: 0.3 } }}
         >
-          <button type="button" className="gallery-lightbox-close" aria-label="Đóng ảnh" onClick={closeLightbox}>
+          <button
+            type="button"
+            className="gallery-lightbox-close"
+            aria-label="Đóng ảnh"
+            onClick={(event) => {
+              event.stopPropagation();
+              closeLightbox();
+            }}
+          >
             <X aria-hidden="true" size={22} />
           </button>
 
@@ -372,7 +420,9 @@ export function GallerySection({ config }: { config: WeddingConfig }) {
               }}
               drag={scale > 1}
               dragConstraints={dragConstraints}
-              dragElastic={0.15}
+              dragElastic={0.08}
+              dragMomentum={false}
+              dragPropagation={false}
               draggable={false}
             />
           </motion.figure>

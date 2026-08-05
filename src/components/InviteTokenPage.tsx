@@ -15,6 +15,7 @@ import { readLocalInvitees, writeLocalInvitees, type Invitee } from "@/lib/invit
 import { readRSVPResponses, removeRSVPResponses } from "@/lib/rsvp-storage";
 import { applyTheme } from "@/lib/site-settings";
 import { usePublishedSettings } from "@/lib/use-published-settings";
+import { useScrollRecovery } from "@/hooks/use-scroll-recovery";
 
 type InvitePayload = {
   backend: "local" | "supabase";
@@ -43,6 +44,7 @@ function toGuestIdentity(invitee?: Invitee): GuestIdentity {
 }
 
 export function InviteTokenPage({ token, initialInvitee }: { token: string; initialInvitee?: Invitee }) {
+  useScrollRecovery(`invite:${token}`);
   const publishedSettings = usePublishedSettings();
   const config = applyTheme(publishedSettings.content, publishedSettings.themeKey);
   const [payload, setPayload] = useState<InvitePayload>({

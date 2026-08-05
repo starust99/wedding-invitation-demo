@@ -614,7 +614,7 @@ export function EventDetailsContent({
               </div>
               
               <div className="event-details-timeline-scene timeline-garden-path-scene w-full max-w-[28rem] sm:max-w-[34rem] md:max-w-[38rem] mx-auto min-h-[28rem] overflow-visible relative">
-                {/* Con đường: poster tĩnh luôn sẵn sàng; đủ 108 frame mới bắt đầu chạy. */}
+                {/* Con đường: poster luôn sẵn sàng; canvas giữ 108 frame nhưng chỉ giải mã một cửa sổ nhỏ quanh frame đang chạy. */}
                 <div className={`timeline-garden-path-image timeline-path-video-wrap timeline-path-frames-wrap opacity-100 pointer-events-none ${isRoadReady ? "is-ready" : ""}`}>
                   <img
                     src="/assets/timeline-frames/frame_001.webp"
