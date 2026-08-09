@@ -404,47 +404,49 @@ export function GallerySection({ config }: { config: WeddingConfig }) {
             <X aria-hidden="true" size={22} />
           </button>
 
-          <motion.figure
-            ref={constraintsRef}
-            key={`lightbox-img-${selectedImageIndex}`}
-            className="gallery-lightbox-frame"
-            aria-busy={!lightboxImageLoaded}
-            onClick={(event) => event.stopPropagation()}
-            onTouchStart={handlePinchTouchStart}
-            onTouchMove={handlePinchTouchMove}
-            onTouchEnd={handlePinchTouchEnd}
-            onTouchCancel={handlePinchTouchEnd}
-            onWheel={handleWheel}
-            initial={{ opacity: 0, scale: 0.95, y: 15 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: 10, transition: { duration: 0.2 } }}
-            transition={{ type: "spring", stiffness: 260, damping: 25 }}
-          >
-            <motion.img
-              src={activeImage}
-              alt={activeAlt}
-              className="gallery-lightbox-image origin-center"
-              loading="eager"
-              fetchPriority="high"
-              decoding="async"
-              onLoad={() => {
-                setLightboxImageLoaded(true);
-                updateLightboxDimensions();
-              }}
-              animate={{ 
-                opacity: lightboxImageLoaded ? 1 : 0,
-                scale: scale,
-                x: scale === 1 ? 0 : undefined,
-                y: scale === 1 ? 0 : undefined
-              }}
-              drag={scale > 1}
-              dragConstraints={dragConstraints}
-              dragElastic={0.08}
-              dragMomentum={false}
-              dragPropagation={false}
-              draggable={false}
-            />
-          </motion.figure>
+          <div className="gallery-lightbox-media">
+            <motion.figure
+              ref={constraintsRef}
+              key={`lightbox-img-${selectedImageIndex}`}
+              className="gallery-lightbox-frame"
+              aria-busy={!lightboxImageLoaded}
+              onClick={(event) => event.stopPropagation()}
+              onTouchStart={handlePinchTouchStart}
+              onTouchMove={handlePinchTouchMove}
+              onTouchEnd={handlePinchTouchEnd}
+              onTouchCancel={handlePinchTouchEnd}
+              onWheel={handleWheel}
+              initial={{ opacity: 0, scale: 0.95, y: 15 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 10, transition: { duration: 0.2 } }}
+              transition={{ type: "spring", stiffness: 260, damping: 25 }}
+            >
+              <motion.img
+                src={activeImage}
+                alt={activeAlt}
+                className="gallery-lightbox-image origin-center"
+                loading="eager"
+                fetchPriority="high"
+                decoding="async"
+                onLoad={() => {
+                  setLightboxImageLoaded(true);
+                  updateLightboxDimensions();
+                }}
+                animate={{
+                  opacity: lightboxImageLoaded ? 1 : 0,
+                  scale: scale,
+                  x: scale === 1 ? 0 : undefined,
+                  y: scale === 1 ? 0 : undefined
+                }}
+                drag={scale > 1}
+                dragConstraints={dragConstraints}
+                dragElastic={0.08}
+                dragMomentum={false}
+                dragPropagation={false}
+                draggable={false}
+              />
+            </motion.figure>
+          </div>
 
           {/* Unified controls panel at the bottom */}
           <div 

@@ -2630,9 +2630,9 @@ textarea {
   z-index: 120;
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  grid-template-rows: auto auto;
-  align-content: center;
-  place-items: center;
+  grid-template-rows: minmax(0, 1fr) auto;
+  align-items: stretch;
+  justify-items: center;
   gap: clamp(0.75rem, 2vh, 1.25rem);
   padding: clamp(1rem, 2vh, 1.5rem) clamp(1rem, 3vw, 2.6rem);
   background:
@@ -2652,6 +2652,14 @@ html.gallery-lightbox-open body {
   overscroll-behavior: none;
 }
 
+.gallery-lightbox-media {
+  display: grid;
+  width: 100%;
+  min-width: 0;
+  min-height: 0;
+  place-items: center;
+}
+
 .gallery-lightbox-frame {
   position: relative;
   display: grid;
@@ -2660,8 +2668,8 @@ html.gallery-lightbox-open body {
   justify-self: center;
   min-height: 0;
   max-width: min(92vw, 74rem);
-  max-height: calc(100vh - 9rem);
-  max-height: calc(100dvh - 9rem);
+  max-height: min(100%, calc(100vh - 9rem));
+  max-height: min(100%, calc(100dvh - 9rem));
   margin: 0;
   border: 1px solid rgba(255, 255, 255, 0.74);
   border-radius: clamp(1.25rem, 3vw, 2.35rem);
@@ -2692,8 +2700,8 @@ html.gallery-lightbox-open body {
   width: auto;
   height: auto;
   max-width: min(92vw, 74rem);
-  max-height: calc(100vh - 9rem);
-  max-height: calc(100dvh - 9rem);
+  max-height: min(100%, calc(100vh - 9rem));
+  max-height: min(100%, calc(100dvh - 9rem));
   object-fit: contain;
   object-position: center;
   touch-action: none;
@@ -2731,7 +2739,7 @@ html.gallery-lightbox-open body {
 
 .gallery-lightbox-controls {
   position: relative;
-  align-self: center;
+  align-self: end;
   justify-self: center;
   flex: 0 0 auto;
   display: flex;
@@ -2874,7 +2882,7 @@ html.gallery-lightbox-open body {
   }
 
   .gallery-lightbox {
-    padding: 4.5rem 0.9rem 4.5rem;
+    padding: 4.5rem 0.9rem max(1rem, env(safe-area-inset-bottom));
   }
 
   .gallery-lightbox-frame {
