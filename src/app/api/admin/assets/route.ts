@@ -105,7 +105,7 @@ function configureCloudinary() {
 
 function getCloudinaryDeliveryWidth(section: string) {
   if (section.includes("hero")) return 2400;
-  if (section.includes("gallery")) return 1800;
+  if (section.includes("gallery")) return 2400;
   return 1600;
 }
 

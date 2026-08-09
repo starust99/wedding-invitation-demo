@@ -4,6 +4,7 @@ import type { CSSProperties } from "react";
 import { useCallback, useEffect, useMemo, useState, useRef } from "react";
 
 import { ChevronLeft, ChevronRight, X, ZoomIn, ZoomOut } from "lucide-react";
+import Image from "next/image";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence, Variants } from "framer-motion";
 import { SectionMediaLayers } from "@/components/SectionMediaLayers";
@@ -11,7 +12,7 @@ import {
   galleryMosaicSlotCount,
   getGalleryMosaicSlots,
   resolveResponsiveGalleryLayouts,
-  type GalleryViewportKey,
+  type GalleryPlacement,
 } from "@/config/gallery-mosaic";
 import { cleanBundledPublicAssetSrc } from "@/lib/asset-cleanup";
 import { defaultSettings, type WeddingConfig } from "@/lib/site-settings";
@@ -31,6 +32,24 @@ const galleryBlurSvg = `
 </svg>`;
 
 const galleryBlurDataUrl = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(galleryBlurSvg)}`;
+
+function getPlacementSpan(placement: GalleryPlacement, columnCount: number) {
+  const spanMatch = placement.gridColumn.match(/span\s+(\d+)/i);
+  if (spanMatch) return Math.min(columnCount, Math.max(1, Number(spanMatch[1])));
+
+  const edgeMatch = placement.gridColumn.match(/^\s*(\d+)\s*\/\s*(\d+)\s*$/);
+  if (edgeMatch) return Math.min(columnCount, Math.max(1, Number(edgeMatch[2]) - Number(edgeMatch[1])));
+
+  return columnCount;
+}
+
+function getResponsiveTileSizes(placements: Record<"mobile" | "tablet" | "desktop", GalleryPlacement>) {
+  const mobileWidth = Math.ceil((getPlacementSpan(placements.mobile, 4) / 4) * 100);
+  const tabletWidth = Math.ceil((getPlacementSpan(placements.tablet, 8) / 8) * 100);
+  const desktopWidth = Math.ceil((getPlacementSpan(placements.desktop, 12) / 12) * 100);
+
+  return `(max-width: 767px) ${mobileWidth}vw, (max-width: 1023px) ${tabletWidth}vw, ${desktopWidth}vw`;
+}
 
 const galleryContainerVariant: Variants = {
   hidden: { opacity: 0 },
@@ -72,7 +91,7 @@ const galleryIntroVariant: Variants = {
 
 export function GallerySection({ config }: { config: WeddingConfig }) {
   const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(null);
-  const [activeViewport, setActiveViewport] = useState<GalleryViewportKey>("mobile");
+  const [lightboxImageLoaded, setLightboxImageLoaded] = useState(false);
   const lightboxRef = useRef<HTMLDivElement>(null);
   const constraintsRef = useRef<HTMLElement>(null);
   const lightboxHistoryActiveRef = useRef(false);
@@ -123,45 +142,37 @@ export function GallerySection({ config }: { config: WeddingConfig }) {
   );
   const activeImage = selectedImageIndex === null || selectedImageIndex >= images.length ? "" : images[selectedImageIndex] || "";
   const activeAlt = activeImage && selectedImageIndex !== null ? `${section.imageAltPrefix} ${selectedImageIndex + 1}` : "";
-  const activeSlot = selectedImageIndex === null ? null : slotsByViewport[activeViewport][selectedImageIndex] ?? null;
-  const activeFrameClass = activeSlot ? `gallery-lightbox-frame-${activeSlot.lightboxFrame}` : "gallery-lightbox-frame-landscape";
-
-  useEffect(() => {
-    const updateViewport = () => {
-      setActiveViewport(window.innerWidth >= 1024 ? "desktop" : window.innerWidth >= 768 ? "tablet" : "mobile");
-    };
-    updateViewport();
-    window.addEventListener("resize", updateViewport, { passive: true });
-    return () => window.removeEventListener("resize", updateViewport);
-  }, []);
 
   const [scale, setScale] = useState(1);
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
 
+  const updateLightboxDimensions = useCallback(() => {
+    if (!constraintsRef.current) return;
+    const rect = constraintsRef.current.getBoundingClientRect();
+    setDimensions({ width: rect.width, height: rect.height });
+  }, []);
+
   useEffect(() => {
     setScale(1);
     setDimensions({ width: 0, height: 0 });
+    setLightboxImageLoaded(false);
   }, [selectedImageIndex]);
 
   useEffect(() => {
     if (!activeImage) return;
 
-    const updateDimensions = () => {
-      if (constraintsRef.current) {
-        const rect = constraintsRef.current.getBoundingClientRect();
-        setDimensions({ width: rect.width, height: rect.height });
-      }
-    };
+    updateLightboxDimensions();
+    const timer = setTimeout(updateLightboxDimensions, 100);
+    const observer = typeof ResizeObserver === "undefined" ? null : new ResizeObserver(updateLightboxDimensions);
+    if (constraintsRef.current) observer?.observe(constraintsRef.current);
 
-    updateDimensions();
-    const timer = setTimeout(updateDimensions, 100);
-
-    window.addEventListener("resize", updateDimensions);
+    window.addEventListener("resize", updateLightboxDimensions);
     return () => {
-      window.removeEventListener("resize", updateDimensions);
+      window.removeEventListener("resize", updateLightboxDimensions);
+      observer?.disconnect();
       clearTimeout(timer);
     };
-  }, [activeImage, selectedImageIndex]);
+  }, [activeImage, selectedImageIndex, updateLightboxDimensions]);
 
   const dragConstraints = useMemo(() => {
     if (scale <= 1 || dimensions.width === 0) {
@@ -396,7 +407,8 @@ export function GallerySection({ config }: { config: WeddingConfig }) {
           <motion.figure
             ref={constraintsRef}
             key={`lightbox-img-${selectedImageIndex}`}
-            className={`gallery-lightbox-frame ${activeFrameClass}`}
+            className="gallery-lightbox-frame"
+            aria-busy={!lightboxImageLoaded}
             onClick={(event) => event.stopPropagation()}
             onTouchStart={handlePinchTouchStart}
             onTouchMove={handlePinchTouchMove}
@@ -411,9 +423,16 @@ export function GallerySection({ config }: { config: WeddingConfig }) {
             <motion.img
               src={activeImage}
               alt={activeAlt}
-              className="gallery-lightbox-image absolute inset-0 w-full h-full object-cover origin-center"
-              style={{ objectPosition: selectedImageIndex !== null ? positions[selectedImageIndex] : "center center" } as any}
+              className="gallery-lightbox-image origin-center"
+              loading="eager"
+              fetchPriority="high"
+              decoding="async"
+              onLoad={() => {
+                setLightboxImageLoaded(true);
+                updateLightboxDimensions();
+              }}
               animate={{ 
+                opacity: lightboxImageLoaded ? 1 : 0,
                 scale: scale,
                 x: scale === 1 ? 0 : undefined,
                 y: scale === 1 ? 0 : undefined
@@ -543,13 +562,16 @@ export function GallerySection({ config }: { config: WeddingConfig }) {
                     disabled={!hasImage}
                   >
                     {hasImage ? (
-                      <img
+                      <Image
                         src={tile.src}
                         alt={`${section.imageAltPrefix} ${index + 1}`}
+                        fill
+                        sizes={getResponsiveTileSizes(tile.placements)}
+                        placeholder="blur"
+                        blurDataURL={galleryBlurDataUrl}
                         className="gallery-mosaic-image absolute inset-0 w-full h-full object-cover"
                         style={{ objectPosition: tile.objectPosition } as CSSProperties}
-                        loading="eager"
-                        decoding="async"
+                        loading="lazy"
                         draggable={false}
                       />
                     ) : (

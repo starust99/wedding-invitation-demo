@@ -1,7 +1,8 @@
 "use client";
 
 const cloudinaryBrowserUploadLimitBytes = 10 * 1024 * 1024;
-const cloudinaryBrowserUploadTargetBytes = 600 * 1024; // 600KB
+const defaultUploadTargetBytes = 600 * 1024; // 600KB
+const galleryUploadTargetBytes = 1.25 * 1024 * 1024; // Full-size lightbox asset, loaded only on demand.
 const compressionThresholdBytes = 400 * 1024; // 400KB
 
 function formatFileSize(bytes: number) {
@@ -11,6 +12,24 @@ function formatFileSize(bytes: number) {
 function getUploadMaxSide(section: string) {
   if (section.includes("gallery")) return 2600;
   return 2400;
+}
+
+function getCompressionPolicy(section: string, originalMaxSide: number) {
+  const isGallery = section.includes("gallery");
+
+  return isGallery
+    ? {
+        targetBytes: galleryUploadTargetBytes,
+        minSide: Math.min(2000, originalMaxSide),
+        resizeFactor: 0.9,
+        qualities: [0.9, 0.86, 0.82, 0.78, 0.74],
+      }
+    : {
+        targetBytes: defaultUploadTargetBytes,
+        minSide: Math.min(900, originalMaxSide),
+        resizeFactor: 0.82,
+        qualities: [0.9, 0.86, 0.82, 0.78, 0.72, 0.66, 0.6],
+      };
 }
 
 function canBrowserCompressImage(file: File) {
@@ -97,14 +116,13 @@ export async function prepareImageFileForUpload(file: File, section: string) {
     throw new Error("Browser không hỗ trợ nén ảnh bằng canvas.");
   }
 
-  let bestBlob: Blob | null = null;
-  let maxSide = Math.min(getUploadMaxSide(section), Math.max(imageSource.width, imageSource.height));
-  const qualities = [0.9, 0.86, 0.82, 0.78, 0.72, 0.66, 0.6];
-  let attempted = false;
+  let fallbackBlob: Blob | null = null;
+  const originalMaxSide = Math.max(imageSource.width, imageSource.height);
+  let maxSide = Math.min(getUploadMaxSide(section), originalMaxSide);
+  const policy = getCompressionPolicy(section, originalMaxSide);
 
   try {
-    while (maxSide >= 900 || !attempted) {
-      attempted = true;
+    while (true) {
       const scale = Math.min(1, maxSide / Math.max(imageSource.width, imageSource.height));
       canvas.width = Math.max(1, Math.round(imageSource.width * scale));
       canvas.height = Math.max(1, Math.round(imageSource.height * scale));
@@ -112,11 +130,11 @@ export async function prepareImageFileForUpload(file: File, section: string) {
       context.fillRect(0, 0, canvas.width, canvas.height);
       context.drawImage(imageSource.source, 0, 0, canvas.width, canvas.height);
 
-      for (const quality of qualities) {
+      for (const quality of policy.qualities) {
         const blob = await canvasToJpegBlob(canvas, quality);
-        if (!bestBlob || blob.size < bestBlob.size) bestBlob = blob;
+        fallbackBlob = blob;
 
-        if (blob.size <= cloudinaryBrowserUploadTargetBytes) {
+        if (blob.size <= policy.targetBytes) {
           return {
             file: new File([blob], optimizedFileName(file.name), { type: "image/jpeg", lastModified: Date.now() }),
             compressed: true,
@@ -126,7 +144,8 @@ export async function prepareImageFileForUpload(file: File, section: string) {
         }
       }
 
-      maxSide = Math.floor(maxSide * 0.82);
+      if (maxSide <= policy.minSide) break;
+      maxSide = Math.max(policy.minSide, Math.floor(maxSide * policy.resizeFactor));
     }
   } finally {
     imageSource.close();
@@ -134,14 +153,14 @@ export async function prepareImageFileForUpload(file: File, section: string) {
     canvas.height = 1;
   }
 
-  if (bestBlob && bestBlob.size <= cloudinaryBrowserUploadLimitBytes) {
+  if (fallbackBlob && fallbackBlob.size <= cloudinaryBrowserUploadLimitBytes) {
     return {
-      file: new File([bestBlob], optimizedFileName(file.name), { type: "image/jpeg", lastModified: Date.now() }),
+      file: new File([fallbackBlob], optimizedFileName(file.name), { type: "image/jpeg", lastModified: Date.now() }),
       compressed: true,
       originalBytes: file.size,
-      outputBytes: bestBlob.size,
+      outputBytes: fallbackBlob.size,
     };
   }
 
-  throw new Error(`Đã thử nén ảnh nhưng vẫn còn ${formatFileSize(bestBlob?.size || file.size)}, vượt giới hạn 10MB. Đổi ảnh sang JPG/WebP nhẹ hơn.`);
+  throw new Error(`Đã thử nén ảnh nhưng vẫn còn ${formatFileSize(fallbackBlob?.size || file.size)}, vượt giới hạn 10MB. Đổi ảnh sang JPG/WebP nhẹ hơn.`);
 }

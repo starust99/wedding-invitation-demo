@@ -2650,7 +2650,11 @@ html.gallery-lightbox-open body {
 
 .gallery-lightbox-frame {
   position: relative;
+  display: grid;
   overflow: hidden;
+  max-width: min(92vw, 74rem);
+  max-height: calc(100vh - 9rem);
+  max-height: calc(100dvh - 9rem);
   margin: 0;
   border: 1px solid rgba(255, 255, 255, 0.74);
   border-radius: clamp(1.25rem, 3vw, 2.35rem);
@@ -2676,32 +2680,15 @@ html.gallery-lightbox-open body {
   box-shadow: inset 0 0 0 0.55rem rgba(255, 253, 248, 0.07);
 }
 
-.gallery-lightbox-frame-landscape {
-  width: min(92vw, 72rem, 90vh);
-  width: min(92vw, 72rem, 90dvh);
-  aspect-ratio: 4 / 3;
-}
-
-.gallery-lightbox-frame-wide {
-  width: min(92vw, 74rem, 110vh);
-  width: min(92vw, 74rem, 110dvh);
-  aspect-ratio: 16 / 9;
-}
-
-.gallery-lightbox-frame-portrait {
-  width: min(88vw, 34rem, 50vh);
-  width: min(88vw, 34rem, 50dvh);
-  aspect-ratio: 3 / 4;
-}
-
-.gallery-lightbox-frame-square {
-  width: min(90vw, 44rem, 74vh);
-  width: min(90vw, 44rem, 74dvh);
-  aspect-ratio: 1;
-}
-
 .gallery-lightbox-image {
-  object-fit: cover;
+  display: block;
+  width: auto;
+  height: auto;
+  max-width: min(92vw, 74rem);
+  max-height: calc(100vh - 9rem);
+  max-height: calc(100dvh - 9rem);
+  object-fit: contain;
+  object-position: center;
   touch-action: none;
   overscroll-behavior: none;
   -webkit-user-drag: none;
@@ -2883,28 +2870,11 @@ html.gallery-lightbox-open body {
 
   .gallery-lightbox-frame {
     border-radius: 1.35rem;
+    max-width: 92vw;
   }
 
-  .gallery-lightbox-frame-landscape {
-    width: min(92vw, 65vh);
-    width: min(92vw, 65dvh);
-    aspect-ratio: 4 / 3;
-  }
-
-  .gallery-lightbox-frame-wide {
-    width: min(92vw, 72vh);
-    width: min(92vw, 72dvh);
-    aspect-ratio: 16 / 9;
-  }
-
-  .gallery-lightbox-frame-portrait {
-    width: min(86vw, 48vh);
-    width: min(86vw, 48dvh);
-  }
-
-  .gallery-lightbox-frame-square {
-    width: min(88vw, 56vh);
-    width: min(88vw, 56dvh);
+  .gallery-lightbox-image {
+    max-width: 92vw;
   }
 }
 
