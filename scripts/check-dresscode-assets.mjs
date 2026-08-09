@@ -5,7 +5,7 @@ import sharp from "sharp";
 const root = process.cwd();
 const expectedAssets = [
   "/assets/dresscode-theme-v5.webp",
-  "/assets/dresscode-pink-v6.webp",
+  "/assets/dresscode-pink-v7.webp",
   "/assets/dresscode-blue-v5.webp",
   "/assets/dresscode-yellow-v5.webp",
   "/assets/dresscode-green-v5.webp",

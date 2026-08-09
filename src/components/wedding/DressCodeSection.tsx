@@ -22,7 +22,7 @@ const DRESS_COLORS: DressCodeColor[] = [
     id: "pink",
     name: "Hồng nhạt",
     hex: "#e8cfce",
-    imgSrc: "/assets/dresscode-pink-v6.webp",
+    imgSrc: "/assets/dresscode-pink-v7.webp",
   },
   {
     id: "blue",

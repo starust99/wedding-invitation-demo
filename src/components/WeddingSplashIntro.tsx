@@ -220,7 +220,7 @@ export function WeddingSplashIntro({
     // viewport, the hero reveal, the first timeline frame, and music are ready.
     const dressCodeImages = [
       "/assets/dresscode-theme-v5.webp",
-      "/assets/dresscode-pink-v6.webp",
+      "/assets/dresscode-pink-v7.webp",
       "/assets/dresscode-blue-v5.webp",
       "/assets/dresscode-yellow-v5.webp",
       "/assets/dresscode-green-v5.webp",
