@@ -2629,8 +2629,12 @@ textarea {
   inset: 0;
   z-index: 120;
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: auto auto;
+  align-content: center;
   place-items: center;
-  padding: clamp(1rem, 3vw, 2.6rem);
+  gap: clamp(0.75rem, 2vh, 1.25rem);
+  padding: clamp(1rem, 2vh, 1.5rem) clamp(1rem, 3vw, 2.6rem);
   background:
     radial-gradient(circle at 18% 16%, rgba(242, 198, 207, 0.2), transparent 34%),
     radial-gradient(circle at 86% 82%, rgba(143, 170, 220, 0.18), transparent 36%),
@@ -2652,6 +2656,9 @@ html.gallery-lightbox-open body {
   position: relative;
   display: grid;
   overflow: hidden;
+  align-self: center;
+  justify-self: center;
+  min-height: 0;
   max-width: min(92vw, 74rem);
   max-height: calc(100vh - 9rem);
   max-height: calc(100dvh - 9rem);
@@ -2723,8 +2730,10 @@ html.gallery-lightbox-open body {
 }
 
 .gallery-lightbox-controls {
-  position: absolute;
-  bottom: clamp(1rem, 3.5vh, 2.5rem);
+  position: relative;
+  align-self: center;
+  justify-self: center;
+  flex: 0 0 auto;
   display: flex;
   align-items: center;
   gap: clamp(0.6rem, 1.5vw, 1.2rem);
