@@ -209,6 +209,54 @@ export function DressCodeSection({
 
       </div>
 
+      <div className="flex w-full flex-col items-center px-1 text-center sm:px-4">
+        <div
+          className="-mx-3 grid min-h-11 w-[calc(100%+1.5rem)] max-w-none grid-cols-7 items-center sm:mx-0 sm:w-full sm:max-w-[32rem]"
+          role="group"
+          aria-label="Chọn màu trang phục"
+        >
+          {DRESS_COLORS.map((color, index) => {
+            const isSelected = selectedColorId === color.id;
+            return (
+              <motion.button
+                key={color.id}
+                type="button"
+                aria-pressed={isSelected}
+                aria-label={isSelected ? `Trở về gợi ý tổng thể từ màu ${color.name}` : `Xem gợi ý phối đồ màu ${color.name}`}
+                onClick={() => selectColor(color, index)}
+                className="group relative flex min-h-11 min-w-0 items-center justify-center rounded-full focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[#8f6f49]"
+                whileTap={{ scale: 0.9 }}
+              >
+                <motion.span
+                  className="relative block h-[clamp(1.8rem,8.4vw,2.25rem)] w-[clamp(1.8rem,8.4vw,2.25rem)] rounded-full shadow-[0_2px_7px_rgba(75,61,48,0.14),_inset_0_1px_2px_rgba(255,255,255,0.3)]"
+                  animate={{
+                    scale: 1,
+                    boxShadow: isSelected
+                      ? `0 0 0 2.5px rgba(255,253,248,0.98), 0 0 12px 4px ${color.hex}96, 0 4px 10px rgba(75,61,48,0.16)`
+                      : "0 2px 7px rgba(75,61,48,0.14), inset 0 1px 2px rgba(255,255,255,0.35)",
+                  }}
+                  transition={{ duration: 0.24, ease: [0.22, 1, 0.36, 1] }}
+                  style={{ backgroundColor: color.hex }}
+                />
+              </motion.button>
+            );
+          })}
+        </div>
+      </div>
+
+      <AnimatePresence initial={false} mode="wait">
+        <motion.p
+          key={currentLabel}
+          initial={{ opacity: 0, y: 5 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -3 }}
+          transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
+          className="-mt-2 min-h-6 font-sans text-[0.9rem] font-semibold tracking-[0.045em] text-[#6d5e51] sm:text-[0.95rem]"
+        >
+          {currentLabel}
+        </motion.p>
+      </AnimatePresence>
+
       <div className="relative mx-auto w-full max-w-[26rem] sm:max-w-[29rem] md:max-w-[32rem]">
         <div className="relative aspect-[3/4] w-full overflow-hidden rounded-[2rem] border border-[#fffdf8]/75 bg-[#f7f0e8] shadow-[0_9px_28px_rgba(76,61,48,0.09)] sm:rounded-[2.2rem]">
           <AnimatePresence initial={false} custom={slideDirection} mode="popLayout">
@@ -275,54 +323,6 @@ export function DressCodeSection({
             </motion.span>
           </motion.button>
         </MotionConfig>
-      </div>
-
-      <AnimatePresence initial={false} mode="wait">
-        <motion.p
-          key={currentLabel}
-          initial={{ opacity: 0, y: 5 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -3 }}
-          transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
-          className="-mt-2 min-h-6 font-sans text-[0.9rem] font-semibold tracking-[0.045em] text-[#6d5e51] sm:text-[0.95rem]"
-        >
-          {currentLabel}
-        </motion.p>
-      </AnimatePresence>
-
-      <div className="flex w-full flex-col items-center px-1 text-center sm:px-4">
-        <div
-          className="-mx-3 grid min-h-11 w-[calc(100%+1.5rem)] max-w-none grid-cols-7 items-center sm:mx-0 sm:w-full sm:max-w-[32rem]"
-          role="group"
-          aria-label="Chọn màu trang phục"
-        >
-          {DRESS_COLORS.map((color, index) => {
-            const isSelected = selectedColorId === color.id;
-            return (
-              <motion.button
-                key={color.id}
-                type="button"
-                aria-pressed={isSelected}
-                aria-label={isSelected ? `Trở về gợi ý tổng thể từ màu ${color.name}` : `Xem gợi ý phối đồ màu ${color.name}`}
-                onClick={() => selectColor(color, index)}
-                className="group relative flex min-h-11 min-w-0 items-center justify-center rounded-full focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[#8f6f49]"
-                whileTap={{ scale: 0.9 }}
-              >
-                <motion.span
-                  className="relative block h-[clamp(1.8rem,8.4vw,2.25rem)] w-[clamp(1.8rem,8.4vw,2.25rem)] rounded-full shadow-[0_2px_7px_rgba(75,61,48,0.14),_inset_0_1px_2px_rgba(255,255,255,0.3)]"
-                  animate={{
-                    scale: 1,
-                    boxShadow: isSelected
-                      ? `0 0 0 2.5px rgba(255,253,248,0.98), 0 0 12px 4px ${color.hex}96, 0 4px 10px rgba(75,61,48,0.16)`
-                      : "0 2px 7px rgba(75,61,48,0.14), inset 0 1px 2px rgba(255,255,255,0.35)",
-                  }}
-                  transition={{ duration: 0.24, ease: [0.22, 1, 0.36, 1] }}
-                  style={{ backgroundColor: color.hex }}
-                />
-              </motion.button>
-            );
-          })}
-        </div>
       </div>
 
       {weatherAlertText && (
