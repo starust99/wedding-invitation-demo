@@ -9,6 +9,7 @@ import {
   ArrowLeft,
   CircleHelp,
   Mail,
+  Minus,
   Plus,
   Trash2,
   CalendarDays,
@@ -31,8 +32,6 @@ import {
 } from "@/lib/rsvp-storage";
 import { buildInvitationCopy, removeStoredGuestIdentityForToken, resolveGuestIdentity, type GuestIdentity, type InvitationCopy } from "@/lib/guest-personalization";
 import { buildRsvpSubmissionCopy } from "@/lib/guest-rsvp-copy";
-import { keepExactPhraseTogether } from "@/lib/couple-name-display";
-import { capitalizeFirst, resolveSalutationCluster } from "@/lib/guest-naming";
 import { weddingConfig } from "@/config/wedding.config";
 import {
   CALENDAR_HANDOFF_HELP_DELAY_MS,
@@ -44,6 +43,7 @@ import { usePageTransition } from "@/components/PageTransitionEffect";
 import { CoupleNameText } from "@/components/ui/CoupleNameText";
 import { findAnyStoredInviteToken } from "@/lib/guest-personalization";
 import { usePublishedSettings } from "@/lib/use-published-settings";
+import { isFamilyLodgingGuestGroup } from "@/lib/rsvp-guest-group";
 
 const lodgingGuestSchema = z.object({
   fullName: z.string().trim().optional(),
@@ -78,9 +78,9 @@ const rsvpSchema = rsvpFormFieldsSchema
       ctx.addIssue({ code: "custom", path: ["attendingBanquet"], message: "Vui lòng chọn phản hồi cho Tiệc cưới." });
     }
     if (data.postCeremonyPartyInvited && data.attendingCeremony === "yes" && !data.attendingPostCeremonyParty) {
-      ctx.addIssue({ code: "custom", path: ["attendingPostCeremonyParty"], message: "Vui lòng chọn phản hồi cho tiệc sau Thánh lễ." });
+      ctx.addIssue({ code: "custom", path: ["attendingPostCeremonyParty"], message: "Vui lòng chọn phản hồi cho Tiệc thân mật." });
     }
-    if (data.attendingBanquet === "yes" && data.stayDecision === null) {
+    if (isFamilyLodgingGuestGroup(data.guestGroup) && data.attendingBanquet === "yes" && data.stayDecision === null) {
       ctx.addIssue({ code: "custom", path: ["stayDecision"], message: "Vui lòng chọn phương án lưu trú." });
     }
     
@@ -88,7 +88,13 @@ const rsvpSchema = rsvpFormFieldsSchema
       ctx.addIssue({ code: "custom", path: ["guestCount"], message: "Nếu tham dự, số người cần từ 1 trở lên." });
     }
 
-    if (data.attending === "yes" && data.attendingBanquet === "yes" && data.stayDecision !== null && data.stayDecision !== "none") {
+    if (
+      isFamilyLodgingGuestGroup(data.guestGroup)
+      && data.attending === "yes"
+      && data.attendingBanquet === "yes"
+      && data.stayDecision !== null
+      && data.stayDecision !== "none"
+    ) {
       if (data.lodgingGuests.length < 1) {
         ctx.addIssue({ code: "custom", path: ["lodgingGuests"], message: "Vui lòng thêm ít nhất một người lưu trú." });
       }
@@ -233,7 +239,16 @@ function Field({ label, error, children }: { label: ReactNode; error?: string; c
     <label className="grid justify-items-center gap-2 text-center text-sm font-bold text-[#252934]/68 w-full">
       {label}
       {children}
-      {error ? <span className="text-xs font-bold text-[#9B4E5C]">{error}</span> : null}
+      {error ? (
+        <span
+          role="alert"
+          tabIndex={-1}
+          data-rsvp-error="true"
+          className="text-sm font-normal text-[#B4232F]"
+        >
+          {error}
+        </span>
+      ) : null}
     </label>
   );
 }
@@ -420,6 +435,7 @@ export default function RSVPPage() {
   const attendingPostCeremonyParty = useWatch({ control, name: "attendingPostCeremonyParty" });
   const attendingBanquet = useWatch({ control, name: "attendingBanquet" });
   const guestCount = useWatch({ control, name: "guestCount" });
+  const selectedGuestCount = Math.max(0, Number(guestCount) || 0);
   const accommodationNeeded = useWatch({ control, name: "accommodationNeeded" });
   const stayDecision = useWatch({ control, name: "stayDecision" });
   const watchedLodgingGuests = useWatch({ control, name: "lodgingGuests" });
@@ -430,12 +446,10 @@ export default function RSVPPage() {
   const submissionCopy = useMemo(() => buildSubmissionCopy(attending, attendingCeremony, attendingBanquet, inviteCopy, inviteeContext ?? guestIdentity), [attending, attendingCeremony, attendingBanquet, inviteCopy, guestIdentity, inviteeContext]);
   const lodgingGuests = normalizeLodgingGuests((watchedLodgingGuests ?? []) as Array<Partial<LodgingGuestForm> | undefined>);
   const terracottaNote = buildTerracottaNote(lodgingGuests);
+  const activeGuestGroup = formValues.guestGroup?.trim() || inviteeContext?.guestGroup || guestIdentity.group || "";
+  const canRequestLodging = isFamilyLodgingGuestGroup(activeGuestGroup);
   const canRegisterStay = attending !== "no";
   const shouldAskPostCeremonyParty = postCeremonyPartyInvited && attendingCeremony === "yes";
-  const hasAnsweredRequiredEvents = attendingCeremony !== null
-    && attendingBanquet !== null
-    && (!shouldAskPostCeremonyParty || attendingPostCeremonyParty !== null);
-
   useEffect(() => {
     const activeToken = inviteToken || inviteeContext?.token || "";
     if (isHydratingGuest || !hasUserEditedFormRef.current || !activeToken) return;
@@ -731,6 +745,23 @@ export default function RSVPPage() {
   }, [replace, setValue]);
 
   useEffect(() => {
+    if (isHydratingGuest || canRequestLodging) return;
+    if (stayDecision !== null || accommodationNeeded || lodgingGuests.length > 0) {
+      setValue("accommodationNeeded", false, { shouldDirty: hasUserEditedFormRef.current });
+      setValue("stayDecision", null, { shouldDirty: hasUserEditedFormRef.current });
+      replace([]);
+    }
+  }, [
+    accommodationNeeded,
+    canRequestLodging,
+    isHydratingGuest,
+    lodgingGuests.length,
+    replace,
+    setValue,
+    stayDecision,
+  ]);
+
+  useEffect(() => {
     if ((!postCeremonyPartyInvited || attendingCeremony !== "yes") && attendingPostCeremonyParty !== null) {
       setValue("attendingPostCeremonyParty", null, {
         shouldDirty: hasUserEditedFormRef.current,
@@ -776,7 +807,7 @@ export default function RSVPPage() {
   }
 
   function handleStayDecisionChange(decision: "25" | "26" | "both" | "none") {
-    if (!canRegisterStay) return;
+    if (!canRegisterStay || !canRequestLodging) return;
     markFormAsEdited();
     setValue("stayDecision", decision, { shouldDirty: true, shouldValidate: true });
     setValue("accommodationNeeded", decision !== "none", { shouldDirty: true });
@@ -798,7 +829,9 @@ export default function RSVPPage() {
   async function onSubmit(data: RSVPFormOutput) {
     setSubmitError("");
 
-    const isStaying = data.attending === "yes"
+    const resolvedGroup = data.guestGroup?.trim() || inviteeContext?.guestGroup || guestIdentity.group || "Khác";
+    const isStaying = isFamilyLodgingGuestGroup(resolvedGroup)
+      && data.attending === "yes"
       && data.attendingBanquet === "yes"
       && data.stayDecision !== null
       && data.stayDecision !== "none";
@@ -817,7 +850,6 @@ export default function RSVPPage() {
       || guestIdentity.displayLabel
       || "Người được mời";
     const resolvedPhone = data.phone?.trim() || inviteeContext?.phone || "";
-    const resolvedGroup = data.guestGroup?.trim() || inviteeContext?.guestGroup || guestIdentity.group || "Khác";
     const resolvedGuestCount = data.attending === "no" ? 0 : Math.max(1, data.guestCount || inviteeContext?.expectedGuestCount || 1);
 
     let checkInDate: string | undefined = undefined;
@@ -849,7 +881,7 @@ export default function RSVPPage() {
       attending: data.attending,
       guestCount: resolvedGuestCount,
       guestGroup: resolvedGroup,
-      dietaryNote: data.dietaryNote?.trim() || undefined,
+      dietaryNote: undefined,
       transportNeeded: false,
       accommodationNeeded: isStaying,
       stayingGuestCount,
@@ -859,7 +891,7 @@ export default function RSVPPage() {
       roomType: undefined,
       childrenCount,
       elderlySupportNeeded: false,
-      notes: data.notes?.trim() || undefined,
+      notes: undefined,
     };
 
     try {
@@ -896,7 +928,16 @@ export default function RSVPPage() {
       setIsReviewing(true);
       window.scrollTo({ top: 0, behavior: "smooth" });
     } else {
-      setSubmitError("Có vài mục cần bổ sung. Vui lòng kiểm tra lại phần được đánh dấu.");
+      // React Hook Form updates the inline error nodes after trigger resolves.
+      // Wait for that render, then bring the first exact field requiring input into view.
+      window.requestAnimationFrame(() => {
+        window.requestAnimationFrame(() => {
+          const firstError = document.querySelector<HTMLElement>('[data-rsvp-error="true"]');
+          if (!firstError) return;
+          firstError.scrollIntoView({ behavior: "smooth", block: "center" });
+          firstError.focus({ preventScroll: true });
+        });
+      });
     }
   };
 
@@ -931,18 +972,13 @@ export default function RSVPPage() {
   const activeInviteToken = inviteToken || inviteeContext?.token || "";
   const calendarInviteQuery = activeInviteToken ? `?invite=${encodeURIComponent(activeInviteToken)}` : "";
   const albumAvailableDate = formatAlbumAvailableDate(runtimeConfig.postWeddingGallery.availableAfter);
-  const albumRecipient = capitalizeFirst(resolveSalutationCluster(
-    inviteeContext?.salutationCluster || guestIdentity.salutationCluster,
-    inviteeContext?.displayLabel || inviteeContext?.guestName || guestIdentity.displayLabel || guestIdentity.name || "",
-  ));
   const shouldShowAttendanceCalendar = submissionCopy.showCalendar && (hasCeremony || hasBanquet);
   const albumEventLabel = hasCeremony && hasBanquet
     ? "Thánh lễ Hôn phối và Tiệc cưới"
     : hasCeremony
       ? "Thánh lễ Hôn phối"
       : "Tiệc cưới";
-  const albumReminderIntro = `Album hình ảnh kỷ niệm ${albumEventLabel} sẽ được đăng tải tại thiệp mời này.`;
-  const albumReminderEmphasis = `Rất mong ${albumRecipient} quay lại ghé thăm vào ngày ${albumAvailableDate} để cùng chia sẻ những khoảnh khắc đáng nhớ nhất.`;
+  const albumReminder = `Album hình ảnh kỷ niệm ${albumEventLabel} sẽ được đăng tải tại thiệp mời này vào ngày ${albumAvailableDate}.`;
   
   if (isHydratingGuest) {
     return <RsvpHydrationState />;
@@ -1061,8 +1097,7 @@ export default function RSVPPage() {
               {shouldShowAttendanceCalendar ? (
                 <div className="w-full bg-white/40 border border-white/50 shadow-[0_8px_32px_rgba(63,70,66,0.04)] rounded-[2rem] p-6 sm:p-10 mb-8 flex flex-col items-center backdrop-blur-md">
                   <div className="wedding-type-body max-w-lg space-y-4 text-center text-[#252934]/75 sm:space-y-5">
-                    <p className="leading-relaxed">{albumReminderIntro}</p>
-                    <p className="leading-relaxed">{albumReminderEmphasis}</p>
+                    <p className="leading-relaxed">{albumReminder}</p>
                   </div>
                 </div>
               ) : null}
@@ -1187,7 +1222,7 @@ export default function RSVPPage() {
                     {formValues.postCeremonyPartyInvited && formValues.attendingCeremony === "yes" ? (
                       <div className="flex items-center justify-between py-3.5 px-4.5 sm:px-5.5 rounded-2xl bg-[#fffaf2]/80 border border-[#d7c6a8]/45">
                         <div className="text-left">
-                          <p className="font-bold text-[#252934] text-base sm:text-lg">Tiệc sau Thánh lễ</p>
+                          <p className="font-bold text-[#252934] text-base sm:text-lg">Tiệc thân mật</p>
                           <p className="text-xs sm:text-sm text-[#7a6a5d] font-medium mt-0.5">Sau Thánh lễ Hôn phối</p>
                         </div>
                         <span className={`inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs sm:text-sm font-semibold shadow-xs shrink-0 ${
@@ -1224,7 +1259,7 @@ export default function RSVPPage() {
                   </div>
                 </div>
 
-                {formValues.attendingBanquet === "yes" && (
+                {formValues.attendingBanquet === "yes" && canRequestLodging && (
                   <div className="border-b border-serenity/16 pb-6">
                     <p className="text-xs sm:text-sm font-bold tracking-[0.14em] text-[#54473b] uppercase text-center mb-2.5">
                       3. LƯU TRÚ TẠI RESORT TERRACOTTA
@@ -1264,27 +1299,20 @@ export default function RSVPPage() {
                   </div>
                 )}
 
-                {(formValues.dietaryNote?.trim() || formValues.notes?.trim()) && (
-                  <div>
-                    <p className="text-xs sm:text-sm font-bold tracking-[0.14em] text-[#54473b] uppercase text-center mb-3.5">
-                      4. GHI CHÚ & LỜI NHẮN
+                {(formValues.attendingCeremony === "yes" || formValues.attendingBanquet === "yes") && !canRequestLodging && (
+                  <div className="border-b border-serenity/16 pb-6">
+                    <p className="text-xs sm:text-sm font-bold tracking-[0.14em] text-[#54473b] uppercase text-center mb-2.5">
+                      3. SỐ NGƯỜI THAM DỰ
                     </p>
-                    <div className="grid gap-3 text-sm text-[#252934] max-w-lg mx-auto w-full text-left">
-                      {formValues.dietaryNote?.trim() && (
-                        <div className="bg-serenity/8 p-4 rounded-2xl border border-serenity/14">
-                          <p className="text-xs font-semibold text-[#7a6a5d] mb-1">Lưu ý thực đơn:</p>
-                          <p className="italic text-[#252934]/90">{formValues.dietaryNote.trim()}</p>
-                        </div>
-                      )}
-                      {formValues.notes?.trim() && (
-                        <div className="bg-serenity/8 p-4 rounded-2xl border border-serenity/14">
-                          <p className="text-xs font-semibold text-[#7a6a5d] mb-1">Ghi chú / Lời nhắn:</p>
-                          <p className="italic text-[#252934]/90">{formValues.notes.trim()}</p>
-                        </div>
-                      )}
-                    </div>
+                    <strong className="block text-base font-semibold text-[#252934] sm:text-lg">
+                      {Math.max(1, Number(formValues.guestCount) || 1)} người
+                    </strong>
+                    <p className="mt-1 text-sm font-normal text-[#7a6a5d]">
+                      Gồm cả người được mời
+                    </p>
                   </div>
                 )}
+
               </div>
 
               {submitError ? (
@@ -1426,10 +1454,10 @@ export default function RSVPPage() {
                         <div className="flex flex-col items-center gap-3 sm:flex-row sm:justify-between">
                           <div className="text-center sm:text-left">
                             <p className="text-sm font-bold tracking-[0.1em] text-[#7a6a5d] uppercase">
-                              Tiệc sau Thánh lễ
+                              Tiệc thân mật
                             </p>
                             <p className="mt-1 text-sm leading-relaxed text-[#252934]/72">
-                              Kính mời Quý khách dự buổi tiệc thân mật cùng gia đình sau Thánh lễ
+                              Kính mời Quý khách dự buổi tiệc chung vui cùng gia đình sau Thánh lễ
                             </p>
                           </div>
                           <div className="flex shrink-0 flex-col items-center gap-1 sm:gap-1.5">
@@ -1471,7 +1499,12 @@ export default function RSVPPage() {
                           </div>
                         </div>
                         {errors.attendingPostCeremonyParty ? (
-                          <p className="mt-2 text-center text-xs font-bold text-[#9B4E5C]">
+                          <p
+                            role="alert"
+                            tabIndex={-1}
+                            data-rsvp-error="true"
+                            className="mt-2 text-center text-xs font-bold text-[#9B4E5C]"
+                          >
                             {errors.attendingPostCeremonyParty.message}
                           </p>
                         ) : null}
@@ -1479,7 +1512,16 @@ export default function RSVPPage() {
                     ) : null}
                   </AnimatePresence>
 
-                  {errors.attendingCeremony && <p className="mt-2 text-xs text-center text-[#9B4E5C] font-bold">{errors.attendingCeremony.message}</p>}
+                  {errors.attendingCeremony && (
+                    <p
+                      role="alert"
+                      tabIndex={-1}
+                      data-rsvp-error="true"
+                      className="mt-2 text-xs text-center text-[#9B4E5C] font-bold"
+                    >
+                      {errors.attendingCeremony.message}
+                    </p>
+                  )}
                 </div>
 
                 {/* Khối Tiệc cưới và lưu trú */}
@@ -1552,11 +1594,20 @@ export default function RSVPPage() {
                     </div>
                   </div>
 
-                  {errors.attendingBanquet && <p className="mt-2 text-xs text-center text-[#9B4E5C] font-bold">{errors.attendingBanquet.message}</p>}
+                  {errors.attendingBanquet && (
+                    <p
+                      role="alert"
+                      tabIndex={-1}
+                      data-rsvp-error="true"
+                      className="mt-2 text-xs text-center text-[#9B4E5C] font-bold"
+                    >
+                      {errors.attendingBanquet.message}
+                    </p>
+                  )}
 
                   {/* Lưu trú - mở ngay trong khối Tiệc cưới */}
                   <AnimatePresence initial={false}>
-                    {attendingBanquet === "yes" && (
+                    {attendingBanquet === "yes" && canRequestLodging && (
                       <motion.div
                         key="banquet-lodging"
                         initial={{ opacity: 0, y: -8 }}
@@ -1640,7 +1691,12 @@ export default function RSVPPage() {
                           </button>
                         </div>
                         {errors.stayDecision ? (
-                          <p className="-mt-3 mb-5 text-center text-xs font-bold text-[#9B4E5C]">
+                          <p
+                            role="alert"
+                            tabIndex={-1}
+                            data-rsvp-error="true"
+                            className="-mt-3 mb-5 text-center text-xs font-bold text-[#9B4E5C]"
+                          >
                             {errors.stayDecision.message}
                           </p>
                         ) : null}
@@ -1656,7 +1712,14 @@ export default function RSVPPage() {
                               className="mt-6 text-left grid gap-5"
                             >
                               {typeof errors.lodgingGuests?.message === "string" ? (
-                                <p className="text-sm font-bold text-[#9B4E5C] text-center">{errors.lodgingGuests.message}</p>
+                                <p
+                                  role="alert"
+                                  tabIndex={-1}
+                                  data-rsvp-error="true"
+                                  className="text-sm font-bold text-[#9B4E5C] text-center"
+                                >
+                                  {errors.lodgingGuests.message}
+                                </p>
                               ) : null}
 
                               <div className="grid gap-4">
@@ -1692,7 +1755,8 @@ export default function RSVPPage() {
                                           <div className="grid grid-cols-1 sm:grid-cols-12 gap-3.5 items-start">
                                             <div className="sm:col-span-7 w-full">
                                               <Field
-                                                label={<span className="text-xs font-bold tracking-wider text-[#252934]/68">Họ tên</span>}
+                                                label={<span className="text-sm font-bold tracking-wider text-[#252934]/68">Họ tên</span>}
+                                                error={guestErrors?.fullName?.message}
                                               >
                                                 <input className={inputClass} placeholder="VD: Nguyễn Văn A" {...register(`lodgingGuests.${index}.fullName`)} />
                                               </Field>
@@ -1705,17 +1769,12 @@ export default function RSVPPage() {
                                               </label>
                                             </div>
                                           </div>
-                                          {guestErrors?.fullName?.message && (
-                                            <p className="text-xs font-bold text-[#9B4E5C] text-center sm:text-left mt-1 ml-1">
-                                              {guestErrors.fullName.message}
-                                            </p>
-                                          )}
                                         </div>
 
                                         {isChild && (
                                           <div className="w-full">
                                             <Field
-                                              label={<span className="text-xs font-bold tracking-wider text-[#252934]/68">Tuổi của bé</span>}
+                                              label={<span className="text-sm font-bold tracking-wider text-[#252934]/68">Tuổi của bé</span>}
                                               error={guestErrors?.age?.message}
                                             >
                                               <p
@@ -1767,74 +1826,86 @@ export default function RSVPPage() {
                     )}
                   </AnimatePresence>
 
-                  {/* Ghi chú - mở ngay trong khối Tiệc cưới */}
                   <AnimatePresence initial={false}>
-                    {hasAnsweredRequiredEvents && (
+                    {(attendingCeremony === "yes" || attendingBanquet === "yes") && !canRequestLodging && (
                       <motion.div
-                        key="banquet-notes"
+                        key="guest-count"
                         initial={{ opacity: 0, y: -8 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -6 }}
                         transition={{ duration: 0.24, ease: "easeOut" }}
-                        className="mt-2 border-t border-serenity/22 pt-5 text-left sm:mt-4 sm:pt-7"
+                        className="mt-2 border-t border-serenity/22 pt-5 text-center sm:mt-4 sm:pt-7"
                       >
-                        <p className="mb-4 text-center text-[0.82rem] font-bold uppercase tracking-[0.15em] text-[#7a6a5d] sm:text-sm">
-                          Ghi chú
+                        <p className="mb-2 text-[0.82rem] font-bold uppercase tracking-[0.15em] text-[#7a6a5d] sm:text-sm">
+                          ĐI BAO NHIÊU NGƯỜI?
                         </p>
-                        <div className="grid gap-5">
-                          <textarea
-                            className={`${inputClass} min-h-[10rem] py-4 text-left`}
-                            placeholder={
-                              attending === "no"
-                                ? keepExactPhraseTogether(
-                                    "Quý khách có thể để lại lời chúc mừng hoặc nhắn gửi cho Nhật & Phương",
-                                    weddingConfig.couple.displayName,
-                                  )
-                                : "Quý khách có thể nhắn giờ đến dự kiến, yêu cầu ghế trẻ em, hỗ trợ đi lại hoặc hỗ trợ người lớn tuổi,... nếu có"
-                            }
-                            {...register("notes")}
-                          />
-                          {hasBanquet && attending !== "no" && (
-                            <Field label="Lưu ý thực đơn">
-                              <textarea
-                                className={`${inputClass} min-h-[9rem] py-4 text-left`}
-                                placeholder="Ăn chay, dị ứng, kiêng món, không dùng rượu/cồn, hoặc cần suất trẻ em nếu có."
-                                {...register("dietaryNote")}
-                              />
-                            </Field>
-                          )}
+                        <p className="mx-auto mb-5 max-w-xl text-sm font-normal leading-relaxed text-[#252934]/72 sm:text-base">
+                          Vui lòng tính cả người được mời.
+                        </p>
+
+                        <div className="mx-auto flex w-fit items-center gap-2 rounded-full border border-serenity/24 bg-white/82 p-1.5 shadow-[0_6px_18px_rgba(63,70,66,0.08)]">
+                          <button
+                            type="button"
+                            aria-label="Giảm số người tham dự"
+                            disabled={selectedGuestCount <= 1}
+                            onClick={() => {
+                              markFormAsEdited();
+                              setValue("guestCount", Math.max(1, selectedGuestCount - 1), { shouldDirty: true, shouldValidate: true });
+                            }}
+                            className="inline-flex h-11 w-11 items-center justify-center rounded-full text-[#54473b] transition hover:bg-serenity/12 disabled:cursor-not-allowed disabled:opacity-30"
+                          >
+                            <Minus aria-hidden="true" className="h-5 w-5" />
+                          </button>
+                          <output
+                            aria-live="polite"
+                            className="min-w-20 px-2 text-center text-lg font-semibold tabular-nums text-[#252934]"
+                          >
+                            {Math.max(1, selectedGuestCount)} người
+                          </output>
+                          <button
+                            type="button"
+                            aria-label="Tăng số người tham dự"
+                            disabled={selectedGuestCount >= 50}
+                            onClick={() => {
+                              markFormAsEdited();
+                              setValue("guestCount", Math.min(50, Math.max(1, selectedGuestCount) + 1), { shouldDirty: true, shouldValidate: true });
+                            }}
+                            className="inline-flex h-11 w-11 items-center justify-center rounded-full text-[#54473b] transition hover:bg-serenity/12 disabled:cursor-not-allowed disabled:opacity-30"
+                          >
+                            <Plus aria-hidden="true" className="h-5 w-5" />
+                          </button>
                         </div>
+
+                        {errors.guestCount ? (
+                          <p
+                            role="alert"
+                            tabIndex={-1}
+                            data-rsvp-error="true"
+                            className="mt-3 text-center text-sm font-normal text-[#B4232F]"
+                          >
+                            {errors.guestCount.message}
+                          </p>
+                        ) : null}
                       </motion.div>
                     )}
                   </AnimatePresence>
+
                 </motion.div>
 
-                {/* Nút gửi - chỉ hiện khi đã trả lời xong các câu hỏi sự kiện */}
-                <AnimatePresence initial={false}>
-                  {hasAnsweredRequiredEvents && (
-                    <motion.div
-                      initial={{ height: 0, opacity: 0, overflow: "hidden" }}
-                      animate={{ height: "auto", opacity: 1, overflow: "visible" }}
-                      exit={{ height: 0, opacity: 0, overflow: "hidden" }}
-                      transition={{ duration: 0.3, ease: "easeInOut" }}
-                    >
-                      {/* Nút XEM LẠI VÀ HOÀN TẤT */}
-                      <div className="mt-4 flex justify-center">
-                        <motion.button
-                          type="button"
-                          onClick={handleGoToReview}
-                          disabled={guestRsvpLocked}
-                          className="light-sweep wedding-type-button rsvp-final-cta inline-flex min-h-13 items-center justify-center gap-2.5 rounded-full bg-rose-quartz text-base font-bold text-[#252934] shadow-[0_16px_48px_rgba(146,168,209,0.22)] ring-1 ring-rose-quartz/70 disabled:opacity-60 uppercase"
-                          whileHover={{ scale: 1.03 }}
-                          whileTap={{ scale: 0.97 }}
-                        >
-                          <Mail className="h-5 w-5 shrink-0" />
-                          <span>XEM LẠI VÀ HOÀN TẤT</span>
-                        </motion.button>
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
+                {/* Nút luôn hiện để khách chủ động kiểm tra phần còn thiếu. */}
+                <div className="mt-4 flex justify-center">
+                  <motion.button
+                    type="button"
+                    onClick={handleGoToReview}
+                    disabled={guestRsvpLocked || isHydratingGuest}
+                    className="light-sweep wedding-type-button rsvp-final-cta inline-flex min-h-13 items-center justify-center gap-2.5 rounded-full bg-rose-quartz text-base font-bold text-[#252934] shadow-[0_16px_48px_rgba(146,168,209,0.22)] ring-1 ring-rose-quartz/70 disabled:opacity-60 uppercase"
+                    whileHover={{ scale: 1.03 }}
+                    whileTap={{ scale: 0.97 }}
+                  >
+                    <Mail className="h-5 w-5 shrink-0" />
+                    <span>XEM LẠI VÀ HOÀN TẤT</span>
+                  </motion.button>
+                </div>
               </form>
             </div>
           )}

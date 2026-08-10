@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { WeddingHero } from "@/components/wedding/WeddingHero";
 import { normalizeWeddingHeroEditorConfig } from "@/lib/wedding/hero-config";
-import { buildInvitationCopy, formatGuestName, type GuestIdentity } from "@/lib/guest-personalization";
+import { buildInvitationCopy, type GuestIdentity } from "@/lib/guest-personalization";
 import type { WeddingConfig } from "@/lib/site-settings";
 import type { HeroViewportMode } from "@/lib/wedding/hero-types";
 
@@ -20,6 +20,8 @@ export function HeroSaveTheDate({ config, guestIdentity }: { config: WeddingConf
     venueDisplayName: compactVenueDisplayName(config.venue.name),
     heroTemplate: config.invitation.heroTemplate,
   });
+  const rawGuestName = hasGuestIdentity ? inviteCopy.guestLabel : "Quý khách";
+  const heroGuestName = rawGuestName.charAt(0).toLocaleUpperCase("vi") + rawGuestName.slice(1);
 
   useEffect(() => {
     const mediaQuery = window.matchMedia("(max-width: 767px)");
@@ -36,7 +38,7 @@ export function HeroSaveTheDate({ config, guestIdentity }: { config: WeddingConf
       mode="public"
       viewport={viewport}
       summary={{
-        invitationLine: hasGuestIdentity ? inviteCopy.heroInvitationLine : undefined,
+        guestName: heroGuestName,
         coupleDisplayName: config.couple.displayName,
         venueName: config.venue.name,
         venueArea: config.venue.area,

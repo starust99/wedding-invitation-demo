@@ -43,23 +43,15 @@ async function requireExplicitStayDecision(page) {
   await page.getByText("Vui lòng chọn phương án lưu trú.", { exact: true }).waitFor({ state: "hidden" });
 }
 
-async function fillNotes(page) {
-  const notes = page.getByPlaceholder(
-    "Quý khách có thể nhắn giờ đến dự kiến, yêu cầu ghế trẻ em, hỗ trợ đi lại hoặc hỗ trợ người lớn tuổi,... nếu có",
-    { exact: true },
-  );
-  const dietaryNote = page.getByPlaceholder(
-    "Ăn chay, dị ứng, kiêng món, không dùng rượu/cồn, hoặc cần suất trẻ em nếu có.",
-    { exact: true },
-  );
-  await notes.fill("Đến trễ");
-  await dietaryNote.fill("ăn chay");
-  return { notes, dietaryNote };
+async function fillLodgingGuest(page) {
+  await page.getByRole("button", { name: /Đêm 25\/12/ }).click();
+  const fullName = page.getByPlaceholder("VD: Nguyễn Văn A", { exact: true });
+  await fullName.fill("Nguyễn Văn A");
+  return fullName;
 }
 
-async function assertDraftValues(notes, dietaryNote) {
-  assert.equal(await notes.inputValue(), "Đến trễ", "Arrival note was lost.");
-  assert.equal(await dietaryNote.inputValue(), "ăn chay", "Dietary note was lost.");
+async function assertDraftValue(fullName) {
+  assert.equal(await fullName.inputValue(), "Nguyễn Văn A", "Lodging guest draft was lost.");
 }
 
 const browser = await chromium.launch({ headless: true });
@@ -69,11 +61,17 @@ try {
   assert.equal(inviteResponse.ok, true, `Could not load test invite (${inviteResponse.status}).`);
   const invitePayload = await inviteResponse.json();
   assert.ok(invitePayload.invitee, "Invite API did not return an invitee.");
+  const familyInvitee = {
+    ...invitePayload.invitee,
+    guestGroup: "[Nhà Trai] Họ nội",
+    postCeremonyPartyInvited: false,
+    rsvp: undefined,
+  };
 
   const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
   await context.addInitScript((invitee) => {
     window.localStorage.setItem("wedding-demo-invitees", JSON.stringify([invitee]));
-  }, invitePayload.invitee);
+  }, familyInvitee);
   const page = await context.newPage();
   const consoleErrors = [];
   page.on("console", (message) => {
@@ -82,33 +80,29 @@ try {
 
   await page.route(`**${inviteApiPath}`, async (route) => {
     await delay(2_500);
-    await route.continue();
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({ invitee: familyInvitee }),
+    });
   });
 
   await page.goto(`${baseUrl}/rsvp?invite=${token}`, { waitUntil: "domcontentloaded" });
 
   await selectBothEvents(page);
   await requireExplicitStayDecision(page);
-  const firstPass = await fillNotes(page);
+  const firstPass = await fillLodgingGuest(page);
   await delay(3_000);
-  await assertDraftValues(firstPass.notes, firstPass.dietaryNote);
+  await assertDraftValue(firstPass);
 
   await page.getByRole("button", { name: "XEM LẠI VÀ HOÀN TẤT", exact: true }).click();
   await page.getByRole("heading", { name: "Xác nhận thông tin hồi đáp", exact: true }).waitFor();
-  assert.match(await page.locator("main").innerText(), /Đến trễ/);
-  assert.match(await page.locator("main").innerText(), /ăn chay/);
+  assert.match(await page.locator("main").innerText(), /Nguyễn Văn A/);
 
   await page.reload({ waitUntil: "domcontentloaded" });
-  const restoredNotes = page.getByPlaceholder(
-    "Quý khách có thể nhắn giờ đến dự kiến, yêu cầu ghế trẻ em, hỗ trợ đi lại hoặc hỗ trợ người lớn tuổi,... nếu có",
-    { exact: true },
-  );
-  const restoredDietaryNote = page.getByPlaceholder(
-    "Ăn chay, dị ứng, kiêng món, không dùng rượu/cồn, hoặc cần suất trẻ em nếu có.",
-    { exact: true },
-  );
-  await restoredNotes.waitFor({ state: "visible" });
-  await assertDraftValues(restoredNotes, restoredDietaryNote);
+  const restoredFullName = page.getByPlaceholder("VD: Nguyễn Văn A", { exact: true });
+  await restoredFullName.waitFor({ state: "visible" });
+  await assertDraftValue(restoredFullName);
 
   assert.deepEqual(consoleErrors, [], `Browser console errors: ${consoleErrors.join(" | ")}`);
   await context.close();
@@ -130,7 +124,46 @@ try {
   await directPage.getByText("THÁNH LỄ HÔN PHỐI", { exact: true }).waitFor({ timeout: 15_000 });
   await directContext.close();
 
-  console.log("RSVP resilience checks passed: explicit lodging choice, delayed hydration, review, reload draft, and direct-link loading gate.");
+  const friendToken = "rsvp-friend-count-test";
+  const friendInvitee = {
+    ...invitePayload.invitee,
+    id: `${invitePayload.invitee.id}-friend-test`,
+    token: friendToken,
+    guestGroup: "[Nhật] Bạn bè & Đồng nghiệp",
+    expectedGuestCount: 1,
+    postCeremonyPartyInvited: false,
+    inviteStatus: "invited",
+    rsvp: undefined,
+  };
+  const friendContext = await browser.newContext({ viewport: { width: 390, height: 844 } });
+  await friendContext.addInitScript((invitee) => {
+    window.localStorage.setItem("wedding-demo-invitees", JSON.stringify([invitee]));
+  }, friendInvitee);
+  const friendPage = await friendContext.newPage();
+  await friendPage.route(`**/api/invites/${friendToken}`, async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({ invitee: friendInvitee }),
+    });
+  });
+
+  await friendPage.goto(`${baseUrl}/rsvp?invite=${friendToken}`, { waitUntil: "domcontentloaded" });
+  await selectBothEvents(friendPage);
+  await friendPage.getByText("ĐI BAO NHIÊU NGƯỜI?", { exact: true }).waitFor();
+  assert.equal(
+    await friendPage.getByText("LƯU TRÚ", { exact: true }).count(),
+    0,
+    "Friends and colleagues must not be asked for resort lodging.",
+  );
+  await friendPage.getByRole("button", { name: "Tăng số người tham dự", exact: true }).click();
+  await friendPage.getByText("2 người", { exact: true }).waitFor();
+  await friendPage.getByRole("button", { name: "XEM LẠI VÀ HOÀN TẤT", exact: true }).click();
+  await friendPage.getByRole("heading", { name: "Xác nhận thông tin hồi đáp", exact: true }).waitFor();
+  await friendPage.getByText("3. SỐ NGƯỜI THAM DỰ", { exact: true }).waitFor();
+  await friendContext.close();
+
+  console.log("RSVP resilience checks passed: family lodging, non-family party size, delayed hydration, review, reload draft, and direct-link loading gate.");
 } finally {
   await browser.close();
 }

@@ -9,6 +9,7 @@ import {
 import type { RSVPResponse } from "@/lib/rsvp-storage";
 import { getSupabaseServerClient, hasSupabaseEnv } from "@/lib/supabase-server";
 import { resolvePostCeremonyPartyAnswer } from "@/lib/post-ceremony-rsvp";
+import { isFamilyLodgingGuestGroup } from "@/lib/rsvp-guest-group";
 
 const guestRsvpSchema = z.object({
   displayLabel: z.string().trim().optional(),
@@ -70,7 +71,11 @@ export async function POST(request: Request, { params }: { params: Promise<{ tok
 
   const expectedGuestCount = Math.max(1, Number(invitee.expected_guest_count) || 1);
   const attending = body.attendingCeremony || body.attendingBanquet ? "yes" : "no";
-  const accommodationNeeded = attending === "yes" && body.attendingBanquet && body.accommodationNeeded;
+  const guestGroup = invitee.guest_group as string;
+  const accommodationNeeded = isFamilyLodgingGuestGroup(guestGroup)
+    && attending === "yes"
+    && body.attendingBanquet
+    && body.accommodationNeeded;
   const lodgingGuests = accommodationNeeded ? body.lodgingGuests : [];
   const payload: Omit<RSVPResponse, "id" | "submittedAt"> = {
     ...body,
@@ -78,12 +83,12 @@ export async function POST(request: Request, { params }: { params: Promise<{ tok
     inviteToken: token,
     displayLabel: invitee.display_label as string,
     name: invitee.display_label as string,
-    guestGroup: invitee.guest_group as string,
+    guestGroup,
     attendingPostCeremonyParty: postCeremonyParty.value,
     attending,
     guestCount: attending === "no"
       ? 0
-      : Math.min(expectedGuestCount, Math.max(1, body.guestCount || expectedGuestCount)),
+      : Math.min(50, Math.max(1, body.guestCount || expectedGuestCount)),
     accommodationNeeded,
     stayingGuestCount: accommodationNeeded ? lodgingGuests.length : 0,
     lodgingGuests,

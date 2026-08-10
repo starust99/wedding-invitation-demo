@@ -964,7 +964,7 @@ export function InviteAdminPanel() {
             </div>
             {(postCeremonyPartyGuests > 0 || childrenStaying > 0 || notAttending > 0) && (
               <div className="flex flex-wrap gap-x-5 gap-y-2 border-t border-[#E8DDCC] bg-[#FCFAF4] px-4 py-3 text-xs text-[#665D54] sm:px-5">
-                <span>Tiệc sau Thánh lễ: <b>{postCeremonyPartyGuests} người</b> <i>(ước lượng)</i></span>
+                <span>Tiệc thân mật: <b>{postCeremonyPartyGuests} người</b> <i>(ước lượng)</i></span>
                 <span>Trẻ em lưu trú: <b>{childrenStaying}</b> <i>(ước lượng)</i></span>
                 <span>Lời từ chối: <b>{notAttending}</b></span>
               </div>

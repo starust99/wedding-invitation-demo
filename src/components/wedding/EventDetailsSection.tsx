@@ -1,5 +1,6 @@
 "use client";
 
+import type { ReactNode } from "react";
 import { EventDetailsAssetLayer } from "@/components/wedding/EventDetailsAssetLayer";
 import { EventDetailsContent } from "@/components/wedding/EventDetailsContent";
 import { normalizeEventDetailsEditorConfig } from "@/lib/wedding/event-details-config";
@@ -21,6 +22,7 @@ export type EventDetailsSectionProps = {
   showPlaceholders?: boolean;
   mapUrl?: string;
   publicData?: EventDetailsPublicData;
+  responseSlot?: ReactNode;
   onSelectAsset?: (id: EventDetailsAssetSlotId) => void;
   onPlacementChange?: (id: EventDetailsAssetSlotId, placement: EventDetailsPlacement) => void;
 };
@@ -78,6 +80,7 @@ export function EventDetailsSection({
   showPlaceholders = false,
   mapUrl,
   publicData,
+  responseSlot,
   onSelectAsset,
   onPlacementChange,
 }: EventDetailsSectionProps) {
@@ -109,7 +112,14 @@ export function EventDetailsSection({
         />
       ) : null}
 
-      <EventDetailsContent config={eventDetailsConfig} mode={mode} viewport={viewport} mapUrl={mapUrl} publicData={publicData} />
+      <EventDetailsContent
+        config={eventDetailsConfig}
+        mode={mode}
+        viewport={viewport}
+        mapUrl={mapUrl}
+        publicData={publicData}
+        responseSlot={responseSlot}
+      />
 
       <EventDetailsAssetLayer
         config={eventDetailsConfig}

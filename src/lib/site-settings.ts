@@ -210,6 +210,19 @@ export function normalizeSettings(settings: SettingsInput | null): SiteSettings 
     };
   }
 
+  // One-time migration from the previous published album date.
+  // This also updates existing Supabase-backed settings when they are read,
+  // then persists the new value the next time Admin publishes.
+  if (content.postWeddingGallery.availableAfter === "2027-01-29T00:00:00+07:00") {
+    content = {
+      ...content,
+      postWeddingGallery: {
+        ...content.postWeddingGallery,
+        availableAfter: defaultSettings.content.postWeddingGallery.availableAfter,
+      },
+    };
+  }
+
   // Migration: Force Vietnamese text unification but preserve user's gallery and media assets
   if ((settings.schemaVersion ?? 0) < 3) {
     content = {

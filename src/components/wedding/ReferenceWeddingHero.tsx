@@ -200,11 +200,15 @@ export function ReferenceWeddingHero({ config, summary }: ReferenceWeddingHeroPr
             </div>
           </LineReveal>
           <LineReveal delay={textBodyDelay} type="body" className="w-full">
-            <p className="save-date-copy save-date-copy-arch">
-              <CoupleNameText
-                text={invitationText}
-                coupleName={summary?.coupleDisplayName || config.content.names}
-              />
+            <p className={`save-date-copy save-date-copy-arch ${summary?.guestName ? "save-date-guest-name" : ""}`}>
+              {summary?.guestName ? (
+                summary.guestName
+              ) : (
+                <CoupleNameText
+                  text={invitationText}
+                  coupleName={summary?.coupleDisplayName || config.content.names}
+                />
+              )}
             </p>
           </LineReveal>
         </article>

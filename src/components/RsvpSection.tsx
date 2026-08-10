@@ -15,12 +15,14 @@ export function RsvpSection({
   guestIdentity,
   rsvpHref = "/rsvp",
   transparentBg = false,
+  embedded = false,
   invitee,
 }: {
   config: WeddingConfig;
   guestIdentity: GuestIdentity;
   rsvpHref?: string;
   transparentBg?: boolean;
+  embedded?: boolean;
   invitee?: Invitee;
 }) {
   const inviteCopy = useMemo(() => buildInvitationCopy(guestIdentity), [guestIdentity]);
@@ -35,8 +37,15 @@ export function RsvpSection({
   }, [prefetch, rsvpHref]);
 
   return (
-    <section id="rsvp" className={transparentBg ? "relative overflow-hidden px-5 py-2 text-ink sm:px-8" : "cinematic-stage editorial-band relative overflow-hidden px-5 py-12 text-ink sm:px-8 sm:py-16 lg:py-20"}>
-      {!transparentBg && (
+    <section
+      id="rsvp"
+      className={embedded
+        ? "relative w-full overflow-visible text-ink"
+        : transparentBg
+          ? "relative overflow-hidden px-5 py-2 text-ink sm:px-8"
+          : "cinematic-stage editorial-band relative overflow-hidden px-5 py-12 text-ink sm:px-8 sm:py-16 lg:py-20"}
+    >
+      {!transparentBg && !embedded && (
         <>
           <SectionMediaLayers config={config} section="cta" className="opacity-[0.1]" />
           <div aria-hidden="true" className="paper-grain-luxury -z-10 opacity-20" />
@@ -44,13 +53,13 @@ export function RsvpSection({
         </>
       )}
 
-      <div className="mx-auto flex max-w-7xl justify-center">
+      <div className={embedded ? "mx-auto flex w-full justify-center" : "mx-auto flex max-w-7xl justify-center"}>
         <motion.div
           initial={{ opacity: 0, y: 15, scale: 0.97, filter: "blur(16px)" }}
           whileInView={{ opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }}
           viewport={{ once: true, margin: "-50px" }}
           transition={{ duration: 1.8, ease: [0.22, 1, 0.36, 1] }}
-          className="glass-panel relative w-full max-w-3xl overflow-hidden rounded-[2.5rem] px-5 py-8 sm:px-10 sm:py-10 lg:px-12 lg:py-12 shadow-none"
+          className={`glass-panel relative w-full overflow-hidden rounded-[2.5rem] px-5 py-8 sm:px-10 sm:py-10 lg:px-12 lg:py-12 shadow-none ${embedded ? "max-w-none" : "max-w-3xl"}`}
         >
           <div className="relative z-10 mx-auto flex max-w-2xl flex-col items-center text-center">
             {hasResponded ? (
@@ -108,7 +117,7 @@ export function RsvpSection({
             >
               <span className="save-date-btn-label">
                 <HeartHandshake aria-hidden="true" className="w-4 h-4 sm:w-4.5 sm:h-4.5" />
-                <span>{hasResponded ? "Xem & Chỉnh sửa hồi đáp" : "Gửi hồi đáp"}</span>
+                <span>{hasResponded ? "Xem & Chỉnh sửa hồi đáp" : "XÁC NHẬN THAM DỰ"}</span>
               </span>
             </button>
           </div>

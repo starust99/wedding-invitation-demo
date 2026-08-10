@@ -1,13 +1,21 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { EventDetailsSection } from "@/components/wedding/EventDetailsSection";
 import { buildInvitationCopy, type GuestIdentity } from "@/lib/guest-personalization";
 import { normalizeEventDetailsEditorConfig } from "@/lib/wedding/event-details-config";
 import type { WeddingConfig } from "@/lib/site-settings";
 import type { EventDetailsViewportMode } from "@/lib/wedding/event-details-types";
 
-export function WeddingDetailsSection({ config, guestIdentity }: { config: WeddingConfig; guestIdentity?: GuestIdentity }) {
+export function WeddingDetailsSection({
+  config,
+  guestIdentity,
+  responseSlot,
+}: {
+  config: WeddingConfig;
+  guestIdentity?: GuestIdentity;
+  responseSlot?: ReactNode;
+}) {
   const [viewport, setViewport] = useState<EventDetailsViewportMode>("desktop");
   const inviteCopy = buildInvitationCopy({
     ...guestIdentity,
@@ -30,6 +38,7 @@ export function WeddingDetailsSection({ config, guestIdentity }: { config: Weddi
       mode="public"
       viewport={viewport}
       mapUrl={config.venue.mapUrl}
+      responseSlot={responseSlot}
       publicData={{
         dateLabel: config.event.dateLabel,
         welcomeTime: config.event.welcomeTime,

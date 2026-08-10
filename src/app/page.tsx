@@ -9,7 +9,6 @@ import { ThankYouSection } from "@/components/ThankYouSection";
 
 import { WeddingDetailsSection } from "@/components/WeddingDetailsSection";
 import { WeddingSplashIntro } from "@/components/WeddingSplashIntro";
-import { SectionMediaLayers } from "@/components/SectionMediaLayers";
 import { resolveGuestIdentity, normalizeText, type GuestIdentity } from "@/lib/guest-personalization";
 import { applyTheme } from "@/lib/site-settings";
 import { usePublishedSettings } from "@/lib/use-published-settings";
@@ -96,29 +95,23 @@ export default function Home() {
       <WeddingSplashIntro config={config} guestIdentity={guestIdentity} storageKey="home" />
       <SceneProgress />
       <HeroSaveTheDate config={config} guestIdentity={guestIdentity} />
-      <WeddingDetailsSection config={config} guestIdentity={guestIdentity} />
+      <WeddingDetailsSection
+        config={config}
+        guestIdentity={guestIdentity}
+        responseSlot={!hasRsvp && !activeRsvp ? (
+          <RsvpSection config={config} guestIdentity={guestIdentity} embedded />
+        ) : (
+          <ThankYouSection
+            config={config}
+            guestIdentity={guestIdentity}
+            rsvpAttending={activeRsvp?.attending || "yes"}
+            rsvpAttendingCeremony={activeRsvp?.attendingCeremony}
+            rsvpAttendingBanquet={activeRsvp?.attendingBanquet}
+            embedded
+          />
+        )}
+      />
       <GallerySection config={config} />
-      {/* Unified RSVP & Thank You section wrapper to eliminate the background seam */}
-      <div className="cinematic-stage editorial-band relative overflow-hidden py-12 sm:py-16 lg:py-20">
-        <SectionMediaLayers config={config} section="cta" className="opacity-[0.1]" />
-        <div aria-hidden="true" className="paper-grain-luxury -z-10 opacity-20" />
-        <div aria-hidden="true" className="hero-couture-shade absolute inset-0 opacity-55" />
-        
-        <div className="relative z-10 flex flex-col gap-8 md:gap-12 w-full">
-          {!hasRsvp && !activeRsvp ? (
-            <RsvpSection config={config} guestIdentity={guestIdentity} transparentBg={true} />
-          ) : (
-            <ThankYouSection
-              config={config}
-              guestIdentity={guestIdentity}
-              rsvpAttending={activeRsvp?.attending || "yes"}
-              rsvpAttendingCeremony={activeRsvp?.attendingCeremony}
-              rsvpAttendingBanquet={activeRsvp?.attendingBanquet}
-              transparentBg={true}
-            />
-          )}
-        </div>
-      </div>
     </main>
   );
 }

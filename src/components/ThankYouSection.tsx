@@ -28,6 +28,7 @@ export function ThankYouSection({
   rsvpAttendingBanquet,
   rsvpHref = "/rsvp",
   transparentBg = false,
+  embedded = false,
 }: {
   config: WeddingConfig;
   guestIdentity: GuestIdentity;
@@ -36,6 +37,7 @@ export function ThankYouSection({
   rsvpAttendingBanquet?: RSVPResponse["attendingBanquet"];
   rsvpHref?: string;
   transparentBg?: boolean;
+  embedded?: boolean;
 }) {
   const inviteCopy = buildInvitationCopy(guestIdentity);
   const { navigateWithTransition } = usePageTransition();
@@ -70,8 +72,15 @@ export function ThankYouSection({
   });
 
   return (
-    <section id="thank-you" className={transparentBg ? "relative overflow-hidden px-5 py-2 text-center text-ink sm:px-8" : "cinematic-stage editorial-band relative overflow-hidden px-5 py-12 text-center text-ink sm:px-8 sm:py-16 lg:py-20"}>
-      {!transparentBg && (
+    <section
+      id="thank-you"
+      className={embedded
+        ? "relative w-full overflow-visible text-center text-ink"
+        : transparentBg
+          ? "relative overflow-hidden px-5 py-2 text-center text-ink sm:px-8"
+          : "cinematic-stage editorial-band relative overflow-hidden px-5 py-12 text-center text-ink sm:px-8 sm:py-16 lg:py-20"}
+    >
+      {!transparentBg && !embedded && (
         <>
           <SectionMediaLayers config={config} section="cta" className="opacity-[0.1]" />
           <div aria-hidden="true" className="hero-couture-shade absolute inset-0 opacity-80" />
@@ -79,13 +88,13 @@ export function ThankYouSection({
         </>
       )}
 
-      <div className="mx-auto flex max-w-7xl justify-center">
+      <div className={embedded ? "mx-auto flex w-full justify-center" : "mx-auto flex max-w-7xl justify-center"}>
         <motion.div
           initial={{ opacity: 0, y: 15, scale: 0.97, filter: "blur(16px)" }}
           whileInView={{ opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }}
           viewport={{ once: true, margin: "-50px" }}
           transition={{ duration: 1.8, ease: [0.22, 1, 0.36, 1] }}
-          className="glass-panel relative w-full max-w-3xl overflow-hidden rounded-[2.5rem] px-5 py-8 sm:px-10 sm:py-10 lg:px-12 lg:py-12 shadow-none"
+          className={`glass-panel relative w-full overflow-hidden rounded-[2.5rem] px-5 py-8 sm:px-10 sm:py-10 lg:px-12 lg:py-12 shadow-none ${embedded ? "max-w-none" : "max-w-3xl"}`}
         >
           <div className="relative z-10 flex flex-col items-center justify-center py-2 text-center">
             <div className="flex w-full max-w-2xl flex-col items-center justify-between gap-5 text-center sm:gap-6">

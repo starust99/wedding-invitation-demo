@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { MapPin } from "lucide-react";
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { motion } from "framer-motion";
 import type { Variants } from "framer-motion";
 import type { EventDetailsViewportMode, WeddingEventDetailsEditorConfig } from "@/lib/wedding/event-details-types";
@@ -52,6 +52,7 @@ type EventDetailsContentProps = {
   viewport?: EventDetailsViewportMode;
   mapUrl?: string;
   publicData?: EventDetailsPublicData;
+  responseSlot?: ReactNode;
 };
 
 
@@ -259,6 +260,7 @@ export function EventDetailsContent({
   viewport = "desktop",
   mapUrl,
   publicData,
+  responseSlot,
 }: EventDetailsContentProps) {
   const compact = mode === "preview";
   const mobilePreview = compact && viewport === "mobile";
@@ -441,6 +443,8 @@ export function EventDetailsContent({
           </motion.div>
         </div>
       </motion.div>
+
+      {responseSlot}
 
       {/* Unified Vertical Scrolling Layout for Mobile, Tablet, and Desktop */}
         {/* Card 1: Thánh lễ Hôn phối */}

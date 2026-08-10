@@ -225,20 +225,24 @@ export function InviteTokenPage({ token, initialInvitee }: { token: string; init
       <WeddingSplashIntro config={config} guestIdentity={guestIdentity} storageKey={token} ready={!loading} />
       <SceneProgress />
       <HeroSaveTheDate config={config} guestIdentity={guestIdentity} />
-      <WeddingDetailsSection config={config} guestIdentity={guestIdentity} />
+      <WeddingDetailsSection
+        config={config}
+        guestIdentity={guestIdentity}
+        responseSlot={!shouldShowThankYou ? (
+          <RsvpSection config={config} guestIdentity={guestIdentity} rsvpHref={rsvpHref} invitee={invitee} embedded />
+        ) : (
+          <ThankYouSection
+            config={config}
+            guestIdentity={guestIdentity}
+            rsvpAttending={activeRsvpObj?.attending || (invitee?.inviteStatus === "rsvp_no" ? "no" : invitee?.inviteStatus && invitee.inviteStatus !== "invited" ? "yes" : "yes")}
+            rsvpAttendingCeremony={activeRsvpObj?.attendingCeremony}
+            rsvpAttendingBanquet={activeRsvpObj?.attendingBanquet}
+            rsvpHref={rsvpHref}
+            embedded
+          />
+        )}
+      />
       <GallerySection config={config} />
-      {!shouldShowThankYou ? (
-        <RsvpSection config={config} guestIdentity={guestIdentity} rsvpHref={rsvpHref} invitee={invitee} />
-      ) : (
-        <ThankYouSection
-          config={config}
-          guestIdentity={guestIdentity}
-          rsvpAttending={activeRsvpObj?.attending || (invitee?.inviteStatus === "rsvp_no" ? "no" : invitee?.inviteStatus && invitee.inviteStatus !== "invited" ? "yes" : "yes")}
-          rsvpAttendingCeremony={activeRsvpObj?.attendingCeremony}
-          rsvpAttendingBanquet={activeRsvpObj?.attendingBanquet}
-          rsvpHref={rsvpHref}
-        />
-      )}
     </main>
   );
 }
