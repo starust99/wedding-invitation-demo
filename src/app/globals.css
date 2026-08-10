@@ -1273,6 +1273,18 @@ textarea {
   text-shadow: 0 1px 0 rgba(255, 253, 248, 0.48);
 }
 
+.save-date-guest-ampersand {
+  display: inline-block;
+  margin-inline: 0.035em;
+  color: inherit;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 0.88em;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 1;
+  transform: translateY(-0.02em);
+}
+
 @media (max-width: 767px) {
   .save-date-copy-arch.save-date-guest-name {
     max-width: 21rem;
