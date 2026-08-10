@@ -29,6 +29,34 @@ function stripRepeatedHeroInvitePrefix(text: string) {
   return text.replace(/^trân trọng kính mời\s+/i, "");
 }
 
+function HeroGuestNameText({ text }: { text: string }) {
+  const names = text.split(/\s*&\s*/);
+
+  if (names.length === 1) return text;
+
+  return (
+    <>
+      <span className="sr-only">{text.replace(/\s*&\s*/g, " và ")}</span>
+      <span aria-hidden="true">
+        {names[0]}
+        {names.slice(1).map((name, index) => (
+          <span key={`${name}-${index}`} className="hero-guest-name-joined-part">
+            <span className="hero-guest-custom-ampersand">
+              <svg viewBox="0 0 1384 1462" aria-hidden="true" focusable="false" shapeRendering="geometricPrecision">
+                <path
+                  transform="matrix(1 0 0.1584 -1 5.1 1430)"
+                  d="M1302 182Q1304 176 1305 166Q1306 156 1306 145Q1306 119 1300 98Q1283 40 1221 8Q1166 -20 1098 -20Q1019 -20 942 23Q912 40 862 74Q796 23 717 -4.5Q638 -32 556 -32Q353 -32 223 68Q78 179 78 380Q78 533 170 641Q245 728 358 766Q279 910 273 924Q224 1030 224 1114Q224 1264 316 1351Q399 1430 522 1430Q643 1430 708.5 1344Q774 1258 774 1110Q774 1008 680 910Q605 831 496 778Q530 715 596 613Q677 489 742 402Q826 290 898 216L930 262Q968 321 990 406Q1001 448 1001 497Q1001 562 980 621Q956 689 908 738Q889 735 860 725.5Q831 716 813.5 706.5Q796 697 785.5 680.5Q775 664 775 644Q775 637 777.5 627.5Q780 618 791 607Q802 596 817 596Q826 596 834 600Q847 607 851.5 613Q856 619 856 626Q859 636 864 636L874 630L888 606L890 592Q890 555 852 538Q844 534 833.5 532Q823 530 814 530Q786 530 764 548.5Q742 567 729.5 594.5Q717 622 717 654Q717 703 742 744Q767 785 812 810Q870 842 959 864Q1023 880 1088 896Q1161 921 1161 966Q1161 975 1158 984Q1147 1014 1116 1014Q1098 1014 1080 1002Q1072 998 1065.5 987.5Q1059 977 1054 977Q1049 977 1044 988Q1039 999 1039 1013Q1039 1034 1053 1051.5Q1067 1069 1079.5 1072.5Q1092 1076 1099.5 1077Q1107 1078 1112 1078Q1151 1078 1179 1048Q1201 1024 1210 992Q1216 968 1216 948Q1216 871 1135 819Q1071 778 962 754Q1002 729 1039 660Q1089 568 1089 464Q1089 439 1086 410Q1078 353 1038.5 282Q999 211 952 168Q981 143 1027 121Q1088 92 1139 92Q1145 92 1166 94Q1193 98 1220.5 116.5Q1248 135 1264 154L1284 188L1293 193Q1299 193 1302 182ZM682 1090Q685 1113 685 1137Q685 1229 645 1294Q598 1370 512 1370Q425 1370 374 1303Q328 1242 328 1159Q328 1148 328 1141Q328 1133 332 1116Q341 1065 381.5 978.5Q422 892 466 828Q555 875 613.5 944Q672 1013 682 1090ZM808 130Q744 190 649 317Q568 425 491 544Q418 657 388 716Q340 706 285 629Q210 525 210 380Q210 218 320 118Q417 30 544 30Q613 30 679 53Q756 80 808 130Z"
+                />
+              </svg>
+            </span>
+            <span>{name}</span>
+          </span>
+        ))}
+      </span>
+    </>
+  );
+}
+
 export function ReferenceWeddingHero({ config, summary }: ReferenceWeddingHeroProps) {
   const [hasMounted, setHasMounted] = useState(false);
   const [isHeroAnimated, setIsHeroAnimated] = useState(false);
@@ -202,7 +230,7 @@ export function ReferenceWeddingHero({ config, summary }: ReferenceWeddingHeroPr
           <LineReveal delay={textBodyDelay} type="body" className="w-full">
             <p className={`save-date-copy save-date-copy-arch ${summary?.guestName ? "save-date-guest-name" : ""}`}>
               {summary?.guestName ? (
-                summary.guestName
+                <HeroGuestNameText text={summary.guestName} />
               ) : (
                 <CoupleNameText
                   text={invitationText}
