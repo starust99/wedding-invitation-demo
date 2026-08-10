@@ -1278,11 +1278,11 @@ textarea {
   margin-inline: 0.035em;
   color: inherit;
   font-family: Georgia, 'Times New Roman', serif;
-  font-size: 0.88em;
-  font-style: normal;
-  font-weight: 500;
+  font-size: 0.94em;
+  font-style: italic;
+  font-weight: 400;
   line-height: 1;
-  transform: translateY(-0.02em);
+  transform: translateY(-0.015em);
 }
 
 @media (max-width: 767px) {
