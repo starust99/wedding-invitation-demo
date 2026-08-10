@@ -129,6 +129,8 @@ const rsvpDraftSchema = z.object({
 
 const inputClass =
   "min-h-13 w-full rounded-2xl border border-serenity/22 bg-white/75 px-4 text-base font-normal text-center leading-relaxed text-[#252934] outline-none transition placeholder:font-normal placeholder:leading-relaxed placeholder:text-[#252934]/36 focus:border-serenity focus:bg-white/86 focus:ring-4 focus:ring-serenity/18";
+const rsvpAlertTextClass =
+  "text-sm font-normal leading-relaxed text-[#B4232F] focus:outline-none";
 
 function createLodgingGuest(fullName = ""): LodgingGuestForm {
   return {
@@ -244,7 +246,7 @@ function Field({ label, error, children }: { label: ReactNode; error?: string; c
           role="alert"
           tabIndex={-1}
           data-rsvp-error="true"
-          className="text-sm font-normal text-[#B4232F]"
+          className={rsvpAlertTextClass}
         >
           {error}
         </span>
@@ -1028,7 +1030,7 @@ export default function RSVPPage() {
               Đăng nhập Admin
             </button>
             {adminLoginError && (
-              <p className="text-xs font-bold text-[#9B4E5C] mt-2">{adminLoginError}</p>
+              <p className={`${rsvpAlertTextClass} mt-2`}>{adminLoginError}</p>
             )}
           </div>
 
@@ -1316,7 +1318,7 @@ export default function RSVPPage() {
               </div>
 
               {submitError ? (
-                <p className="mb-5 w-full max-w-xl rounded-2xl border border-[#9B4E5C]/25 bg-white/75 px-4 py-3 text-sm font-semibold text-[#9B4E5C]">
+                <p className={`${rsvpAlertTextClass} mb-5 w-full max-w-xl rounded-2xl border border-[#B4232F]/25 bg-white/75 px-4 py-3`}>
                   {submitError}
                 </p>
               ) : null}
@@ -1369,7 +1371,7 @@ export default function RSVPPage() {
                 className="w-full px-4 sm:px-8 text-center"
               >
                 {submitError ? (
-                  <p className="mb-6 rounded-2xl border border-serenity/18 bg-white/60 px-4 py-3 text-sm font-semibold text-[#9B4E5C]">
+                  <p className={`${rsvpAlertTextClass} mb-6 rounded-2xl border border-[#B4232F]/20 bg-white/60 px-4 py-3`}>
                     {submitError}
                   </p>
                 ) : null}
@@ -1503,7 +1505,7 @@ export default function RSVPPage() {
                             role="alert"
                             tabIndex={-1}
                             data-rsvp-error="true"
-                            className="mt-2 text-center text-xs font-bold text-[#9B4E5C]"
+                            className={`${rsvpAlertTextClass} mt-2 text-center`}
                           >
                             {errors.attendingPostCeremonyParty.message}
                           </p>
@@ -1517,7 +1519,7 @@ export default function RSVPPage() {
                       role="alert"
                       tabIndex={-1}
                       data-rsvp-error="true"
-                      className="mt-2 text-xs text-center text-[#9B4E5C] font-bold"
+                      className={`${rsvpAlertTextClass} mt-2 text-center`}
                     >
                       {errors.attendingCeremony.message}
                     </p>
@@ -1599,7 +1601,7 @@ export default function RSVPPage() {
                       role="alert"
                       tabIndex={-1}
                       data-rsvp-error="true"
-                      className="mt-2 text-xs text-center text-[#9B4E5C] font-bold"
+                      className={`${rsvpAlertTextClass} mt-2 text-center`}
                     >
                       {errors.attendingBanquet.message}
                     </p>
@@ -1695,7 +1697,7 @@ export default function RSVPPage() {
                             role="alert"
                             tabIndex={-1}
                             data-rsvp-error="true"
-                            className="-mt-3 mb-5 text-center text-xs font-bold text-[#9B4E5C]"
+                            className={`${rsvpAlertTextClass} -mt-3 mb-5 text-center`}
                           >
                             {errors.stayDecision.message}
                           </p>
@@ -1716,7 +1718,7 @@ export default function RSVPPage() {
                                   role="alert"
                                   tabIndex={-1}
                                   data-rsvp-error="true"
-                                  className="text-sm font-bold text-[#9B4E5C] text-center"
+                                  className={`${rsvpAlertTextClass} text-center`}
                                 >
                                   {errors.lodgingGuests.message}
                                 </p>
@@ -1881,7 +1883,7 @@ export default function RSVPPage() {
                             role="alert"
                             tabIndex={-1}
                             data-rsvp-error="true"
-                            className="mt-3 text-center text-sm font-normal text-[#B4232F]"
+                            className={`${rsvpAlertTextClass} mt-3 text-center`}
                           >
                             {errors.guestCount.message}
                           </p>

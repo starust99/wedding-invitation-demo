@@ -1,6 +1,7 @@
 "use client";
 
-import { HeartHandshake, MapPin, Image as ImageIcon } from "lucide-react";
+import type { MouseEvent } from "react";
+import { Church, HeartHandshake, Image as ImageIcon, Wine } from "lucide-react";
 import { SectionMediaLayers } from "@/components/SectionMediaLayers";
 import type { WeddingConfig } from "@/lib/site-settings";
 import { buildInvitationCopy, type GuestIdentity } from "@/lib/guest-personalization";
@@ -41,6 +42,18 @@ export function ThankYouSection({
 }) {
   const inviteCopy = buildInvitationCopy(guestIdentity);
   const { navigateWithTransition } = usePageTransition();
+
+  const handleInformationJump = (event: MouseEvent<HTMLAnchorElement>, targetId: "thanh-le-hon-phoi" | "tiec-cuoi") => {
+    event.preventDefault();
+    window.dispatchEvent(new CustomEvent("wedding:reveal-event-card", { detail: { targetId } }));
+    window.history.replaceState(window.history.state, "", `#${targetId}`);
+
+    window.requestAnimationFrame(() => {
+      window.requestAnimationFrame(() => {
+        document.getElementById(targetId)?.scrollIntoView({ behavior: "smooth", block: "start" });
+      });
+    });
+  };
 
   if (!rsvpAttending) return null;
 
@@ -150,20 +163,19 @@ export function ThankYouSection({
                       </button>
                     )}
 
-                    {/* Navigation Buttons: Đến Nhà thờ & Đến Tiệc cưới - Side-by-side on same row */}
+                    {/* Navigation Buttons: jump to the matching information card. */}
                     {((isCeremonyOnly || isBoth) || (isBanquetOnly || isBoth || isDefault)) && (
                       <div className="flex flex-row flex-wrap items-center justify-center gap-2.5 sm:gap-3.5 w-full">
                         {(isCeremonyOnly || isBoth) ? (
                           <a
                             suppressHydrationWarning
-                            href={config.church?.mapUrl || config.venue.mapUrl}
-                            target="_blank"
-                            rel="noreferrer"
+                            href="#thanh-le-hon-phoi"
+                            onClick={(event) => handleInformationJump(event, "thanh-le-hon-phoi")}
                             className="inline-flex h-[2.75rem] sm:h-[3.0rem] w-[14rem] sm:w-[15rem] items-center justify-center transition hover:-translate-y-0.5 save-date-watercolor-btn save-date-btn-equal-width"
                           >
                             <span className="save-date-btn-label">
-                              <MapPin aria-hidden="true" className="w-4 h-4 sm:w-4.5 sm:h-4.5" />
-                              <span>Đến Nhà thờ</span>
+                              <Church aria-hidden="true" className="w-4 h-4 sm:w-4.5 sm:h-4.5" />
+                              <span>Thông tin Thánh lễ</span>
                             </span>
                           </a>
                         ) : null}
@@ -171,14 +183,13 @@ export function ThankYouSection({
                         {(isBanquetOnly || isBoth || isDefault) ? (
                           <a
                             suppressHydrationWarning
-                            href={config.venue.mapUrl}
-                            target="_blank"
-                            rel="noreferrer"
+                            href="#tiec-cuoi"
+                            onClick={(event) => handleInformationJump(event, "tiec-cuoi")}
                             className="inline-flex h-[2.75rem] sm:h-[3.0rem] w-[14rem] sm:w-[15rem] items-center justify-center transition hover:-translate-y-0.5 save-date-watercolor-btn save-date-btn-equal-width"
                           >
                             <span className="save-date-btn-label">
-                              <MapPin aria-hidden="true" className="w-4 h-4 sm:w-4.5 sm:h-4.5" />
-                              <span>{isBanquetOnly || isBoth ? "Đến Tiệc cưới" : "Chỉ đường"}</span>
+                              <Wine aria-hidden="true" className="w-4 h-4 sm:w-4.5 sm:h-4.5" />
+                              <span>Thông tin Tiệc cưới</span>
                             </span>
                           </a>
                         ) : null}

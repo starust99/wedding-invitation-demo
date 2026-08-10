@@ -196,25 +196,33 @@ export function InviteTokenPage({ token, initialInvitee }: { token: string; init
   const shouldShowThankYou = Boolean(activeRsvpObj || (invitee?.inviteStatus && invitee.inviteStatus !== "invited") || hasHashThankYou);
 
   useEffect(() => {
-    if (loading) return;
-    if (window.location.hash !== "#thank-you") return;
+    if (loading || window.location.hash !== "#thank-you") return;
 
+    let cancelled = false;
     let attempts = 0;
-    const interval = window.setInterval(() => {
-      const el = document.getElementById("thank-you");
-      if (el) {
-        el.scrollIntoView({ behavior: "smooth", block: "start" });
-        attempts++;
-        if (attempts >= 4) {
-          window.clearInterval(interval);
-        }
-      }
-    }, 150);
+    let retryTimer = 0;
 
-    return () => {
-      window.clearInterval(interval);
+    const alignThankYouCard = () => {
+      if (cancelled) return;
+      const element = document.getElementById("thank-you");
+      if (!element) {
+        attempts += 1;
+        if (attempts < 20) retryTimer = window.setTimeout(alignThankYouCard, 100);
+        return;
+      }
+
+      element.scrollIntoView({ behavior: "auto", block: "start" });
+      window.requestAnimationFrame(() => {
+        if (!cancelled) element.scrollIntoView({ behavior: "auto", block: "start" });
+      });
     };
-  }, [loading]);
+
+    alignThankYouCard();
+    return () => {
+      cancelled = true;
+      window.clearTimeout(retryTimer);
+    };
+  }, [loading, shouldShowThankYou]);
 
   if (!loading && !invitee && fetchStatus === "not-found") {
     return <InviteAccessGate variant="invalid-token" />;

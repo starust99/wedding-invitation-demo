@@ -56,6 +56,15 @@
   filter: invert(38%) sepia(12%) saturate(980%) hue-rotate(345deg) brightness(90%) contrast(87%);
 }
 
+/* Use the ornament artwork strictly as an alpha mask so its old uneven
+   brown/gold pixels cannot show through. The resulting gold matches the
+   marriage-title divider and stays identical in all four corners. */
+[data-family-corner-ornament] {
+  background-color: #daa74e;
+  -webkit-mask: url('/assets/corner_ornament.png') center / contain no-repeat;
+  mask: url('/assets/corner_ornament.png') center / contain no-repeat;
+}
+
 :root {
   --cream: #fef8e7;
   --ivory: #fffdf8;
@@ -1253,11 +1262,12 @@ textarea {
 .save-date-copy-arch.save-date-guest-name {
   max-width: 34rem;
   margin-top: 0.35rem;
-  color: rgba(76, 80, 73, 0.88);
+  color: #3f4642;
   font-family: var(--font-serif);
   font-size: clamp(1.55rem, 3.2vw, 2.3rem);
-  font-weight: 600;
-  letter-spacing: 0.015em;
+  font-style: italic;
+  font-weight: 500;
+  letter-spacing: 0.005em;
   line-height: 1.3;
   text-wrap: balance;
   text-shadow: 0 1px 0 rgba(255, 253, 248, 0.48);

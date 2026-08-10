@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { MapPin } from "lucide-react";
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { motion } from "framer-motion";
 import type { Variants } from "framer-motion";
 import type { EventDetailsViewportMode, WeddingEventDetailsEditorConfig } from "@/lib/wedding/event-details-types";
@@ -192,6 +192,22 @@ const cardItemVariant: Variants = {
   },
 };
 
+const instantCardVariant: Variants = {
+  hidden: { opacity: 1, y: 0, scale: 1, filter: "blur(0px)" },
+  visible: {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    filter: "blur(0px)",
+    transition: { duration: 0, delayChildren: 0, staggerChildren: 0 },
+  },
+};
+
+const instantCardItemVariant: Variants = {
+  hidden: { opacity: 1, y: 0, filter: "blur(0px)" },
+  visible: { opacity: 1, y: 0, filter: "blur(0px)", transition: { duration: 0 } },
+};
+
 const headerVariant: Variants = {
   hidden: { opacity: 0, y: 20 },
   visible: {
@@ -266,11 +282,35 @@ export function EventDetailsContent({
   const mobilePreview = compact && viewport === "mobile";
   const [selectedColorId, setSelectedColorId] = useState<DressColorId | null>(null);
   const [isRoadReady, setIsRoadReady] = useState(false);
+  const [immediatelyRevealedCards, setImmediatelyRevealedCards] = useState<Set<string>>(() => new Set());
   const content = config.content;
   const churchDateParsed = parseEventDate(publicData?.churchDate || content.churchDate);
   const banquetDateParsed = parseEventDate(publicData?.dateLabel, { day: "26", month: "12", year: "2026", weekday: "THỨ BẢY" });
   const dressCodeTitle = publicData?.dressCodeTitle && !publicData.dressCodeTitle.includes("pastel") && publicData.dressCodeTitle !== "Trang phục chủ đề" ? publicData.dressCodeTitle : "Khu vườn mùa xuân";
   const dressCodeNote = publicData?.dressCodeNote || content.dressCodeText;
+
+  useEffect(() => {
+    const revealCard = (targetId: string) => {
+      if (targetId !== "thanh-le-hon-phoi" && targetId !== "tiec-cuoi") return;
+      setImmediatelyRevealedCards((current) => {
+        if (current.has(targetId)) return current;
+        const next = new Set(current);
+        next.add(targetId);
+        return next;
+      });
+    };
+
+    const handleReveal = (event: Event) => {
+      revealCard((event as CustomEvent<{ targetId?: string }>).detail?.targetId ?? "");
+    };
+
+    revealCard(window.location.hash.slice(1));
+    window.addEventListener("wedding:reveal-event-card", handleReveal);
+    return () => window.removeEventListener("wedding:reveal-event-card", handleReveal);
+  }, []);
+
+  const revealChurchImmediately = immediatelyRevealedCards.has("thanh-le-hon-phoi");
+  const revealBanquetImmediately = immediatelyRevealedCards.has("tiec-cuoi");
 
   return (
     <div
@@ -309,28 +349,28 @@ export function EventDetailsContent({
         <div className="absolute -bottom-12 -right-12 w-48 h-48 bg-gradient-to-tl from-[#d4e4f7]/25 to-transparent rounded-full blur-[40px] pointer-events-none z-0" />
 
         {/* Corner Ornaments */}
-        <img 
-          src="/assets/corner_ornament.png" 
-          alt="corner ornament" 
+        <span
+          aria-hidden="true"
           className="absolute top-0 left-0 sm:top-6 sm:left-6 w-[92px] h-[92px] sm:w-28 sm:h-28 object-contain pointer-events-none select-none block z-20"
+          data-family-corner-ornament
           style={{ transform: "scaleY(-1)" }}
         />
-        <img 
-          src="/assets/corner_ornament.png" 
-          alt="corner ornament" 
+        <span
+          aria-hidden="true"
           className="absolute top-0 right-0 sm:top-6 sm:right-6 w-[92px] h-[92px] sm:w-28 sm:h-28 object-contain pointer-events-none select-none block z-20"
+          data-family-corner-ornament
           style={{ transform: "scale(-1, -1)" }}
         />
-        <img 
-          src="/assets/corner_ornament.png" 
-          alt="corner ornament" 
+        <span
+          aria-hidden="true"
           className="absolute bottom-0 right-0 sm:bottom-6 sm:right-6 w-[92px] h-[92px] sm:w-28 sm:h-28 object-contain pointer-events-none select-none block z-20"
+          data-family-corner-ornament
           style={{ transform: "scaleX(-1)" }}
         />
-        <img 
-          src="/assets/corner_ornament.png" 
-          alt="corner ornament" 
+        <span
+          aria-hidden="true"
           className="absolute bottom-0 left-0 sm:bottom-6 sm:left-6 w-[92px] h-[92px] sm:w-28 sm:h-28 object-contain pointer-events-none select-none block z-20"
+          data-family-corner-ornament
         />
 
         {/* Tier 1: Title Header */}
@@ -449,20 +489,22 @@ export function EventDetailsContent({
       {/* Unified Vertical Scrolling Layout for Mobile, Tablet, and Desktop */}
         {/* Card 1: Thánh lễ Hôn phối */}
         <motion.div 
+          id="thanh-le-hon-phoi"
           initial="hidden"
+          animate={revealChurchImmediately ? "visible" : undefined}
           whileInView="visible"
           viewport={{ once: true, margin: "-80px" }}
-          variants={cardVariant}
-          className="w-full luxury-wedding-stationery-card px-6 pt-10 pb-10 sm:px-10 sm:pt-14 sm:pb-14 md:px-12 md:pt-16 md:pb-16 flex flex-col items-center text-center relative"
+          variants={revealChurchImmediately ? instantCardVariant : cardVariant}
+          className="w-full scroll-mt-4 luxury-wedding-stationery-card px-6 pt-10 pb-10 sm:px-10 sm:pt-14 sm:pb-14 md:px-12 md:pt-16 md:pb-16 flex flex-col items-center text-center relative"
         >
 
           {/* Main Title */}
-          <motion.h4 variants={cardItemVariant} className="font-serif text-[1.2rem] sm:text-[1.35rem] font-bold tracking-[0.14em] md:tracking-[0.18em] uppercase text-[#3f4642] mt-1 mb-1.5 leading-tight">
+          <motion.h4 variants={revealChurchImmediately ? instantCardItemVariant : cardItemVariant} className="font-serif text-[1.2rem] sm:text-[1.35rem] font-bold tracking-[0.14em] md:tracking-[0.18em] uppercase text-[#3f4642] mt-1 mb-1.5 leading-tight">
             Thánh lễ hôn phối
           </motion.h4>
 
           {/* Decorative Divider */}
-          <motion.div variants={cardItemVariant} className="w-full flex justify-center mt-1 mb-5">
+          <motion.div variants={revealChurchImmediately ? instantCardItemVariant : cardItemVariant} className="w-full flex justify-center mt-1 mb-5">
             <img 
               src="/assets/divider_cards.png" 
               alt="decorative divider" 
@@ -472,7 +514,7 @@ export function EventDetailsContent({
           </motion.div>
 
           {/* Church Image */}
-          <motion.div variants={cardItemVariant} className="watercolor-blend-container relative w-full max-w-[38rem] mx-auto aspect-[4/3] rounded-[1.5rem] overflow-hidden shadow-[0_4px_14px_rgba(63,70,66,0.05)] border border-[#b4975a]/12 mb-6">
+          <motion.div variants={revealChurchImmediately ? instantCardItemVariant : cardItemVariant} className="watercolor-blend-container relative w-full max-w-[38rem] mx-auto aspect-[4/3] rounded-[1.5rem] overflow-hidden shadow-[0_4px_14px_rgba(63,70,66,0.05)] border border-[#b4975a]/12 mb-6">
             {content.churchImageUrl ? (
               <Image
                 src={content.churchImageUrl}
@@ -490,12 +532,12 @@ export function EventDetailsContent({
             )}
           </motion.div>
 
-          <motion.div variants={cardItemVariant} className="w-full flex flex-col items-center">
+          <motion.div variants={revealChurchImmediately ? instantCardItemVariant : cardItemVariant} className="w-full flex flex-col items-center">
             <DateDisplayStack dateParsed={churchDateParsed} lunarText="Nhằm ngày 12 tháng 11 năm Bính Ngọ" />
           </motion.div>
 
           {/* Time Display */}
-          <motion.div variants={cardItemVariant} className="w-full flex flex-col items-center">
+          <motion.div variants={revealChurchImmediately ? instantCardItemVariant : cardItemVariant} className="w-full flex flex-col items-center">
             <span className="font-sans text-[0.82rem] sm:text-[1.01rem] md:text-[1.08rem] tracking-[0.18em] font-bold text-[#7d7065] uppercase mb-1">
               Cử Hành
             </span>
@@ -505,7 +547,7 @@ export function EventDetailsContent({
           </motion.div>
 
           {/* Location */}
-          <motion.div variants={cardItemVariant} className="w-full flex flex-col items-center">
+          <motion.div variants={revealChurchImmediately ? instantCardItemVariant : cardItemVariant} className="w-full flex flex-col items-center">
             <p className="font-serif text-[#3f4642] text-[1.2rem] sm:text-[1.48rem] md:text-[1.70rem] font-semibold leading-snug mb-0.5">
               {content.churchLocation || "Nhà Thờ Giáo Xứ Tam Hải"}
             </p>
@@ -516,7 +558,7 @@ export function EventDetailsContent({
 
           {/* Map Pin link */}
           <motion.a 
-            variants={cardItemVariant}
+            variants={revealChurchImmediately ? instantCardItemVariant : cardItemVariant}
             href="https://www.google.com/maps/search/?api=1&query=Nh%C3%A0%20th%E1%BB%9D%20Gi%C3%A1o%20x%E1%BB%A9%20Tam%20H%E1%BA%A3i%20180%20Tam%20Ch%C3%A2u%20Tam%20B%C3%ACnh%20Th%E1%BB%A7%20%C4%90%E1%BB%A9c" 
             target="_blank" 
             rel="noreferrer" 
@@ -531,20 +573,22 @@ export function EventDetailsContent({
 
         {/* Card 2: Tiệc Cưới Thân Mật (Unified Card) */}
         <motion.div 
+          id="tiec-cuoi"
           initial="hidden"
+          animate={revealBanquetImmediately ? "visible" : undefined}
           whileInView="visible"
           viewport={{ once: true, margin: "-80px" }}
-          variants={cardVariant}
-          className="w-full luxury-wedding-stationery-card px-6 pt-10 pb-6 sm:px-10 sm:pt-14 sm:pb-8 md:px-12 md:pt-16 md:pb-10 flex flex-col items-center text-center relative"
+          variants={revealBanquetImmediately ? instantCardVariant : cardVariant}
+          className="w-full scroll-mt-4 luxury-wedding-stationery-card px-6 pt-10 pb-6 sm:px-10 sm:pt-14 sm:pb-8 md:px-12 md:pt-16 md:pb-10 flex flex-col items-center text-center relative"
         >
 
           {/* Main Title */}
-          <motion.h4 variants={cardItemVariant} className="font-serif text-[1.2rem] sm:text-[1.35rem] font-bold tracking-[0.14em] md:tracking-[0.18em] uppercase text-[#3f4642] mt-1 mb-1.5 leading-tight">
+          <motion.h4 variants={revealBanquetImmediately ? instantCardItemVariant : cardItemVariant} className="font-serif text-[1.2rem] sm:text-[1.35rem] font-bold tracking-[0.14em] md:tracking-[0.18em] uppercase text-[#3f4642] mt-1 mb-1.5 leading-tight">
             Tiệc cưới
           </motion.h4>
 
           {/* Decorative Divider */}
-          <motion.div variants={cardItemVariant} className="w-full flex justify-center mt-1 mb-5">
+          <motion.div variants={revealBanquetImmediately ? instantCardItemVariant : cardItemVariant} className="w-full flex justify-center mt-1 mb-5">
             <img 
               src="/assets/divider_cards.png" 
               alt="decorative divider" 
@@ -554,16 +598,16 @@ export function EventDetailsContent({
           </motion.div>
 
           {/* Venue Image */}
-          <motion.div variants={cardItemVariant} className="relative w-full max-w-[38rem] mx-auto aspect-[4/3] rounded-[1.5rem] overflow-hidden shadow-[0_4px_14px_rgba(63,70,66,0.05)] border border-[#b4975a]/12 mb-6">
+          <motion.div variants={revealBanquetImmediately ? instantCardItemVariant : cardItemVariant} className="relative w-full max-w-[38rem] mx-auto aspect-[4/3] rounded-[1.5rem] overflow-hidden shadow-[0_4px_14px_rgba(63,70,66,0.05)] border border-[#b4975a]/12 mb-6">
             <VenueMapImage className="w-full h-full !aspect-auto !rounded-none" />
           </motion.div>
 
-          <motion.div variants={cardItemVariant} className="w-full flex flex-col items-center">
+          <motion.div variants={revealBanquetImmediately ? instantCardItemVariant : cardItemVariant} className="w-full flex flex-col items-center">
             <DateDisplayStack dateParsed={banquetDateParsed} lunarText="Nhằm ngày 18 tháng 11 năm Bính Ngọ" />
           </motion.div>
 
           {/* Time Display */}
-          <motion.div variants={cardItemVariant} className="w-full flex flex-col items-center">
+          <motion.div variants={revealBanquetImmediately ? instantCardItemVariant : cardItemVariant} className="w-full flex flex-col items-center">
             <span className="font-sans text-[0.82rem] sm:text-[1.01rem] md:text-[1.08rem] tracking-[0.18em] font-bold text-[#7d7065] uppercase mb-1">
               Đón Khách
             </span>
@@ -573,7 +617,7 @@ export function EventDetailsContent({
           </motion.div>
 
           {/* Location */}
-          <motion.div variants={cardItemVariant} className="w-full flex flex-col items-center">
+          <motion.div variants={revealBanquetImmediately ? instantCardItemVariant : cardItemVariant} className="w-full flex flex-col items-center">
             <p className="font-serif text-[#3f4642] text-[1.2rem] sm:text-[1.48rem] md:text-[1.70rem] font-semibold leading-snug mb-0.5">
               Terracotta Hotel & Resort Đà Lạt
             </p>
@@ -585,7 +629,7 @@ export function EventDetailsContent({
           {/* Map Link */}
           {mapUrl ? (
             <motion.a 
-              variants={cardItemVariant}
+              variants={revealBanquetImmediately ? instantCardItemVariant : cardItemVariant}
               href={mapUrl} 
               target="_blank" 
               rel="noreferrer" 
@@ -599,11 +643,11 @@ export function EventDetailsContent({
           ) : null}
 
           {/* Divider */}
-          <motion.div variants={cardItemVariant} className="w-full border-t border-[#b4975a]/15 my-6" />
+          <motion.div variants={revealBanquetImmediately ? instantCardItemVariant : cardItemVariant} className="w-full border-t border-[#b4975a]/15 my-6" />
 
           {/* Timeline Section wrapped inside Card 2 */}
           {publicData?.timeline && publicData.timeline.length > 0 && (
-            <motion.div variants={cardItemVariant} className="w-full text-center">
+            <motion.div variants={revealBanquetImmediately ? instantCardItemVariant : cardItemVariant} className="w-full text-center">
               <h5 className="font-sans text-[0.88rem] sm:text-[0.94rem] md:text-[1rem] font-bold tracking-[0.22em] text-[#7d7065] uppercase leading-none mt-2 mb-3">
                 Chương trình tiệc
               </h5>
@@ -658,7 +702,7 @@ export function EventDetailsContent({
           )}
 
           {/* Section 3: Dress Code */}
-          <motion.div variants={cardItemVariant} className="pt-6 sm:pt-10 md:pt-12 pb-0 w-full">
+          <motion.div variants={revealBanquetImmediately ? instantCardItemVariant : cardItemVariant} className="pt-6 sm:pt-10 md:pt-12 pb-0 w-full">
             <DressCodeSection
               title={dressCodeTitle}
               note={dressCodeNote}
