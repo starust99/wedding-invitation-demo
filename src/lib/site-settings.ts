@@ -43,7 +43,7 @@ type SettingsInput = Partial<Omit<SiteSettings, "content">> & {
 
 export const draftStorageKey = "wedding-demo-draft-settings";
 export const publishedStorageKey = "wedding-demo-published-settings";
-export const settingsSchemaVersion = 21;
+export const settingsSchemaVersion = 22;
 
 export const defaultSettings: SiteSettings = {
   schemaVersion: settingsSchemaVersion,
@@ -555,6 +555,28 @@ export function normalizeSettings(settings: SettingsInput | null): SiteSettings 
         },
       };
     }
+  }
+
+  // Migration v22: Keep the displayed RSVP date and the actual edit deadline aligned.
+  if ((settings.schemaVersion ?? 0) < 22) {
+    content = {
+      ...content,
+      rsvp: {
+        ...content.rsvp,
+        deadline: defaultSettings.content.rsvp.deadline,
+      },
+      accommodation: {
+        ...content.accommodation,
+        rsvpDeadline: defaultSettings.content.accommodation.rsvpDeadline,
+      },
+      sections: {
+        ...content.sections,
+        cta: {
+          ...content.sections.cta,
+          buttonLabel: defaultSettings.content.sections.cta.buttonLabel,
+        },
+      },
+    };
   }
 
   return {

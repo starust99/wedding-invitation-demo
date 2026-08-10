@@ -63,7 +63,7 @@ export function RsvpSection({
         >
           <div className="relative z-10 mx-auto flex max-w-2xl flex-col items-center text-center">
             {hasResponded ? (
-              <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-emerald-500/40 bg-emerald-500/10 px-4 py-1.5 text-xs font-semibold text-emerald-800 dark:text-emerald-300 backdrop-blur-sm">
+              <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-emerald-500/40 bg-emerald-500/10 px-4 py-1.5 text-xs font-semibold text-[#3f4642]/95 backdrop-blur-sm">
                 <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
                 <span>{isDeclined ? "ĐÃ BÁO BẬN" : "ĐÃ XÁC NHẬN THAM DỰ"}</span>
               </div>
@@ -77,36 +77,23 @@ export function RsvpSection({
               <span className="h-2 w-2 rounded-full border border-[rgba(212,175,55,0.5)] bg-white/78" />
               <span className="h-px w-16 bg-[rgba(212,175,55,0.5)] sm:w-20" />
             </div>
-            <p suppressHydrationWarning className="wedding-type-meta font-sans mt-3.5 max-w-xl text-ink/62 uppercase tracking-wider" style={{ fontSize: "1.09em" }}>
-              QUÝ KHÁCH THÂN MẾN,
-            </p>
-
             {hasResponded ? (
               <>
-                <p className="wedding-type-body font-sans mt-4 max-w-2xl text-ink/80 font-medium">
+                <p className="wedding-type-body font-sans mt-4 max-w-2xl text-[#3f4642]/95 font-medium">
                   Cảm ơn Quý khách đã gửi lời hồi đáp cho hai gia đình.
                 </p>
-                <p className="wedding-type-body font-sans mt-2 max-w-2xl text-ink/68">
-                  Thông tin phản hồi của Quý khách đã được ghi nhận thành công trên hệ thống. Quý khách có thể xem lại hoặc chỉnh sửa thông tin tham dự bất kỳ lúc nào trước ngày <strong className="font-bold text-ink/90">{config.rsvp.deadline}</strong>.
+                <p className="wedding-type-body font-sans mt-2 max-w-2xl text-[#3f4642]/95">
+                  Thông tin phản hồi của Quý khách đã được ghi nhận thành công trên hệ thống. Quý khách có thể xem lại hoặc chỉnh sửa thông tin tham dự bất kỳ lúc nào trước ngày <strong className="font-bold text-[#3f4642]/95">{config.rsvp.deadline}</strong>.
+                </p>
+                <p className="wedding-type-body font-sans mt-2 max-w-xl text-[#3f4642]/95">
+                  Trân trọng cảm ơn.
                 </p>
               </>
             ) : (
-              <>
-                <p className="wedding-type-body font-sans mt-4 max-w-2xl text-ink/68">
-                  Sự hiện diện của Quý khách là niềm vinh hạnh lớn nhất của hai gia đình.
-                </p>
-                <p className="wedding-type-body font-sans mt-3.5 max-w-2xl text-ink/68">
-                  Để công tác đón tiếp được chuẩn bị chu đáo, xin Quý khách vui lòng xác nhận thông tin tham dự trước ngày <strong className="font-bold text-ink/90">{config.rsvp.deadline}</strong>.
-                </p>
-                <p className="wedding-type-body font-sans mt-3.5 max-w-xl text-ink/68">
-                  Xin bấm nút "Gửi hồi đáp" để điền thông tin.
-                </p>
-              </>
+              <p className="wedding-type-body font-sans mt-4 max-w-2xl text-[#3f4642]/95">
+                Để công tác đón tiếp được chuẩn bị chu đáo, xin Quý khách vui lòng nhấn nút “Xác nhận tham dự” để xác nhận thông tin tham dự trước ngày <strong className="font-bold text-[#3f4642]/95">{config.rsvp.deadline}</strong>. Trân trọng cảm ơn.
+              </p>
             )}
-
-            <p className="wedding-type-body font-sans mt-2 max-w-xl text-ink/68">
-              Trân trọng cảm ơn.
-            </p>
 
             <button
               type="button"
@@ -117,7 +104,7 @@ export function RsvpSection({
             >
               <span className="save-date-btn-label">
                 <HeartHandshake aria-hidden="true" className="w-4 h-4 sm:w-4.5 sm:h-4.5" />
-                <span>{hasResponded ? "Xem & Chỉnh sửa hồi đáp" : "XÁC NHẬN THAM DỰ"}</span>
+                <span>{hasResponded ? "Xem & Chỉnh sửa hồi đáp" : "Xác nhận tham dự"}</span>
               </span>
             </button>
           </div>

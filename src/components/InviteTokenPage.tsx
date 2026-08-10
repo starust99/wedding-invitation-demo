@@ -194,6 +194,13 @@ export function InviteTokenPage({ token, initialInvitee }: { token: string; init
   const activeRsvpObj = invitee?.rsvp || localRsvp;
   const hasHashThankYou = typeof window !== "undefined" && window.location.hash.includes("thank-you");
   const shouldShowThankYou = Boolean(activeRsvpObj || (invitee?.inviteStatus && invitee.inviteStatus !== "invited") || hasHashThankYou);
+  const isDeclinedResponse = activeRsvpObj?.attending === "no" || invitee?.inviteStatus === "rsvp_no";
+  const hasExplicitEventSelections = typeof activeRsvpObj?.attendingCeremony === "boolean"
+    || typeof activeRsvpObj?.attendingBanquet === "boolean";
+  const showChurchCard = !shouldShowThankYou
+    || (!isDeclinedResponse && (!hasExplicitEventSelections || activeRsvpObj?.attendingCeremony === true));
+  const showBanquetCard = !shouldShowThankYou
+    || (!isDeclinedResponse && (!hasExplicitEventSelections || activeRsvpObj?.attendingBanquet === true));
 
   useEffect(() => {
     if (loading || window.location.hash !== "#thank-you") return;
@@ -236,6 +243,8 @@ export function InviteTokenPage({ token, initialInvitee }: { token: string; init
       <WeddingDetailsSection
         config={config}
         guestIdentity={guestIdentity}
+        showChurchCard={showChurchCard}
+        showBanquetCard={showBanquetCard}
         responseSlot={!shouldShowThankYou ? (
           <RsvpSection config={config} guestIdentity={guestIdentity} rsvpHref={rsvpHref} invitee={invitee} embedded />
         ) : (

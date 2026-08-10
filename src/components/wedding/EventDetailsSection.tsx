@@ -23,6 +23,8 @@ export type EventDetailsSectionProps = {
   mapUrl?: string;
   publicData?: EventDetailsPublicData;
   responseSlot?: ReactNode;
+  showChurchCard?: boolean;
+  showBanquetCard?: boolean;
   onSelectAsset?: (id: EventDetailsAssetSlotId) => void;
   onPlacementChange?: (id: EventDetailsAssetSlotId, placement: EventDetailsPlacement) => void;
 };
@@ -81,6 +83,8 @@ export function EventDetailsSection({
   mapUrl,
   publicData,
   responseSlot,
+  showChurchCard = true,
+  showBanquetCard = true,
   onSelectAsset,
   onPlacementChange,
 }: EventDetailsSectionProps) {
@@ -119,6 +123,8 @@ export function EventDetailsSection({
         mapUrl={mapUrl}
         publicData={publicData}
         responseSlot={responseSlot}
+        showChurchCard={showChurchCard}
+        showBanquetCard={showBanquetCard}
       />
 
       <EventDetailsAssetLayer

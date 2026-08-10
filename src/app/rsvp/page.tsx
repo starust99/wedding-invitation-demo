@@ -118,7 +118,7 @@ type LodgingGuestForm = {
   age?: number;
 };
 
-const RSVP_GUEST_EDIT_DEADLINE = new Date("2026-09-26T00:00:00+07:00");
+const RSVP_GUEST_EDIT_DEADLINE = new Date("2026-09-30T00:00:00+07:00");
 const RSVP_INVITE_FETCH_TIMEOUT_MS = 10_000;
 const RSVP_DRAFT_STORAGE_PREFIX = "wedding-rsvp-draft:";
 
@@ -1074,7 +1074,7 @@ export default function RSVPPage() {
 
         {guestRsvpLocked ? (
           <p className="mb-6 rounded-2xl border border-serenity/22 bg-white/70 px-4 py-3 text-sm font-semibold text-[#252934]/72 text-center">
-            Đã hết hạn chỉnh sửa lời hồi đáp (sau 26/09/2026, 00:00 giờ Việt Nam). Vui lòng liên hệ gia đình nếu cần thay đổi.
+            Đã hết hạn chỉnh sửa lời hồi đáp (sau 30/09/2026, 00:00 giờ Việt Nam). Vui lòng liên hệ gia đình nếu cần thay đổi.
           </p>
         ) : null}
 

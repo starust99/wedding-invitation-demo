@@ -119,7 +119,7 @@ export const weddingConfig = {
       eyebrow: "Hồi đáp",
       title: "Xác nhận tham dự",
       description: "Gia đình mong nhận được lời hồi đáp sớm để chuẩn bị đón tiếp chu đáo.",
-      buttonLabel: "Gửi hồi đáp",
+      buttonLabel: "Xác nhận tham dự",
     },
   },
   appearance: {
@@ -222,7 +222,7 @@ export const weddingConfig = {
     title: "Hỗ trợ lưu trú tại resort",
     description:
       "Nếu khách mời cần hỗ trợ lưu trú tại resort, vui lòng đăng ký trong form RSVP để gia đình sắp xếp thông tin với Terracotta được chu đáo.",
-    rsvpDeadline: "26/09/2026",
+    rsvpDeadline: "30/09/2026",
   },
   gallery: [
     "https://res.cloudinary.com/dt1b5ua11/image/upload/c_limit,f_auto,q_auto,w_1800/v1/wedding-invitation-demo/gallery/2026-05-12-n-p-1_75a",
@@ -254,7 +254,7 @@ export const weddingConfig = {
     animationEnabled: true,
   },
   rsvp: {
-    deadline: "26/09/2026",
+    deadline: "30/09/2026",
     askAccommodation: true,
     askDietary: true,
     askTransport: false,

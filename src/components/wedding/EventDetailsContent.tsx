@@ -53,6 +53,8 @@ type EventDetailsContentProps = {
   mapUrl?: string;
   publicData?: EventDetailsPublicData;
   responseSlot?: ReactNode;
+  showChurchCard?: boolean;
+  showBanquetCard?: boolean;
 };
 
 
@@ -277,6 +279,8 @@ export function EventDetailsContent({
   mapUrl,
   publicData,
   responseSlot,
+  showChurchCard = true,
+  showBanquetCard = true,
 }: EventDetailsContentProps) {
   const compact = mode === "preview";
   const mobilePreview = compact && viewport === "mobile";
@@ -488,7 +492,7 @@ export function EventDetailsContent({
 
       {/* Unified Vertical Scrolling Layout for Mobile, Tablet, and Desktop */}
         {/* Card 1: Thánh lễ Hôn phối */}
-        <motion.div 
+        {showChurchCard ? <motion.div
           id="thanh-le-hon-phoi"
           initial="hidden"
           animate={revealChurchImmediately ? "visible" : undefined}
@@ -569,10 +573,10 @@ export function EventDetailsContent({
               <span>Chỉ đường</span>
             </span>
           </motion.a>
-        </motion.div>
+        </motion.div> : null}
 
         {/* Card 2: Tiệc Cưới Thân Mật (Unified Card) */}
-        <motion.div 
+        {showBanquetCard ? <motion.div
           id="tiec-cuoi"
           initial="hidden"
           animate={revealBanquetImmediately ? "visible" : undefined}
@@ -710,7 +714,7 @@ export function EventDetailsContent({
               setSelectedColorId={setSelectedColorId}
             />
           </motion.div>
-        </motion.div>
+        </motion.div> : null}
       </div>
 
     </div>

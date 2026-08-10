@@ -120,13 +120,13 @@ export function ThankYouSection({
                   <span className="h-2 w-2 rounded-full border border-[rgba(212,175,55,0.48)] bg-white/76" />
                   <span className="h-px w-16 bg-[rgba(212,175,55,0.46)] sm:w-20" />
                 </div>
-                <p suppressHydrationWarning className="wedding-type-body font-sans mx-auto mt-4 max-w-xl text-ink/66">
+                <p suppressHydrationWarning className="wedding-type-body font-sans mx-auto mt-4 max-w-xl text-[#3f4642]/95">
                   {thankYouMessage}
                 </p>
               </div>
 
               <div className="w-full">
-                <p suppressHydrationWarning className="wedding-type-card-title text-ink/74">
+                <p suppressHydrationWarning className="wedding-type-card-title text-[#3f4642]/95">
                   {inviteCopy.signaturePrefix}
                 </p>
 

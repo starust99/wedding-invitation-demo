@@ -11,10 +11,14 @@ export function WeddingDetailsSection({
   config,
   guestIdentity,
   responseSlot,
+  showChurchCard = true,
+  showBanquetCard = true,
 }: {
   config: WeddingConfig;
   guestIdentity?: GuestIdentity;
   responseSlot?: ReactNode;
+  showChurchCard?: boolean;
+  showBanquetCard?: boolean;
 }) {
   const [viewport, setViewport] = useState<EventDetailsViewportMode>("desktop");
   const inviteCopy = buildInvitationCopy({
@@ -39,6 +43,8 @@ export function WeddingDetailsSection({
       viewport={viewport}
       mapUrl={config.venue.mapUrl}
       responseSlot={responseSlot}
+      showChurchCard={showChurchCard}
+      showBanquetCard={showBanquetCard}
       publicData={{
         dateLabel: config.event.dateLabel,
         welcomeTime: config.event.welcomeTime,
