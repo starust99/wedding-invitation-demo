@@ -41,6 +41,6 @@ assert.match(thankYouSource, /wedding:reveal-event-card/);
 assert.match(eventDetailsSource, /id="thanh-le-hon-phoi"/);
 assert.match(eventDetailsSource, /id="tiec-cuoi"/);
 assert.match(eventDetailsSource, /instantCardVariant/);
-assert.match(globalStyles, /\.save-date-copy-arch\.save-date-guest-name \{[\s\S]*?color: #3f4642;[\s\S]*?font-style: italic;[\s\S]*?font-weight: 500;/);
+assert.match(globalStyles, /\.save-date-copy-arch\.save-date-guest-name \{[\s\S]*?color: #3f4642;[\s\S]*?font-family: var\(--font-eb-garamond\), Georgia, serif;[\s\S]*?font-style: italic;[\s\S]*?font-weight: 400;/);
 
 console.log("RSVP lodging, guest-group branching, navigation, error typography and hero copy checks passed.");

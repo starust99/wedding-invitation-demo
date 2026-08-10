@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Cormorant_Garamond, Be_Vietnam_Pro, Dancing_Script } from "next/font/google";
+import { EB_Garamond, Cormorant_Garamond, Be_Vietnam_Pro, Dancing_Script } from "next/font/google";
 import "./globals.css";
 import { PageTransitionEffect } from "@/components/PageTransitionEffect";
 import { InvitationWatercolorBackdrop } from "@/components/InvitationWatercolorBackdrop";
@@ -27,10 +27,20 @@ const dancingScript = Dancing_Script({
   variable: "--font-dancing-script",
 });
 
+const ebGaramond = EB_Garamond({
+  display: "swap",
+  preload: false,
+  subsets: ["latin", "vietnamese"],
+  variable: "--font-eb-garamond",
+  style: ["italic"],
+  weight: ["400"],
+});
+
 const fontVariables = [
   cormorantGaramond.variable,
   beVietnamPro.variable,
   dancingScript.variable,
+  ebGaramond.variable,
 ].join(" ");
 
 export const metadata: Metadata = {

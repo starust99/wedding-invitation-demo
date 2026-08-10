@@ -202,11 +202,7 @@ export function ReferenceWeddingHero({ config, summary }: ReferenceWeddingHeroPr
           <LineReveal delay={textBodyDelay} type="body" className="w-full">
             <p className={`save-date-copy save-date-copy-arch ${summary?.guestName ? "save-date-guest-name" : ""}`}>
               {summary?.guestName ? (
-                summary.guestName.split(/(&)/g).map((part, index) => part === "&" ? (
-                  <span key={`guest-ampersand-${index}`} className="save-date-guest-ampersand">
-                    &amp;
-                  </span>
-                ) : part)
+                summary.guestName
               ) : (
                 <CoupleNameText
                   text={invitationText}
