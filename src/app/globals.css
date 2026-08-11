@@ -1301,7 +1301,13 @@ textarea {
     width: calc(100% - 1rem);
     margin-left: auto !important;
     margin-right: auto !important;
-    transform: scale(1.225);
+    /*
+     * Preserve the desktop visual hierarchy on narrow screens. The artwork
+     * and guest name now keep the same 3.2:1 rendered-height ratio as the
+     * 1440px composition instead of letting the viewport-scaled name outrun
+     * the invitation heading.
+     */
+    transform: scale(1.35);
     transform-origin: 50% 50%;
   }
 
@@ -1366,8 +1372,14 @@ textarea {
     margin-top: 0.55rem !important;
     padding-left: 0.25rem;
     padding-right: 0.25rem;
-    font-size: clamp(1.35rem, 6.5vw, 1.9rem);
+    font-size: clamp(1.2rem, calc(6.937vw - 0.174rem), 1.595rem);
     line-height: 1.32;
+  }
+}
+
+@media (min-width: 768px) {
+  .save-date-copy-arch.save-date-guest-name {
+    font-size: 2.3rem;
   }
 }
 
