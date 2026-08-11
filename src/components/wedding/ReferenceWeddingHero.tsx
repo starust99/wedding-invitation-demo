@@ -1,10 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
 import { ChevronDown } from "lucide-react";
-import { LineReveal, checkIsIntroDone } from "@/components/ui/CinematicReveal";
+import { useReducedMotion } from "framer-motion";
+import { checkIsIntroDone } from "@/components/ui/CinematicReveal";
 import { CoupleNameText } from "@/components/ui/CoupleNameText";
+import { HeroInviteHandwriting } from "@/components/wedding/HeroInviteHandwriting";
 import type { WeddingHeroEditorConfig } from "@/lib/wedding/hero-types";
 
 type ReferenceWeddingHeroProps = {
@@ -60,6 +62,8 @@ function HeroGuestNameText({ text }: { text: string }) {
 export function ReferenceWeddingHero({ config, summary }: ReferenceWeddingHeroProps) {
   const [hasMounted, setHasMounted] = useState(false);
   const [isHeroAnimated, setIsHeroAnimated] = useState(false);
+  const [isInvitationWritten, setIsInvitationWritten] = useState(false);
+  const shouldReduceMotion = Boolean(useReducedMotion());
 
   useEffect(() => {
     setHasMounted(true);
@@ -95,11 +99,21 @@ export function ReferenceWeddingHero({ config, summary }: ReferenceWeddingHeroPr
     summary?.invitationLine || config.content.description,
   );
 
-  const textHeaderDelay = isDone ? 0 : 1.25;
-  const textBodyDelay = isDone ? 0 : 1.4;
+  const handwritingMode = shouldReduceMotion || heroMotionClass === "hero-static"
+    ? "static"
+    : heroMotionClass === "hero-animating"
+      ? "animating"
+      : "preparing";
+  const isGuestNameReady = handwritingMode === "static" || isInvitationWritten;
+  const handleInvitationWritten = useCallback(() => {
+    setIsInvitationWritten(true);
+  }, []);
 
   return (
-    <section id="home" className={`save-date-hero save-date-hero-arch ${heroMotionClass}`}>
+    <section
+      id="home"
+      className={`save-date-hero save-date-hero-arch ${heroMotionClass} ${shouldReduceMotion ? "hero-reduced-motion" : ""}`}
+    >
 
       <div
         className="save-date-name-logo-reveal"
@@ -114,7 +128,7 @@ export function ReferenceWeddingHero({ config, summary }: ReferenceWeddingHeroPr
           <img
             src="/assets/hero-names-logo-v9-centered.png"
             alt="Long Nhật"
-            className="absolute inset-0 w-full h-full object-contain pointer-events-none select-none"
+            className="hero-champagne-ink absolute inset-0 w-full h-full object-contain pointer-events-none select-none"
             style={{ clipPath: "inset(0 60% 0 0)" }}
             draggable={false}
           />
@@ -124,7 +138,7 @@ export function ReferenceWeddingHero({ config, summary }: ReferenceWeddingHeroPr
             <img
               src="/assets/icon-cross-new.png"
               alt="Thập giá"
-              className="save-date-new-cross pointer-events-none"
+              className="hero-cross-gold save-date-new-cross pointer-events-none"
               draggable={false}
             />
           </div>
@@ -133,7 +147,7 @@ export function ReferenceWeddingHero({ config, summary }: ReferenceWeddingHeroPr
           <img
             src="/assets/hero-names-logo-v9-centered.png"
             alt="Anh Phương"
-            className="absolute inset-0 w-full h-full object-contain pointer-events-none select-none"
+            className="hero-champagne-ink absolute inset-0 w-full h-full object-contain pointer-events-none select-none"
             style={{ clipPath: "inset(0 0 0 60%)" }}
             draggable={false}
           />
@@ -214,31 +228,24 @@ export function ReferenceWeddingHero({ config, summary }: ReferenceWeddingHeroPr
         </div>
 
         <article className="save-date-hero-copy-block">
-          <LineReveal delay={textHeaderDelay} type="header" className="w-full">
-            <div className="save-date-invite-heading-image" aria-label="Trân trọng kính mời">
-              <Image
-                src="/assets/hero-invite-heading-v5.png"
-                alt=""
-                fill
-                priority
-                aria-hidden="true"
-                sizes="(max-width: 767px) 78vw, 24rem"
-                className="object-contain"
-              />
+          <HeroInviteHandwriting
+            mode={handwritingMode}
+            onComplete={handleInvitationWritten}
+          />
+          <div className="w-full">
+            <div className={`hero-text-fade-body ${isGuestNameReady ? "is-sequence-ready" : ""}`}>
+              <p className={`save-date-copy save-date-copy-arch ${summary?.guestName ? "save-date-guest-name" : ""}`}>
+                {summary?.guestName ? (
+                  <HeroGuestNameText text={summary.guestName} />
+                ) : (
+                  <CoupleNameText
+                    text={invitationText}
+                    coupleName={summary?.coupleDisplayName || config.content.names}
+                  />
+                )}
+              </p>
             </div>
-          </LineReveal>
-          <LineReveal delay={textBodyDelay} type="body" className="w-full">
-            <p className={`save-date-copy save-date-copy-arch ${summary?.guestName ? "save-date-guest-name" : ""}`}>
-              {summary?.guestName ? (
-                <HeroGuestNameText text={summary.guestName} />
-              ) : (
-                <CoupleNameText
-                  text={invitationText}
-                  coupleName={summary?.coupleDisplayName || config.content.names}
-                />
-              )}
-            </p>
-          </LineReveal>
+          </div>
         </article>
       </div>
 

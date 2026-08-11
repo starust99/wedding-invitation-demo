@@ -56,6 +56,19 @@
   filter: invert(38%) sepia(12%) saturate(980%) hue-rotate(345deg) brightness(90%) contrast(87%);
 }
 
+/* A single flat antique-gold ink for the hero lettering and cross. The
+   brightness(0) reset keeps the result independent of the source PNG color,
+   while retaining the artwork's original alpha/edge detail. */
+.hero-champagne-ink {
+  filter: brightness(0) saturate(100%) invert(29.72%) sepia(50.01%)
+    saturate(1812.55%) hue-rotate(356.24deg) brightness(112.88%) contrast(31.44%);
+}
+
+.hero-cross-gold {
+  filter: brightness(0) saturate(100%) invert(41.74%) sepia(59.73%)
+    saturate(275.44%) hue-rotate(358.36deg) brightness(114.23%) contrast(129.19%);
+}
+
 /* Use the ornament artwork strictly as an alpha mask so its old uneven
    brown/gold pixels cannot show through. The resulting gold matches the
    marriage-title divider and stays identical in all four corners. */
@@ -1239,8 +1252,15 @@ textarea {
   width: min(100%, 78.8rem);
   aspect-ratio: 1821 / 395;
   margin: 0.35rem auto;
-  filter: brightness(0.72) saturate(1.35);
+  filter: none;
   transform: scale(1.225);
+}
+
+.hero-invite-handwriting-svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
 }
 
 @media (max-width: 767px) {
@@ -4314,8 +4334,13 @@ html.gallery-lightbox-open body {
 
 .save-date-hero.hero-animating .hero-text-fade-body {
   opacity: 0;
-  animation: heroTextKeyframes 2.2s cubic-bezier(0.16, 1, 0.3, 1) 1.5s forwards !important;
+  transform: translateY(8px);
+  animation: none !important;
   transition: none !important;
+}
+
+.save-date-hero.hero-animating .hero-text-fade-body.is-sequence-ready {
+  animation: heroTextKeyframes 0.72s cubic-bezier(0.16, 1, 0.3, 1) 0s forwards !important;
 }
 
 /* Instant splash skip dialog hide styles */
@@ -4370,6 +4395,18 @@ html.splash-skipped body {
 .save-date-hero.hero-static .hero-text-fade-body {
   opacity: 0;
   animation: heroTextKeyframes 1.0s cubic-bezier(0.25, 1, 0.5, 1) 0.7s forwards !important;
+  transition: none !important;
+}
+
+.save-date-hero.hero-reduced-motion .hero-logo-fade,
+.save-date-hero.hero-reduced-motion .hero-photo-fade,
+.save-date-hero.hero-reduced-motion .hero-ornament-fade-left,
+.save-date-hero.hero-reduced-motion .hero-ornament-fade-right,
+.save-date-hero.hero-reduced-motion .hero-text-fade-header,
+.save-date-hero.hero-reduced-motion .hero-text-fade-body {
+  opacity: 1 !important;
+  transform: none !important;
+  animation: none !important;
   transition: none !important;
 }
 
