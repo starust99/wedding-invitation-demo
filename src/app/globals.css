@@ -1219,11 +1219,9 @@ textarea {
 @media (max-width: 767px) {
   .save-date-hero-copy-block {
     margin-top: 0.75rem !important;
-    padding-inline: 1.2rem;
   }
   .save-date-copy-arch {
     margin-top: 0.5rem !important;
-    padding-inline: 0.6rem;
   }
 }
 
@@ -1276,26 +1274,41 @@ textarea {
 }
 
 @media (max-width: 767px) {
+  .save-date-hero-arch .save-date-arch-shell {
+    width: 100%;
+    max-width: 24rem;
+  }
+
+  /*
+   * Keep the invitation copy in normal, full-width flow on mobile. iOS WebKit
+   * can paint transformed descendants off-center when their flex item is also
+   * grid-centered with min()/logical sizing. Stretching one physical box makes
+   * the artwork and guest name share the exact same, stable center line.
+   */
   .save-date-hero-copy-block {
-    align-self: center;
-    width: min(100%, 24rem);
-    max-width: 100%;
-    padding-inline: 0;
-    transform: translate3d(var(--hero-visual-center-offset, 0px), 0, 0);
+    display: block;
+    align-self: stretch;
+    width: auto;
+    max-width: none;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    padding-left: 0;
+    padding-right: 0;
+    transform: none;
   }
 
   .save-date-invite-heading-image {
     width: calc(100% - 1rem);
-    margin-inline: auto !important;
-    justify-self: center;
+    margin-left: auto !important;
+    margin-right: auto !important;
     transform: scale(1.225);
-    transform-origin: center;
+    transform-origin: 50% 50%;
   }
 
   .save-date-copy-arch.save-date-guest-name {
     width: calc(100% - 1rem);
-    margin-inline: auto !important;
-    justify-self: center;
+    margin-left: auto !important;
+    margin-right: auto !important;
   }
 }
 
@@ -1351,7 +1364,8 @@ textarea {
   .save-date-copy-arch.save-date-guest-name {
     max-width: 21rem;
     margin-top: 0.55rem !important;
-    padding-inline: 0.25rem;
+    padding-left: 0.25rem;
+    padding-right: 0.25rem;
     font-size: clamp(1.35rem, 6.5vw, 1.9rem);
     line-height: 1.32;
   }
