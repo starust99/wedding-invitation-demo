@@ -82,39 +82,68 @@ export function ReferenceWeddingHero({ config, summary }: ReferenceWeddingHeroPr
 
     const visualViewport = window.visualViewport;
     let frame = 0;
+    let settleFrame = 0;
 
     const alignToVisibleViewport = () => {
       window.cancelAnimationFrame(frame);
+      window.cancelAnimationFrame(settleFrame);
       frame = window.requestAnimationFrame(() => {
-        // Some iOS in-app browsers paint against a wider layout viewport while
-        // clipping the page to a narrower visual viewport. CSS auto margins then
-        // center this copy in the hidden layout area, which makes it look shifted
-        // to the right. Correct only that delta; normal Safari/Chrome resolve to 0.
+        // iOS WebKit can resolve this flex/grid child's painted center differently
+        // from the document center. Measure the element that is actually painted
+        // instead of inferring its position from layout-viewport dimensions.
         if (visualViewport && visualViewport.scale > 1.05) return;
 
-        const layoutWidth = document.documentElement.clientWidth || window.innerWidth;
         const visibleLeft = visualViewport?.offsetLeft ?? 0;
         const visibleWidth = visualViewport?.width ?? window.innerWidth;
         const visibleCenter = visibleLeft + visibleWidth / 2;
-        const layoutCenter = layoutWidth / 2;
-        const correction = Math.max(-32, Math.min(32, visibleCenter - layoutCenter));
+        const currentCorrection = Number.parseFloat(
+          copyBlock.style.getPropertyValue("--hero-visual-center-offset"),
+        ) || 0;
+        const copyRect = copyBlock.getBoundingClientRect();
+        const paintedCenter = copyRect.left + copyRect.width / 2;
+        const centerDelta = visibleCenter - paintedCenter;
+        const correction = Math.max(
+          -48,
+          Math.min(48, currentCorrection + centerDelta),
+        );
 
         copyBlock.style.setProperty(
           "--hero-visual-center-offset",
           `${Math.abs(correction) < 0.5 ? 0 : correction}px`,
         );
+
+        // Give WebKit one paint to commit the transform, then make one bounded
+        // verification pass. This avoids a visible correction loop.
+        settleFrame = window.requestAnimationFrame(() => {
+          const settledRect = copyBlock.getBoundingClientRect();
+          const remainingDelta = visibleCenter - (settledRect.left + settledRect.width / 2);
+          if (Math.abs(remainingDelta) < 0.5) return;
+
+          const settledCorrection = Math.max(
+            -48,
+            Math.min(48, correction + remainingDelta),
+          );
+          copyBlock.style.setProperty(
+            "--hero-visual-center-offset",
+            `${Math.abs(settledCorrection) < 0.5 ? 0 : settledCorrection}px`,
+          );
+        });
       });
     };
 
     alignToVisibleViewport();
     window.addEventListener("resize", alignToVisibleViewport);
     window.addEventListener("orientationchange", alignToVisibleViewport);
+    window.addEventListener("pageshow", alignToVisibleViewport);
     visualViewport?.addEventListener("resize", alignToVisibleViewport);
+    document.fonts?.ready.then(alignToVisibleViewport).catch(() => undefined);
 
     return () => {
       window.cancelAnimationFrame(frame);
+      window.cancelAnimationFrame(settleFrame);
       window.removeEventListener("resize", alignToVisibleViewport);
       window.removeEventListener("orientationchange", alignToVisibleViewport);
+      window.removeEventListener("pageshow", alignToVisibleViewport);
       visualViewport?.removeEventListener("resize", alignToVisibleViewport);
     };
   }, []);
