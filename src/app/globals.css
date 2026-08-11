@@ -1276,8 +1276,25 @@ textarea {
 }
 
 @media (max-width: 767px) {
+  .save-date-hero-copy-block {
+    align-self: center;
+    width: min(100%, 24rem);
+    max-width: 100%;
+    padding-inline: 0;
+  }
+
   .save-date-invite-heading-image {
-    width: 100%;
+    width: calc(100% - 1rem);
+    margin-inline: auto !important;
+    justify-self: center;
+    transform: scale(1.225);
+    transform-origin: center;
+  }
+
+  .save-date-copy-arch.save-date-guest-name {
+    width: calc(100% - 1rem);
+    margin-inline: auto !important;
+    justify-self: center;
   }
 }
 
@@ -4283,6 +4300,38 @@ html.gallery-lightbox-open body {
   }
 }
 
+@keyframes heroGuestNameRevealKeyframes {
+  0% {
+    opacity: 0;
+    transform: translate3d(-8px, 2px, 0);
+    filter: blur(3px);
+    -webkit-mask-position: 100% 0;
+    mask-position: 100% 0;
+  }
+  38% {
+    opacity: 0.72;
+    filter: blur(1.4px);
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+    filter: blur(0);
+    -webkit-mask-position: 0 0;
+    mask-position: 0 0;
+  }
+}
+
+.hero-guest-name-reveal {
+  -webkit-mask-image: linear-gradient(90deg, #000 0%, #000 55%, transparent 70%);
+  mask-image: linear-gradient(90deg, #000 0%, #000 55%, transparent 70%);
+  -webkit-mask-size: 220% 100%;
+  mask-size: 220% 100%;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: 100% 0;
+  mask-position: 100% 0;
+}
+
 .hero-logo-fade,
 .hero-photo-fade,
 .hero-ornament-fade-left,
@@ -4355,6 +4404,10 @@ html.gallery-lightbox-open body {
   animation: heroTextKeyframes 0.72s cubic-bezier(0.16, 1, 0.3, 1) 0s forwards !important;
 }
 
+.save-date-hero.hero-animating .hero-text-fade-body.hero-guest-name-reveal.is-sequence-ready {
+  animation: heroGuestNameRevealKeyframes 1.85s cubic-bezier(0.42, 0, 0.2, 1) 0s forwards !important;
+}
+
 /* Instant splash skip dialog hide styles */
 html.splash-active,
 html.splash-active body {
@@ -4410,6 +4463,10 @@ html.splash-skipped body {
   transition: none !important;
 }
 
+.save-date-hero.hero-static .hero-text-fade-body.hero-guest-name-reveal {
+  animation: heroGuestNameRevealKeyframes 1.68s cubic-bezier(0.42, 0, 0.2, 1) 0.72s forwards !important;
+}
+
 .save-date-hero.hero-reduced-motion .hero-logo-fade,
 .save-date-hero.hero-reduced-motion .hero-photo-fade,
 .save-date-hero.hero-reduced-motion .hero-ornament-fade-left,
@@ -4418,6 +4475,9 @@ html.splash-skipped body {
 .save-date-hero.hero-reduced-motion .hero-text-fade-body {
   opacity: 1 !important;
   transform: none !important;
+  filter: none !important;
+  -webkit-mask-image: none !important;
+  mask-image: none !important;
   animation: none !important;
   transition: none !important;
 }

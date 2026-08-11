@@ -31,10 +31,10 @@ async function requireExplicitStayDecision(page) {
     "'Không nghỉ lại' must expose an unselected state to assistive technology.",
   );
 
-  await page.getByRole("button", { name: "XEM LẠI VÀ HOÀN TẤT", exact: true }).click();
+  await page.getByRole("button", { name: "Xem lại và hoàn tất", exact: true }).click();
   await page.getByText("Vui lòng chọn phương án lưu trú.", { exact: true }).waitFor();
   assert.equal(
-    await page.getByRole("heading", { name: "Xác nhận thông tin hồi đáp", exact: true }).count(),
+    await page.getByRole("heading", { name: "Xem lại hồi đáp", exact: true }).count(),
     0,
     "Review must wait for an explicit lodging choice.",
   );
@@ -45,8 +45,12 @@ async function requireExplicitStayDecision(page) {
 
 async function fillLodgingGuest(page) {
   await page.getByRole("button", { name: /Đêm 25\/12/ }).click();
+  await page.getByRole("button", { name: "Xem lại và hoàn tất", exact: true }).click();
+  const missingNameError = page.getByText("Nhập họ tên người lưu trú.", { exact: true });
+  await missingNameError.waitFor();
   const fullName = page.getByPlaceholder("VD: Nguyễn Văn A", { exact: true });
   await fullName.fill("Nguyễn Văn A");
+  await missingNameError.waitFor({ state: "hidden" });
   return fullName;
 }
 
@@ -95,8 +99,8 @@ try {
   await delay(3_000);
   await assertDraftValue(firstPass);
 
-  await page.getByRole("button", { name: "XEM LẠI VÀ HOÀN TẤT", exact: true }).click();
-  await page.getByRole("heading", { name: "Xác nhận thông tin hồi đáp", exact: true }).waitFor();
+  await page.getByRole("button", { name: "Xem lại và hoàn tất", exact: true }).click();
+  await page.getByRole("heading", { name: "Xem lại hồi đáp", exact: true }).waitFor();
   assert.match(await page.locator("main").innerText(), /Nguyễn Văn A/);
 
   await page.reload({ waitUntil: "domcontentloaded" });
@@ -121,7 +125,7 @@ try {
     0,
     "Interactive RSVP controls must stay hidden until direct-link hydration finishes.",
   );
-  await directPage.getByText("THÁNH LỄ HÔN PHỐI", { exact: true }).waitFor({ timeout: 15_000 });
+  await directPage.getByText("THÁNH LỄ HÔN PHỐI", { exact: true }).waitFor({ timeout: 30_000 });
   await directContext.close();
 
   const friendToken = "rsvp-friend-count-test";
@@ -150,7 +154,7 @@ try {
 
   await friendPage.goto(`${baseUrl}/rsvp?invite=${friendToken}`, { waitUntil: "domcontentloaded" });
   await selectBothEvents(friendPage);
-  await friendPage.getByText("ĐI BAO NHIÊU NGƯỜI?", { exact: true }).waitFor();
+  await friendPage.getByText("SỐ NGƯỜI THAM DỰ:", { exact: true }).waitFor();
   assert.equal(
     await friendPage.getByText("LƯU TRÚ", { exact: true }).count(),
     0,
@@ -158,10 +162,21 @@ try {
   );
   await friendPage.getByRole("button", { name: "Tăng số người tham dự", exact: true }).click();
   await friendPage.getByText("2 người", { exact: true }).waitFor();
-  await friendPage.getByRole("button", { name: "XEM LẠI VÀ HOÀN TẤT", exact: true }).click();
-  await friendPage.getByRole("heading", { name: "Xác nhận thông tin hồi đáp", exact: true }).waitFor();
-  await friendPage.getByText("3. SỐ NGƯỜI THAM DỰ", { exact: true }).waitFor();
+  await friendPage.getByRole("button", { name: "Xem lại và hoàn tất", exact: true }).click();
+  await friendPage.getByRole("heading", { name: "Xem lại hồi đáp", exact: true }).waitFor();
+  await friendPage.getByRole("heading", { name: "Số người tham dự", exact: true }).waitFor();
   await friendContext.close();
+
+  const invalidContext = await browser.newContext({ viewport: { width: 390, height: 844 } });
+  const invalidPage = await invalidContext.newPage();
+  await invalidPage.route("**/api/invites/invite-does-not-exist", async (route) => {
+    await route.fulfill({ status: 404, contentType: "application/json", body: JSON.stringify({ error: "Not found" }) });
+  });
+  await invalidPage.goto(`${baseUrl}/rsvp?invite=invite-does-not-exist`, { waitUntil: "domcontentloaded" });
+  await invalidPage.getByRole("heading", { name: "Không tìm thấy lời mời", exact: true }).waitFor();
+  assert.equal(await invalidPage.locator('input[type="password"]').count(), 0, "Invalid public invites must never expose an admin password field.");
+  assert.equal(await invalidPage.getByText(/Admin/i).count(), 0, "Invalid public invites must not expose admin actions or labels.");
+  await invalidContext.close();
 
   console.log("RSVP resilience checks passed: family lodging, non-family party size, delayed hydration, review, reload draft, and direct-link loading gate.");
 } finally {

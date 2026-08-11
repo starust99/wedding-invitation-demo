@@ -102,6 +102,29 @@ guest is marked as a child, RSVP explains that the numeric age helps the family
 arrange a suitable room and bed, keeps `VD: 5` in the age input, and reports a
 missing value as `Nhập tuổi của bé`.
 
+## RSVP Review and Invalid Invitation Presentation
+
+The public invalid-invitation state is guest-facing only. It explains that the
+personal invitation could not be found and offers a safe retry path without
+rendering an admin password field or admin action.
+
+The RSVP review preserves the same event, lodging, and guest-count data but
+presents it as a flat summary with hairline separators. It does not use numbered
+form sections, nested cards, or filled status pills. On narrow screens, event
+status moves below the event date so neither value is compressed.
+
+Inline validation remains attached to the exact field requiring attention and
+is cleared as soon as that field becomes valid. These presentation rules do not
+change draft storage, API payloads, invite eligibility, or RSVP persistence.
+
+## Hero Invitation Alignment
+
+On narrow mobile and in-app browser viewports, the handwritten invitation
+heading and personalized guest name share one deterministic horizontal center.
+The heading artwork, its divider, and star use the approved flat `#9B7134` ink
+instead of depending on WebView-specific CSS filter rendering. This does not
+change the hero copy, reveal order, splash behavior, or guest-name data.
+
 ## Compatibility
 
 Existing imported invitees may not have a stored `Cụm danh xưng`. A

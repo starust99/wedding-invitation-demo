@@ -12,6 +12,7 @@ const HEADING_ASSET = "/assets/hero-invite-heading-v5.png";
 const REVEAL_MAP_ASSET = "/assets/hero-invite-reveal-map-v2.png";
 const CANVAS_WIDTH = 800;
 const CANVAS_HEIGHT = 267;
+const HERO_INVITE_INK = "#9B7134";
 const writeEase = [0.42, 0, 0.2, 1] as const;
 const writeStart = 0.46;
 const phraseDuration = 4.775;
@@ -78,6 +79,10 @@ export function HeroInviteHandwriting({ mode, onComplete }: HeroInviteHandwritin
         if (!sourceContext || !mapContext) return;
 
         sourceContext.drawImage(heading, 0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+        sourceContext.globalCompositeOperation = "source-in";
+        sourceContext.fillStyle = HERO_INVITE_INK;
+        sourceContext.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+        sourceContext.globalCompositeOperation = "source-over";
         mapContext.drawImage(revealMap, 0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
 
         const sourcePixels = sourceContext.getImageData(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
@@ -169,7 +174,7 @@ export function HeroInviteHandwriting({ mode, onComplete }: HeroInviteHandwritin
           ref={canvasRef}
           width={CANVAS_WIDTH}
           height={CANVAS_HEIGHT}
-          className="hero-invite-handwriting-canvas hero-champagne-ink"
+          className="hero-invite-handwriting-canvas"
           aria-hidden="true"
         />
       ) : null}
@@ -182,6 +187,25 @@ export function HeroInviteHandwriting({ mode, onComplete }: HeroInviteHandwritin
         focusable="false"
       >
         <defs>
+          <mask
+            id={`${ornamentMaskId}Artwork`}
+            maskUnits="userSpaceOnUse"
+            maskContentUnits="userSpaceOnUse"
+            x="0"
+            y="0"
+            width="800"
+            height="267"
+            style={{ maskType: "alpha" }}
+          >
+            <image
+              href={HEADING_ASSET}
+              x="0"
+              y="0"
+              width="800"
+              height="267"
+              preserveAspectRatio="xMidYMid meet"
+            />
+          </mask>
           <mask
             id={ornamentMaskId}
             maskUnits="userSpaceOnUse"
@@ -250,28 +274,27 @@ export function HeroInviteHandwriting({ mode, onComplete }: HeroInviteHandwritin
         </defs>
 
         {isStatic ? (
-          <image
-            href={HEADING_ASSET}
+          <rect
             x="0"
             y="0"
             width="800"
             height="267"
-            preserveAspectRatio="xMidYMid meet"
-            className="hero-champagne-ink"
+            fill={HERO_INVITE_INK}
+            mask={`url(#${ornamentMaskId}Artwork)`}
           />
         ) : null}
 
         {isAnimating ? (
-          <image
-            href={HEADING_ASSET}
-            x="0"
-            y="0"
-            width="800"
-            height="267"
-            preserveAspectRatio="xMidYMid meet"
-            mask={`url(#${ornamentMaskId})`}
-            className="hero-champagne-ink"
-          />
+          <g mask={`url(#${ornamentMaskId})`}>
+            <rect
+              x="0"
+              y="0"
+              width="800"
+              height="267"
+              fill={HERO_INVITE_INK}
+              mask={`url(#${ornamentMaskId}Artwork)`}
+            />
+          </g>
         ) : null}
       </svg>
     </div>

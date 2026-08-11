@@ -233,7 +233,7 @@ export function ReferenceWeddingHero({ config, summary }: ReferenceWeddingHeroPr
             onComplete={handleInvitationWritten}
           />
           <div className="w-full">
-            <div className={`hero-text-fade-body ${isGuestNameReady ? "is-sequence-ready" : ""}`}>
+            <div className={`hero-text-fade-body hero-guest-name-reveal ${isGuestNameReady ? "is-sequence-ready" : ""}`}>
               <p className={`save-date-copy save-date-copy-arch ${summary?.guestName ? "save-date-guest-name" : ""}`}>
                 {summary?.guestName ? (
                   <HeroGuestNameText text={summary.guestName} />
