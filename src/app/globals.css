@@ -687,9 +687,51 @@ textarea {
 
 .save-date-arch-wrapper {
   position: relative;
-  width: min(92vw, 42rem);
+  flex: none;
+  width: min(calc(100dvw - 2rem), 42rem);
   max-width: 42rem;
-  margin: 0 auto;
+  margin: 0;
+  justify-self: center;
+  transform-origin: 50% 50%;
+}
+
+/*
+ * A viewport-centred rail keeps the hero portrait independent from the flex
+ * shell's cached intrinsic geometry. This matters when a browser restores the
+ * invitation from BFCache after visiting the admin editor: the visual remains
+ * pinned to the physical viewport centre even if the old flex calculation is
+ * reused for one paint.
+ */
+.save-date-arch-visual-rail {
+  position: relative;
+  display: grid;
+  width: 100dvw;
+  max-width: 100dvw;
+  margin-inline: calc(50% - 50dvw);
+  place-items: center;
+  overflow: visible;
+  contain: layout;
+}
+
+@supports not (width: 100dvw) {
+  .save-date-arch-wrapper {
+    width: min(calc(100vw - 2rem), 42rem);
+  }
+
+  .save-date-arch-visual-rail {
+    width: 100vw;
+    max-width: 100vw;
+    margin-inline: calc(50% - 50vw);
+  }
+}
+
+.save-date-arch-wrapper > .hero-photo-fade,
+.save-date-arch-wrapper .save-date-arch-figure,
+.save-date-arch-wrapper .save-date-arch-composite-svg {
+  width: 100%;
+  max-width: 100%;
+  margin-inline: auto;
+  transform-origin: 50% 50%;
 }
 
 

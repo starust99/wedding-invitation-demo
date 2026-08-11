@@ -92,7 +92,7 @@ function DateDisplayStack({ dateParsed, lunarText }: { dateParsed: { day: string
             <path d="M12 2Q12 12 22 12Q12 12 12 22Q12 12 2 12Q12 12 12 2" />
           </svg>
           
-          <div className="font-sans text-[0.68rem] sm:text-[0.93rem] md:text-[1.11rem] tracking-[0.12em] font-bold text-[#7d7065] uppercase whitespace-nowrap px-1">
+          <div className="font-sans text-[0.75rem] sm:text-[1rem] md:text-[1.15rem] tracking-[0.1em] font-bold text-[#645b53] uppercase whitespace-nowrap px-1">
             {dateParsed.weekday}
           </div>
         </div>
@@ -110,12 +110,12 @@ function DateDisplayStack({ dateParsed, lunarText }: { dateParsed: { day: string
 
           {/* Middle Column: Day */}
           {dateParsed.day.trim().length === 2 ? (
-            <div className="flex items-center justify-center font-serif text-[4.2rem] sm:text-[6.77rem] md:text-[7.63rem] font-light leading-none text-[#b4975a] select-none translate-y-[-0.09em] mx-1 sm:mx-2 md:mx-3">
+            <div className="flex items-center justify-center font-serif text-[4.2rem] sm:text-[6.77rem] md:text-[7.63rem] font-normal leading-none text-[#9b7134] select-none translate-y-[-0.09em] mx-1 sm:mx-2 md:mx-3">
               <span className="w-[1.9rem] sm:w-[3.08rem] md:w-[3.57rem] text-right">{dateParsed.day.trim()[0]}</span>
               <span className="w-[1.9rem] sm:w-[3.08rem] md:w-[3.57rem] text-left">{dateParsed.day.trim()[1]}</span>
             </div>
           ) : (
-            <div className="font-serif text-[4.2rem] sm:text-[6.77rem] md:text-[7.63rem] font-light leading-none text-[#b4975a] text-center translate-y-[-0.09em] min-w-[3.8rem] sm:min-w-[6.15rem] md:min-w-[7.13rem] mx-1 sm:mx-2 md:mx-3">
+            <div className="font-serif text-[4.2rem] sm:text-[6.77rem] md:text-[7.63rem] font-normal leading-none text-[#9b7134] text-center translate-y-[-0.09em] min-w-[3.8rem] sm:min-w-[6.15rem] md:min-w-[7.13rem] mx-1 sm:mx-2 md:mx-3">
               {dateParsed.day}
             </div>
           )}
@@ -141,14 +141,14 @@ function DateDisplayStack({ dateParsed, lunarText }: { dateParsed: { day: string
             <path d="M12 2Q12 12 22 12Q12 12 12 22Q12 12 2 12Q12 12 12 2" />
           </svg>
 
-          <div className="font-sans text-[0.62rem] sm:text-[0.93rem] md:text-[1.11rem] tracking-[0.06em] font-bold text-[#7d7065] uppercase whitespace-nowrap px-1">
+          <div className="font-sans text-[0.7rem] sm:text-[0.98rem] md:text-[1.12rem] tracking-[0.035em] font-bold text-[#645b53] uppercase whitespace-nowrap px-1">
             THÁNG {dateParsed.month} • {dateParsed.year}
           </div>
         </div>
       </div>
 
       {/* Lunar Calendar Date */}
-      <div className="font-serif text-[#7d7065] text-[1.18rem] sm:text-[1.45rem] md:text-[1.66rem] italic tracking-wide mt-2 select-none">
+      <div className="font-serif text-[#5c554e] text-[1.22rem] sm:text-[1.52rem] md:text-[1.74rem] italic font-medium tracking-[0.025em] leading-snug mt-2 px-2 text-balance select-none">
         {lunarText}
       </div>
     </div>
@@ -542,20 +542,20 @@ export function EventDetailsContent({
 
           {/* Time Display */}
           <motion.div variants={revealChurchImmediately ? instantCardItemVariant : cardItemVariant} className="w-full flex flex-col items-center">
-            <span className="font-sans text-[0.82rem] sm:text-[1.01rem] md:text-[1.08rem] tracking-[0.18em] font-bold text-[#7d7065] uppercase mb-1">
+            <span className="font-sans text-[0.9rem] sm:text-[1.05rem] md:text-[1.14rem] tracking-[0.17em] font-bold text-[#6a5f56] uppercase mb-1.5">
               Cử Hành
             </span>
-            <div className="font-serif text-[2.35rem] sm:text-[2.89rem] md:text-[3.32rem] font-light text-[#3f4642] tracking-wider leading-none mb-3">
+            <div className="font-serif text-[2.55rem] sm:text-[3.05rem] md:text-[3.45rem] font-normal text-[#303936] tracking-[0.045em] leading-none mb-3.5">
               {publicData?.churchTime || content.churchTime || "10:00"}
             </div>
           </motion.div>
 
           {/* Location */}
           <motion.div variants={revealChurchImmediately ? instantCardItemVariant : cardItemVariant} className="w-full flex flex-col items-center">
-            <p className="font-serif text-[#3f4642] text-[1.2rem] sm:text-[1.48rem] md:text-[1.70rem] font-semibold leading-snug mb-0.5">
+            <p className="max-w-full font-serif text-[#303936] text-[1.28rem] sm:text-[1.55rem] md:text-[1.78rem] font-semibold leading-[1.25] text-balance break-words mb-1">
               {content.churchLocation || "Nhà Thờ Giáo Xứ Tam Hải"}
             </p>
-            <p className="font-serif text-[#6e5949] text-[1.02rem] sm:text-[1.25rem] md:text-[1.41rem] italic leading-snug mb-5">
+            <p className="max-w-full font-serif text-[#544d47] text-[1.08rem] sm:text-[1.3rem] md:text-[1.47rem] italic font-medium leading-[1.35] text-balance break-words mb-5">
               180 Đ. Tam Châu, Tam Bình, Thủ Đức
             </p>
           </motion.div>
@@ -612,20 +612,20 @@ export function EventDetailsContent({
 
           {/* Time Display */}
           <motion.div variants={revealBanquetImmediately ? instantCardItemVariant : cardItemVariant} className="w-full flex flex-col items-center">
-            <span className="font-sans text-[0.82rem] sm:text-[1.01rem] md:text-[1.08rem] tracking-[0.18em] font-bold text-[#7d7065] uppercase mb-1">
+            <span className="font-sans text-[0.9rem] sm:text-[1.05rem] md:text-[1.14rem] tracking-[0.17em] font-bold text-[#6a5f56] uppercase mb-1.5">
               Đón Khách
             </span>
-            <div className="font-serif text-[2.35rem] sm:text-[2.89rem] md:text-[3.32rem] font-light text-[#3f4642] tracking-wider leading-none mb-3">
+            <div className="font-serif text-[2.55rem] sm:text-[3.05rem] md:text-[3.45rem] font-normal text-[#303936] tracking-[0.045em] leading-none mb-3.5">
               {publicData?.welcomeTime || "17:30"}
             </div>
           </motion.div>
 
           {/* Location */}
           <motion.div variants={revealBanquetImmediately ? instantCardItemVariant : cardItemVariant} className="w-full flex flex-col items-center">
-            <p className="font-serif text-[#3f4642] text-[1.2rem] sm:text-[1.48rem] md:text-[1.70rem] font-semibold leading-snug mb-0.5">
+            <p className="max-w-full font-serif text-[#303936] text-[1.28rem] sm:text-[1.55rem] md:text-[1.78rem] font-semibold leading-[1.25] text-balance break-words mb-1">
               Terracotta Hotel & Resort Đà Lạt
             </p>
-            <p className="font-serif text-[#6e5949] text-[1.02rem] sm:text-[1.25rem] md:text-[1.41rem] italic leading-snug mb-5">
+            <p className="max-w-full font-serif text-[#544d47] text-[1.08rem] sm:text-[1.3rem] md:text-[1.47rem] italic font-medium leading-[1.35] text-balance break-words mb-5">
               Quảng trường Terrace Montagne
             </p>
           </motion.div>

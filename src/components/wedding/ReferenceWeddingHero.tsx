@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useId } from "react";
 import Image from "next/image";
 import { ChevronDown } from "lucide-react";
 import { useReducedMotion } from "framer-motion";
@@ -60,6 +60,9 @@ function HeroGuestNameText({ text }: { text: string }) {
 }
 
 export function ReferenceWeddingHero({ config, summary }: ReferenceWeddingHeroProps) {
+  const heroSvgId = useId().replace(/:/g, "");
+  const roughEdgeFilterId = `hero-watercolor-edge-${heroSvgId}`;
+  const watercolorMaskId = `hero-watercolor-mask-${heroSvgId}`;
   const [hasMounted, setHasMounted] = useState(false);
   const [isHeroAnimated, setIsHeroAnimated] = useState(false);
   const [isInvitationWritten, setIsInvitationWritten] = useState(false);
@@ -155,75 +158,78 @@ export function ReferenceWeddingHero({ config, summary }: ReferenceWeddingHeroPr
       </div>
 
       <div className="save-date-arch-shell">
-        <div className="save-date-arch-wrapper">
-          <div
-            className={`hero-photo-fade ${isDone ? "is-visible" : ""}`}
-          >
-            <figure
-              className="save-date-arch-figure save-date-arch-figure--composite"
-              aria-label="Khung ảnh cưới"
+        <div className="save-date-arch-visual-rail">
+          <div className="save-date-arch-wrapper">
+            <div
+              className={`hero-photo-fade ${isDone ? "is-visible" : ""}`}
             >
-              {/* SVG container which renders the masked image reliably across all browsers */}
-              <svg
-                viewBox="0 0 2000 1333"
-                width="100%"
-                className="save-date-arch-composite-svg"
-                style={{ display: "block", width: "100%", height: "auto" }}
+              <figure
+                className="save-date-arch-figure save-date-arch-figure--composite"
+                aria-label="Khung ảnh cưới"
               >
-                <defs>
-                  <filter id="watercolor-rough-edge-svg" filterUnits="objectBoundingBox">
-                    <feTurbulence type="fractalNoise" baseFrequency="0.04" numOctaves="4" result="noise" />
-                    <feDisplacementMap in="SourceGraphic" in2="noise" scale="0.03" xChannelSelector="R" yChannelSelector="G" />
-                  </filter>
+                {/* SVG container which renders the masked image reliably across all browsers */}
+                <svg
+                  viewBox="0 0 2000 1333"
+                  width="100%"
+                  className="save-date-arch-composite-svg"
+                  style={{ display: "block", width: "100%", height: "auto" }}
+                >
+                  <defs>
+                    <filter id={roughEdgeFilterId} filterUnits="objectBoundingBox">
+                      <feTurbulence type="fractalNoise" baseFrequency="0.04" numOctaves="4" result="noise" />
+                      <feDisplacementMap in="SourceGraphic" in2="noise" scale="0.03" xChannelSelector="R" yChannelSelector="G" />
+                    </filter>
 
-                  <mask id="watercolor-mask-svg" maskContentUnits="objectBoundingBox">
-                    <rect x="-0.1" y="-0.1" width="1.2" height="0.83" fill="white" />
-                    <path
-                      d="M -0.1 0.63 L 1.1 0.63 L 1.1 0.91 C 0.98 0.95, 0.92 0.86, 0.80 0.92 C 0.68 0.96, 0.56 0.88, 0.44 0.94 C 0.32 0.97, 0.20 0.90, 0.08 0.93 C -0.004 0.96, -0.04 0.88, -0.1 0.92 Z"
-                      fill="white"
-                      filter="url(#watercolor-rough-edge-svg)"
-                    />
-                  </mask>
-                </defs>
+                    <mask id={watercolorMaskId} maskContentUnits="objectBoundingBox">
+                      <rect x="-0.1" y="-0.1" width="1.2" height="0.83" fill="white" />
+                      <path
+                        d="M -0.1 0.63 L 1.1 0.63 L 1.1 0.91 C 0.98 0.95, 0.92 0.86, 0.80 0.92 C 0.68 0.96, 0.56 0.88, 0.44 0.94 C 0.32 0.97, 0.20 0.90, 0.08 0.93 C -0.004 0.96, -0.04 0.88, -0.1 0.92 Z"
+                        fill="white"
+                        filter={`url(#${roughEdgeFilterId})`}
+                      />
+                    </mask>
+                  </defs>
 
-                <image
-                  href={heroCompositeSrc}
-                  x="0"
-                  y="0"
-                  width="2000"
-                  height="1333"
-                  mask="url(#watercolor-mask-svg)"
-                />
-              </svg>
-            </figure>
-          </div>
+                  <image
+                    href={heroCompositeSrc}
+                    x="0"
+                    y="0"
+                    width="2000"
+                    height="1333"
+                    preserveAspectRatio="xMidYMid meet"
+                    mask={`url(#${watercolorMaskId})`}
+                  />
+                </svg>
+              </figure>
+            </div>
 
-          {/* Left Ornament */}
-          <div
-            className={`save-date-hero-ornament save-date-hero-ornament-left hero-ornament-fade-left ${isDone ? "is-visible" : ""}`}
-          >
-            <Image
-              src="/assets/hero-corner-left-v2.png"
-              alt=""
-              width={250}
-              height={250}
-              priority
-              className="object-contain pointer-events-none"
-            />
-          </div>
+            {/* Left Ornament */}
+            <div
+              className={`save-date-hero-ornament save-date-hero-ornament-left hero-ornament-fade-left ${isDone ? "is-visible" : ""}`}
+            >
+              <Image
+                src="/assets/hero-corner-left-v2.png"
+                alt=""
+                width={250}
+                height={250}
+                priority
+                className="object-contain pointer-events-none"
+              />
+            </div>
 
-          {/* Right Ornament */}
-          <div
-            className={`save-date-hero-ornament save-date-hero-ornament-right hero-ornament-fade-right ${isDone ? "is-visible" : ""}`}
-          >
-            <Image
-              src="/assets/hero-corner-right-v3.png"
-              alt=""
-              width={250}
-              height={250}
-              priority
-              className="object-contain pointer-events-none"
-            />
+            {/* Right Ornament */}
+            <div
+              className={`save-date-hero-ornament save-date-hero-ornament-right hero-ornament-fade-right ${isDone ? "is-visible" : ""}`}
+            >
+              <Image
+                src="/assets/hero-corner-right-v3.png"
+                alt=""
+                width={250}
+                height={250}
+                priority
+                className="object-contain pointer-events-none"
+              />
+            </div>
           </div>
         </div>
 
