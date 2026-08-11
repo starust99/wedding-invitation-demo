@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import Image from "next/image";
 import { ChevronDown } from "lucide-react";
 import { useReducedMotion } from "framer-motion";
@@ -60,6 +60,7 @@ function HeroGuestNameText({ text }: { text: string }) {
 }
 
 export function ReferenceWeddingHero({ config, summary }: ReferenceWeddingHeroProps) {
+  const heroCopyRef = useRef<HTMLElement>(null);
   const [hasMounted, setHasMounted] = useState(false);
   const [isHeroAnimated, setIsHeroAnimated] = useState(false);
   const [isInvitationWritten, setIsInvitationWritten] = useState(false);
@@ -73,6 +74,49 @@ export function ReferenceWeddingHero({ config, summary }: ReferenceWeddingHeroPr
     };
     window.addEventListener("introFinished", handleIntroFinished);
     return () => window.removeEventListener("introFinished", handleIntroFinished);
+  }, []);
+
+  useEffect(() => {
+    const copyBlock = heroCopyRef.current;
+    if (!copyBlock) return;
+
+    const visualViewport = window.visualViewport;
+    let frame = 0;
+
+    const alignToVisibleViewport = () => {
+      window.cancelAnimationFrame(frame);
+      frame = window.requestAnimationFrame(() => {
+        // Some iOS in-app browsers paint against a wider layout viewport while
+        // clipping the page to a narrower visual viewport. CSS auto margins then
+        // center this copy in the hidden layout area, which makes it look shifted
+        // to the right. Correct only that delta; normal Safari/Chrome resolve to 0.
+        if (visualViewport && visualViewport.scale > 1.05) return;
+
+        const layoutWidth = document.documentElement.clientWidth || window.innerWidth;
+        const visibleLeft = visualViewport?.offsetLeft ?? 0;
+        const visibleWidth = visualViewport?.width ?? window.innerWidth;
+        const visibleCenter = visibleLeft + visibleWidth / 2;
+        const layoutCenter = layoutWidth / 2;
+        const correction = Math.max(-32, Math.min(32, visibleCenter - layoutCenter));
+
+        copyBlock.style.setProperty(
+          "--hero-visual-center-offset",
+          `${Math.abs(correction) < 0.5 ? 0 : correction}px`,
+        );
+      });
+    };
+
+    alignToVisibleViewport();
+    window.addEventListener("resize", alignToVisibleViewport);
+    window.addEventListener("orientationchange", alignToVisibleViewport);
+    visualViewport?.addEventListener("resize", alignToVisibleViewport);
+
+    return () => {
+      window.cancelAnimationFrame(frame);
+      window.removeEventListener("resize", alignToVisibleViewport);
+      window.removeEventListener("orientationchange", alignToVisibleViewport);
+      visualViewport?.removeEventListener("resize", alignToVisibleViewport);
+    };
   }, []);
 
   const isSplashActive =
@@ -227,7 +271,7 @@ export function ReferenceWeddingHero({ config, summary }: ReferenceWeddingHeroPr
           </div>
         </div>
 
-        <article className="save-date-hero-copy-block">
+        <article ref={heroCopyRef} className="save-date-hero-copy-block">
           <HeroInviteHandwriting
             mode={handwritingMode}
             onComplete={handleInvitationWritten}
