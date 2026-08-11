@@ -241,6 +241,7 @@ export function WeddingSplashIntro({
       "/assets/hero-corner-right-v3.png",
       "/assets/icon-cross-new.png",
       "/assets/hero-invite-heading-v5.png",
+      "/assets/hero-invite-reveal-map-v2.png",
       "/assets/timeline-frames/frame_001.webp",
       ...dressCodeImages,
     ];

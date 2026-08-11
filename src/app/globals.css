@@ -1263,6 +1263,18 @@ textarea {
   overflow: visible;
 }
 
+.hero-invite-handwriting-canvas {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  display: block;
+  width: auto;
+  height: 100%;
+  aspect-ratio: 800 / 267;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
 @media (max-width: 767px) {
   .save-date-invite-heading-image {
     width: 100%;
