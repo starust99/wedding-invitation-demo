@@ -195,7 +195,7 @@ export function BackgroundMusic() {
         <button
           onClick={togglePlay}
           aria-label={isPlaying ? "Tắt nhạc nền" : "Bật nhạc nền"}
-          className="fixed bottom-6 right-6 md:bottom-8 md:right-8 z-[90] w-[36px] h-[36px] md:w-[45px] md:h-[45px] rounded-full flex items-center justify-center opacity-90 hover:opacity-100 hover:scale-105 active:scale-95 transition-all duration-500 cursor-pointer select-none"
+          className="wedding-music-controller fixed z-[90] w-[36px] h-[36px] md:w-[45px] md:h-[45px] rounded-full flex items-center justify-center opacity-90 hover:opacity-100 hover:scale-105 active:scale-95 transition-all duration-500 cursor-pointer select-none"
         >
           <div className="w-[36px] h-[36px] md:w-[45px] md:h-[45px] relative transition-transform duration-500 vinyl-spin-active">
             <img 

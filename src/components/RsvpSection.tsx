@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useMemo } from "react";
+import { useEffect } from "react";
 import { HeartHandshake } from "lucide-react";
+import Image from "next/image";
 import { SectionMediaLayers } from "@/components/SectionMediaLayers";
 import type { WeddingConfig } from "@/lib/site-settings";
-import { buildInvitationCopy, type GuestIdentity } from "@/lib/guest-personalization";
+import type { GuestIdentity } from "@/lib/guest-personalization";
 import { usePageTransition } from "@/components/PageTransitionEffect";
 import { motion } from "framer-motion";
 
@@ -12,7 +13,6 @@ import type { Invitee } from "@/lib/invites";
 
 export function RsvpSection({
   config,
-  guestIdentity,
   rsvpHref = "/rsvp",
   transparentBg = false,
   embedded = false,
@@ -25,7 +25,6 @@ export function RsvpSection({
   embedded?: boolean;
   invitee?: Invitee;
 }) {
-  const inviteCopy = useMemo(() => buildInvitationCopy(guestIdentity), [guestIdentity]);
   const { navigateWithTransition, prefetch } = usePageTransition();
 
   const hasResponded = Boolean(invitee?.rsvp || (invitee?.inviteStatus && invitee.inviteStatus !== "invited"));
@@ -100,18 +99,35 @@ export function RsvpSection({
               </>
             )}
 
-            <button
-              type="button"
-              onClick={() => navigateWithTransition(rsvpHref)}
-              onMouseEnter={() => prefetch(rsvpHref)}
-              onTouchStart={() => prefetch(rsvpHref)}
-              className="mt-5 inline-flex h-[2.75rem] sm:h-[3.0rem] items-center justify-center transition hover:-translate-y-0.5 save-date-watercolor-btn mx-auto min-w-[11rem] sm:min-w-[12.5rem]"
-            >
-              <span className="save-date-btn-label">
-                <HeartHandshake aria-hidden="true" className="w-4 h-4 sm:w-4.5 sm:h-4.5" />
-                <span>{hasResponded ? "Xem & Chỉnh sửa hồi đáp" : "Xác nhận tham dự"}</span>
-              </span>
-            </button>
+            <div className="relative mt-5 inline-flex">
+              <button
+                type="button"
+                onClick={() => navigateWithTransition(rsvpHref)}
+                onMouseEnter={() => prefetch(rsvpHref)}
+                onTouchStart={() => prefetch(rsvpHref)}
+                className="inline-flex h-[2.75rem] sm:h-[3.0rem] items-center justify-center transition hover:-translate-y-0.5 save-date-watercolor-btn mx-auto min-w-[11rem] sm:min-w-[12.5rem]"
+              >
+                <span className="save-date-btn-label">
+                  <HeartHandshake aria-hidden="true" className="w-4 h-4 sm:w-4.5 sm:h-4.5" />
+                  <span>{hasResponded ? "Xem & Chỉnh sửa hồi đáp" : "Xác nhận tham dự"}</span>
+                </span>
+              </button>
+
+              {!hasResponded ? (
+                <span className="rsvp-tap-guide" aria-hidden="true">
+                  <span className="rsvp-tap-guide-ripple" />
+                  <Image
+                    src="/assets/wedding/ui/rsvp/tap-hand-neutral.webp"
+                    alt=""
+                    width={420}
+                    height={420}
+                    className="rsvp-tap-guide-image"
+                    draggable={false}
+                    unoptimized
+                  />
+                </span>
+              ) : null}
+            </div>
           </div>
         </motion.div>
       </div>

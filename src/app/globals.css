@@ -1723,6 +1723,145 @@ textarea {
     inset 0 2px 6px rgba(255, 255, 255, 1) !important;
 }
 
+/* RSVP CTA guidance: two quick taps, then one restrained confirmation ripple. */
+.rsvp-tap-guide {
+  position: absolute;
+  z-index: 4;
+  top: calc(50% - 0.55rem);
+  left: calc(100% - 1.3rem);
+  width: 4rem;
+  aspect-ratio: 1;
+  pointer-events: none;
+  transform-origin: 23% 14%;
+  animation: rsvp-hand-double-tap 2.5s cubic-bezier(0.22, 1, 0.36, 1) infinite;
+  will-change: transform;
+}
+
+.rsvp-tap-guide-image {
+  position: relative;
+  z-index: 1;
+  display: block;
+  width: 100%;
+  height: auto;
+  user-select: none;
+  -webkit-user-drag: none;
+  filter: drop-shadow(0 0.3rem 0.48rem rgba(109, 83, 68, 0.12));
+}
+
+.rsvp-tap-guide-ripple {
+  position: absolute;
+  z-index: 0;
+  top: 14%;
+  left: 23%;
+  width: 1.55rem;
+  height: 1.55rem;
+  border: 1.5px solid rgba(177, 136, 69, 0.58);
+  border-radius: 999px;
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(0.35);
+  animation: rsvp-tap-ripple 2.5s ease-out infinite;
+  will-change: transform, opacity;
+}
+
+/* Form completion cue: the fingertip lands on the CTA edge without covering its copy. */
+.rsvp-review-tap-guide {
+  position: absolute;
+  z-index: 4;
+  top: calc(100% - 1.75rem);
+  right: -1.5rem;
+  width: 3.8rem;
+  aspect-ratio: 1;
+  pointer-events: none;
+  transform-origin: 23% 14%;
+  animation: rsvp-hand-double-tap 2.5s cubic-bezier(0.22, 1, 0.36, 1) infinite;
+  will-change: transform;
+}
+
+.rsvp-submit-tap-guide {
+  position: absolute;
+  z-index: 4;
+  top: calc(100% - 1.75rem);
+  right: -1.5rem;
+  width: 3.8rem;
+  aspect-ratio: 1;
+  pointer-events: none;
+  transform-origin: 23% 14%;
+  animation: rsvp-hand-double-tap 2.5s cubic-bezier(0.22, 1, 0.36, 1) infinite;
+  will-change: transform;
+}
+
+@media (min-width: 640px) {
+  .rsvp-tap-guide {
+    top: calc(50% - 0.62rem);
+    left: calc(100% - 1.45rem);
+    width: 4.5rem;
+  }
+
+  .rsvp-tap-guide-ripple {
+    width: 1.7rem;
+    height: 1.7rem;
+  }
+
+  .rsvp-review-tap-guide {
+    top: calc(100% - 1.9rem);
+    right: -1.35rem;
+    width: 4.25rem;
+  }
+
+  .rsvp-submit-tap-guide {
+    top: calc(100% - 1.9rem);
+    right: -1.35rem;
+    width: 4.25rem;
+  }
+}
+
+/* Keep the music control in the top-right corner and respect device safe areas. */
+.wedding-music-controller {
+  top: calc(1rem + env(safe-area-inset-top, 0px));
+  right: calc(1rem + env(safe-area-inset-right, 0px));
+  bottom: auto;
+  left: auto;
+}
+
+@media (min-width: 768px) {
+  .wedding-music-controller {
+    top: calc(1.5rem + env(safe-area-inset-top, 0px));
+    right: calc(1.5rem + env(safe-area-inset-right, 0px));
+  }
+}
+
+@keyframes rsvp-hand-double-tap {
+  0%,
+  5%,
+  13%,
+  18%,
+  26%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  9%,
+  22% {
+    transform: translate3d(-0.2rem, -0.2rem, 0) scale(0.965);
+  }
+}
+
+@keyframes rsvp-tap-ripple {
+  0%,
+  22% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.35);
+  }
+  24% {
+    opacity: 0.42;
+    transform: translate(-50%, -50%) scale(0.42);
+  }
+  39%,
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(1.85);
+  }
+}
+
 .save-date-countdown-card {
   display: grid;
   width: min(98%, 41rem);
@@ -4046,6 +4185,7 @@ html.gallery-lightbox-open body {
   font-size: clamp(0.78rem, 3.4vw, 0.9rem);
   line-height: 1.35;
   letter-spacing: 0.1em;
+  text-transform: none;
   white-space: normal;
 }
 

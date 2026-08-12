@@ -15,8 +15,23 @@ const CANVAS_HEIGHT = 267;
 const HERO_INVITE_INK = "#9B7134";
 const writeEase = [0.42, 0, 0.2, 1] as const;
 const writeStart = 0.46;
-const phraseDuration = 4.775;
+const phraseDuration = 2.5;
 const ornamentDurationMs = 760;
+const FIRST_PHRASE_LAST_STEP = 124;
+const SECOND_PHRASE_FIRST_STEP = 125;
+const FINAL_REVEAL_STEP = 254;
+const PHRASE_SPLIT_X = 384;
+
+function normalizePhraseRevealStep(revealStep: number, x: number) {
+  if (x < PHRASE_SPLIT_X) {
+    const progress = (revealStep - 1) / (FIRST_PHRASE_LAST_STEP - 1);
+    return Math.round(1 + progress * (FINAL_REVEAL_STEP - 1));
+  }
+
+  const progress = (revealStep - SECOND_PHRASE_FIRST_STEP)
+    / (FINAL_REVEAL_STEP - SECOND_PHRASE_FIRST_STEP);
+  return Math.round(1 + progress * (FINAL_REVEAL_STEP - 1));
+}
 
 function loadDecodedImage(src: string) {
   return new Promise<HTMLImageElement>((resolve, reject) => {
@@ -91,11 +106,16 @@ export function HeroInviteHandwriting({ mode, onComplete }: HeroInviteHandwritin
         const revealBuckets: number[][] = Array.from({ length: 255 }, () => []);
 
         // The grayscale map stores the exact arrival time of the pen for every
-        // visible pixel. Pixels are copied only when their own turn arrives, so a
-        // thick mask can no longer touch and expose a future loop, accent or dot.
+        // visible pixel. Its first range belongs to “Trân trọng &” and its second
+        // range belongs to “Thân mời:”. Normalize both ranges to the same 1–254
+        // timeline so the two phrases begin together, while preserving every
+        // phrase's original stroke order and single-pen reveal internally.
         for (let offset = 0; offset < mapPixels.data.length; offset += 4) {
           const revealStep = mapPixels.data[offset];
-          if (revealStep > 0) revealBuckets[revealStep].push(offset);
+          if (revealStep > 0) {
+            const x = (offset / 4) % CANVAS_WIDTH;
+            revealBuckets[normalizePhraseRevealStep(revealStep, x)].push(offset);
+          }
         }
 
         let lastSolidStep = 0;

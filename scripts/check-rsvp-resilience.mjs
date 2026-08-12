@@ -134,7 +134,7 @@ try {
     id: `${invitePayload.invitee.id}-friend-test`,
     token: friendToken,
     guestGroup: "[Nhật] Bạn bè & Đồng nghiệp",
-    expectedGuestCount: 1,
+    expectedGuestCount: 4,
     postCeremonyPartyInvited: false,
     inviteStatus: "invited",
     rsvp: undefined,
@@ -153,18 +153,55 @@ try {
   });
 
   await friendPage.goto(`${baseUrl}/rsvp?invite=${friendToken}`, { waitUntil: "domcontentloaded" });
-  await selectBothEvents(friendPage);
+  const friendYesButtons = friendPage.getByRole("button", { name: "Có", exact: true });
+  await friendYesButtons.first().waitFor({ state: "visible" });
+  assert.equal(
+    await friendPage.getByText("SỐ NGƯỜI THAM DỰ:", { exact: true }).count(),
+    0,
+    "The banquet guest count must stay hidden before a Tiệc cưới response is selected.",
+  );
+  await friendYesButtons.nth(0).click();
+  assert.equal(
+    await friendPage.getByText("SỐ NGƯỜI THAM DỰ:", { exact: true }).count(),
+    0,
+    "Selecting only Thánh lễ Hôn phối must not reveal the Tiệc cưới guest count.",
+  );
+  await friendYesButtons.nth(1).click();
   await friendPage.getByText("SỐ NGƯỜI THAM DỰ:", { exact: true }).waitFor();
+  await friendPage.getByText("1 người", { exact: true }).waitFor();
+  assert.equal(
+    await friendPage.getByRole("button", { name: "Giảm số người tham dự", exact: true }).isDisabled(),
+    true,
+    "A new non-family RSVP must start at exactly one guest, independent of the imported estimate.",
+  );
   assert.equal(
     await friendPage.getByText("LƯU TRÚ", { exact: true }).count(),
     0,
     "Friends and colleagues must not be asked for resort lodging.",
   );
+  const noButtons = friendPage.getByRole("button", { name: "Không", exact: true });
+  await noButtons.nth(0).click();
+  await noButtons.nth(1).click();
+  await friendPage.getByText("SỐ NGƯỜI THAM DỰ:", { exact: true }).waitFor({ state: "hidden" });
+  await friendPage.getByRole("button", { name: "Có", exact: true }).nth(1).click();
+  await friendPage.getByText("1 người", { exact: true }).waitFor();
   await friendPage.getByRole("button", { name: "Tăng số người tham dự", exact: true }).click();
   await friendPage.getByText("2 người", { exact: true }).waitFor();
   await friendPage.getByRole("button", { name: "Xem lại và hoàn tất", exact: true }).click();
   await friendPage.getByRole("heading", { name: "Xem lại hồi đáp", exact: true }).waitFor();
-  await friendPage.getByRole("heading", { name: "Số người tham dự", exact: true }).waitFor();
+  const banquetReviewRow = friendPage.getByText("Tiệc cưới", { exact: true }).locator("xpath=../..");
+  await banquetReviewRow.getByText("Số người tham dự:", { exact: false }).waitFor();
+  await banquetReviewRow.getByText("2 người", { exact: true }).waitFor();
+  assert.equal(
+    await banquetReviewRow.getByText("Sẽ tham dự", { exact: true }).locator("svg").count(),
+    0,
+    "Positive attendance copy should not carry a decorative check icon.",
+  );
+  assert.equal(
+    await friendPage.getByRole("heading", { name: "Số người tham dự", exact: true }).count(),
+    0,
+    "The banquet guest count must stay inside the Tiệc cưới review row instead of becoming a separate section.",
+  );
   await friendContext.close();
 
   const invalidContext = await browser.newContext({ viewport: { width: 390, height: 844 } });
