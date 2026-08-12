@@ -59,8 +59,6 @@ const shellClass =
   "rounded-[2rem] border border-[#2F3A35]/12 bg-[#fffdf8]/68 shadow-[0_26px_90px_rgba(47,58,53,0.12)] backdrop-blur-2xl";
 const fieldClass =
   "min-h-12 w-full rounded-full border border-[#2F3A35]/12 bg-[#fffdf8]/78 px-4 text-center text-sm font-semibold text-[#2F3A35] outline-none transition placeholder:text-[#2F3A35]/34 focus:border-[#8FAADC]/70 focus:bg-[#fffdf8] focus:ring-4 focus:ring-[#8FAADC]/18";
-const textareaClass =
-  "min-h-28 w-full resize-y rounded-[1.4rem] border border-[#2F3A35]/12 bg-[#fffdf8]/78 px-4 py-3 text-left text-sm font-semibold leading-6 text-[#2F3A35] outline-none transition placeholder:text-[#2F3A35]/34 focus:border-[#8FAADC]/70 focus:bg-[#fffdf8] focus:ring-4 focus:ring-[#8FAADC]/18";
 const primaryButton =
   "inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-[#2F3A35] px-5 text-xs font-black uppercase tracking-[0.16em] text-[#FDFBF7] shadow-[0_18px_46px_rgba(47,58,53,0.18)] transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-45 disabled:hover:translate-y-0";
 const softButton =
@@ -183,10 +181,6 @@ function getGalleryPositions(settings: SiteSettings | null) {
 }
 
 function validatePublishSettings(settings: SiteSettings) {
-  if (!/\[\s*cụm tên khách\s*\]/i.test(settings.content.invitation.heroTemplate)) {
-    return "Câu mời Hero cần giữ token [Cụm tên khách].";
-  }
-
   const datePattern = /\d{1,2}[.\/-]\d{1,2}[.\/-]\d{4}/;
   const rsvpDeadlineMatch = settings.content.rsvp.deadline.trim().match(/^(\d{1,2})[.\/-](\d{1,2})[.\/-](\d{4})$/);
   if (!datePattern.test(settings.content.eventDetailsConfig.content.churchDate)) return "Ngày Thánh lễ chưa đúng định dạng ngày/tháng/năm.";
@@ -311,16 +305,6 @@ export default function AdminEditorPage() {
       if (next.content.eventDetailsConfig?.content) {
         next.content.eventDetailsConfig.content[field] = value;
       }
-      return next;
-    });
-  }
-
-  function updateHeroTemplate(value: string) {
-    markDirty();
-    setSettings((current) => {
-      if (!current) return current;
-      const next = normalizeGallerySettings(current);
-      next.content.invitation.heroTemplate = value;
       return next;
     });
   }
@@ -605,7 +589,7 @@ export default function AdminEditorPage() {
               <p className="text-[0.68rem] font-black uppercase tracking-[0.32em] text-[#2F3A35]/48">Content Editor</p>
               <h1 className="font-serif text-[clamp(2.2rem,4vw,4rem)] leading-none">Tinh chỉnh nội dung thiệp</h1>
               <p className="max-w-xl text-sm font-semibold leading-6 text-[#2F3A35]/56">
-                Hero, ngày giờ, chương trình tiệc và {filledCount}/{galleryMosaicSlotCount} ảnh Khoảnh khắc. Backend: {backend === "supabase" ? "Supabase" : "Local"}.
+                Ngày giờ, chương trình tiệc và {filledCount}/{galleryMosaicSlotCount} ảnh Khoảnh khắc. Backend: {backend === "supabase" ? "Supabase" : "Local"}.
                 {dirty ? " Có thay đổi chưa lưu." : ""}
               </p>
             </div>
@@ -634,23 +618,6 @@ export default function AdminEditorPage() {
         </header>
 
         <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_25rem]">
-
-
-          <div className={`${shellClass} grid gap-5 p-4 sm:p-5 lg:p-6 xl:col-span-2`}>
-            <div className="grid gap-2 text-left">
-              <p className="text-[0.68rem] font-black uppercase tracking-[0.32em] text-[#2F3A35]/48">Hero</p>
-              <h2 className="font-serif text-[clamp(2rem,3vw,3rem)] leading-none">Câu mời khách</h2>
-              <p className="max-w-3xl text-sm font-semibold leading-6 text-[#2F3A35]/55">
-                Giữ nguyên token <strong>[Cụm tên khách]</strong>; hệ thống tự thay bằng đúng tên trên từng link thiệp. Tên Nhật &amp; Phương không chỉnh tại đây.
-              </p>
-            </div>
-            <textarea
-              className={textareaClass}
-              value={settings.content.invitation.heroTemplate}
-              onChange={(event) => updateHeroTemplate(event.target.value)}
-              placeholder="[Cụm tên khách] đến chung vui và ghi dấu những khoảnh khắc đáng nhớ cùng Nhật & Phương."
-            />
-          </div>
 
 
           <div className={`${shellClass} grid gap-5 p-4 sm:p-5 lg:p-6 xl:col-span-2`}>
