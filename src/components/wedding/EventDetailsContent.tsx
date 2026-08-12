@@ -161,11 +161,11 @@ function DateDisplayStack({ dateParsed, lunarText }: { dateParsed: { day: string
 
 
 const cardVariant: Variants = {
-  hidden: { 
-    opacity: 0, 
-    y: 15, 
-    scale: 0.97, 
-    filter: "blur(16px)" 
+  hidden: {
+    opacity: 0,
+    y: 18,
+    scale: 0.98,
+    filter: "blur(10px)"
   },
   visible: {
     opacity: 1,
@@ -173,22 +173,22 @@ const cardVariant: Variants = {
     scale: 1,
     filter: "blur(0px)",
     transition: {
-      duration: 1.55,
+      duration: 0.9,
       ease: [0.22, 1, 0.36, 1],
-      staggerChildren: 0.24,
-      delayChildren: 0.38,
+      staggerChildren: 0.025,
+      delayChildren: 0,
     },
   },
 };
 
 const cardItemVariant: Variants = {
-  hidden: { opacity: 0, y: 15, filter: "blur(6px)" },
+  hidden: { opacity: 0, y: 13, filter: "blur(4px)" },
   visible: {
     opacity: 1,
     y: 0,
     filter: "blur(0px)",
     transition: {
-      duration: 1.3,
+      duration: 0.72,
       ease: [0.22, 1, 0.36, 1],
     },
   },
@@ -211,23 +211,23 @@ const instantCardItemVariant: Variants = {
 };
 
 const headerVariant: Variants = {
-  hidden: { opacity: 0, y: 20 },
+  hidden: { opacity: 0, y: 16 },
   visible: {
     opacity: 1,
     y: 0,
     transition: {
-      duration: 0.6,
-      ease: "easeOut",
+      duration: 0.72,
+      ease: [0.22, 1, 0.36, 1],
     },
   },
 };
 
 const familyPanelVariant: Variants = {
-  hidden: { 
-    opacity: 0, 
-    y: 12, 
-    scale: 0.98, 
-    filter: "blur(12px)" 
+  hidden: {
+    opacity: 0,
+    y: 16,
+    scale: 0.985,
+    filter: "blur(9px)"
   },
   visible: {
     opacity: 1,
@@ -235,25 +235,42 @@ const familyPanelVariant: Variants = {
     scale: 1,
     filter: "blur(0px)",
     transition: {
-      duration: 1.38,
+      duration: 0.9,
       ease: [0.22, 1, 0.36, 1],
-      staggerChildren: 0.19,
-      delayChildren: 0.3,
+      staggerChildren: 0.035,
+      delayChildren: 0,
     },
   },
 };
 
 const familyItemVariant: Variants = {
-  hidden: { opacity: 0, y: 10, filter: "blur(4px)" },
+  hidden: { opacity: 0, y: 11, filter: "blur(4px)" },
   visible: {
     opacity: 1,
     y: 0,
     filter: "blur(0px)",
     transition: {
-      duration: 1.2,
+      duration: 0.72,
       ease: [0.22, 1, 0.36, 1],
     },
   },
+};
+
+const sectionRevealHidden = {
+  opacity: 0,
+  y: 18,
+  filter: "blur(7px)",
+};
+
+const sectionRevealVisible = {
+  opacity: 1,
+  y: 0,
+  filter: "blur(0px)",
+};
+
+const sectionRevealTransition = {
+  duration: 0.86,
+  ease: [0.22, 1, 0.36, 1] as [number, number, number, number],
 };
 
 
@@ -329,7 +346,7 @@ export function EventDetailsContent({
           className="details-venue-header"
           initial="hidden"
           whileInView="visible"
-          viewport={{ once: true, margin: "-50px" }}
+          viewport={{ once: true, amount: 0.12 }}
           variants={headerVariant}
         >
           {content.eyebrow && content.eyebrow !== "Lễ Thành Hôn" && content.eyebrow !== "Lễ Thánh Hôn" && content.eyebrow !== "Thông tin và địa điểm" && (
@@ -345,7 +362,7 @@ export function EventDetailsContent({
         className="w-full luxury-wedding-stationery-card px-1.5 pt-10 pb-10 sm:px-10 sm:pt-14 sm:pb-14 md:px-12 md:pt-16 md:pb-16 text-center flex flex-col relative"
         initial="hidden"
         whileInView="visible"
-        viewport={{ once: true, margin: "-50px" }}
+        viewport={{ once: true, amount: 0.08 }}
         variants={familyPanelVariant}
       >
         {/* Subtle watercolor washes in corners */}
@@ -497,7 +514,7 @@ export function EventDetailsContent({
           initial="hidden"
           animate={revealChurchImmediately ? "visible" : undefined}
           whileInView="visible"
-          viewport={{ once: true, margin: "-80px" }}
+          viewport={{ once: true, amount: 0.08 }}
           variants={revealChurchImmediately ? instantCardVariant : cardVariant}
           className="w-full scroll-mt-4 luxury-wedding-stationery-card px-6 pt-10 pb-10 sm:px-10 sm:pt-14 sm:pb-14 md:px-12 md:pt-16 md:pb-16 flex flex-col items-center text-center relative"
         >
@@ -581,7 +598,7 @@ export function EventDetailsContent({
           initial="hidden"
           animate={revealBanquetImmediately ? "visible" : undefined}
           whileInView="visible"
-          viewport={{ once: true, margin: "-80px" }}
+          viewport={{ once: true, amount: 0.08 }}
           variants={revealBanquetImmediately ? instantCardVariant : cardVariant}
           className="w-full scroll-mt-4 luxury-wedding-stationery-card px-6 pt-10 pb-6 sm:px-10 sm:pt-14 sm:pb-8 md:px-12 md:pt-16 md:pb-10 flex flex-col items-center text-center relative"
         >
@@ -651,7 +668,15 @@ export function EventDetailsContent({
 
           {/* Timeline Section wrapped inside Card 2 */}
           {publicData?.timeline && publicData.timeline.length > 0 && (
-            <motion.div variants={revealBanquetImmediately ? instantCardItemVariant : cardItemVariant} className="w-full text-center">
+            <motion.div
+              inherit={false}
+              initial={revealBanquetImmediately ? false : sectionRevealHidden}
+              animate={revealBanquetImmediately ? sectionRevealVisible : undefined}
+              whileInView={sectionRevealVisible}
+              viewport={{ once: true, amount: 0.08 }}
+              transition={revealBanquetImmediately ? { duration: 0 } : sectionRevealTransition}
+              className="w-full text-center"
+            >
               <h5 className="font-sans text-[0.88rem] sm:text-[0.94rem] md:text-[1rem] font-bold tracking-[0.22em] text-[#7d7065] uppercase leading-none mt-2 mb-3">
                 Chương trình tiệc
               </h5>
@@ -706,7 +731,15 @@ export function EventDetailsContent({
           )}
 
           {/* Section 3: Dress Code */}
-          <motion.div variants={revealBanquetImmediately ? instantCardItemVariant : cardItemVariant} className="pt-6 sm:pt-10 md:pt-12 pb-0 w-full">
+          <motion.div
+            inherit={false}
+            initial={revealBanquetImmediately ? false : sectionRevealHidden}
+            animate={revealBanquetImmediately ? sectionRevealVisible : undefined}
+            whileInView={sectionRevealVisible}
+            viewport={{ once: true, amount: 0.08 }}
+            transition={revealBanquetImmediately ? { duration: 0 } : sectionRevealTransition}
+            className="pt-6 sm:pt-10 md:pt-12 pb-0 w-full"
+          >
             <DressCodeSection
               title={dressCodeTitle}
               note={dressCodeNote}

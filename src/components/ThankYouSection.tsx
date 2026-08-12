@@ -103,10 +103,10 @@ export function ThankYouSection({
 
       <div className={embedded ? "mx-auto flex w-full justify-center" : "mx-auto flex max-w-7xl justify-center"}>
         <motion.div
-          initial={{ opacity: 0, y: 15, scale: 0.97, filter: "blur(16px)" }}
+          initial={{ opacity: 0, y: 18, scale: 0.98, filter: "blur(10px)" }}
           whileInView={{ opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }}
-          viewport={{ once: true, margin: "-50px" }}
-          transition={{ duration: 1.8, ease: [0.22, 1, 0.36, 1] }}
+          viewport={{ once: true, amount: 0.1 }}
+          transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
           className={`glass-panel relative w-full overflow-hidden rounded-[2.5rem] px-5 py-8 sm:px-10 sm:py-10 lg:px-12 lg:py-12 shadow-none ${embedded ? "max-w-none" : "max-w-3xl"}`}
         >
           <div className="relative z-10 flex flex-col items-center justify-center py-2 text-center">

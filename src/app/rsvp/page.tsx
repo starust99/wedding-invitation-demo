@@ -7,6 +7,7 @@ import { useFieldArray, useForm, useWatch } from "react-hook-form";
 import { z } from "zod";
 import {
   ArrowLeft,
+  ClipboardCheck,
   CircleHelp,
   Mail,
   Minus,
@@ -256,7 +257,7 @@ function ReviewAttendanceStatus({ attending }: { attending: boolean }) {
   return (
     <span
       className={[
-        "inline-flex items-center gap-1.5 text-sm font-medium",
+        "inline-flex items-center justify-center gap-1.5 text-center text-sm font-medium",
         attending ? "text-[#66744e]" : "text-[#6e655e]",
       ].join(" ")}
     >
@@ -1143,7 +1144,7 @@ export default function RSVPPage() {
                 Quý khách vui lòng kiểm tra thông tin trước khi gửi.
               </p>
 
-              <div className="mb-7 grid w-full gap-0 rounded-[1.8rem] border border-serenity/22 bg-white/92 px-5 py-6 text-left shadow-[0_16px_40px_rgba(37,41,52,0.05)] backdrop-blur-md sm:px-9 sm:py-8">
+              <div className="mb-7 grid w-full justify-items-center gap-0 rounded-[1.8rem] border border-serenity/22 bg-white/92 px-5 py-6 text-center shadow-[0_16px_40px_rgba(37,41,52,0.05)] backdrop-blur-md sm:px-9 sm:py-8">
                 <header className="pb-5 text-center sm:pb-6">
                   <p className="mb-1.5 text-sm font-medium text-[#7a6a5d]">Hồi đáp của</p>
                   <div className="mx-auto w-full max-w-lg text-center">
@@ -1156,11 +1157,11 @@ export default function RSVPPage() {
                   </div>
                 </header>
 
-                <section className="border-t border-serenity/16 py-5 sm:py-6">
+                <section className="w-full border-t border-serenity/16 py-5 text-center sm:py-6">
                   <h3 className="mb-2 text-base font-semibold text-[#252934] sm:text-lg">Sự kiện</h3>
                   <div className="divide-y divide-serenity/14">
-                    <div className="grid gap-2 py-4 first:pt-2 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center sm:gap-5">
-                      <div>
+                    <div className="flex flex-col items-center justify-center gap-2 py-4 text-center first:pt-2">
+                      <div className="text-center">
                         <p className="text-base font-semibold text-[#252934] sm:text-lg">Thánh lễ Hôn phối</p>
                         <p className="mt-1 text-sm font-normal leading-relaxed text-[#7a6a5d]">{churchDateLine}</p>
                       </div>
@@ -1168,8 +1169,8 @@ export default function RSVPPage() {
                     </div>
 
                     {formValues.postCeremonyPartyInvited && formValues.attendingCeremony === "yes" ? (
-                      <div className="grid gap-2 py-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center sm:gap-5">
-                        <div>
+                      <div className="flex flex-col items-center justify-center gap-2 py-4 text-center">
+                        <div className="text-center">
                           <p className="text-base font-semibold text-[#252934] sm:text-lg">Tiệc thân mật</p>
                           <p className="mt-1 text-sm font-normal leading-relaxed text-[#7a6a5d]">Sau Thánh lễ Hôn phối</p>
                         </div>
@@ -1177,8 +1178,8 @@ export default function RSVPPage() {
                       </div>
                     ) : null}
 
-                    <div className="grid gap-2 py-4 last:pb-1 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center sm:gap-5">
-                      <div>
+                    <div className="flex flex-col items-center justify-center gap-2 py-4 text-center last:pb-1">
+                      <div className="text-center">
                         <p className="text-base font-semibold text-[#252934] sm:text-lg">Tiệc cưới</p>
                         <p className="mt-1 text-sm font-normal leading-relaxed text-[#7a6a5d]">{banquetDateLine}</p>
                       </div>
@@ -1188,7 +1189,7 @@ export default function RSVPPage() {
                 </section>
 
                 {formValues.attendingBanquet === "yes" && canRequestLodging && (
-                  <section className="border-t border-serenity/16 pt-5 sm:pt-6">
+                  <section className="w-full border-t border-serenity/16 pt-5 text-center sm:pt-6">
                     <h3 className="text-base font-semibold text-[#252934] sm:text-lg">Lưu trú tại Resort Terracotta</h3>
                     <div className="mt-2 grid gap-4 text-sm text-[#252934]">
                       <strong className="block text-base font-medium leading-relaxed text-[#252934] sm:text-lg">
@@ -1199,13 +1200,13 @@ export default function RSVPPage() {
                       </strong>
 
                       {stayDecision !== null && stayDecision !== "none" && lodgingGuests.length > 0 && (
-                        <div className="w-full">
+                        <div className="w-full text-center">
                           <p className="mb-1 text-sm font-medium text-[#7a6a5d]">
                             Người lưu trú ({lodgingGuests.length})
                           </p>
                           <ul className="divide-y divide-serenity/12">
                             {lodgingGuests.map((g, idx) => (
-                              <li key={idx} className="grid gap-1 py-3 first:pt-2 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center sm:gap-4">
+                              <li key={idx} className="flex flex-col items-center justify-center gap-1 py-3 text-center first:pt-2 sm:gap-1.5">
                                 <span className="font-medium text-[#252934]">{g.fullName || "Khách mời"}</span>
                                 {g.isChild ? (
                                   <span className="text-sm font-normal text-[#7a6a5d]">
@@ -1222,7 +1223,7 @@ export default function RSVPPage() {
                 )}
 
                 {(formValues.attendingCeremony === "yes" || formValues.attendingBanquet === "yes") && !canRequestLodging && (
-                  <section className="border-t border-serenity/16 pt-5 sm:pt-6">
+                  <section className="w-full border-t border-serenity/16 pt-5 text-center sm:pt-6">
                     <h3 className="text-base font-semibold text-[#252934] sm:text-lg">Số người tham dự</h3>
                     <strong className="mt-2 block text-base font-medium text-[#252934] sm:text-lg">
                       {Math.max(1, Number(formValues.guestCount) || 1)} người
@@ -1366,7 +1367,7 @@ export default function RSVPPage() {
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -6 }}
                         transition={{ duration: 0.22, ease: "easeOut" }}
-                        className="mx-auto my-2 w-full max-w-xl rounded-[1.35rem] border border-[#d7c6a8]/55 bg-[#fffaf2]/78 px-4 py-4 shadow-[0_8px_24px_rgba(122,106,93,0.06)] sm:px-5"
+                        className="mx-auto mt-3 w-full max-w-xl border-t border-[#d7c6a8]/48 bg-[#fffaf2]/32 px-2 pb-1 pt-5 sm:px-3 sm:pt-6"
                       >
                         <div className="flex flex-col items-center gap-3 sm:flex-row sm:justify-between">
                           <div className="text-center sm:text-left">
@@ -1542,8 +1543,7 @@ export default function RSVPPage() {
                           LƯU TRÚ
                         </p>
                         <p className="text-sm sm:text-base font-normal text-[#252934]/80 mb-5 leading-relaxed max-w-xl mx-auto">
-                          Để việc dự tiệc thuận tiện nhất, gia đình sẽ đặt phòng lưu trú cho Quý khách tại Resort Terracotta.<br />
-                          Xin cho biết thông tin người lưu trú và số đêm nghỉ lại.
+                          Gia đình sẽ chuẩn bị phòng tại Resort Terracotta cho Quý khách. Vui lòng chọn đêm nghỉ lại.
                         </p>
 
                         {/* Chọn đêm lưu trú (4 lựa chọn dạng thẻ) */}
@@ -1604,7 +1604,7 @@ export default function RSVPPage() {
                             className={[
                               "flex flex-col items-center justify-center min-h-[3.6rem] sm:min-h-[4.2rem] rounded-xl border p-2 sm:p-3 text-center transition-all duration-200 cursor-pointer shadow-sm",
                               stayDecision === "none"
-                                ? "bg-[#7a4a4a] border-[#7a4a4a] text-white"
+                                ? "bg-[#887476] border-[#887476] text-white"
                                 : "bg-[#fcfaf9]/90 border-rose-quartz/30 hover:bg-[#faf6f3] text-[#252934]/80"
                             ].join(" ")}
                           >
@@ -1848,7 +1848,7 @@ export default function RSVPPage() {
                     className="wedding-type-button rsvp-final-cta inline-flex min-h-13 items-center justify-center gap-2.5 rounded-full bg-rose-quartz text-base font-semibold text-[#252934] shadow-[0_12px_32px_rgba(146,168,209,0.18)] ring-1 ring-rose-quartz/70 disabled:opacity-60"
                     whileTap={{ scale: 0.98 }}
                   >
-                    <Mail className="h-5 w-5 shrink-0" />
+                    <ClipboardCheck className="h-5 w-5 shrink-0" />
                     <span>Xem lại và hoàn tất</span>
                   </motion.button>
                 </div>

@@ -34,6 +34,12 @@ The private invitation must never reveal an unfinished visual state.
   complete. The frames decode after splash disposal, avoiding duplicate
   in-flight downloads and reducing peak memory pressure.
 - Reduced-motion users receive a complete static composition.
+- Below-the-fold content reveals only after it actually enters the viewport, so
+  guests can see the established fade, lift, and soft-focus motion. Long cards
+  must not serialize every child into a slow queue: when a guest scrolls
+  quickly, the visible region starts revealing immediately. The banquet
+  timeline and dress-code block own independent reveal triggers; Gallery keeps
+  its existing behavior.
 
 ## Validation Expectations
 
@@ -53,3 +59,6 @@ The private invitation must never reveal an unfinished visual state.
 - Verify the timeline requests all 108 frames, never substitutes MP4/WebM, and
   leaves the poster visible until every frame is decoded.
 - Check iPad, mobile, and desktop viewports.
+- Fast-scroll through the invitation and verify the visible card or subsection
+  begins revealing without waiting for offscreen content above it. Verify the
+  motion remains perceptible and Gallery is unchanged.
