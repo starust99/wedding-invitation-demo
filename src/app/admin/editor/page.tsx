@@ -188,8 +188,18 @@ function validatePublishSettings(settings: SiteSettings) {
   }
 
   const datePattern = /\d{1,2}[.\/-]\d{1,2}[.\/-]\d{4}/;
+  const rsvpDeadlineMatch = settings.content.rsvp.deadline.trim().match(/^(\d{1,2})[.\/-](\d{1,2})[.\/-](\d{4})$/);
   if (!datePattern.test(settings.content.eventDetailsConfig.content.churchDate)) return "Ngày Thánh lễ chưa đúng định dạng ngày/tháng/năm.";
   if (!datePattern.test(settings.content.event.dateLabel)) return "Ngày Tiệc cưới chưa đúng định dạng ngày/tháng/năm.";
+  if (!rsvpDeadlineMatch) return "Hạn xác nhận hồi đáp chưa đúng định dạng ngày/tháng/năm.";
+
+  const rsvpDeadlineDay = Number(rsvpDeadlineMatch[1]);
+  const rsvpDeadlineMonth = Number(rsvpDeadlineMatch[2]);
+  const rsvpDeadlineYear = Number(rsvpDeadlineMatch[3]);
+  const daysInRsvpDeadlineMonth = new Date(Date.UTC(rsvpDeadlineYear, rsvpDeadlineMonth, 0)).getUTCDate();
+  if (rsvpDeadlineMonth < 1 || rsvpDeadlineMonth > 12 || rsvpDeadlineDay < 1 || rsvpDeadlineDay > daysInRsvpDeadlineMonth) {
+    return "Hạn xác nhận hồi đáp không phải là một ngày hợp lệ.";
+  }
 
   const timePattern = /^\d{1,2}:\d{2}$/;
   if (!timePattern.test(settings.content.eventDetailsConfig.content.churchTime.trim())) return "Giờ Thánh lễ cần có dạng 10:00.";
@@ -329,6 +339,17 @@ export default function AdminEditorPage() {
         }
       }
 
+      return next;
+    });
+  }
+
+  function updateRsvpDeadline(value: string) {
+    markDirty();
+    setSettings((current) => {
+      if (!current) return current;
+      const next = normalizeGallerySettings(current);
+      next.content.rsvp.deadline = value;
+      next.content.accommodation.rsvpDeadline = value;
       return next;
     });
   }
@@ -679,6 +700,22 @@ export default function AdminEditorPage() {
                     placeholder="17:30"
                     onChange={(event) => updateBanquetInfo("welcomeTime", event.target.value)}
                   />
+                </label>
+              </fieldset>
+              <fieldset className="grid gap-4 rounded-[1.55rem] border border-[#2F3A35]/12 bg-[#fffdf8]/54 p-4 text-left md:col-span-2">
+                <legend className="px-2 text-sm font-black uppercase tracking-[0.14em] text-[#2F3A35]/58">Hồi đáp</legend>
+                <label className="grid max-w-xl gap-2 text-left text-sm font-black text-[#2F3A35]/60">
+                  Hạn xác nhận hồi đáp
+                  <input
+                    className={fieldClass}
+                    value={settings.content.rsvp.deadline}
+                    inputMode="numeric"
+                    placeholder="30/09/2026"
+                    onChange={(event) => updateRsvpDeadline(event.target.value)}
+                  />
+                  <span className="px-2 text-xs font-semibold leading-5 text-[#2F3A35]/48">
+                    Dùng định dạng ngày/tháng/năm. Ngày này xuất hiện trên thẻ Hồi đáp và là hạn khách được chỉnh sửa thông tin.
+                  </span>
                 </label>
               </fieldset>
             </div>

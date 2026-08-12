@@ -116,7 +116,21 @@ type LodgingGuestForm = {
   age?: number;
 };
 
-const RSVP_GUEST_EDIT_DEADLINE = new Date("2026-09-30T00:00:00+07:00");
+function parseRsvpDeadline(value: string) {
+  const match = value.trim().match(/^(\d{1,2})[.\/-](\d{1,2})[.\/-](\d{4})$/);
+  if (!match) return null;
+
+  const day = Number(match[1]);
+  const month = Number(match[2]);
+  const year = Number(match[3]);
+  const daysInMonth = new Date(Date.UTC(year, month, 0)).getUTCDate();
+
+  if (month < 1 || month > 12 || day < 1 || day > daysInMonth) {
+    return null;
+  }
+
+  return new Date(`${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}T00:00:00+07:00`);
+}
 const RSVP_INVITE_FETCH_TIMEOUT_MS = 10_000;
 const RSVP_DRAFT_STORAGE_PREFIX = "wedding-rsvp-draft:";
 
@@ -651,7 +665,6 @@ export default function RSVPPage() {
       const bypassed = typeof window !== "undefined" && sessionStorage.getItem("admin_rsvp_bypass") === "true";
       setTokenGateChecked(true);
       setMissingInviteToken(!token && !bypassed);
-      setGuestRsvpLocked(Date.now() >= RSVP_GUEST_EDIT_DEADLINE.getTime() && !bypassed);
 
       if (!token && !bypassed) {
         finishHydration();
@@ -739,6 +752,12 @@ export default function RSVPPage() {
       window.clearTimeout(guestTimer);
     };
   }, [replace, setValue]);
+
+  useEffect(() => {
+    if (isHydratingGuest) return;
+    const deadline = parseRsvpDeadline(runtimeConfig.rsvp.deadline);
+    setGuestRsvpLocked(Boolean(!isAdminBypassed && deadline && Date.now() >= deadline.getTime()));
+  }, [isAdminBypassed, isHydratingGuest, runtimeConfig.rsvp.deadline]);
 
   useEffect(() => {
     if (isHydratingGuest || canRequestLodging) return;
@@ -1032,7 +1051,7 @@ export default function RSVPPage() {
 
         {guestRsvpLocked ? (
           <p className="mb-6 rounded-2xl border border-serenity/22 bg-white/70 px-4 py-3 text-sm font-semibold text-[#252934]/72 text-center">
-            Đã hết hạn chỉnh sửa lời hồi đáp (sau 30/09/2026, 00:00 giờ Việt Nam). Vui lòng liên hệ gia đình nếu cần thay đổi.
+            Đã hết hạn chỉnh sửa lời hồi đáp (sau {runtimeConfig.rsvp.deadline}, 00:00 giờ Việt Nam). Vui lòng liên hệ gia đình nếu cần thay đổi.
           </p>
         ) : null}
 
