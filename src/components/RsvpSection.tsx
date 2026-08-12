@@ -90,9 +90,14 @@ export function RsvpSection({
                 </p>
               </>
             ) : (
-              <p className="wedding-type-body font-sans mt-4 max-w-2xl text-[#3f4642]/95">
-                Để công tác đón tiếp được chuẩn bị chu đáo, xin Quý khách vui lòng nhấn nút “Xác nhận tham dự” để xác nhận thông tin tham dự trước ngày <strong className="font-bold text-[#3f4642]/95">{config.rsvp.deadline}</strong>. Trân trọng cảm ơn.
-              </p>
+              <>
+                <p className="wedding-type-body mt-4 max-w-2xl font-sans font-normal text-[#3f4642]/95">
+                  Để gia đình chuẩn bị đón tiếp chu đáo, xin Quý khách vui lòng xác nhận tham dự trước ngày <strong className="font-semibold text-[#3f4642]/95">{config.rsvp.deadline}</strong>.
+                </p>
+                <p className="wedding-type-body mt-1.5 max-w-xl font-sans font-normal text-[#3f4642]/95">
+                  Trân trọng cảm ơn.
+                </p>
+              </>
             )}
 
             <button
@@ -100,7 +105,7 @@ export function RsvpSection({
               onClick={() => navigateWithTransition(rsvpHref)}
               onMouseEnter={() => prefetch(rsvpHref)}
               onTouchStart={() => prefetch(rsvpHref)}
-              className="mt-6 inline-flex h-[2.75rem] sm:h-[3.0rem] items-center justify-center transition hover:-translate-y-0.5 save-date-watercolor-btn mx-auto min-w-[11rem] sm:min-w-[12.5rem]"
+              className="mt-5 inline-flex h-[2.75rem] sm:h-[3.0rem] items-center justify-center transition hover:-translate-y-0.5 save-date-watercolor-btn mx-auto min-w-[11rem] sm:min-w-[12.5rem]"
             >
               <span className="save-date-btn-label">
                 <HeartHandshake aria-hidden="true" className="w-4 h-4 sm:w-4.5 sm:h-4.5" />
