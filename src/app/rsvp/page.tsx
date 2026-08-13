@@ -1719,7 +1719,7 @@ export default function RSVPPage() {
                                 : "bg-[#fcfaf9]/90 border-rose-quartz/30 hover:bg-[#faf6f3] text-[#252934]/80"
                             ].join(" ")}
                           >
-                            <span className="text-sm sm:text-base font-bold leading-snug">Không nghỉ lại</span>
+                            <span className="whitespace-nowrap text-[clamp(0.75rem,2.6vw,1rem)] font-bold leading-none">Không nghỉ lại</span>
                           </button>
                         </div>
                         {errors.stayDecision ? (
