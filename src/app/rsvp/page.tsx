@@ -1178,7 +1178,7 @@ export default function RSVPPage() {
               transition={{ duration: 0.4 }}
               className="px-4 sm:px-6 text-center flex flex-col items-center w-full max-w-2xl mx-auto"
             >
-              <div className="w-full bg-white/40 border border-white/50 shadow-[0_8px_32px_rgba(63,70,66,0.04)] rounded-[2rem] p-6 sm:p-10 mb-8 flex flex-col items-center backdrop-blur-md">
+              <div className="rsvp-success-paper-card w-full rounded-[2rem] p-6 sm:p-10 mb-8 flex flex-col items-center">
                 <h2 className="wedding-type-title text-[#252934] font-serif italic text-2xl sm:text-3xl font-bold mb-4">{submissionCopy.title}</h2>
                 <p className="wedding-type-body max-w-lg text-[#252934]/75 leading-relaxed whitespace-pre-line text-center">
                   <CoupleNameText
@@ -1189,7 +1189,7 @@ export default function RSVPPage() {
               </div>
 
               {shouldShowAttendanceCalendar ? (
-                <div className="w-full bg-white/40 border border-white/50 shadow-[0_8px_32px_rgba(63,70,66,0.04)] rounded-[2rem] p-6 sm:p-10 mb-8 flex flex-col items-center backdrop-blur-md">
+                <div className="rsvp-success-paper-card w-full rounded-[2rem] p-6 sm:p-10 mb-8 flex flex-col items-center">
                   <div className="wedding-type-body max-w-lg space-y-4 text-center text-[#252934]/75 sm:space-y-5">
                     <p className="leading-relaxed">{albumReminder}</p>
                   </div>
@@ -1197,7 +1197,7 @@ export default function RSVPPage() {
               ) : null}
 
               {shouldShowAttendanceCalendar ? (
-                <div className="w-full max-w-md mx-auto bg-white/40 border border-white/50 shadow-[0_8px_32px_rgba(63,70,66,0.04)] rounded-[2rem] p-5 sm:p-6 mb-6 text-center backdrop-blur-md">
+                <div className="rsvp-success-paper-card w-full max-w-md mx-auto rounded-[2rem] p-5 sm:p-6 mb-6 text-center">
                   <p className="mb-4 text-[0.82rem] font-semibold tracking-[0.08em] text-[#7a6a5d] sm:text-sm">
                     Thêm vào lịch
                   </p>
@@ -1253,14 +1253,27 @@ export default function RSVPPage() {
                   </AnimatePresence>
                 </div>
               ) : null}
-              <div className="mt-6">
+              <div className="relative mt-6 inline-flex">
                 <button
                   type="button"
                   onClick={() => redirectToInvitePage(inviteToken, "#thank-you")}
-                  className="light-sweep wedding-type-button inline-flex min-h-12 items-center justify-center rounded-full bg-rose-quartz px-8 text-[#252934] shadow-[0_16px_48px_rgba(146,168,209,0.22)] ring-1 ring-rose-quartz/70 transition hover:-translate-y-0.5"
+                  className="light-sweep wedding-type-button rsvp-return-invite-button inline-flex min-h-12 items-center justify-center rounded-full bg-rose-quartz px-8 text-[#252934] shadow-[0_16px_48px_rgba(146,168,209,0.22)] ring-1 ring-rose-quartz/70 transition hover:-translate-y-0.5"
                 >
                   Trở lại trang thiệp
                 </button>
+
+                <span className="rsvp-tap-guide" aria-hidden="true">
+                  <span className="rsvp-tap-guide-ripple" />
+                  <Image
+                    src="/assets/wedding/ui/rsvp/tap-hand-neutral.webp"
+                    alt=""
+                    width={420}
+                    height={420}
+                    className="rsvp-tap-guide-image"
+                    draggable={false}
+                    unoptimized
+                  />
+                </span>
               </div>
             </motion.div>
           ) : isReviewing ? (

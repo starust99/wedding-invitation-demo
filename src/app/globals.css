@@ -4869,6 +4869,45 @@ html.splash-skipped body {
   }
 }
 
+/* A final RSVP reminder lives outside the gallery card. It intentionally
+   reuses the primary RSVP button and hand cue so the action stays familiar. */
+.invite-bottom-rsvp-cta {
+  position: relative;
+  z-index: 12;
+  display: flex;
+  width: 100%;
+  justify-content: center;
+  overflow: visible;
+  padding: clamp(1.75rem, 4vw, 3.25rem) 1.5rem
+    calc(clamp(3.5rem, 7vw, 6rem) + env(safe-area-inset-bottom, 0px));
+}
+
+.invite-bottom-rsvp-cta .save-date-watercolor-btn {
+  min-width: min(15rem, calc(100vw - 6.5rem));
+}
+
+/* RSVP completion cards use the same opaque invitation-paper surface as the
+   cards on the private invitation. This keeps every response branch visually
+   consistent and prevents the watercolor background from bleeding through. */
+.rsvp-success-paper-card {
+  border: 1px solid rgba(255, 255, 255, 0.72);
+  background: linear-gradient(155deg, #fffdfa 0%, #fbf3ed 52%, #f8f1ed 100%);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  box-shadow:
+    0 17px 32px -27px rgba(147, 104, 43, 0.3),
+    0 5px 11px -8px rgba(90, 70, 50, 0.16),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.66);
+}
+
+/* The global wedding button style is deliberately uppercase; this return
+   action reads as a sentence and therefore opts out without changing any
+   other CTA on the site. */
+.rsvp-return-invite-button {
+  text-transform: none !important;
+  letter-spacing: 0.04em !important;
+}
+
 /* Một wrapper duy nhất giữ mọi thẻ sự kiện thẳng mép ở mọi viewport. */
 .event-details-card-stack {
   /* Opaque invitation paper shared by the main card and its RSVP insert.

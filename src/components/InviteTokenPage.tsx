@@ -6,6 +6,7 @@ import { HeroSaveTheDate } from "@/components/HeroSaveTheDate";
 import { RsvpSection } from "@/components/RsvpSection";
 import { SceneProgress } from "@/components/SceneProgress";
 import { ThankYouSection } from "@/components/ThankYouSection";
+import { BottomRsvpCta } from "@/components/BottomRsvpCta";
 
 import { WeddingDetailsSection } from "@/components/WeddingDetailsSection";
 import { WeddingSplashIntro } from "@/components/WeddingSplashIntro";
@@ -260,6 +261,9 @@ export function InviteTokenPage({ token, initialInvitee }: { token: string; init
         )}
       />
       <GallerySection config={config} />
+      {!loading && fetchStatus === "ok" && !shouldShowThankYou ? (
+        <BottomRsvpCta rsvpHref={rsvpHref} />
+      ) : null}
     </main>
   );
 }
