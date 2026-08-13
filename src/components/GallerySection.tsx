@@ -518,12 +518,6 @@ export function GallerySection({ config }: { config: WeddingConfig }) {
             <h3 className="font-serif text-[1.12rem] sm:text-[1.25rem] md:text-[1.38rem] font-bold gold-foil-text uppercase leading-tight mt-0.5 mb-1.5">
               {section.eyebrow}
             </h3>
-            {section.description && (
-              <p className="wedding-type-body font-serif mx-auto max-w-2xl text-center text-ink/62">
-                {section.description}
-              </p>
-            )}
-
           </motion.div>
 
           <motion.div
