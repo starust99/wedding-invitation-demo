@@ -9,7 +9,10 @@ import {
 import type { RSVPResponse } from "@/lib/rsvp-storage";
 import { getSupabaseServerClient, hasSupabaseEnv } from "@/lib/supabase-server";
 import { resolvePostCeremonyPartyAnswer } from "@/lib/post-ceremony-rsvp";
-import { isFamilyLodgingGuestGroup } from "@/lib/rsvp-guest-group";
+import {
+  isFamilyLodgingGuestGroup,
+  isGroomFamilyLodgingGuestGroup,
+} from "@/lib/rsvp-guest-group";
 
 const guestRsvpSchema = z.object({
   displayLabel: z.string().trim().optional(),
@@ -76,6 +79,16 @@ export async function POST(request: Request, { params }: { params: Promise<{ tok
     && attending === "yes"
     && body.attendingBanquet
     && body.accommodationNeeded;
+  if (
+    accommodationNeeded
+    && isGroomFamilyLodgingGuestGroup(guestGroup)
+    && (body.checkInDate !== "2026-12-26" || body.checkOutDate !== "2026-12-27")
+  ) {
+    return NextResponse.json(
+      { error: "Phương án lưu trú không hợp lệ. Vui lòng chọn lại." },
+      { status: 400 },
+    );
+  }
   const lodgingGuests = accommodationNeeded ? body.lodgingGuests : [];
   const payload: Omit<RSVPResponse, "id" | "submittedAt"> = {
     ...body,

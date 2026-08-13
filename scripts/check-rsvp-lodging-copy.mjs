@@ -30,8 +30,17 @@ assert.doesNotMatch(rsvpSource, /data-rsvp-error="true"[\s\S]{0,160}font-bold/);
 assert.match(rsvpSource, /SỐ NGƯỜI THAM DỰ:/);
 assert.doesNotMatch(rsvpSource, /Vui lòng tính cả người được mời\./);
 assert.match(guestGroupSource, /ho \(\?:noi\|ngoai\)/);
+assert.match(guestGroupSource, /\^nha trai ho \(\?:noi\|ngoai\)\$/);
 assert.match(tokenRouteSource, /isFamilyLodgingGuestGroup\(guestGroup\)/);
+assert.match(tokenRouteSource, /isGroomFamilyLodgingGuestGroup\(guestGroup\)/);
+assert.match(tokenRouteSource, /body\.checkInDate !== "2026-12-26"/);
+assert.match(tokenRouteSource, /body\.checkOutDate !== "2026-12-27"/);
 assert.match(tokenRouteSource, /Math\.min\(50, Math\.max\(1, body\.guestCount/);
+assert.match(
+  rsvpSource,
+  /Gia đình sẽ chuẩn bị phòng tại Resort Terracotta cho Quý khách\. Xin Quý khách vui lòng xác nhận nhu cầu nghỉ lại\./,
+);
+assert.match(rsvpSource, /hasGroomFamilyLodgingOptions \? "max-w-2xl mx-auto" : "md:grid-cols-4"/);
 assert.match(rsvpSource, /redirectToInvitePage\(inviteToken, "#thank-you"\)/);
 assert.match(rsvpSource, /function parseRsvpDeadline\(value: string\)/);
 assert.match(rsvpSource, /parseRsvpDeadline\(runtimeConfig\.rsvp\.deadline\)/);

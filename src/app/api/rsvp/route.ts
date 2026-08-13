@@ -8,6 +8,7 @@ import {
 } from "@/lib/rsvp-mapper";
 import { getSupabaseServerClient, hasSupabaseEnv } from "@/lib/supabase-server";
 import { resolvePostCeremonyPartyAnswer } from "@/lib/post-ceremony-rsvp";
+import { isGroomFamilyLodgingGuestGroup } from "@/lib/rsvp-guest-group";
 
 export const dynamic = "force-dynamic";
 
@@ -47,9 +48,9 @@ export async function POST(request: Request) {
   const displayLabel = body.displayLabel?.trim();
 
   // Search for matching invitee in Supabase
-  let matchingInvitee: { id: string; token: string; post_ceremony_party_invited: boolean | null } | null = null;
+  let matchingInvitee: { id: string; token: string; guest_group: string | null; post_ceremony_party_invited: boolean | null } | null = null;
   if (inviteeId || token || displayLabel || name) {
-    let query = supabase.from("invitees").select("id, token, post_ceremony_party_invited");
+    let query = supabase.from("invitees").select("id, token, guest_group, post_ceremony_party_invited");
     if (inviteeId) {
       query = query.eq("id", inviteeId);
     } else if (token) {
@@ -74,10 +75,23 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: postCeremonyParty.error }, { status: 400 });
   }
 
+  const resolvedGuestGroup = matchingInvitee?.guest_group || body.guestGroup || "";
+  if (
+    body.accommodationNeeded === true
+    && isGroomFamilyLodgingGuestGroup(resolvedGuestGroup)
+    && (body.checkInDate !== "2026-12-26" || body.checkOutDate !== "2026-12-27")
+  ) {
+    return NextResponse.json(
+      { error: "Phương án lưu trú không hợp lệ. Vui lòng chọn lại." },
+      { status: 400 },
+    );
+  }
+
   const payload = {
     ...body,
     inviteeId: matchingInvitee?.id || body.inviteeId,
     inviteToken: matchingInvitee?.token || token,
+    guestGroup: resolvedGuestGroup,
     attendingPostCeremonyParty: postCeremonyParty.value,
   };
 

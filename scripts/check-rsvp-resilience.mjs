@@ -44,7 +44,7 @@ async function requireExplicitStayDecision(page) {
 }
 
 async function fillLodgingGuest(page) {
-  await page.getByRole("button", { name: /Đêm 25\/12/ }).click();
+  await page.getByRole("button", { name: /Đêm 26\/12/ }).click();
   await page.getByRole("button", { name: "Xem lại và hoàn tất", exact: true }).click();
   const missingNameError = page.getByText("Nhập họ tên người lưu trú.", { exact: true });
   await missingNameError.waitFor();
@@ -94,6 +94,20 @@ try {
   await page.goto(`${baseUrl}/rsvp?invite=${token}`, { waitUntil: "domcontentloaded" });
 
   await selectBothEvents(page);
+  await page.getByText(
+    "Gia đình sẽ chuẩn bị phòng tại Resort Terracotta cho Quý khách. Xin Quý khách vui lòng xác nhận nhu cầu nghỉ lại.",
+    { exact: true },
+  ).waitFor();
+  assert.equal(
+    await page.getByRole("button", { name: /Đêm 25\/12/ }).count(),
+    0,
+    "Nhà Trai family guests must not be offered the night of 25/12.",
+  );
+  assert.equal(
+    await page.getByRole("button", { name: /Cả hai đêm/ }).count(),
+    0,
+    "Nhà Trai family guests must not be offered both nights.",
+  );
   await requireExplicitStayDecision(page);
   const firstPass = await fillLodgingGuest(page);
   await delay(3_000);

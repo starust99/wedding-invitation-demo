@@ -41,7 +41,10 @@ import { usePageTransition } from "@/components/PageTransitionEffect";
 import { CoupleNameText } from "@/components/ui/CoupleNameText";
 import { findAnyStoredInviteToken } from "@/lib/guest-personalization";
 import { usePublishedSettings } from "@/lib/use-published-settings";
-import { isFamilyLodgingGuestGroup } from "@/lib/rsvp-guest-group";
+import {
+  isFamilyLodgingGuestGroup,
+  isGroomFamilyLodgingGuestGroup,
+} from "@/lib/rsvp-guest-group";
 
 const lodgingGuestSchema = z.object({
   fullName: z.string().trim().optional(),
@@ -81,6 +84,15 @@ const rsvpSchema = rsvpFormFieldsSchema
     if (isFamilyLodgingGuestGroup(data.guestGroup) && data.attendingBanquet === "yes" && data.stayDecision === null) {
       ctx.addIssue({ code: "custom", path: ["stayDecision"], message: "Vui lòng chọn phương án lưu trú." });
     }
+    if (
+      isGroomFamilyLodgingGuestGroup(data.guestGroup)
+      && data.attendingBanquet === "yes"
+      && data.stayDecision !== null
+      && data.stayDecision !== "26"
+      && data.stayDecision !== "none"
+    ) {
+      ctx.addIssue({ code: "custom", path: ["stayDecision"], message: "Vui lòng chọn lại phương án lưu trú." });
+    }
     
     if (data.attending !== "no" && data.guestCount < 1) {
       ctx.addIssue({ code: "custom", path: ["guestCount"], message: "Nếu tham dự, số người cần từ 1 trở lên." });
@@ -115,6 +127,7 @@ type LodgingGuestForm = {
   isChild: boolean;
   age?: number;
 };
+type StayDecision = "25" | "26" | "both" | "none" | null;
 
 function parseRsvpDeadline(value: string) {
   const match = value.trim().match(/^(\d{1,2})[.\/-](\d{1,2})[.\/-](\d{4})$/);
@@ -363,6 +376,11 @@ function normalizeGuestCount(value: unknown, minimum: 0 | 1) {
   return Math.min(50, Math.max(minimum, Math.trunc(parsed)));
 }
 
+function normalizeStayDecisionForGuestGroup(guestGroup: string, decision: StayDecision): StayDecision {
+  if (!isGroomFamilyLodgingGuestGroup(guestGroup)) return decision;
+  return decision === "26" || decision === "none" ? decision : null;
+}
+
 function resolveHydratedGuestCount({
   guestGroup,
   storedGuestCount,
@@ -487,6 +505,7 @@ export default function RSVPPage() {
   const terracottaNote = buildTerracottaNote(lodgingGuests);
   const activeGuestGroup = formValues.guestGroup?.trim() || inviteeContext?.guestGroup || guestIdentity.group || "";
   const canRequestLodging = isFamilyLodgingGuestGroup(activeGuestGroup);
+  const hasGroomFamilyLodgingOptions = isGroomFamilyLodgingGuestGroup(activeGuestGroup);
   const canRegisterStay = attending !== "no";
   const shouldAskPostCeremonyParty = postCeremonyPartyInvited && attendingCeremony === "yes";
   const isReadyForReview = rsvpSchema.safeParse({
@@ -617,7 +636,7 @@ export default function RSVPPage() {
       setValue("attendingBanquet", normalizeBoolean(response?.attendingBanquet), { shouldDirty: false });
       setValue("attending", normalizeAttendanceForForm(response?.attending), { shouldDirty: false });
       setValue("dietaryNote", response?.dietaryNote ?? "", { shouldDirty: false });
-      let initialStayDecision: "25" | "26" | "both" | "none" | null = response ? "none" : null;
+      let initialStayDecision: StayDecision = response ? "none" : null;
       if (response?.accommodationNeeded) {
         const inDate = response.checkInDate;
         const outDate = response.checkOutDate;
@@ -631,7 +650,8 @@ export default function RSVPPage() {
           initialStayDecision = "both";
         }
       }
-      setValue("accommodationNeeded", response?.accommodationNeeded ?? false, { shouldDirty: false });
+      initialStayDecision = normalizeStayDecisionForGuestGroup(hydratedGuestGroup, initialStayDecision);
+      setValue("accommodationNeeded", initialStayDecision !== null && initialStayDecision !== "none", { shouldDirty: false });
       setValue("stayDecision", initialStayDecision, { shouldDirty: false });
       setValue("notes", response?.notes ?? "", { shouldDirty: false });
       replace(response?.lodgingGuests?.length
@@ -660,7 +680,7 @@ export default function RSVPPage() {
       setValue("attending", normalizeAttendanceForForm(response.attending), { shouldDirty: false });
       setValue("dietaryNote", response.dietaryNote ?? "", { shouldDirty: false });
       
-      let initialStayDecision: "25" | "26" | "both" | "none" = "none";
+      let initialStayDecision: StayDecision = "none";
       if (response.accommodationNeeded) {
         const inDate = response.checkInDate;
         const outDate = response.checkOutDate;
@@ -674,12 +694,13 @@ export default function RSVPPage() {
           initialStayDecision = "both";
         }
       }
-      setValue("accommodationNeeded", response.accommodationNeeded ?? false, { shouldDirty: false });
+      initialStayDecision = normalizeStayDecisionForGuestGroup(hydratedGuestGroup, initialStayDecision);
+      setValue("accommodationNeeded", initialStayDecision !== null && initialStayDecision !== "none", { shouldDirty: false });
       setValue("stayDecision", initialStayDecision, { shouldDirty: false });
       setValue("notes", response.notes ?? "", { shouldDirty: false });
       replace(response.lodgingGuests?.length
         ? response.lodgingGuests
-        : initialStayDecision !== "none"
+        : initialStayDecision !== null && initialStayDecision !== "none"
           ? [createLodgingGuest("")]
           : []);
     }
@@ -702,8 +723,9 @@ export default function RSVPPage() {
         attending: values.attending,
       }), { shouldDirty: true });
       setValue("guestGroup", hydratedGuestGroup, { shouldDirty: true });
-      setValue("stayDecision", values.stayDecision, { shouldDirty: true });
-      setValue("accommodationNeeded", values.accommodationNeeded, { shouldDirty: true });
+      const normalizedStayDecision = normalizeStayDecisionForGuestGroup(hydratedGuestGroup, values.stayDecision);
+      setValue("stayDecision", normalizedStayDecision, { shouldDirty: true });
+      setValue("accommodationNeeded", normalizedStayDecision !== null && normalizedStayDecision !== "none", { shouldDirty: true });
       setValue("dietaryNote", values.dietaryNote ?? "", { shouldDirty: true });
       setValue("notes", values.notes ?? "", { shouldDirty: true });
       replace(values.lodgingGuests ?? []);
@@ -838,6 +860,26 @@ export default function RSVPPage() {
   ]);
 
   useEffect(() => {
+    if (
+      isHydratingGuest
+      || !hasGroomFamilyLodgingOptions
+      || stayDecision === null
+      || stayDecision === "26"
+      || stayDecision === "none"
+    ) return;
+
+    // An older response/draft may still contain 25/12 or both nights. Keep
+    // guest names in memory, but require an explicit valid choice before review.
+    setValue("stayDecision", null, { shouldDirty: hasUserEditedFormRef.current });
+    setValue("accommodationNeeded", false, { shouldDirty: hasUserEditedFormRef.current });
+  }, [
+    hasGroomFamilyLodgingOptions,
+    isHydratingGuest,
+    setValue,
+    stayDecision,
+  ]);
+
+  useEffect(() => {
     if ((!postCeremonyPartyInvited || attendingCeremony !== "yes") && attendingPostCeremonyParty !== null) {
       setValue("attendingPostCeremonyParty", null, {
         shouldDirty: hasUserEditedFormRef.current,
@@ -891,6 +933,7 @@ export default function RSVPPage() {
 
   function handleStayDecisionChange(decision: "25" | "26" | "both" | "none") {
     if (!canRegisterStay || !canRequestLodging) return;
+    if (hasGroomFamilyLodgingOptions && decision !== "26" && decision !== "none") return;
     markFormAsEdited();
     clearErrors("stayDecision");
     setValue("stayDecision", decision, { shouldDirty: true, shouldValidate: true });
@@ -1654,13 +1697,15 @@ export default function RSVPPage() {
                           LƯU TRÚ
                         </p>
                         <p className="text-sm sm:text-base font-normal text-[#252934]/80 mb-5 leading-relaxed max-w-xl mx-auto">
-                          Gia đình sẽ chuẩn bị phòng tại Resort Terracotta cho Quý khách. Vui lòng chọn đêm nghỉ lại.
+                          {hasGroomFamilyLodgingOptions
+                            ? "Gia đình sẽ chuẩn bị phòng tại Resort Terracotta cho Quý khách. Xin Quý khách vui lòng xác nhận nhu cầu nghỉ lại."
+                            : "Gia đình sẽ chuẩn bị phòng tại Resort Terracotta cho Quý khách. Vui lòng chọn đêm nghỉ lại."}
                         </p>
 
-                        {/* Chọn đêm lưu trú (4 lựa chọn dạng thẻ) */}
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 w-full mb-6">
+                        {/* Chọn đêm lưu trú theo nhóm khách */}
+                        <div className={`grid grid-cols-2 gap-3 w-full mb-6 ${hasGroomFamilyLodgingOptions ? "max-w-2xl mx-auto" : "md:grid-cols-4"}`}>
                           {/* Option 25 */}
-                          <button
+                          {!hasGroomFamilyLodgingOptions && <button
                             type="button"
                             aria-pressed={stayDecision === "25"}
                             onClick={() => handleStayDecisionChange("25")}
@@ -1673,7 +1718,7 @@ export default function RSVPPage() {
                           >
                             <span className="text-sm sm:text-base font-bold leading-snug">Đêm 25/12</span>
                             <span className={`text-[11px] sm:text-xs mt-0.5 ${stayDecision === "25" ? "text-white/80" : "text-[#252934]/55"}`}>đêm trước tiệc</span>
-                          </button>
+                          </button>}
 
                           {/* Option 26 */}
                           <button
@@ -1692,7 +1737,7 @@ export default function RSVPPage() {
                           </button>
 
                           {/* Option both */}
-                          <button
+                          {!hasGroomFamilyLodgingOptions && <button
                             type="button"
                             aria-pressed={stayDecision === "both"}
                             onClick={() => handleStayDecisionChange("both")}
@@ -1705,7 +1750,7 @@ export default function RSVPPage() {
                           >
                             <span className="text-sm sm:text-base font-bold leading-snug">Cả hai đêm</span>
                             <span className={`text-[11px] sm:text-xs mt-0.5 ${stayDecision === "both" ? "text-white/80" : "text-[#252934]/55"}`}>25/12 & 26/12</span>
-                          </button>
+                          </button>}
 
                           {/* Option none */}
                           <button
