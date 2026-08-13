@@ -359,7 +359,7 @@ export function EventDetailsContent({
 
       <div className="event-details-card-stack">
       <motion.div 
-        className="w-full luxury-wedding-stationery-card px-1.5 pt-10 pb-10 sm:px-10 sm:pt-14 sm:pb-14 md:px-12 md:pt-16 md:pb-16 text-center flex flex-col relative"
+        className="stationery-invitation-main-card z-30 w-full luxury-wedding-stationery-card px-1.5 pt-10 pb-10 sm:px-10 sm:pt-14 sm:pb-14 md:px-12 md:pt-16 md:pb-16 text-center flex flex-col relative"
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true, amount: 0.08 }}

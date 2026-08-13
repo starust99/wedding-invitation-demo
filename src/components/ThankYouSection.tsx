@@ -8,7 +8,8 @@ import { buildInvitationCopy, type GuestIdentity } from "@/lib/guest-personaliza
 import { buildThankYouMessage } from "@/lib/guest-rsvp-copy";
 import { usePageTransition } from "@/components/PageTransitionEffect";
 import type { RSVPResponse } from "@/lib/rsvp-storage";
-import { motion } from "framer-motion";
+import { InvitationCardDivider } from "@/components/InvitationCardDivider";
+import { InvitationResponseCardShell } from "@/components/InvitationResponseCardShell";
 
 function normalizeGuestGroup(value?: string) {
   return value?.trim().toLocaleLowerCase("vi") ?? "";
@@ -88,7 +89,7 @@ export function ThankYouSection({
     <section
       id="thank-you"
       className={embedded
-        ? "relative w-full overflow-visible text-center text-ink"
+        ? "stationery-response-slot relative z-10 w-full overflow-visible text-center text-ink"
         : transparentBg
           ? "relative overflow-hidden px-5 py-2 text-center text-ink sm:px-8"
           : "cinematic-stage editorial-band relative overflow-hidden px-5 py-12 text-center text-ink sm:px-8 sm:py-16 lg:py-20"}
@@ -102,25 +103,15 @@ export function ThankYouSection({
       )}
 
       <div className={embedded ? "mx-auto flex w-full justify-center" : "mx-auto flex max-w-7xl justify-center"}>
-        <motion.div
-          initial={{ opacity: 0, y: 18, scale: 0.98, filter: "blur(10px)" }}
-          whileInView={{ opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }}
-          viewport={{ once: true, amount: 0.1 }}
-          transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
-          className={`glass-panel relative w-full overflow-hidden rounded-[2.5rem] px-5 py-8 sm:px-10 sm:py-10 lg:px-12 lg:py-12 shadow-none ${embedded ? "max-w-none" : "max-w-3xl"}`}
-        >
+        <InvitationResponseCardShell fullWidth={embedded}>
           <div className="relative z-10 flex flex-col items-center justify-center py-2 text-center">
             <div className="flex w-full max-w-2xl flex-col items-center justify-between gap-5 text-center sm:gap-6">
               <div>
                 <h3 className="font-serif text-[1.12rem] sm:text-[1.25rem] md:text-[1.38rem] font-bold gold-foil-text uppercase leading-tight mt-0.5 mb-1.5">
                   Phản hồi đã được ghi nhận
                 </h3>
-                <div className="mt-3.5 flex items-center justify-center gap-3">
-                  <span className="h-px w-16 bg-[rgba(212,175,55,0.46)] sm:w-20" />
-                  <span className="h-2 w-2 rounded-full border border-[rgba(212,175,55,0.48)] bg-white/76" />
-                  <span className="h-px w-16 bg-[rgba(212,175,55,0.46)] sm:w-20" />
-                </div>
-                <p suppressHydrationWarning className="wedding-type-body font-sans mx-auto mt-4 max-w-xl text-[#3f4642]/95">
+                <InvitationCardDivider className="mt-1.5" />
+                <p suppressHydrationWarning className="invitation-response-copy wedding-type-body font-sans mx-auto mt-4 max-w-xl text-[#3f4642]/95">
                   {thankYouMessage}
                 </p>
               </div>
@@ -200,7 +191,7 @@ export function ThankYouSection({
               </div>
             </div>
           </div>
-        </motion.div>
+        </InvitationResponseCardShell>
       </div>
     </section>
   );
