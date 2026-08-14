@@ -4900,6 +4900,40 @@ html.splash-skipped body {
     inset 0 -1px 0 rgba(255, 255, 255, 0.66);
 }
 
+/* The practical follow-up card is tucked behind the RSVP confirmation, then
+   drawn down like the physical response insert on the private invitation. */
+.rsvp-success-card-stack {
+  position: relative;
+  isolation: isolate;
+}
+
+.rsvp-success-main-card {
+  position: relative;
+  z-index: 30;
+}
+
+.rsvp-success-utility-stage {
+  position: relative;
+  z-index: 20;
+  margin-top: 0;
+  margin-bottom: 0;
+  isolation: isolate;
+  -webkit-clip-path: inset(0 -3rem -4rem -3rem);
+  clip-path: inset(0 -3rem -4rem -3rem);
+}
+
+.rsvp-success-utility-shell {
+  position: relative;
+  padding-top: 1.5rem;
+  transform-origin: 50% 0%;
+  will-change: transform;
+}
+
+.rsvp-success-utility-card {
+  position: relative;
+  z-index: 10;
+}
+
 /* The global wedding button style is deliberately uppercase; this return
    action reads as a sentence and therefore opts out without changing any
    other CTA on the site. */

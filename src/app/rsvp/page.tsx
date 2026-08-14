@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion, type Variants } from "framer-motion";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useFieldArray, useForm, useWatch } from "react-hook-form";
 import { z } from "zod";
@@ -45,6 +45,64 @@ import {
   isFamilyLodgingGuestGroup,
   isGroomFamilyLodgingGuestGroup,
 } from "@/lib/rsvp-guest-group";
+
+const rsvpSuccessUtilityVariants: Variants = {
+  tucked: {
+    y: "-100%",
+  },
+  drawn: {
+    y: 0,
+    transition: {
+      y: {
+        type: "spring",
+        stiffness: 18,
+        damping: 7.5,
+        mass: 1.18,
+        restDelta: 0.2,
+        restSpeed: 0.2,
+        delay: 0.42,
+      },
+    },
+  },
+};
+
+const rsvpSuccessUtilityContentVariants: Variants = {
+  tucked: {
+    opacity: 0,
+    y: -8,
+  },
+  drawn: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.48,
+      delay: 0.84,
+      ease: [0.22, 1, 0.36, 1],
+    },
+  },
+};
+
+function RsvpSuccessUtilityCard({ children }: { children: ReactNode }) {
+  return (
+    <motion.div
+      className="rsvp-success-utility-stage w-full max-w-lg"
+      initial="tucked"
+      whileInView="drawn"
+      viewport={{ once: true, amount: 0.04, margin: "0px 0px -3% 0px" }}
+    >
+      <motion.div
+        className="rsvp-success-utility-shell w-full"
+        variants={rsvpSuccessUtilityVariants}
+      >
+        <div className="rsvp-success-paper-card rsvp-success-utility-card w-full rounded-[2rem] p-5 text-center sm:p-7">
+          <motion.div variants={rsvpSuccessUtilityContentVariants}>
+            {children}
+          </motion.div>
+        </div>
+      </motion.div>
+    </motion.div>
+  );
+}
 
 const lodgingGuestSchema = z.object({
   fullName: z.string().trim().optional(),
@@ -1172,13 +1230,13 @@ export default function RSVPPage() {
 
         <section className="w-full text-center py-4">
           {isSubmitted ? (
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.4 }}
-              className="px-4 sm:px-6 text-center flex flex-col items-center w-full max-w-2xl mx-auto"
-            >
-              <div className="rsvp-success-paper-card mb-6 flex w-full flex-col items-center rounded-[2rem] p-6 sm:p-8">
+            <div className="rsvp-success-card-stack mx-auto flex w-full max-w-2xl flex-col items-center px-4 text-center sm:px-6">
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.4 }}
+                className="rsvp-success-paper-card rsvp-success-main-card flex w-full flex-col items-center rounded-[2rem] p-6 sm:p-8"
+              >
                 <h2 className="wedding-type-title text-[#252934] font-serif italic text-2xl sm:text-3xl font-bold mb-4">{submissionCopy.title}</h2>
                 <div className="wedding-type-body max-w-lg space-y-5 text-center leading-relaxed text-[#252934]/75 sm:space-y-6">
                   {submissionCopy.body.split("\n\n").map((paragraph, index) => (
@@ -1193,11 +1251,11 @@ export default function RSVPPage() {
                     </p>
                   ))}
                 </div>
-              </div>
+              </motion.div>
 
               {shouldShowAttendanceCalendar ? (
-                <div className="rsvp-success-paper-card mx-auto mb-6 w-full max-w-lg rounded-[2rem] p-5 text-center sm:p-7">
-                  <p className="mb-4 text-[0.82rem] font-semibold tracking-[0.08em] text-[#7a6a5d] sm:text-sm">
+                <RsvpSuccessUtilityCard>
+                  <p className="mb-5 text-base font-semibold tracking-[0.07em] text-[#7a6a5d] sm:text-lg">
                     Lưu vào lịch
                   </p>
                   <div className="flex flex-row justify-center gap-3.5 flex-wrap">
@@ -1256,7 +1314,7 @@ export default function RSVPPage() {
                       </motion.div>
                     ) : null}
                   </AnimatePresence>
-                </div>
+                </RsvpSuccessUtilityCard>
               ) : null}
               <div className="relative mt-6 inline-flex">
                 <button
@@ -1280,7 +1338,7 @@ export default function RSVPPage() {
                   />
                 </span>
               </div>
-            </motion.div>
+            </div>
           ) : isReviewing ? (
             <motion.div
               initial={{ opacity: 0, y: 10 }}
