@@ -55,12 +55,35 @@ const cases = [
   {
     name: "Android Messenger uses a native calendar intent",
     environment: {
-      userAgent: "Mozilla/5.0 (Linux; Android 15; Pixel 9 Build/AP3A; wv) AppleWebKit/537.36 Version/4.0 Chrome/136.0 Mobile Safari/537.36 [FBAN/Orca-Android;FBAV/536.0.0.0.68]",
+      userAgent: "Mozilla/5.0 (Linux; Android 15; Pixel 9 Build/AP3A; wv) AppleWebKit/537.36 Version/4.0 Chrome/136.0 Mobile Safari/537.36 [FBAN/FB4A;FBAV/536.0.0.0.68;FBPN/com.facebook.orca]",
       platform: "Linux armv8l",
       maxTouchPoints: 5,
     },
     expectedKind: "external-browser",
     expected: /Trên Messenger:.*Mở bằng Chrome/,
+    expectedAndroidIntent: true,
+  },
+  {
+    name: "generic Meta WebView with a Messenger referrer is labeled Messenger",
+    environment: {
+      userAgent: "Mozilla/5.0 (Linux; Android 15; Pixel 9 Build/AP3A; wv) AppleWebKit/537.36 Version/4.0 Chrome/136.0 Mobile Safari/537.36 [FBAN/FB4A;FBAV/536.0.0.0.68]",
+      platform: "Linux armv8l",
+      maxTouchPoints: 5,
+      referrer: "android-app://com.facebook.orca/",
+    },
+    expectedKind: "external-browser",
+    expected: /Trên Messenger:.*Mở bằng Chrome/,
+    expectedAndroidIntent: true,
+  },
+  {
+    name: "the Facebook app remains labeled Facebook",
+    environment: {
+      userAgent: "Mozilla/5.0 (Linux; Android 15; Pixel 9 Build/AP3A; wv) AppleWebKit/537.36 Version/4.0 Chrome/136.0 Mobile Safari/537.36 [FBAN/FB4A;FBAV/536.0.0.0.68;FBPN/com.facebook.katana]",
+      platform: "Linux armv8l",
+      maxTouchPoints: 5,
+    },
+    expectedKind: "external-browser",
+    expected: /Trên Facebook:.*trình duyệt ngoài/,
     expectedAndroidIntent: true,
   },
   {

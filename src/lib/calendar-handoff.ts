@@ -24,11 +24,16 @@ type CalendarClientEnvironment = {
   userAgent: string;
   platform?: string;
   maxTouchPoints?: number;
+  referrer?: string;
 };
 
-function detectHostApp(userAgent: string): CalendarHostApp {
+function detectHostApp(userAgent: string, referrer = ""): CalendarHostApp {
+  const appIdentity = `${userAgent} ${referrer}`;
+
   if (/\bZalo(?:\/|\b)/i.test(userAgent)) return "zalo";
-  if (/MessengerForiOS|FBAN\/(?:Messenger|Orca)|FB_IAB\/(?:Messenger|Orca)|\bMessengerLite\b/i.test(userAgent)) return "messenger";
+  if (
+    /MessengerForiOS|FBAN\/(?:Messenger|Orca|EMA)|FB_IAB\/(?:Messenger|Orca)|\bMessengerLite\b|FBPN\/com\.facebook\.(?:orca|mlite)|com\.facebook\.(?:orca|mlite)|(?:^|\.)messenger\.com/i.test(appIdentity)
+  ) return "messenger";
   if (/Instagram/i.test(userAgent)) return "instagram";
   if (/FBAN|FBAV|FB_IAB|FB4A|FBIOS/i.test(userAgent)) return "facebook";
   if (/Telegram/i.test(userAgent)) return "telegram";
@@ -58,7 +63,7 @@ function isGenericInAppBrowser(userAgent: string, ios: boolean) {
 export function shouldUseAndroidCalendarIntent(environment: CalendarClientEnvironment) {
   if (!/Android/i.test(environment.userAgent)) return false;
 
-  const hostApp = detectHostApp(environment.userAgent);
+  const hostApp = detectHostApp(environment.userAgent, environment.referrer);
   return hostApp !== "unknown" || isGenericInAppBrowser(environment.userAgent, false);
 }
 
@@ -114,7 +119,7 @@ function downloadedFileMessage(environment: CalendarClientEnvironment, ios: bool
 }
 
 export function getCalendarHandoffGuidance(environment: CalendarClientEnvironment): CalendarHandoffGuidance | null {
-  const hostApp = detectHostApp(environment.userAgent);
+  const hostApp = detectHostApp(environment.userAgent, environment.referrer);
   const ios = isIosDevice(environment);
   const android = /Android/i.test(environment.userAgent);
   const isNamedInAppBrowser = hostApp !== "unknown";

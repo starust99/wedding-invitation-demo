@@ -631,6 +631,7 @@ export default function RSVPPage() {
       userAgent: window.navigator.userAgent || "",
       platform: window.navigator.platform,
       maxTouchPoints: window.navigator.maxTouchPoints,
+      referrer: document.referrer,
     };
     const guidance = getCalendarHandoffGuidance(environment);
 
