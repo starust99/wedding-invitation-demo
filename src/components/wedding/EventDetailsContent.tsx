@@ -503,6 +503,17 @@ export function EventDetailsContent({
             </div>
           </motion.div>
         </div>
+
+        {/*
+          Mobile RSVP reveal marker. The response insert observes the actual
+          bottom of the printed invitation instead of revealing as soon as
+          its own stage peeks into the viewport.
+        */}
+        <span
+          aria-hidden="true"
+          data-invitation-read-sentinel
+          className="pointer-events-none absolute inset-x-0 bottom-0 h-px"
+        />
       </motion.div>
 
       {responseSlot}

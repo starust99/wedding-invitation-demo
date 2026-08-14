@@ -1,6 +1,6 @@
 "use client";
 
-import { useLayoutEffect, useRef, useState, type ReactNode } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import { motion, useInView, type Variants } from "framer-motion";
 
 const FALLBACK_TUCK_DISTANCE = 560;
@@ -51,6 +51,9 @@ export function InvitationResponseCardShell({
   const stageRef = useRef<HTMLDivElement>(null);
   const cardRef = useRef<HTMLDivElement>(null);
   const [tuckDistance, setTuckDistance] = useState(FALLBACK_TUCK_DISTANCE);
+  const [isMobileViewport, setIsMobileViewport] = useState<boolean | null>(null);
+  const [hasReachedMobileReadPoint, setHasReachedMobileReadPoint] = useState(false);
+  const [hasStartedDrawing, setHasStartedDrawing] = useState(false);
   const isInView = useInView(stageRef, {
     once: true,
     amount: 0.04,
@@ -76,6 +79,62 @@ export function InvitationResponseCardShell({
     return () => observer.disconnect();
   }, []);
 
+  useLayoutEffect(() => {
+    const mobileQuery = window.matchMedia("(max-width: 639px)");
+    const updateViewportMode = () => setIsMobileViewport(mobileQuery.matches);
+
+    updateViewportMode();
+
+    if (typeof mobileQuery.addEventListener === "function") {
+      mobileQuery.addEventListener("change", updateViewportMode);
+      return () => mobileQuery.removeEventListener("change", updateViewportMode);
+    }
+
+    // Older iOS webviews still expose the legacy MediaQueryList API.
+    mobileQuery.addListener(updateViewportMode);
+    return () => mobileQuery.removeListener(updateViewportMode);
+  }, []);
+
+  useEffect(() => {
+    if (isMobileViewport !== true || hasReachedMobileReadPoint) return;
+
+    const stack = stageRef.current?.closest(".event-details-card-stack");
+    const readSentinel = stack?.querySelector<HTMLElement>("[data-invitation-read-sentinel]");
+
+    if (!readSentinel || typeof IntersectionObserver === "undefined") {
+      // Never strand the RSVP action in an older browser without observer support.
+      setHasReachedMobileReadPoint(true);
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry?.isIntersecting) return;
+        setHasReachedMobileReadPoint(true);
+        observer.disconnect();
+      },
+      {
+        threshold: 0,
+        // The invitation's bottom must cross roughly 78% of the viewport.
+        // Guests therefore see the complete printed card before RSVP is drawn.
+        rootMargin: "0px 0px -22% 0px",
+      },
+    );
+
+    observer.observe(readSentinel);
+    return () => observer.disconnect();
+  }, [hasReachedMobileReadPoint, isMobileViewport]);
+
+  useEffect(() => {
+    const canStartDrawing =
+      isMobileViewport === true
+        ? hasReachedMobileReadPoint
+        : isMobileViewport === false
+          ? isInView
+          : false;
+    if (canStartDrawing) setHasStartedDrawing(true);
+  }, [hasReachedMobileReadPoint, isInView, isMobileViewport]);
+
   return (
     <div
       ref={stageRef}
@@ -84,7 +143,7 @@ export function InvitationResponseCardShell({
       <motion.div
         ref={cardRef}
         initial="tucked"
-        animate={isInView ? "drawn" : "tucked"}
+        animate={hasStartedDrawing ? "drawn" : "tucked"}
         custom={tuckDistance}
         variants={stationeryCardVariants}
         className="invitation-response-card-shell relative w-full"
