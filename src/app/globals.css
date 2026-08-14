@@ -5229,7 +5229,7 @@ html.splash-skipped body {
 }
 
 .event-details-timeline-scene .timeline-garden-card h3 {
-  font-size: 1rem !important;
+  font-size: 1.1rem !important;
   font-weight: 600 !important;
   color: #2f3532 !important;
   /* Preserve the previous 1.125rem line box so the card height stays fixed. */
@@ -5247,9 +5247,9 @@ html.splash-skipped body {
     padding: 0.85rem 3.5rem 0.85rem 1rem !important;
   }
   .event-details-timeline-scene .timeline-garden-card h3 {
-    font-size: 1.05rem !important;
-    /* Preserve the previous 1.1875rem line box at this breakpoint. */
-    line-height: 1.1875rem !important;
+    font-size: 1.15rem !important;
+    /* Preserve the original 1.375rem line box at this breakpoint. */
+    line-height: 1.375rem !important;
     white-space: nowrap !important;
   }
 }
