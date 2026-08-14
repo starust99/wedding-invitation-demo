@@ -1178,28 +1178,27 @@ export default function RSVPPage() {
               transition={{ duration: 0.4 }}
               className="px-4 sm:px-6 text-center flex flex-col items-center w-full max-w-2xl mx-auto"
             >
-              <div className="rsvp-success-paper-card w-full rounded-[2rem] p-6 sm:p-10 mb-8 flex flex-col items-center">
+              <div className="rsvp-success-paper-card mb-6 flex w-full flex-col items-center rounded-[2rem] p-6 sm:p-8">
                 <h2 className="wedding-type-title text-[#252934] font-serif italic text-2xl sm:text-3xl font-bold mb-4">{submissionCopy.title}</h2>
-                <p className="wedding-type-body max-w-lg text-[#252934]/75 leading-relaxed whitespace-pre-line text-center">
-                  <CoupleNameText
-                    text={submissionCopy.body}
-                    coupleName={weddingConfig.couple.displayName}
-                  />
-                </p>
+                <div className="wedding-type-body max-w-lg space-y-5 text-center leading-relaxed text-[#252934]/75 sm:space-y-6">
+                  {submissionCopy.body.split("\n\n").map((paragraph, index) => (
+                    <p
+                      key={`${index}-${paragraph}`}
+                      className={paragraph === "Chân thành cảm ơn!" ? "font-semibold text-[#54473b]" : undefined}
+                    >
+                      <CoupleNameText
+                        text={paragraph}
+                        coupleName={weddingConfig.couple.displayName}
+                      />
+                    </p>
+                  ))}
+                </div>
               </div>
 
               {shouldShowAttendanceCalendar ? (
-                <div className="rsvp-success-paper-card w-full rounded-[2rem] p-6 sm:p-10 mb-8 flex flex-col items-center">
-                  <div className="wedding-type-body max-w-lg space-y-4 text-center text-[#252934]/75 sm:space-y-5">
-                    <p className="leading-relaxed">{albumReminder}</p>
-                  </div>
-                </div>
-              ) : null}
-
-              {shouldShowAttendanceCalendar ? (
-                <div className="rsvp-success-paper-card w-full max-w-md mx-auto rounded-[2rem] p-5 sm:p-6 mb-6 text-center">
+                <div className="rsvp-success-paper-card mx-auto mb-6 w-full max-w-lg rounded-[2rem] p-5 text-center sm:p-7">
                   <p className="mb-4 text-[0.82rem] font-semibold tracking-[0.08em] text-[#7a6a5d] sm:text-sm">
-                    Thêm vào lịch
+                    Lưu vào lịch
                   </p>
                   <div className="flex flex-row justify-center gap-3.5 flex-wrap">
                     {hasCeremony && (
@@ -1222,10 +1221,16 @@ export default function RSVPPage() {
                         <CalendarDays className="w-4 h-4" /> Tiệc cưới
                       </a>
                     )}
+                  </div>
+
+                  <div className="mt-5 border-t border-[#D4AF37]/24 pt-5 sm:mt-6 sm:pt-6">
+                    <p className="wedding-type-body mx-auto max-w-md text-sm leading-relaxed text-[#252934]/70 sm:text-base">
+                      {albumReminder}
+                    </p>
                     <a
                       href={`/calendar/album${calendarInviteQuery}`}
                       onClick={handleCalendarHandoffAttempt}
-                      className="wedding-type-button inline-flex h-11 items-center justify-center gap-2 rounded-full border border-serenity/24 bg-white/80 px-6 text-xs sm:text-sm font-bold text-[#252934] transition hover:bg-white hover:shadow-sm min-w-[130px]"
+                      className="wedding-type-button mt-4 inline-flex h-11 min-w-[130px] items-center justify-center gap-2 rounded-full border border-serenity/24 bg-white/80 px-6 text-xs font-bold text-[#252934] transition hover:bg-white hover:shadow-sm sm:text-sm"
                     >
                       <Images className="h-4 w-4" /> Xem album
                     </a>

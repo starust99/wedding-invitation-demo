@@ -10,6 +10,10 @@ function isNo(value: AttendanceValue) {
   return value === false || value === "no";
 }
 
+function withClosingThanks(message: string) {
+  return `${message}\n\nChân thành cảm ơn!`;
+}
+
 export function buildThankYouMessage(input: {
   attending: AttendanceValue;
   attendingCeremony: AttendanceValue;
@@ -51,34 +55,34 @@ export function buildRsvpSubmissionCopy(input: {
   if (isNo(input.attending)) {
     return {
       title: "Đã xác nhận",
-      body: `Cảm ơn ${recipient} đã phản hồi.\n\nDù rất tiếc không thể chung vui trực tiếp, nhưng những tình cảm ấm áp và lời chúc gửi trao vẫn luôn được trân trọng vô cùng. Hẹn gặp lại ${recipient} vào một dịp sớm nhất!`,
+      body: withClosingThanks(`Cảm ơn ${recipient} đã phản hồi.\n\nDù rất tiếc không thể chung vui trực tiếp, nhưng những tình cảm ấm áp và lời chúc gửi trao vẫn luôn được trân trọng vô cùng. Hẹn gặp lại ${recipient} vào một dịp sớm nhất!`),
       showCalendar: false,
     };
   }
   if (isYes(input.attendingCeremony) && isYes(input.attendingBanquet)) {
     return {
       title: "Đã xác nhận",
-      body: `Lời hồi đáp đã được gửi thành công!\n\nThật hạnh phúc khi biết ${recipientLower} sẽ có mặt ở cả Thánh lễ Hôn phối lẫn Tiệc cưới để chung vui cùng ${coupleDisplayName}.\n\nSự hiện diện của ${recipientLower} chính là món quà ý nghĩa nhất. Chân thành cảm ơn!`,
+      body: withClosingThanks(`Lời hồi đáp đã được gửi thành công!\n\nThật hạnh phúc khi biết ${recipientLower} sẽ có mặt ở cả Thánh lễ Hôn phối lẫn Tiệc cưới để chung vui cùng ${coupleDisplayName}.\n\nSự hiện diện của ${recipientLower} chính là món quà ý nghĩa nhất.`),
       showCalendar: true,
     };
   }
   if (isYes(input.attendingCeremony) && isNo(input.attendingBanquet)) {
     return {
       title: "Đã xác nhận",
-      body: `Lời hồi đáp đã được gửi thành công!\n\nCảm ơn ${recipient} đã sắp xếp thời gian đến chứng kiến và hiệp thông trong Thánh lễ Hôn phối của ${coupleDisplayName}.\n\nDù rất tiếc không thể đồng hành trong buổi Tiệc cưới, sự hiện diện và lời cầu nguyện của ${recipientLower} tại Thánh đường đã là món quà vô cùng trân quý.`,
+      body: withClosingThanks(`Lời hồi đáp đã được gửi thành công!\n\nCảm ơn ${recipient} đã sắp xếp thời gian đến chứng kiến và hiệp thông trong Thánh lễ Hôn phối của ${coupleDisplayName}.\n\nDù rất tiếc không thể đồng hành trong buổi Tiệc cưới, sự hiện diện và lời cầu nguyện của ${recipientLower} tại Thánh đường đã là món quà vô cùng trân quý.`),
       showCalendar: true,
     };
   }
   if (isNo(input.attendingCeremony) && isYes(input.attendingBanquet)) {
     return {
       title: "Đã xác nhận",
-      body: `Lời hồi đáp đã được gửi thành công!\n\nCảm ơn ${recipient} đã sắp xếp thời gian đến chung vui tại Tiệc cưới của ${coupleDisplayName}.\n\nSự đồng hành của ${recipientLower} chắc chắn sẽ giúp ngày vui thêm trọn vẹn và đong đầy ý nghĩa. Hẹn sớm gặp tại Đà Lạt!`,
+      body: withClosingThanks(`Lời hồi đáp đã được gửi thành công!\n\nCảm ơn ${recipient} đã sắp xếp thời gian đến chung vui tại Tiệc cưới của ${coupleDisplayName}.\n\nSự đồng hành của ${recipientLower} chắc chắn sẽ giúp ngày vui thêm trọn vẹn và đong đầy ý nghĩa. Hẹn sớm gặp tại Đà Lạt!`),
       showCalendar: true,
     };
   }
   return {
     title: "Đã xác nhận",
-    body: `Lời hồi đáp đã được gửi thành công.\n\n${input.fallbackClosingLine}`,
+    body: withClosingThanks(`Lời hồi đáp đã được gửi thành công.\n\n${input.fallbackClosingLine}`),
     showCalendar: true,
   };
 }

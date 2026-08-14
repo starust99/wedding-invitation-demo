@@ -121,6 +121,20 @@ const banquet = copy.buildRsvpSubmissionCopy({
 assert(banquet.body.includes("Cảm ơn Gia đình anh chị đã sắp xếp"));
 assert(banquet.body.includes("Sự đồng hành của gia đình anh chị"));
 
+for (const submission of [decline, both, ceremony, banquet]) {
+  assert(submission.body.endsWith("\n\nChân thành cảm ơn!"));
+  assert.equal(submission.body.match(/Chân thành cảm ơn!/g)?.length, 1);
+}
+
+const fallback = copy.buildRsvpSubmissionCopy({
+  ...clusterInput,
+  attending: "maybe",
+  attendingCeremony: null,
+  attendingBanquet: null,
+  fallbackClosingLine: "Hẹn gặp Gia đình anh chị tại ngày vui sắp tới.",
+});
+assert(fallback.body.endsWith("\n\nChân thành cảm ơn!"));
+
 const loverInput = {
   salutationCluster: "Anh chị",
   fullGuestName: "Chị Chi & Người thương",
@@ -139,4 +153,4 @@ const loverBoth = copy.buildRsvpSubmissionCopy({
 assert(loverBoth.body.includes("biết anh chị sẽ có mặt"));
 assert(loverBoth.body.includes("Sự hiện diện của anh chị chính là"));
 
-console.log(`Guest naming/copy checks passed (${nameCases.length} name patterns, 11 copy branches).`);
+console.log(`Guest naming/copy checks passed (${nameCases.length} name patterns, 12 copy branches).`);

@@ -197,11 +197,12 @@ async function openSubmittedRsvp(browser, userAgent) {
   assert.equal(await yesButtons.count(), 2);
   await yesButtons.nth(0).click();
   await yesButtons.nth(1).click();
-  await page.getByRole("button", { name: "Không nghỉ lại", exact: true }).click();
-  await page.getByRole("button", { name: "XEM LẠI VÀ HOÀN TẤT", exact: true }).click();
-  await page.getByRole("heading", { name: "Xác nhận thông tin hồi đáp", exact: true }).waitFor();
+  const noStayButton = page.getByRole("button", { name: "Không nghỉ lại", exact: true });
+  if (await noStayButton.count()) await noStayButton.click();
+  await page.getByRole("button", { name: "Xem lại và hoàn tất", exact: true }).click();
+  await page.getByRole("heading", { name: "Xem lại hồi đáp", exact: true }).waitFor();
   await page.getByRole("button", { name: "Xác nhận gửi hồi đáp", exact: true }).click();
-  await page.getByText("Thêm vào lịch", { exact: true }).waitFor();
+  await page.getByText("Lưu vào lịch", { exact: true }).waitFor();
 
   return { context, page };
 }
@@ -210,15 +211,15 @@ if (e2eBaseUrl) {
   const browser = await chromium.launch({ headless: true });
   try {
     const zalo = await openSubmittedRsvp(browser, cases[1].environment.userAgent);
-    await zalo.page.getByRole("link", { name: "THÁNH LỄ", exact: true }).click();
+    await zalo.page.getByRole("link", { name: "Thánh lễ", exact: true }).click();
     await zalo.page.getByText(/Chưa mở được lịch\?.*Trên Zalo:/).waitFor({
       timeout: CALENDAR_HANDOFF_HELP_DELAY_MS + 2_000,
     });
     if (process.env.CALENDAR_HANDOFF_SCREENSHOT) {
-      await zalo.page.screenshot({ path: process.env.CALENDAR_HANDOFF_SCREENSHOT });
+      await zalo.page.screenshot({ path: process.env.CALENDAR_HANDOFF_SCREENSHOT, fullPage: true });
     }
 
-    await zalo.page.getByRole("link", { name: "THÁNH LỄ", exact: true }).click();
+    await zalo.page.getByRole("link", { name: "Thánh lễ", exact: true }).click();
     await zalo.page.evaluate(() => window.dispatchEvent(new Event("blur")));
     await zalo.page.waitForTimeout(CALENDAR_HANDOFF_HELP_DELAY_MS + 300);
     assert.equal(
@@ -229,15 +230,15 @@ if (e2eBaseUrl) {
     await zalo.context.close();
 
     const safari = await openSubmittedRsvp(browser, cases[0].environment.userAgent);
-    await safari.page.getByRole("link", { name: "THÁNH LỄ", exact: true }).click();
+    await safari.page.getByRole("link", { name: "Thánh lễ", exact: true }).click();
     await safari.page.getByText(/Chưa mở được lịch\?.*Mở mục Tải về/).waitFor({
       timeout: CALENDAR_HANDOFF_HELP_DELAY_MS + 2_000,
     });
     if (process.env.CALENDAR_HANDOFF_DOWNLOAD_SCREENSHOT) {
-      await safari.page.screenshot({ path: process.env.CALENDAR_HANDOFF_DOWNLOAD_SCREENSHOT });
+      await safari.page.screenshot({ path: process.env.CALENDAR_HANDOFF_DOWNLOAD_SCREENSHOT, fullPage: true });
     }
 
-    await safari.page.getByRole("link", { name: "THÁNH LỄ", exact: true }).click();
+    await safari.page.getByRole("link", { name: "Thánh lễ", exact: true }).click();
     await safari.page.evaluate(() => window.dispatchEvent(new Event("blur")));
     await safari.page.waitForTimeout(CALENDAR_HANDOFF_HELP_DELAY_MS + 300);
     assert.equal(
