@@ -73,6 +73,25 @@ export function BackgroundMusic() {
   // Initialize audio and check user preference & native script status
   useEffect(() => {
     const audio = audioRef.current;
+
+    // Keep Safari/iOS lock-screen artwork aligned with the wedding brand.
+    // Without explicit Media Session metadata, WebKit may fall back to a
+    // stale favicon cached from an earlier deployment.
+    if ("mediaSession" in navigator && "MediaMetadata" in window) {
+      navigator.mediaSession.metadata = new MediaMetadata({
+        title: "Nhật & Phương",
+        artist: "Thiệp cưới",
+        album: "26.12.2026",
+        artwork: [
+          { src: "/assets/brand/heart-icon-96.png", sizes: "96x96", type: "image/png" },
+          { src: "/assets/brand/heart-icon-128.png", sizes: "128x128", type: "image/png" },
+          { src: "/assets/brand/heart-icon-192.png", sizes: "192x192", type: "image/png" },
+          { src: "/assets/brand/heart-icon-256.png", sizes: "256x256", type: "image/png" },
+          { src: "/assets/brand/heart-icon-384.png", sizes: "384x384", type: "image/png" },
+          { src: "/assets/brand/heart-icon-512.png", sizes: "512x512", type: "image/png" },
+        ],
+      });
+    }
     
     // 1. Sync React state with actual DOM audio state (in case native script already started it)
     const savedMuted = localStorage.getItem("wedding-music-muted");
@@ -158,6 +177,9 @@ export function BackgroundMusic() {
       window.removeEventListener("wedding-music-playing-native", handleNativePlay);
       if (fadeIntervalRef.current) {
         window.clearInterval(fadeIntervalRef.current);
+      }
+      if ("mediaSession" in navigator) {
+        navigator.mediaSession.metadata = null;
       }
     };
   }, []);

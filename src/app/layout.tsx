@@ -35,8 +35,24 @@ const fontVariables = [
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://nhatphuong.love"),
+  applicationName: "Nhật & Phương",
   title: "Nhật & Phương — Thiệp cưới",
   description: "Quý khách đến chung vui và ghi dấu những khoảnh khắc đáng nhớ cùng Nhật & Phương, 26.12.2026.",
+  manifest: "/manifest.webmanifest",
+  icons: {
+    icon: [
+      { url: "/icon.svg", type: "image/svg+xml" },
+      { url: "/assets/brand/heart-icon-192.png", sizes: "192x192", type: "image/png" },
+      { url: "/assets/brand/heart-icon-512.png", sizes: "512x512", type: "image/png" },
+    ],
+    shortcut: [{ url: "/assets/brand/heart-icon-192.png", sizes: "192x192", type: "image/png" }],
+    apple: [{ url: "/apple-icon.png", sizes: "180x180", type: "image/png" }],
+  },
+  appleWebApp: {
+    capable: true,
+    title: "Nhật & Phương",
+    statusBarStyle: "default",
+  },
   openGraph: {
     title: "Nhật & Phương — Thiệp cưới",
     description: "Quý khách đến chung vui và ghi dấu những khoảnh khắc đáng nhớ cùng Nhật & Phương, 26.12.2026.",
