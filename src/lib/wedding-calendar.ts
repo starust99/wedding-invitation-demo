@@ -1,4 +1,5 @@
 import { weddingConfig } from "@/config/wedding.config";
+import { shouldUseAndroidCalendarIntent } from "@/lib/calendar-handoff";
 import type { WeddingConfig } from "@/lib/site-settings";
 
 export type WeddingCalendarEventId = "thanh-le" | "tiec-cuoi" | "album";
@@ -160,7 +161,8 @@ export function getWeddingCalendarEvent(value: string, config?: WeddingConfig) {
 }
 
 export function shouldUseGoogleCalendar(userAgent: string) {
-  return /Android/i.test(userAgent);
+  return /Android/i.test(userAgent)
+    && !shouldUseAndroidCalendarIntent({ userAgent });
 }
 
 export function shouldPresentIcsInline(userAgent: string) {
@@ -194,6 +196,38 @@ export function buildGoogleCalendarUrl(event: WeddingCalendarEvent) {
   url.searchParams.set("location", event.location);
   url.searchParams.set("ctz", "Asia/Ho_Chi_Minh");
   return url.toString();
+}
+
+function utcStampToEpoch(value: string) {
+  const parts = value.match(/^(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})Z$/);
+  if (!parts) throw new Error(`Invalid UTC calendar stamp: ${value}`);
+
+  return Date.UTC(
+    Number(parts[1]),
+    Number(parts[2]) - 1,
+    Number(parts[3]),
+    Number(parts[4]),
+    Number(parts[5]),
+    Number(parts[6]),
+  );
+}
+
+export function buildAndroidCalendarIntent(event: WeddingCalendarEvent, fallbackUrl: string) {
+  const extra = (value: string) => encodeURIComponent(value);
+
+  return [
+    "intent://com.android.calendar/events#Intent",
+    "scheme=content",
+    "action=android.intent.action.INSERT",
+    "type=vnd.android.cursor.dir/event",
+    `S.title=${extra(event.title)}`,
+    `S.description=${extra(eventDetails(event))}`,
+    `S.eventLocation=${extra(event.location)}`,
+    `l.beginTime=${utcStampToEpoch(event.startUtc)}`,
+    `l.endTime=${utcStampToEpoch(event.endUtc)}`,
+    `S.browser_fallback_url=${extra(fallbackUrl)}`,
+    "end",
+  ].join(";");
 }
 
 function escapeIcsText(value: string) {

@@ -17,6 +17,7 @@ const handoffModule = await import(
 const {
   CALENDAR_HANDOFF_HELP_DELAY_MS,
   getCalendarHandoffGuidance,
+  shouldUseAndroidCalendarIntent,
 } = handoffModule;
 
 const cases = [
@@ -49,6 +50,18 @@ const cases = [
     },
     expectedKind: "external-browser",
     expected: /Trên Zalo:.*Mở bằng Chrome/,
+    expectedAndroidIntent: true,
+  },
+  {
+    name: "Android Messenger uses a native calendar intent",
+    environment: {
+      userAgent: "Mozilla/5.0 (Linux; Android 15; Pixel 9 Build/AP3A; wv) AppleWebKit/537.36 Version/4.0 Chrome/136.0 Mobile Safari/537.36 [FBAN/Orca-Android;FBAV/536.0.0.0.68]",
+      platform: "Linux armv8l",
+      maxTouchPoints: 5,
+    },
+    expectedKind: "external-browser",
+    expected: /Trên Messenger:.*Mở bằng Chrome/,
+    expectedAndroidIntent: true,
   },
   {
     name: "iPhone Messenger uses its menu",
@@ -69,6 +82,7 @@ const cases = [
     },
     expectedKind: "external-browser",
     expected: /Trên Telegram:.*Mở bằng Chrome/,
+    expectedAndroidIntent: true,
   },
   {
     name: "Android KakaoTalk uses its real menu label",
@@ -79,6 +93,7 @@ const cases = [
     },
     expectedKind: "external-browser",
     expected: /다른 브라우저로 열기/,
+    expectedAndroidIntent: true,
   },
   {
     name: "iPhone WhatsApp explains the long-press fallback",
@@ -109,6 +124,7 @@ const cases = [
     },
     expectedKind: "external-browser",
     expected: /biểu tượng chia sẻ.*Chrome/,
+    expectedAndroidIntent: true,
   },
   {
     name: "macOS Chrome explains the downloaded calendar file",
@@ -138,6 +154,7 @@ const cases = [
       maxTouchPoints: 5,
     },
     expected: null,
+    expectedAndroidIntent: false,
   },
 ];
 
@@ -150,12 +167,19 @@ for (const testCase of cases) {
     assert.equal(result.kind, testCase.expectedKind, testCase.name);
     assert.match(result.message, testCase.expected, testCase.name);
   }
+
+  assert.equal(
+    shouldUseAndroidCalendarIntent(testCase.environment),
+    testCase.expectedAndroidIntent ?? false,
+    `${testCase.name}: native Android calendar intent decision`,
+  );
 }
 
 assert.equal(CALENDAR_HANDOFF_HELP_DELAY_MS, 2_800);
 
 const rsvpSource = await readFile(new URL("../src/app/rsvp/page.tsx", import.meta.url), "utf8");
-assert.equal((rsvpSource.match(/onClick=\{handleCalendarHandoffAttempt\}/g) || []).length, 3);
+assert.equal((rsvpSource.match(/handleCalendarHandoffAttempt\(event, /g) || []).length, 3);
+assert.match(rsvpSource, /window\.location\.href = buildAndroidCalendarIntent/);
 assert.match(rsvpSource, /aria-live="polite"/);
 assert.match(rsvpSource, /Chưa mở được lịch\?/);
 

@@ -7,6 +7,7 @@ const userAgents = {
   iphoneSafari: "Mozilla/5.0 (iPhone; CPU iPhone OS 18_5 like Mac OS X) AppleWebKit/605.1.15 Version/18.5 Mobile/15E148 Safari/604.1",
   iphoneMessenger: "Mozilla/5.0 (iPhone; CPU iPhone OS 18_5 like Mac OS X) AppleWebKit/605.1.15 Mobile/15E148 [FBAN/MessengerForiOS;FBAV/514.0]",
   androidChrome: "Mozilla/5.0 (Linux; Android 15; Pixel 9) AppleWebKit/537.36 Chrome/136.0.0.0 Mobile Safari/537.36",
+  androidMessenger: "Mozilla/5.0 (Linux; Android 15; Pixel 9 Build/AP3A; wv) AppleWebKit/537.36 Version/4.0 Chrome/136.0 Mobile Safari/537.36 [FBAN/Orca-Android;FBAV/536.0.0.0.68]",
   androidZalo: "Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 Chrome/132.0.0.0 Mobile Safari/537.36 Zalo android",
   ipadSafari: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15) AppleWebKit/605.1.15 Version/18.5 Mobile/15E148 Safari/604.1",
   macSafari: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 Version/18.5 Safari/605.1.15",
@@ -44,7 +45,13 @@ for (const userAgent of [userAgents.iphoneSafari, userAgents.ipadSafari, userAge
   await assertIcsResponse(userAgent, "inline", "thanh-le-20261220@nhatphuong.love", "20261220T030000Z");
 }
 
-for (const userAgent of [userAgents.iphoneMessenger, userAgents.macChrome, userAgents.windowsChrome]) {
+for (const userAgent of [
+  userAgents.iphoneMessenger,
+  userAgents.androidMessenger,
+  userAgents.androidZalo,
+  userAgents.macChrome,
+  userAgents.windowsChrome,
+]) {
   await assertIcsResponse(userAgent, "attachment", "thanh-le-20261220@nhatphuong.love", "20261220T030000Z");
 }
 
@@ -71,19 +78,28 @@ assert.match(albumBody, /DTSTART:20270131T170000Z/);
 assert.match(albumBody, /Album ảnh sẽ được cập nhật tại thiệp mời/);
 assert.match(albumBody, /URL:https:\/\/nhatphuong\.love\/i\/chu-hai-test-123/);
 
-for (const userAgent of [userAgents.androidChrome, userAgents.androidZalo]) {
-  const response = await requestCalendar("tiec-cuoi", userAgent);
-  assert.equal(response.status, 302);
-  assert.match(response.headers.get("vary") || "", /(?:^|,\s*)User-Agent(?:,|$)/i);
-  assert.match(response.headers.get("cache-control") || "", /no-store/);
+const androidChromeRedirect = await requestCalendar("tiec-cuoi", userAgents.androidChrome);
+assert.equal(androidChromeRedirect.status, 302);
+assert.match(androidChromeRedirect.headers.get("vary") || "", /(?:^|,\s*)User-Agent(?:,|$)/i);
+assert.match(androidChromeRedirect.headers.get("cache-control") || "", /no-store/);
 
-  const location = new URL(response.headers.get("location"));
-  assert.equal(location.origin, "https://calendar.google.com");
-  assert.equal(location.searchParams.get("action"), "TEMPLATE");
-  assert.equal(location.searchParams.get("dates"), "20261226T103000Z/20261226T140000Z");
-  assert.equal(location.searchParams.get("ctz"), "Asia/Ho_Chi_Minh");
-  assert.match(location.searchParams.get("text") || "", /Tiệc cưới Nhật & Phương/);
-}
+const location = new URL(androidChromeRedirect.headers.get("location"));
+assert.equal(location.origin, "https://calendar.google.com");
+assert.equal(location.searchParams.get("action"), "TEMPLATE");
+assert.equal(location.searchParams.get("dates"), "20261226T103000Z/20261226T140000Z");
+assert.equal(location.searchParams.get("ctz"), "Asia/Ho_Chi_Minh");
+assert.match(location.searchParams.get("text") || "", /Tiệc cưới Nhật & Phương/);
+
+const forcedAndroidIcs = await fetch(`${baseUrl}/calendar/tiec-cuoi?download=1`, {
+  headers: { "user-agent": userAgents.androidChrome },
+  redirect: "manual",
+});
+assert.equal(forcedAndroidIcs.status, 200);
+assert.match(forcedAndroidIcs.headers.get("content-type") || "", /^text\/calendar; charset=utf-8/i);
+assert.match(
+  forcedAndroidIcs.headers.get("content-disposition") || "",
+  /^attachment; filename="Lich-Tiec-cuoi-Nhat-Phuong\.ics"$/i,
+);
 
 const missingResponse = await requestCalendar("khong-ton-tai", userAgents.windowsChrome);
 assert.equal(missingResponse.status, 404);
@@ -105,5 +121,7 @@ assert.doesNotMatch(rsvpSource, /\/calendar\/album-tiec-cuoi/);
 assert.doesNotMatch(rsvpSource, /const openCalendar/);
 assert.doesNotMatch(rsvpSource, /URL\.createObjectURL/);
 assert.doesNotMatch(rsvpSource, /window\.open\(gcalUrl/);
+assert.match(rsvpSource, /buildAndroidCalendarIntent/);
+assert.match(rsvpSource, /fallbackUrl\.searchParams\.set\("download", "1"\)/);
 
-console.log("Smart calendar checks passed: unchanged links, inline Apple Safari ICS, readable fallback downloads, Android Google Calendar, cache safety, and 404 handling.");
+console.log("Smart calendar checks passed: Apple inline ICS, Android in-app native/fallback flow, external Android Google Calendar, cache safety, and 404 handling.");

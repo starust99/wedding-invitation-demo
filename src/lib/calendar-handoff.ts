@@ -28,7 +28,7 @@ type CalendarClientEnvironment = {
 
 function detectHostApp(userAgent: string): CalendarHostApp {
   if (/\bZalo(?:\/|\b)/i.test(userAgent)) return "zalo";
-  if (/MessengerForiOS|FBAN\/Messenger|FB_IAB\/Messenger/i.test(userAgent)) return "messenger";
+  if (/MessengerForiOS|FBAN\/(?:Messenger|Orca)|FB_IAB\/(?:Messenger|Orca)|\bMessengerLite\b/i.test(userAgent)) return "messenger";
   if (/Instagram/i.test(userAgent)) return "instagram";
   if (/FBAN|FBAV|FB_IAB|FB4A|FBIOS/i.test(userAgent)) return "facebook";
   if (/Telegram/i.test(userAgent)) return "telegram";
@@ -53,6 +53,13 @@ function isGenericInAppBrowser(userAgent: string, ios: boolean) {
   }
 
   return /;\s*wv\)|\bwv\b|Version\/4\.0.*Chrome/i.test(userAgent);
+}
+
+export function shouldUseAndroidCalendarIntent(environment: CalendarClientEnvironment) {
+  if (!/Android/i.test(environment.userAgent)) return false;
+
+  const hostApp = detectHostApp(environment.userAgent);
+  return hostApp !== "unknown" || isGenericInAppBrowser(environment.userAgent, false);
 }
 
 function appSpecificMessage(hostApp: CalendarHostApp, ios: boolean) {

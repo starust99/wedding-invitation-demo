@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type MouseEvent as ReactMouseEvent, type ReactNode } from "react";
 import { AnimatePresence, motion, useReducedMotion, type Variants } from "framer-motion";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useFieldArray, useForm, useWatch } from "react-hook-form";
@@ -34,8 +34,14 @@ import { weddingConfig } from "@/config/wedding.config";
 import {
   CALENDAR_HANDOFF_HELP_DELAY_MS,
   getCalendarHandoffGuidance,
+  shouldUseAndroidCalendarIntent,
   type CalendarHandoffGuidance,
 } from "@/lib/calendar-handoff";
+import {
+  buildAndroidCalendarIntent,
+  createWeddingCalendarEvents,
+  type WeddingCalendarEventId,
+} from "@/lib/wedding-calendar";
 import { getInviteStatusFromRsvp, readLocalInvitees, upsertLocalInvitees, writeLocalInvitees, type Invitee } from "@/lib/invites";
 import { usePageTransition } from "@/components/PageTransitionEffect";
 import { CoupleNameText } from "@/components/ui/CoupleNameText";
@@ -614,15 +620,34 @@ export default function RSVPPage() {
     calendarHandoffCleanupRef.current?.();
   }, []);
 
-  function handleCalendarHandoffAttempt() {
+  function handleCalendarHandoffAttempt(
+    clickEvent: ReactMouseEvent<HTMLAnchorElement>,
+    eventId: WeddingCalendarEventId,
+  ) {
     calendarHandoffCleanupRef.current?.();
     setCalendarHandoffHelp(null);
 
-    const guidance = getCalendarHandoffGuidance({
+    const environment = {
       userAgent: window.navigator.userAgent || "",
       platform: window.navigator.platform,
       maxTouchPoints: window.navigator.maxTouchPoints,
-    });
+    };
+    const guidance = getCalendarHandoffGuidance(environment);
+
+    if (shouldUseAndroidCalendarIntent(environment)) {
+      clickEvent.preventDefault();
+
+      const fallbackUrl = new URL(clickEvent.currentTarget.href);
+      fallbackUrl.searchParams.set("download", "1");
+
+      const calendarEvent = createWeddingCalendarEvents(runtimeConfig)[eventId];
+      const inviteToken = fallbackUrl.searchParams.get("invite")?.trim();
+      calendarEvent.invitationUrl = inviteToken
+        ? `${window.location.origin}/i/${encodeURIComponent(inviteToken)}`
+        : window.location.origin;
+
+      window.location.href = buildAndroidCalendarIntent(calendarEvent, fallbackUrl.toString());
+    }
 
     if (!guidance) return;
 
@@ -1283,7 +1308,7 @@ export default function RSVPPage() {
                       // Calendar files require a full document navigation so in-app WebViews can hand them to the operating system.
                       <a
                         href={`/calendar/thanh-le${calendarInviteQuery}`}
-                        onClick={handleCalendarHandoffAttempt}
+                        onClick={(event) => handleCalendarHandoffAttempt(event, "thanh-le")}
                         className="wedding-type-button inline-flex h-11 items-center justify-center gap-2 rounded-full border border-serenity/24 bg-white/80 px-6 text-xs sm:text-sm font-bold text-[#252934] transition hover:bg-white hover:shadow-sm min-w-[130px]"
                       >
                         <CalendarDays className="w-4 h-4" /> Thánh lễ
@@ -1293,7 +1318,7 @@ export default function RSVPPage() {
                       // Calendar files require a full document navigation so in-app WebViews can hand them to the operating system.
                       <a
                         href={`/calendar/tiec-cuoi${calendarInviteQuery}`}
-                        onClick={handleCalendarHandoffAttempt}
+                        onClick={(event) => handleCalendarHandoffAttempt(event, "tiec-cuoi")}
                         className="wedding-type-button inline-flex h-11 items-center justify-center gap-2 rounded-full border border-serenity/24 bg-white/80 px-6 text-xs sm:text-sm font-bold text-[#252934] transition hover:bg-white hover:shadow-sm min-w-[130px]"
                       >
                         <CalendarDays className="w-4 h-4" /> Tiệc cưới
@@ -1307,7 +1332,7 @@ export default function RSVPPage() {
                     </p>
                     <a
                       href={`/calendar/album${calendarInviteQuery}`}
-                      onClick={handleCalendarHandoffAttempt}
+                      onClick={(event) => handleCalendarHandoffAttempt(event, "album")}
                       className="wedding-type-button mt-4 inline-flex h-11 min-w-[130px] items-center justify-center gap-2 rounded-full border border-serenity/24 bg-white/80 px-6 text-xs font-bold text-[#252934] transition hover:bg-white hover:shadow-sm sm:text-sm"
                     >
                       <Images className="h-4 w-4" /> Xem album

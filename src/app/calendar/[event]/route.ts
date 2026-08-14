@@ -65,8 +65,9 @@ export async function GET(
   };
 
   const userAgent = request.headers.get("user-agent") ?? "";
+  const forceIcsDownload = requestUrl.searchParams.get("download") === "1";
 
-  if (shouldUseGoogleCalendar(userAgent)) {
+  if (!forceIcsDownload && shouldUseGoogleCalendar(userAgent)) {
     return new Response(null, {
       status: 302,
       headers: {
