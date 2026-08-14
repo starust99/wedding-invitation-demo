@@ -1482,12 +1482,12 @@ export default function RSVPPage() {
               ) : null}
 
               <div className="mx-auto flex w-full justify-center">
-                <div className="relative w-full max-w-[24rem]">
+                <div className="relative inline-flex max-w-full">
                   <motion.button
                     type="button"
                     onClick={handleSubmit(onSubmit)}
                     disabled={isSubmitting}
-                    className="inline-flex min-h-12 w-full items-center justify-center rounded-full bg-rose-quartz px-6 text-sm font-semibold text-[#252934] shadow-[0_12px_32px_rgba(146,168,209,0.18)] ring-1 ring-rose-quartz/70 transition disabled:opacity-60"
+                    className="inline-flex min-h-12 max-w-full items-center justify-center rounded-full bg-rose-quartz px-8 text-sm font-semibold text-[#252934] shadow-[0_12px_32px_rgba(146,168,209,0.18)] ring-1 ring-rose-quartz/70 transition disabled:opacity-60"
                     whileTap={{ scale: 0.98 }}
                   >
                     {isSubmitting ? (
@@ -2093,7 +2093,7 @@ export default function RSVPPage() {
 
                 {/* Nút luôn hiện để khách chủ động kiểm tra phần còn thiếu. */}
                 <div className="mt-4 flex justify-center">
-                  <div className="relative w-full max-w-[24rem]">
+                  <div className="relative inline-flex max-w-full">
                     <motion.button
                       type="button"
                       onClick={handleGoToReview}

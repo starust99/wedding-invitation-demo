@@ -4183,8 +4183,9 @@ html.gallery-lightbox-open body {
 }
 
 .rsvp-final-cta {
-  width: min(100%, 24rem);
-  padding-inline: clamp(1.25rem, 6vw, 2.5rem);
+  width: auto;
+  max-width: 100%;
+  padding-inline: 2rem;
   font-size: clamp(0.78rem, 3.4vw, 0.9rem);
   line-height: 1.35;
   letter-spacing: 0.1em;
