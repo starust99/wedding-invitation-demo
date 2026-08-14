@@ -6,23 +6,26 @@ import { motion, useInView, useReducedMotion, type Variants } from "framer-motio
 const stationeryCardVariants: Variants = {
   tucked: {
     opacity: 0,
-    transform: "translate3d(0, -2rem, 0)",
+    y: -64,
   },
   drawn: {
     opacity: 1,
-    transform: "translate3d(0, 0, 0)",
+    y: 0,
     transition: {
-      transform: {
-        type: "tween",
-        duration: 0.62,
-        delay: 0.12,
-        ease: [0.16, 1, 0.3, 1],
+      y: {
+        type: "spring",
+        stiffness: 48,
+        damping: 10.5,
+        mass: 1.05,
+        restDelta: 0.08,
+        restSpeed: 0.08,
+        delay: 0.22,
       },
       opacity: {
         type: "tween",
-        duration: 0.28,
-        delay: 0.12,
-        ease: [0.16, 1, 0.3, 1],
+        duration: 0.72,
+        delay: 0.16,
+        ease: [0.22, 1, 0.36, 1],
       },
     },
   },
