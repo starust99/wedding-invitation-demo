@@ -31,6 +31,15 @@ const nextConfig: NextConfig = {
   async headers() {
     return [
       {
+        source: "/assets/og-invitation-v2.jpg",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=31536000, immutable",
+          },
+        ],
+      },
+      {
         source: "/assets/:path*",
         headers: [
           {

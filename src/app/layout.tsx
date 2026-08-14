@@ -44,9 +44,10 @@ export const metadata: Metadata = {
     siteName: "Nhật & Phương Wedding",
     images: [
       {
-        url: "/assets/og-image.png",
+        url: "https://nhatphuong.love/assets/og-invitation-v2.jpg",
         width: 1672,
         height: 941,
+        type: "image/jpeg",
         alt: "Nhật & Phương Wedding Thumbnail",
       },
     ],
@@ -57,7 +58,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Nhật & Phương — Thiệp cưới",
     description: "Quý khách đến chung vui và ghi dấu những khoảnh khắc đáng nhớ cùng Nhật & Phương, 26.12.2026.",
-    images: ["/assets/og-image.png"],
+    images: ["https://nhatphuong.love/assets/og-invitation-v2.jpg"],
   },
 };
 

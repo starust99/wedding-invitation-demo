@@ -9,9 +9,10 @@ import type { InviteeDatabaseRow } from "@/lib/invite-mapper";
 import type { RSVPDatabaseRow } from "@/lib/rsvp-mapper";
 
 const ogImage = {
-  url: "/assets/og-image.png",
+  url: "https://nhatphuong.love/assets/og-invitation-v2.jpg",
   width: 1672,
   height: 941,
+  type: "image/jpeg",
   alt: "Nhật & Phương Wedding Thumbnail",
 };
 
@@ -82,7 +83,7 @@ export async function generateMetadata({ params }: { params: Promise<{ token: st
   }
 
   const title = `Thiệp mời: ${guestName} | Nhật & Phương`;
-  const description = `Trân trọng kính mời ${guestName} đến chung vui trong ngày trọng đại của Nhật & Phương.`;
+  const description = `Trân trọng mời ${guestName} đến chung vui trong ngày trọng đại của Nhật & Phương.`;
 
   return {
     title,
