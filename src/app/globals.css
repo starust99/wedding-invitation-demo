@@ -4886,10 +4886,10 @@ html.splash-skipped body {
   min-width: min(15rem, calc(100vw - 6.5rem));
 }
 
-/* RSVP completion cards use the same opaque invitation-paper surface as the
-   cards on the private invitation. This keeps every response branch visually
-   consistent and prevents the watercolor background from bleeding through. */
-.rsvp-success-paper-card {
+/* Every primary RSVP card shares one opaque invitation-paper surface. This
+   keeps the form, review, and completion steps visually consistent while
+   preserving lighter interactive controls inside each card. */
+.rsvp-paper-card {
   border: 1px solid rgba(255, 255, 255, 0.72);
   background: linear-gradient(155deg, #fffdfa 0%, #fbf3ed 52%, #f8f1ed 100%);
   -webkit-backdrop-filter: none;
@@ -4917,16 +4917,12 @@ html.splash-skipped body {
   z-index: 20;
   margin-top: 0;
   margin-bottom: 0;
-  isolation: isolate;
-  -webkit-clip-path: inset(0 -3rem -4rem -3rem);
-  clip-path: inset(0 -3rem -4rem -3rem);
 }
 
 .rsvp-success-utility-shell {
   position: relative;
   padding-top: 1.5rem;
   transform-origin: 50% 0%;
-  will-change: transform;
 }
 
 .rsvp-success-utility-card {
@@ -4971,12 +4967,6 @@ html.splash-skipped body {
   /* Leave a deliberate paper gap below the invitation. The vellum tab bridges
      that gap; the RSVP card must not visually fuse with the main card. */
   margin-top: clamp(-1.9rem, -2.4vw, -1.55rem);
-  isolation: isolate;
-  /* Top-edge reveal mask: the insert is completely hidden while tucked and
-     is exposed only by the exact distance it travels downward. Negative side
-     and bottom insets preserve the final paper shadow. */
-  -webkit-clip-path: inset(0 -4rem -5rem -4rem);
-  clip-path: inset(0 -4rem -5rem -4rem);
 }
 
 .stationery-invitation-main-card {
@@ -4992,12 +4982,10 @@ html.splash-skipped body {
 }
 
 .invitation-response-card-shell {
-  isolation: isolate;
   /* Compact physical tab: the paper starts before the tongue ends, so the tab
      overlaps the RSVP insert without turning the two cards into one block. */
   padding-top: 1.5rem;
   transform-origin: 50% 0%;
-  will-change: transform;
 }
 
 .invitation-response-paper {
@@ -5075,10 +5063,10 @@ html.splash-skipped body {
   border-top-color: rgba(221, 202, 180, 0.18);
   border-radius: 0 0 1rem 1rem;
   background:
-    linear-gradient(180deg, rgba(242, 226, 211, 0.38), rgba(255, 252, 247, 0.76)),
-    rgba(252, 247, 240, 0.68);
-  -webkit-backdrop-filter: blur(8px) saturate(0.8);
-  backdrop-filter: blur(8px) saturate(0.8);
+    linear-gradient(180deg, rgba(242, 226, 211, 0.82), rgba(255, 252, 247, 0.96)),
+    rgb(252, 247, 240);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
   box-shadow:
     0 6px 9px -7px rgba(116, 82, 43, 0.2),
     0 1px 2px rgba(119, 90, 56, 0.06),

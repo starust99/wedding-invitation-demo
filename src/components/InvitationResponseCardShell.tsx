@@ -1,42 +1,29 @@
 "use client";
 
 import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
-import { motion, useInView, type Variants } from "framer-motion";
-
-const FALLBACK_TUCK_DISTANCE = 560;
+import { motion, useInView, useReducedMotion, type Variants } from "framer-motion";
 
 const stationeryCardVariants: Variants = {
-  tucked: (tuckDistance: number = FALLBACK_TUCK_DISTANCE) => ({
-    y: -tuckDistance,
-  }),
-  drawn: {
-    y: 0,
-    transition: {
-      y: {
-        type: "spring",
-        stiffness: 18,
-        damping: 7.5,
-        mass: 1.18,
-        restDelta: 0.2,
-        restSpeed: 0.2,
-        delay: 0.12,
-      },
-      delayChildren: 0.42,
-    },
-  },
-};
-
-const stationeryContentVariants: Variants = {
   tucked: {
     opacity: 0,
-    y: -8,
+    transform: "translate3d(0, -2rem, 0)",
   },
   drawn: {
     opacity: 1,
-    y: 0,
+    transform: "translate3d(0, 0, 0)",
     transition: {
-      duration: 0.48,
-      ease: [0.22, 1, 0.36, 1],
+      transform: {
+        type: "tween",
+        duration: 0.62,
+        delay: 0.12,
+        ease: [0.16, 1, 0.3, 1],
+      },
+      opacity: {
+        type: "tween",
+        duration: 0.28,
+        delay: 0.12,
+        ease: [0.16, 1, 0.3, 1],
+      },
     },
   },
 };
@@ -49,35 +36,15 @@ export function InvitationResponseCardShell({
   fullWidth?: boolean;
 }) {
   const stageRef = useRef<HTMLDivElement>(null);
-  const cardRef = useRef<HTMLDivElement>(null);
-  const [tuckDistance, setTuckDistance] = useState(FALLBACK_TUCK_DISTANCE);
   const [isMobileViewport, setIsMobileViewport] = useState<boolean | null>(null);
   const [hasReachedMobileReadPoint, setHasReachedMobileReadPoint] = useState(false);
   const [hasStartedDrawing, setHasStartedDrawing] = useState(false);
+  const shouldReduceMotion = useReducedMotion();
   const isInView = useInView(stageRef, {
     once: true,
     amount: 0.04,
     margin: "0px 0px -3% 0px",
   });
-
-  useLayoutEffect(() => {
-    const card = cardRef.current;
-    if (!card) return;
-
-    const updateTuckDistance = () => {
-      // Translate by the card's complete rendered height. The static stage
-      // stays in normal flow as the viewport trigger, while the actual RSVP
-      // insert starts fully tucked behind the main invitation card.
-      setTuckDistance(Math.max(1, Math.ceil(card.offsetHeight)));
-    };
-
-    updateTuckDistance();
-
-    const observer = new ResizeObserver(updateTuckDistance);
-    observer.observe(card);
-
-    return () => observer.disconnect();
-  }, []);
 
   useLayoutEffect(() => {
     const mobileQuery = window.matchMedia("(max-width: 639px)");
@@ -141,10 +108,8 @@ export function InvitationResponseCardShell({
       className={`invitation-response-card-stage relative w-full ${fullWidth ? "max-w-none" : "max-w-3xl"}`}
     >
       <motion.div
-        ref={cardRef}
-        initial="tucked"
-        animate={hasStartedDrawing ? "drawn" : "tucked"}
-        custom={tuckDistance}
+        initial={shouldReduceMotion ? "drawn" : "tucked"}
+        animate={shouldReduceMotion || hasStartedDrawing ? "drawn" : "tucked"}
         variants={stationeryCardVariants}
         className="invitation-response-card-shell relative w-full"
       >
@@ -165,7 +130,7 @@ export function InvitationResponseCardShell({
           </svg>
         </div>
 
-        <div className="glass-panel invitation-response-paper relative z-10 w-full overflow-hidden rounded-[2.5rem] px-5 py-8 sm:px-10 sm:py-10 lg:px-12 lg:py-12">
+        <div className="invitation-response-paper relative z-10 w-full overflow-hidden rounded-[2.5rem] border px-5 py-8 sm:px-10 sm:py-10 lg:px-12 lg:py-12">
           <div className="invitation-response-corner-ornaments" aria-hidden="true">
             <span className="invitation-response-corner invitation-response-corner--top-left" />
             <span className="invitation-response-corner invitation-response-corner--top-right" />
@@ -173,9 +138,9 @@ export function InvitationResponseCardShell({
             <span className="invitation-response-corner invitation-response-corner--bottom-right" />
           </div>
 
-          <motion.div className="relative z-[1]" variants={stationeryContentVariants}>
+          <div className="relative z-[1]">
             {children}
-          </motion.div>
+          </div>
         </div>
       </motion.div>
     </div>

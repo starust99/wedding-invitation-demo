@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
-import { AnimatePresence, motion, type Variants } from "framer-motion";
+import { AnimatePresence, motion, useReducedMotion, type Variants } from "framer-motion";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useFieldArray, useForm, useWatch } from "react-hook-form";
 import { z } from "zod";
@@ -48,59 +48,46 @@ import {
 
 const rsvpSuccessUtilityVariants: Variants = {
   tucked: {
-    y: "-100%",
+    opacity: 0,
+    transform: "translate3d(0, -2rem, 0)",
   },
   drawn: {
-    y: 0,
+    opacity: 1,
+    transform: "translate3d(0, 0, 0)",
     transition: {
-      y: {
-        type: "spring",
-        stiffness: 18,
-        damping: 7.5,
-        mass: 1.18,
-        restDelta: 0.2,
-        restSpeed: 0.2,
-        delay: 0.42,
+      transform: {
+        type: "tween",
+        duration: 0.58,
+        delay: 0.14,
+        ease: [0.16, 1, 0.3, 1],
+      },
+      opacity: {
+        type: "tween",
+        duration: 0.26,
+        delay: 0.14,
+        ease: [0.16, 1, 0.3, 1],
       },
     },
   },
 };
 
-const rsvpSuccessUtilityContentVariants: Variants = {
-  tucked: {
-    opacity: 0,
-    y: -8,
-  },
-  drawn: {
-    opacity: 1,
-    y: 0,
-    transition: {
-      duration: 0.48,
-      delay: 0.84,
-      ease: [0.22, 1, 0.36, 1],
-    },
-  },
-};
+function RsvpSuccessUtilityCard({ children, reveal }: { children: ReactNode; reveal: boolean }) {
+  const shouldReduceMotion = useReducedMotion();
+  const revealState = shouldReduceMotion || reveal ? "drawn" : "tucked";
 
-function RsvpSuccessUtilityCard({ children }: { children: ReactNode }) {
   return (
-    <motion.div
-      className="rsvp-success-utility-stage w-full max-w-lg"
-      initial="tucked"
-      whileInView="drawn"
-      viewport={{ once: true, amount: 0.04, margin: "0px 0px -3% 0px" }}
-    >
+    <div className="rsvp-success-utility-stage w-full max-w-lg">
       <motion.div
         className="rsvp-success-utility-shell w-full"
+        initial={shouldReduceMotion ? "drawn" : "tucked"}
+        animate={revealState}
         variants={rsvpSuccessUtilityVariants}
       >
-        <div className="rsvp-success-paper-card rsvp-success-utility-card w-full rounded-[2rem] p-5 text-center sm:p-7">
-          <motion.div variants={rsvpSuccessUtilityContentVariants}>
-            {children}
-          </motion.div>
+        <div className="rsvp-paper-card rsvp-success-utility-card w-full rounded-[2rem] p-5 text-center sm:p-7">
+          {children}
         </div>
       </motion.div>
-    </motion.div>
+    </div>
   );
 }
 
@@ -377,7 +364,7 @@ function RsvpHydrationState() {
 
         <div
           aria-hidden="true"
-          className="mt-8 overflow-hidden rounded-[1.6rem] border border-serenity/18 bg-white/75 p-5 shadow-sm sm:p-8"
+          className="rsvp-paper-card mt-8 overflow-hidden rounded-[1.6rem] p-5 sm:p-8"
         >
           <div className="grid gap-6 motion-safe:animate-pulse motion-reduce:animate-none">
             {[0, 1].map((item) => (
@@ -504,8 +491,10 @@ export default function RSVPPage() {
   const [guestRsvpLocked, setGuestRsvpLocked] = useState(false);
   const [isAdminBypassed, setIsAdminBypassed] = useState(false);
   const [calendarHandoffHelp, setCalendarHandoffHelp] = useState<CalendarHandoffGuidance | null>(null);
+  const [shouldRevealSuccessUtility, setShouldRevealSuccessUtility] = useState(false);
   const hasUserEditedFormRef = useRef(false);
   const calendarHandoffCleanupRef = useRef<(() => void) | null>(null);
+  const successConfirmationRef = useRef<HTMLDivElement>(null);
   const { navigateWithTransition, prefetch } = usePageTransition();
 
   // Prefetch home page / on mount for instant return navigation
@@ -589,6 +578,33 @@ export default function RSVPPage() {
     if (isSubmitted) {
       hasUserEditedFormRef.current = false;
     }
+  }, [isSubmitted]);
+
+  useEffect(() => {
+    if (!isSubmitted) {
+      setShouldRevealSuccessUtility(false);
+      return;
+    }
+
+    let revealFrameId = 0;
+    const scrollFrameId = window.requestAnimationFrame(() => {
+      successConfirmationRef.current?.scrollIntoView({
+        behavior: "instant",
+        block: "start",
+      });
+
+      // Give WebKit one paint with the final scroll position before moving the
+      // utility card. This avoids scroll and card compositing competing for the
+      // same frame inside memory-constrained in-app webviews.
+      revealFrameId = window.requestAnimationFrame(() => {
+        setShouldRevealSuccessUtility(true);
+      });
+    });
+
+    return () => {
+      window.cancelAnimationFrame(scrollFrameId);
+      if (revealFrameId) window.cancelAnimationFrame(revealFrameId);
+    };
   }, [isSubmitted]);
 
   useEffect(() => () => {
@@ -1178,7 +1194,7 @@ export default function RSVPPage() {
       <main className="public-invitation-page relative flex min-h-screen items-center justify-center px-4 py-12 text-[#252934] sm:px-6 sm:py-16">
         <div aria-hidden="true" className="aurora-wash pointer-events-none absolute inset-0 -z-10 opacity-50" />
         <div aria-hidden="true" className="film-grain-soft pointer-events-none absolute inset-0 -z-10" />
-        <section className="glass-panel w-full max-w-lg rounded-[2rem] px-6 py-9 text-center shadow-[0_24px_64px_rgba(37,41,52,0.08)] sm:p-10">
+        <section className="rsvp-paper-card w-full max-w-lg rounded-[2rem] px-6 py-9 text-center sm:p-10">
           <p className="section-kicker-dark wedding-type-kicker text-serenity">Lời hồi đáp</p>
           <h1 className="wedding-type-title mt-4 text-[#252934]">Không tìm thấy lời mời</h1>
           <p className="wedding-type-body mx-auto mt-5 max-w-md leading-relaxed text-[#252934]/68">
@@ -1232,10 +1248,11 @@ export default function RSVPPage() {
           {isSubmitted ? (
             <div className="rsvp-success-card-stack mx-auto flex w-full max-w-2xl flex-col items-center px-4 text-center sm:px-6">
               <motion.div
+                ref={successConfirmationRef}
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.4 }}
-                className="rsvp-success-paper-card rsvp-success-main-card flex w-full flex-col items-center rounded-[2rem] p-6 sm:p-8"
+                className="rsvp-paper-card rsvp-success-main-card flex w-full scroll-mt-4 flex-col items-center rounded-[2rem] p-6 sm:scroll-mt-8 sm:p-8"
               >
                 <h2 className="wedding-type-title text-[#252934] font-serif italic text-2xl sm:text-3xl font-bold mb-4">{submissionCopy.title}</h2>
                 <div className="wedding-type-body max-w-lg space-y-5 text-center leading-relaxed text-[#252934]/75 sm:space-y-6">
@@ -1254,7 +1271,7 @@ export default function RSVPPage() {
               </motion.div>
 
               {shouldShowAttendanceCalendar ? (
-                <RsvpSuccessUtilityCard>
+                <RsvpSuccessUtilityCard reveal={shouldRevealSuccessUtility}>
                   <p className="mb-5 text-base font-semibold tracking-[0.07em] text-[#7a6a5d] sm:text-lg">
                     Lưu vào lịch
                   </p>
@@ -1367,7 +1384,7 @@ export default function RSVPPage() {
                 </button>
               </div>
 
-              <div className="mb-7 grid w-full justify-items-center gap-0 rounded-[1.8rem] border border-serenity/22 bg-white/92 px-5 py-6 text-center shadow-[0_16px_40px_rgba(37,41,52,0.05)] backdrop-blur-md sm:px-9 sm:py-8">
+              <div className="rsvp-paper-card mb-7 grid w-full justify-items-center gap-0 rounded-[1.8rem] px-5 py-6 text-center sm:px-9 sm:py-8">
                 <header className="pb-5 text-center sm:pb-6">
                   <p className="mb-1.5 text-sm font-medium text-[#7a6a5d]">Hồi đáp của</p>
                   <div className="mx-auto w-full max-w-lg text-center">
@@ -1521,7 +1538,7 @@ export default function RSVPPage() {
                 ) : null}
 
                 {/* Khối Thánh lễ và tiệc sau Thánh lễ */}
-                <div className="rounded-[1.6rem] border border-serenity/18 bg-white/80 p-4 sm:p-8 shadow-sm text-center mb-6 grid gap-1 sm:gap-2">
+                <div className="rsvp-paper-card mb-6 grid gap-1 rounded-[1.6rem] p-4 text-center sm:gap-2 sm:p-8">
                   
                   {/* Sự kiện 1: Thánh lễ */}
                   <div className="py-2 sm:py-6 flex flex-col items-center sm:flex-row sm:justify-between sm:items-center gap-2 sm:gap-6 text-center sm:text-left">
@@ -1678,7 +1695,7 @@ export default function RSVPPage() {
                 <motion.div
                   layout
                   transition={{ layout: { duration: 0.28, ease: "easeOut" } }}
-                  className="rounded-[1.6rem] border border-serenity/18 bg-white/80 p-4 sm:p-8 shadow-sm text-center mb-6 grid gap-1 sm:gap-2"
+                  className="rsvp-paper-card mb-6 grid gap-1 rounded-[1.6rem] p-4 text-center sm:gap-2 sm:p-8"
                 >
                   {/* Sự kiện 2: Tiệc cưới */}
                   <div className="py-2 sm:py-6 flex flex-col items-center sm:flex-row sm:justify-between sm:items-center gap-2 sm:gap-6 text-center sm:text-left">
