@@ -44,4 +44,19 @@ INVITE_PREVIEW_BASE_URL=https://nhatphuong.love npm run check:invite-preview
 - Headless mobile Chromium loaded the `/w` fixture with HTTP 200, the expected
   personalized title, one real invitation root, zero horizontal overflow, and
   no console errors.
-- Production and Messenger rendering evidence remain pending deployment.
+- GitHub `main` commit `43f2cfd` deployed successfully as Vercel production
+  deployment `dpl_9zWG5bB2ApprvVERrZgDCM5fFiXj` and was aliased to
+  `https://nhatphuong.love`.
+- The production preview check passed for all six agents. The Meta responses
+  carried OG metadata in the first 7,600 bytes; `/t`, `robots.txt`, and JPEG
+  Range delivery also passed. Measured `/w` TTFB was 1.17–1.26 seconds for the
+  two documented `facebookexternalhit` forms and 0.92 seconds for Android
+  Chrome.
+- The production image returned HTTP 200, `image/jpeg`, 215,832 bytes,
+  `Accept-Ranges: bytes`, and a one-year immutable cache policy.
+- Production mobile Chromium loaded the Dì Nên fixture with HTTP 200, the
+  personalized title, one real invitation root, zero horizontal overflow, and
+  no console errors.
+- Messenger's rendered card still requires a fresh manual share or an
+  authenticated Meta Sharing Debugger check; the provider does not expose that
+  final renderer through an unauthenticated API.
