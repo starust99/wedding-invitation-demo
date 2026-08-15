@@ -1,6 +1,7 @@
 import type { RSVPResponse } from "@/lib/rsvp-storage";
 import { buildInvitationCopy } from "@/lib/guest-personalization";
 import { canonicalizeGuestFullName, resolveSalutationCluster } from "@/lib/guest-naming";
+import { invitePreviewVersion } from "@/lib/invite-preview";
 
 export type InviteUnit = "individual" | "household";
 export type InvitedBy = "parents" | "couple";
@@ -510,7 +511,7 @@ export function buildInvitePath(token: string) {
 
 export function buildInviteUrl(token: string, origin = "") {
   const base = origin.replace(/\/$/, "");
-  return `${base}${buildInvitePath(token)}`;
+  return `${base}${buildInvitePath(token)}?v=${invitePreviewVersion}`;
 }
 
 export function generateInviteToken(seed: string, existingTokens: Set<string>) {

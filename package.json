@@ -18,6 +18,7 @@
     "check:rsvp-lodging-copy": "node scripts/check-rsvp-lodging-copy.mjs",
     "check:smart-calendar": "node scripts/check-smart-calendar.mjs",
     "check:calendar-handoff": "node scripts/check-calendar-handoff.mjs",
+    "check:invite-preview": "node scripts/check-invite-preview.mjs",
     "check:slow-invite-experience": "node scripts/check-slow-invite-experience.mjs",
     "capture:browser": "node scripts/capture-browser-shots.mjs",
     "gitnexus:index": "gitnexus analyze --index-only",

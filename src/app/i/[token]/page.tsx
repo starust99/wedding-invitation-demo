@@ -7,9 +7,10 @@ import { mapInviteeRow } from "@/lib/invite-mapper";
 import { mapRSVPRow } from "@/lib/rsvp-mapper";
 import type { InviteeDatabaseRow } from "@/lib/invite-mapper";
 import type { RSVPDatabaseRow } from "@/lib/rsvp-mapper";
+import { invitationOgImageUrl, invitePreviewVersion } from "@/lib/invite-preview";
 
 const ogImage = {
-  url: "https://nhatphuong.love/assets/og-invitation-v2.jpg",
+  url: invitationOgImageUrl,
   width: 1672,
   height: 941,
   type: "image/jpeg",
@@ -84,6 +85,7 @@ export async function generateMetadata({ params }: { params: Promise<{ token: st
 
   const title = `Thiệp mời: ${guestName} | Nhật & Phương`;
   const description = `Trân trọng mời ${guestName} đến chung vui trong ngày trọng đại của Nhật & Phương.`;
+  const previewUrl = `/i/${encodeURIComponent(token)}?v=${invitePreviewVersion}`;
 
   return {
     title,
@@ -91,7 +93,7 @@ export async function generateMetadata({ params }: { params: Promise<{ token: st
     openGraph: {
       title,
       description,
-      url: `/i/${token}`,
+      url: previewUrl,
       siteName: "Nhật & Phương",
       locale: "vi_VN",
       type: "website",

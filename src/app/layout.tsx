@@ -4,6 +4,7 @@ import "./globals.css";
 import { PageTransitionEffect } from "@/components/PageTransitionEffect";
 import { InvitationWatercolorBackdrop } from "@/components/InvitationWatercolorBackdrop";
 import { BackgroundMusic } from "@/components/wedding/BackgroundMusic";
+import { invitationOgImageUrl } from "@/lib/invite-preview";
 
 const cormorantGaramond = Cormorant_Garamond({
   display: "swap",
@@ -60,7 +61,7 @@ export const metadata: Metadata = {
     siteName: "Nhật & Phương Wedding",
     images: [
       {
-        url: "https://nhatphuong.love/assets/og-invitation-v2.jpg",
+        url: invitationOgImageUrl,
         width: 1672,
         height: 941,
         type: "image/jpeg",
@@ -74,7 +75,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Nhật & Phương — Thiệp cưới",
     description: "Quý khách đến chung vui và ghi dấu những khoảnh khắc đáng nhớ cùng Nhật & Phương, 26.12.2026.",
-    images: ["https://nhatphuong.love/assets/og-invitation-v2.jpg"],
+    images: [invitationOgImageUrl],
   },
 };
 
