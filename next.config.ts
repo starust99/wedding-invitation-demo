@@ -28,6 +28,14 @@ const nextConfig: NextConfig = {
       },
     ];
   },
+  async rewrites() {
+    return [
+      {
+        source: "/m/:token",
+        destination: "/i/:token?invite_preview=short",
+      },
+    ];
+  },
   async headers() {
     return [
       {

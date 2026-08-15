@@ -7,7 +7,7 @@ import { mapInviteeRow } from "@/lib/invite-mapper";
 import { mapRSVPRow } from "@/lib/rsvp-mapper";
 import type { InviteeDatabaseRow } from "@/lib/invite-mapper";
 import type { RSVPDatabaseRow } from "@/lib/rsvp-mapper";
-import { invitationOgImageUrl, invitePreviewVersion } from "@/lib/invite-preview";
+import { invitationOgImageUrl } from "@/lib/invite-preview";
 
 const ogImage = {
   url: invitationOgImageUrl,
@@ -70,8 +70,15 @@ function resolveMetadataGuestName(invitee: Awaited<ReturnType<typeof fetchInvite
   ).trim();
 }
 
-export async function generateMetadata({ params }: { params: Promise<{ token: string }> }): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ token: string }>;
+  searchParams: Promise<{ invite_preview?: string }>;
+}): Promise<Metadata> {
   const { token } = await params;
+  const { invite_preview: previewMode } = await searchParams;
   const invitee = await fetchInviteeDataFromServer(token);
   const guestName = resolveMetadataGuestName(invitee);
 
@@ -85,7 +92,9 @@ export async function generateMetadata({ params }: { params: Promise<{ token: st
 
   const title = `Thiệp mời: ${guestName} | Nhật & Phương`;
   const description = `Trân trọng mời ${guestName} đến chung vui trong ngày trọng đại của Nhật & Phương.`;
-  const previewUrl = `/i/${encodeURIComponent(token)}?v=${invitePreviewVersion}`;
+  const previewUrl = previewMode === "short"
+    ? `/m/${encodeURIComponent(token)}`
+    : `/i/${encodeURIComponent(token)}`;
 
   return {
     title,

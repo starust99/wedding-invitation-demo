@@ -11,7 +11,7 @@ const metaUserAgents = [
 ];
 
 for (const userAgent of metaUserAgents) {
-  const response = await fetch(`${baseUrl}/i/${encodeURIComponent(token)}?v=${expectedVersion}`, {
+  const response = await fetch(`${baseUrl}/m/${encodeURIComponent(token)}`, {
     headers: { "user-agent": userAgent },
     redirect: "manual",
   });
@@ -24,8 +24,8 @@ for (const userAgent of metaUserAgents) {
   assert.match(head, /property="og:description"/i, `${userAgent}: OG description must be emitted inside head`);
   assert.match(
     head,
-    new RegExp(`property="og:url" content="[^"]*\\?v=${expectedVersion}"`, "i"),
-    `${userAgent}: OG URL must use the fresh preview version`,
+    new RegExp(`property="og:url" content="[^"]*/m/${token}"`, "i"),
+    `${userAgent}: OG URL must preserve the short public link`,
   );
   assert.match(
     head,
