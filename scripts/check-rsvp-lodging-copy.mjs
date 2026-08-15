@@ -42,6 +42,7 @@ assert.match(
 );
 assert.match(rsvpSource, /hasGroomFamilyLodgingOptions \? "max-w-2xl mx-auto" : "md:grid-cols-4"/);
 assert.match(rsvpSource, /redirectToInvitePage\(inviteToken, "#thank-you"\)/);
+assert.match(rsvpSource, /append\(createLodgingGuest\(""\), \{ shouldFocus: false \}\)/);
 assert.match(rsvpSource, /function parseRsvpDeadline\(value: string\)/);
 assert.match(rsvpSource, /parseRsvpDeadline\(runtimeConfig\.rsvp\.deadline\)/);
 assert.match(rsvpSource, /T00:00:00\+07:00/);

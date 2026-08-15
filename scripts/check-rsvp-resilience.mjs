@@ -45,10 +45,16 @@ async function requireExplicitStayDecision(page) {
 
 async function fillLodgingGuest(page) {
   await page.getByRole("button", { name: /Đêm 26\/12/ }).click();
+  const fullName = page.getByPlaceholder("VD: Nguyễn Văn A", { exact: true });
+  await fullName.waitFor({ state: "visible" });
+  assert.equal(
+    await fullName.evaluate((input) => document.activeElement === input),
+    false,
+    "Choosing a lodging night must not focus the guest-name field or open the mobile keyboard.",
+  );
   await page.getByRole("button", { name: "Xem lại và hoàn tất", exact: true }).click();
   const missingNameError = page.getByText("Nhập họ tên người lưu trú.", { exact: true });
   await missingNameError.waitFor();
-  const fullName = page.getByPlaceholder("VD: Nguyễn Văn A", { exact: true });
   await fullName.fill("Nguyễn Văn A");
   await missingNameError.waitFor({ state: "hidden" });
   return fullName;

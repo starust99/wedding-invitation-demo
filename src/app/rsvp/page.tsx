@@ -1045,7 +1045,9 @@ export default function RSVPPage() {
       replace([]);
     } else {
       if ((getValues("lodgingGuests") ?? []).length === 0) {
-        append(createLodgingGuest(""));
+        // Merely choosing a night should reveal the guest fields without
+        // summoning the mobile keyboard. Guests can focus the name field when ready.
+        append(createLodgingGuest(""), { shouldFocus: false });
       }
     }
   }
