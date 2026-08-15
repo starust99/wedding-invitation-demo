@@ -113,8 +113,9 @@ function readForceIntro(storageKey?: string) {
     }
 
     const pathname = window.location.pathname || "";
-    if (pathname.startsWith("/i/")) {
-      const token = pathname.replace("/i/", "").split("?")[0];
+    const guestPathMatch = pathname.match(/^\/(?:i|t|w)\/([^/?#]+)/);
+    if (guestPathMatch) {
+      const token = guestPathMatch[1];
       if (token && window.sessionStorage.getItem(`wedding-splash-seen:${token}`) === "1") {
         return false;
       }

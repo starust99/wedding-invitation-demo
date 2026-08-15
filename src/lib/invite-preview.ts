@@ -1,7 +1,4 @@
-// Meta caches failed link previews by the exact shared URL for a long time.
-// Bump this value whenever the Open Graph card changes so newly copied links
-// are crawled as a fresh object by Messenger and Facebook.
-export const invitePreviewVersion = "20260816";
-
-export const invitationOgImageUrl =
-  `https://nhatphuong.love/assets/og-invitation-v2.jpg?v=${invitePreviewVersion}`;
+// Social crawlers cache media independently from the page object. Use a new
+// physical filename for a changed card instead of relying on a query string.
+export const invitationOgImagePath = "/assets/meta/og-wedding-20260816.jpg";
+export const invitationOgImageUrl = `https://nhatphuong.love${invitationOgImagePath}`;

@@ -9,10 +9,8 @@ function getCurrentStorageKey(): string {
   if (typeof window === "undefined") return "home";
   const pathname = window.location.pathname;
   if (pathname === "/") return "home";
-  if (pathname.startsWith("/i/")) {
-    const parts = pathname.split("/");
-    return parts[parts.length - 1] || "home";
-  }
+  const guestPathMatch = pathname.match(/^\/(?:i|t|w)\/([^/?#]+)/);
+  if (guestPathMatch) return guestPathMatch[1] || "home";
   return "home";
 }
 

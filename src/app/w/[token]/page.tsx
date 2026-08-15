@@ -10,7 +10,7 @@ export const revalidate = 0;
 
 export async function generateMetadata({ params }: InvitationTokenRouteProps): Promise<Metadata> {
   const { token } = await params;
-  return buildInvitationMetadata(token, "/i");
+  return buildInvitationMetadata(token, "/w");
 }
 
 export default InvitationTokenRoutePage;

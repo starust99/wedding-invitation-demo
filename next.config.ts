@@ -39,6 +39,15 @@ const nextConfig: NextConfig = {
   async headers() {
     return [
       {
+        source: "/assets/:path*",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=604800, stale-while-revalidate=86400",
+          },
+        ],
+      },
+      {
         source: "/assets/og-invitation-v2.jpg",
         headers: [
           {
@@ -48,11 +57,11 @@ const nextConfig: NextConfig = {
         ],
       },
       {
-        source: "/assets/:path*",
+        source: "/assets/meta/og-wedding-20260816.jpg",
         headers: [
           {
             key: "Cache-Control",
-            value: "public, max-age=604800, stale-while-revalidate=86400",
+            value: "public, max-age=31536000, immutable",
           },
         ],
       },
