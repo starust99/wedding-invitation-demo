@@ -510,7 +510,7 @@ export function buildInvitePath(token: string) {
 
 export function buildInviteUrl(token: string, origin = "") {
   const base = origin.replace(/\/$/, "");
-  return `${base}/m/${encodeURIComponent(token)}`;
+  return `${base}/t/${encodeURIComponent(token)}`;
 }
 
 export function generateInviteToken(seed: string, existingTokens: Set<string>) {

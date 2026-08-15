@@ -70,15 +70,8 @@ function resolveMetadataGuestName(invitee: Awaited<ReturnType<typeof fetchInvite
   ).trim();
 }
 
-export async function generateMetadata({
-  params,
-  searchParams,
-}: {
-  params: Promise<{ token: string }>;
-  searchParams: Promise<{ invite_preview?: string }>;
-}): Promise<Metadata> {
+export async function generateMetadata({ params }: { params: Promise<{ token: string }> }): Promise<Metadata> {
   const { token } = await params;
-  const { invite_preview: previewMode } = await searchParams;
   const invitee = await fetchInviteeDataFromServer(token);
   const guestName = resolveMetadataGuestName(invitee);
 
@@ -92,9 +85,7 @@ export async function generateMetadata({
 
   const title = `Thiệp mời: ${guestName} | Nhật & Phương`;
   const description = `Trân trọng mời ${guestName} đến chung vui trong ngày trọng đại của Nhật & Phương.`;
-  const previewUrl = previewMode === "short"
-    ? `/m/${encodeURIComponent(token)}`
-    : `/i/${encodeURIComponent(token)}`;
+  const previewUrl = `/i/${encodeURIComponent(token)}`;
 
   return {
     title,

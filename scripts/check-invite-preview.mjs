@@ -11,7 +11,7 @@ const metaUserAgents = [
 ];
 
 for (const userAgent of metaUserAgents) {
-  const response = await fetch(`${baseUrl}/m/${encodeURIComponent(token)}`, {
+  const response = await fetch(`${baseUrl}/t/${encodeURIComponent(token)}`, {
     headers: { "user-agent": userAgent },
     redirect: "manual",
   });
@@ -24,13 +24,22 @@ for (const userAgent of metaUserAgents) {
   assert.match(head, /property="og:description"/i, `${userAgent}: OG description must be emitted inside head`);
   assert.match(
     head,
-    new RegExp(`property="og:url" content="[^"]*/m/${token}"`, "i"),
+    new RegExp(`property="og:url" content="[^"]*/t/${token}"`, "i"),
     `${userAgent}: OG URL must preserve the short public link`,
   );
   assert.match(
     head,
     new RegExp(`property="og:image" content="[^"]*og-invitation-v2\\.jpg\\?v=${expectedVersion}"`, "i"),
     `${userAgent}: OG image must use the fresh preview version`,
+  );
+  assert.match(
+    html,
+    new RegExp(`window\\.location\\.replace\\("/i/${token}"\\)`),
+    `${userAgent}: a human opening the preview URL must be handed to the invitation`,
+  );
+  assert.ok(
+    html.length < 8_000,
+    `${userAgent}: preview HTML must stay lightweight enough for Messenger's composer timeout`,
   );
 }
 
