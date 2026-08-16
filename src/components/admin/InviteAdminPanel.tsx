@@ -138,6 +138,17 @@ function downloadBlob(filename: string, blob: Blob) {
   URL.revokeObjectURL(url);
 }
 
+function prewarmInvitePreview(url: string) {
+  void fetch(url, {
+    credentials: "omit",
+    keepalive: true,
+  })
+    .then((response) => response.arrayBuffer())
+    .catch(() => {
+      // Copying the URL must remain available even if background warming is interrupted.
+    });
+}
+
 export function InviteAdminPanel() {
   const router = useRouter();
   const publishedSettings = usePublishedSettings();
@@ -171,6 +182,12 @@ export function InviteAdminPanel() {
   const selectedInvitee = useMemo(() => {
     return invitees.find((item) => item.id === selectedInviteeId) ?? invitees[0] ?? null;
   }, [invitees, selectedInviteeId]);
+
+  useEffect(() => {
+    if (!selectedInvitee?.token) return;
+    prewarmInvitePreview(buildInviteUrl(selectedInvitee.token, window.location.origin));
+  }, [selectedInvitee?.token]);
+
   useEffect(() => {
     let cancelled = false;
 
@@ -672,17 +689,6 @@ export function InviteAdminPanel() {
       setBusy(false);
       if (importFileRef.current) importFileRef.current.value = "";
     }
-  }
-
-  function prewarmInvitePreview(url: string) {
-    void fetch(url, {
-      credentials: "omit",
-      keepalive: true,
-    })
-      .then((response) => response.arrayBuffer())
-      .catch(() => {
-        // Copying the URL must remain available even if background warming is interrupted.
-      });
   }
 
   function copyInviteUrl(token: string) {

@@ -17,6 +17,7 @@ function TimelineIcon({ title, icon, className }: { title: string; icon?: string
     <img
       src={iconPath}
       alt={title}
+      loading="lazy"
       className={className}
       draggable={false}
     />
@@ -283,7 +284,6 @@ function VenueMapImage({ className = "" }: { className?: string }) {
         fill
         unoptimized
         className="object-cover"
-        priority
       />
     </div>
   );
@@ -404,6 +404,7 @@ export function EventDetailsContent({
             <img 
               src="/assets/divider_title_marriage.png" 
               alt="decorative divider" 
+              loading="lazy"
               className="w-[43.7%] max-w-[11.3rem] h-auto opacity-95 select-none object-contain pointer-events-none"
             />
           </div>
@@ -420,6 +421,7 @@ export function EventDetailsContent({
             <img 
               src="/assets/divider_family_title.png" 
               alt="decorative divider" 
+              loading="lazy"
               className="w-[7.65rem] sm:w-[9.35rem] md:w-[10.2rem] h-auto opacity-95 select-none object-contain pointer-events-none mt-0 mb-1"
             />
 
@@ -447,6 +449,7 @@ export function EventDetailsContent({
             <img 
               src="/assets/divider_family_title.png" 
               alt="decorative divider" 
+              loading="lazy"
               className="w-[7.65rem] sm:w-[9.35rem] md:w-[10.2rem] h-auto opacity-95 select-none object-contain pointer-events-none mt-0 mb-1"
             />
 
@@ -477,6 +480,7 @@ export function EventDetailsContent({
               <img 
                 src="/assets/event-details-names-v4-blank.png" 
                 alt="Augustino Trần Long Nhật" 
+                loading="lazy"
                 className="absolute top-0 left-0 w-full h-auto names-image-color"
                 draggable={false}
               />
@@ -487,6 +491,7 @@ export function EventDetailsContent({
               <img
                 src="/assets/wedding-rings.webp"
                 alt="Cặp nhẫn cưới"
+                loading="lazy"
                 className="w-full h-full object-contain"
                 draggable={false}
               />
@@ -497,6 +502,7 @@ export function EventDetailsContent({
               <img 
                 src="/assets/event-details-names-v4-blank.png" 
                 alt="Teresa Nguyễn Anh Phương" 
+                loading="lazy"
                 className="absolute bottom-0 left-0 w-full h-auto names-image-color"
                 draggable={false}
               />
@@ -540,6 +546,7 @@ export function EventDetailsContent({
             <img 
               src="/assets/divider_cards.png" 
               alt="decorative divider" 
+              loading="lazy"
               className="w-[90%] sm:w-[95%] max-w-[33.7rem] h-auto opacity-95 select-none object-contain pointer-events-none"
               style={{ filter: "brightness(0.85) saturate(1.3) contrast(1.05)" }}
             />
@@ -555,7 +562,6 @@ export function EventDetailsContent({
                 sizes="(max-width: 767px) 90vw"
                 className="object-cover church-image-illustration"
                 unoptimized
-                priority
               />
             ) : (
               <div className="w-full h-full flex items-center justify-center bg-white/40">
@@ -624,6 +630,7 @@ export function EventDetailsContent({
             <img 
               src="/assets/divider_cards.png" 
               alt="decorative divider" 
+              loading="lazy"
               className="w-[90%] sm:w-[95%] max-w-[33.7rem] h-auto opacity-95 select-none object-contain pointer-events-none"
               style={{ filter: "brightness(0.85) saturate(1.3) contrast(1.05)" }}
             />
@@ -708,6 +715,7 @@ export function EventDetailsContent({
                     src="/assets/timeline-frames/frame_001.webp"
                     alt=""
                     aria-hidden="true"
+                    loading="lazy"
                     className={`timeline-path-poster timeline-path-video ${isRoadReady ? "is-faded-out" : ""}`}
                   />
                   <RoadSequencePlayer

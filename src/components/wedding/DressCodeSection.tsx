@@ -282,7 +282,6 @@ export function DressCodeSection({
                 unoptimized
                 className="object-cover"
                 style={{ objectPosition: selectedColor?.objectPosition }}
-                priority
                 draggable={false}
               />
             </motion.div>

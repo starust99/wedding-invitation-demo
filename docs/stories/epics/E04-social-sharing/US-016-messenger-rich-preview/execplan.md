@@ -11,7 +11,13 @@ the link stays short for guests.
 In scope:
 
 - Replace `/t`'s preview-only route handler with a real invitation page.
-- Add a fresh `/w` shared path and switch generated links to it.
+- Add a fresh `/g` shared path and switch generated links to it while keeping
+  `/w` and `/t` compatible.
+- Restore exact personalized guest metadata using one cached invitee query,
+  without caching contact, admin-note, or RSVP data.
+- Invalidate cached identities and routes after admin mutations.
+- Put essential OG metadata inside the first 4 KiB and prewarm selected links
+  before the copy gesture.
 - Publish a fresh physical JPEG URL and explicit `robots.txt` policy.
 - Strengthen automated preview checks and verify production after deployment.
 
@@ -39,9 +45,10 @@ Hard gates:
 
 1. Confirm origin, image, crawler, DNS, and TLS behavior.
 2. Define a content-page route with no preview bridge or crawler cloaking.
-3. Add deterministic source and production checks.
-4. Build, deploy, and smoke-test the fresh URL and image.
-5. Record evidence and remaining Meta-controlled uncertainty.
+3. Add token-scoped personalization cache and mutation invalidation.
+4. Reduce head preloads and add deterministic Meta/Zalo/range checks.
+5. Build, deploy, and smoke-test the fresh URL and image.
+6. Record evidence and remaining provider-controlled uncertainty.
 
 ## Stop Conditions
 

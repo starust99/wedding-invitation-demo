@@ -4,7 +4,7 @@ Date: 2026-08-17
 
 ## Status
 
-Accepted
+Superseded by decision 0012
 
 ## Context
 
@@ -74,6 +74,9 @@ Tradeoffs:
 
 ## Follow-Up
 
+- Decision 0012 restores token-personalized metadata and a safe public invitee
+  projection after production proved that generic metadata violated the guest
+  naming contract and did not reliably preserve Messenger cards.
 - Add short-lived token-keyed API caching only if invitation hydration, rather
   than thumbnail crawl, remains perceptibly slow after this change.
 - Use an authenticated Meta workflow only if automatic prewarming becomes a

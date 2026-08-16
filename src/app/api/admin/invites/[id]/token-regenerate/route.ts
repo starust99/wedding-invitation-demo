@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { hasAdminSession } from "@/lib/admin-auth";
+import { revalidateSharedInvitation } from "@/lib/invite-share-cache";
 import { generateInviteToken } from "@/lib/invites";
 import { getSupabaseServerClient, hasSupabaseEnv } from "@/lib/supabase-server";
 
@@ -40,6 +41,9 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   if (updateError) {
     return NextResponse.json({ error: updateError.message }, { status: 500 });
   }
+
+  revalidateSharedInvitation(String(invitee.token ?? ""));
+  revalidateSharedInvitation(nextToken);
 
   return NextResponse.json({ token: nextToken });
 }

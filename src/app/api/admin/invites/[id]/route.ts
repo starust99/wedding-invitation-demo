@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { hasAdminSession } from "@/lib/admin-auth";
+import { revalidateSharedInvitation } from "@/lib/invite-share-cache";
 import { mapInviteeRow, type InviteeDatabaseRow } from "@/lib/invite-mapper";
 import { getSupabaseServerClient, hasSupabaseEnv } from "@/lib/supabase-server";
 
@@ -41,6 +42,16 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
   const { id } = await params;
   const body = await request.json() as PatchBody;
   const supabase = getSupabaseServerClient();
+  const { data: existingInvitee, error: readError } = await supabase
+    .from("invitees")
+    .select("token")
+    .eq("id", id)
+    .maybeSingle();
+
+  if (readError) {
+    return NextResponse.json({ error: readError.message }, { status: 500 });
+  }
+
   const { data, error } = await supabase
     .from("invitees")
     .update({
@@ -53,6 +64,12 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+
+  const previousToken = String(existingInvitee?.token ?? "");
+  const updatedToken = String(data.token ?? "");
+  for (const token of new Set([previousToken, updatedToken])) {
+    revalidateSharedInvitation(token);
   }
 
   return NextResponse.json({
@@ -100,6 +117,8 @@ export async function DELETE(_request: Request, { params }: { params: Promise<{ 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
+
+  revalidateSharedInvitation(token);
 
   return NextResponse.json({ ok: true, deletedId: id, backend: "supabase" });
 }

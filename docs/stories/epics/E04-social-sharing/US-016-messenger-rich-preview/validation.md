@@ -9,11 +9,11 @@ separating origin correctness from Messenger's provider-controlled rendering.
 
 | Layer | Cases |
 | --- | --- |
-| Unit | URL builder emits `/w`; params-only metadata avoids Supabase; every admin copy path triggers non-blocking prewarming. |
-| Integration | Meta user agents and a normal browser receive cacheable HTTP 200 at `/w`; no JS/meta redirect exists. |
-| E2E | Shared shell renders immediately, then hydrates the personalized invitation or invalid-token gate through the API. |
-| Platform | Production checks cover `facebookexternalhit`, Facebot, Meta agents, normal browser, `robots.txt`, and image GET/HEAD/Range. |
-| Performance | OG fields remain in the first response head and page/image requests complete within Meta's documented crawl window. |
+| Unit | URL builder emits `/g`; metadata prefers exact `guestName`; cache invalidation covers `/g`, `/w`, and `/t`; selection/copy warming stays non-blocking. |
+| Integration | Meta, Zalo, and a normal browser receive exact personalized OG metadata and cacheable HTTP 200 at `/g`; `/w` and `/t` remain compatible. |
+| E2E | Shared SSR contains the real personalized invitation and the API refreshes current state after hydration; invalid tokens return not found. |
+| Platform | Production checks cover Meta agents, Zalo agents, normal browser, `robots.txt`, and HTML/JPEG range requests. |
+| Performance | Primary OG image begins before byte 4096; warm edge timing is measured without asserting an external-provider SLA. |
 | Logs/Audit | No durable business data changes; production request evidence is captured in the story. |
 
 ## Fixtures

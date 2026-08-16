@@ -212,7 +212,6 @@ export function ReferenceWeddingHero({ config, summary }: ReferenceWeddingHeroPr
                 alt=""
                 width={250}
                 height={250}
-                priority
                 className="object-contain pointer-events-none"
               />
             </div>
@@ -226,7 +225,6 @@ export function ReferenceWeddingHero({ config, summary }: ReferenceWeddingHeroPr
                 alt=""
                 width={250}
                 height={250}
-                priority
                 className="object-contain pointer-events-none"
               />
             </div>

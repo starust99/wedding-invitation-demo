@@ -115,7 +115,7 @@ assert.equal(linkSheet.getCell("A5").result, 1);
 assert.match(linkSheet.getCell("A5").formula, /COUNTIF\(\$B\$5:B5/);
 assert.equal(linkSheet.getCell("B5").text, "Gia đình anh chị Tuấn");
 assert.equal(linkSheet.getCell("C5").text, "Có");
-assert.equal(linkSheet.getCell("D5").hyperlink, `https://nhatphuong.love/w/${parsed.invitees[0].token}`);
+assert.equal(linkSheet.getCell("D5").hyperlink, `https://nhatphuong.love/g/${parsed.invitees[0].token}`);
 
 const mappedInvitee = inviteMapper.mapInviteeRow({
   id: "11111111-1111-4111-8111-111111111111",

@@ -16,6 +16,7 @@ const cormorantGaramond = Cormorant_Garamond({
 
 const beVietnamPro = Be_Vietnam_Pro({
   display: "swap",
+  preload: false,
   subsets: ["latin", "vietnamese"],
   variable: "--font-be-vietnam-pro",
   weight: ["400", "500", "600"],
@@ -92,7 +93,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="vi" data-scroll-behavior="smooth" className={fontVariables} suppressHydrationWarning>
-      <head>
+      <body>
         <script
           dangerouslySetInnerHTML={{
             __html: `
@@ -105,7 +106,7 @@ export default function RootLayout({
                 var isExplicitSkip = search.indexOf("view=main") !== -1 || search.indexOf("from=rsvp") !== -1 || search.indexOf("skip_intro=1") !== -1 || hash.indexOf("rsvp") !== -1 || hash.indexOf("thank-you") !== -1;
                 var isExplicitForce = search.indexOf("intro=1") !== -1 || href.indexOf("intro=1") !== -1;
 
-                var guestPathMatch = path.match(/^\/(?:i|t|w)\/([^/?#]+)/);
+                var guestPathMatch = path.match(/^\/(?:g|i|m|t|w)\/([^/?#]+)/);
                 var isGuestPath = Boolean(guestPathMatch);
                 var token = guestPathMatch ? guestPathMatch[1] : "public";
                 var sessionSeen = false;
@@ -131,8 +132,6 @@ export default function RootLayout({
             `
           }}
         />
-      </head>
-      <body>
         <InvitationWatercolorBackdrop />
         <PageTransitionEffect>{children}</PageTransitionEffect>
         <BackgroundMusic />

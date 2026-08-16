@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { hasAdminSession } from "@/lib/admin-auth";
+import { revalidateSharedInvitation } from "@/lib/invite-share-cache";
 import { parseInviteCsv, type Invitee } from "@/lib/invites";
 import {
   mapInviteeRow as mapInviteRow,
@@ -127,6 +128,10 @@ export async function POST(request: Request) {
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+
+  for (const row of data ?? []) {
+    revalidateSharedInvitation(String(row.token ?? ""));
   }
 
   return NextResponse.json({
