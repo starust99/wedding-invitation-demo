@@ -6,6 +6,7 @@ const sharedRoute = `/w/${encodeURIComponent(token)}`;
 const legacyRoute = `/t/${encodeURIComponent(token)}`;
 const imagePath = "/assets/meta/og-wedding-20260816.jpg";
 const imageUrl = `https://nhatphuong.love${imagePath}`;
+const maxHeaderMs = Number(process.env.INVITE_PREVIEW_MAX_HEADER_MS || 0);
 const userAgents = [
   "facebookexternalhit/1.1 (+http://www.facebook.com/externalhit_uatext.php)",
   "facebookexternalhit/1.1",
@@ -20,12 +21,25 @@ function escapeRegExp(value) {
 }
 
 async function assertInvitationPage(route, userAgent) {
+  const startedAt = performance.now();
   const response = await fetch(`${baseUrl}${route}`, {
     headers: { "user-agent": userAgent },
     redirect: "manual",
   });
+  const headerMs = performance.now() - startedAt;
   assert.equal(response.status, 200, `${userAgent}: ${route} must be directly crawlable`);
   assert.match(response.headers.get("content-type") || "", /^text\/html/i);
+  assert.doesNotMatch(
+    response.headers.get("cache-control") || "",
+    /private|no-store/i,
+    `${userAgent}: shared invitation HTML must remain edge-cacheable`,
+  );
+  if (maxHeaderMs > 0) {
+    assert.ok(
+      headerMs <= maxHeaderMs,
+      `${userAgent}: response headers took ${headerMs.toFixed(0)}ms (budget ${maxHeaderMs}ms)`,
+    );
+  }
 
   const html = await response.text();
   const headEnd = html.indexOf("</head>");
@@ -61,13 +75,15 @@ async function assertInvitationPage(route, userAgent) {
     `${userAgent}: shared URL must render the real invitation rather than a preview gateway`,
   );
 
-  return { bytes: Buffer.byteLength(html), headBytes: Buffer.byteLength(head) };
+  return { bytes: Buffer.byteLength(html), headBytes: Buffer.byteLength(head), headerMs };
 }
 
 let largestPage = { bytes: 0, headBytes: 0 };
+const sharedHeaderTimes = [];
 for (const userAgent of userAgents) {
   const result = await assertInvitationPage(sharedRoute, userAgent);
   if (result.bytes > largestPage.bytes) largestPage = result;
+  sharedHeaderTimes.push(result.headerMs);
 }
 
 await assertInvitationPage(legacyRoute, userAgents[0]);
@@ -101,5 +117,5 @@ assert.equal(image.byteLength, 1024);
 assert.deepEqual([...image.slice(0, 2)], [0xff, 0xd8], "OG image must be a valid JPEG stream");
 
 console.log(
-  `Invite preview checks passed: ${userAgents.length} crawler/browser agents received the real /w invitation with OG metadata in the first ${largestPage.headBytes} bytes; /t compatibility, robots.txt, and JPEG range delivery also passed.`,
+  `Invite preview checks passed: ${userAgents.length} crawler/browser agents received the edge-cacheable /w invitation with OG metadata in the first ${largestPage.headBytes} bytes (response-header max ${Math.max(...sharedHeaderTimes).toFixed(0)}ms); /t compatibility, robots.txt, and JPEG range delivery also passed.`,
 );

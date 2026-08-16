@@ -1,16 +1,16 @@
 import type { Metadata } from "next";
 import {
-  buildInvitationMetadata,
-  InvitationTokenRoutePage,
-  type InvitationTokenRouteProps,
-} from "@/lib/invite-page-server";
+  buildSharedInvitationMetadata,
+  SharedInvitationTokenRoutePage,
+  type SharedInvitationTokenRouteProps,
+} from "@/lib/invite-share-page";
 
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
+export const dynamic = "force-static";
+export const revalidate = 86400;
 
-export async function generateMetadata({ params }: InvitationTokenRouteProps): Promise<Metadata> {
+export async function generateMetadata({ params }: SharedInvitationTokenRouteProps): Promise<Metadata> {
   const { token } = await params;
-  return buildInvitationMetadata(token, "/t");
+  return buildSharedInvitationMetadata(token, "/t");
 }
 
-export default InvitationTokenRoutePage;
+export default SharedInvitationTokenRoutePage;

@@ -6,8 +6,9 @@
   each guest.
 - The shared URL is the real invitation page. It must not be a preview-only
   gateway that immediately redirects with JavaScript.
-- Opening the shared URL preserves the same personalized invitation experience
-  and invalid-token behavior as the canonical `/i/<token>` route.
+- Opening the shared URL preserves the personalized invitation experience. The
+  cacheable HTML shell hydrates token-scoped guest and RSVP data through the
+  invitation API while the opening sequence is visible.
 - The first HTML response exposes a complete Open Graph card with a title,
   description, canonical page URL, locale, and an absolute HTTPS JPEG image.
 - Preview media uses a versioned physical filename so a new release creates a
@@ -22,6 +23,12 @@
 - Human visitors and social crawlers receive the same invitation content at the
   shared URL; no user-agent-specific cloaking is used.
 - The guest-facing path stays compact and contains no cache-busting query.
+- Shared HTML must not wait for Supabase or RSVP queries. It is cacheable at the
+  edge for 24 hours, while guest data remains dynamic and is never stored in the
+  shared-page cache.
+- Invalid shared tokens may initially return the generic HTTP 200 shell, but the
+  client must replace it with the same invalid-invitation gate after the API
+  responds with 404.
 
 ## Validation
 
@@ -30,5 +37,7 @@
   fields, fresh physical image URL, and no redirect script or meta refresh.
 - A normal production request receives the actual invitation markup at the same
   URL.
+- Production requests expose a public edge-cache policy and demonstrate a warm
+  Meta-crawler response-header time below 500 ms under normal conditions.
 - Final rendering inside Messenger remains provider-controlled and must be
   checked with Meta Sharing Debugger or a fresh Messenger share after deploy.

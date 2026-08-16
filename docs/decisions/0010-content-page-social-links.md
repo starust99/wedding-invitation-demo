@@ -59,6 +59,9 @@ Tradeoffs:
 
 ## Follow-Up
 
+- Decision 0011 refines the delivery path with a cacheable generic metadata and
+  invitation shell; the no-redirect and no-user-agent-cloaking rules remain in
+  force.
 - Use Meta Sharing Debugger with an authenticated Facebook session if a fresh
   `/w` share is still suppressed, and inspect the provider's reported block or
   cache reason before changing markup again.

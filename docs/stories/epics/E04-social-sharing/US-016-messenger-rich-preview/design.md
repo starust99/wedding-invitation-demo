@@ -8,15 +8,20 @@ an alternate public route to the same token-scoped invitation content.
 ## Application Flow
 
 1. Admin copy/export calls `buildInviteUrl()` and receives `/w/<token>`.
-2. A social crawler requests that URL and receives server-rendered metadata plus
-   invitation HTML.
-3. A guest opens the same URL and receives the normal personalized invitation.
-4. Invalid tokens continue through the existing `notFound()` path.
+2. A social crawler receives params-only generic wedding metadata and the real
+   invitation client shell without waiting for Supabase.
+3. The response is cached at the edge for 24 hours by token. It contains no
+   guest or RSVP data.
+4. A guest opens the same shell; `InviteTokenPage` hydrates the token-scoped
+   invitee through `/api/invites/<token>` while the opening sequence is visible.
+5. Invalid tokens receive the shell first, then switch to the existing invalid
+   invitation gate when the API responds with 404.
 
 ## Interface Contract
 
-- `GET /w/<token>`: actual invitation page, HTTP 200 for a valid token.
-- `GET /t/<token>`: backward-compatible actual invitation page.
+- `GET /w/<token>`: cacheable actual-invitation shell and generic wedding OG
+  metadata; token data hydrates client-side.
+- `GET /t/<token>`: backward-compatible form of the same cacheable shell.
 - `GET /robots.txt`: plaintext allow policy.
 - Open Graph image: absolute HTTPS URL with a versioned physical filename.
 
@@ -26,15 +31,17 @@ No schema, migration, retention, or data ownership changes.
 
 ## UI / Platform Impact
 
-The visible invitation is unchanged. Only the public link path and social
-preview delivery change. The new path is the same length as `/t` and has no
-query string.
+The visible invitation is unchanged after hydration. First-time guest data now
+loads in parallel with the opening sequence instead of blocking the HTML
+response. Returning guests can still use the token-scoped local cache while the
+API refreshes in the background.
 
 ## Observability
 
 Focused checks report page status, metadata position, redirect absence, image
-type/size, and normal-page invitation markers. Production curl evidence is
-recorded after deployment; final provider rendering requires Meta or Messenger.
+type/size, cache policy, response-header latency, and normal-page invitation
+markers. Production curl evidence is recorded after deployment; final provider
+rendering requires Meta or Messenger.
 
 ## Alternatives Considered
 
@@ -45,3 +52,9 @@ recorded after deployment; final provider rendering requires Meta or Messenger.
    and makes CDN caching and platform behavior harder to reason about.
 3. Add query parameters for cache busting. Rejected because the user requires a
    clean short link and Meta caches the page object by shared URL.
+4. Cache the full personalized SSR response. Rejected because the first crawl of
+   each unique token would still pay two sequential Supabase round trips and the
+   cache would contain guest and RSVP state.
+5. Persist only invitee lookups with a short TTL. Kept as a future API/runtime
+   optimization, but unnecessary for the thumbnail critical path once the
+   shared shell no longer waits for the database.
