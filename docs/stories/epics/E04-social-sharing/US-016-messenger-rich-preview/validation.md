@@ -9,7 +9,7 @@ separating origin correctness from Messenger's provider-controlled rendering.
 
 | Layer | Cases |
 | --- | --- |
-| Unit | URL builder emits `/w`; params-only metadata emits canonical shared URL and fresh image path without Supabase. |
+| Unit | URL builder emits `/w`; params-only metadata avoids Supabase; every admin copy path triggers non-blocking prewarming. |
 | Integration | Meta user agents and a normal browser receive cacheable HTTP 200 at `/w`; no JS/meta redirect exists. |
 | E2E | Shared shell renders immediately, then hydrates the personalized invitation or invalid-token gate through the API. |
 | Platform | Production checks cover `facebookexternalhit`, Facebot, Meta agents, normal browser, `robots.txt`, and image GET/HEAD/Range. |
@@ -72,3 +72,13 @@ INVITE_PREVIEW_BASE_URL=https://nhatphuong.love npm run check:invite-preview
 - Local mobile Chromium confirmed the static shell hydrates the existing family
   fixture successfully. A nonexistent token returned the generic shell, then
   switched to the existing “Không tìm thấy thiệp” gate after the API 404.
+- First optimized production deployment `dpl_73GMfCe1Lzjixj4R9qtJdT65JWCm`
+  reduced cold Meta TTFB from 4.69 seconds to 1.78 seconds. After edge
+  propagation, five consecutive responses were `x-vercel-cache: HIT` with
+  0.178–0.196 second TTFB and a positive `Age` header.
+- The final local build keeps `/w` and `/t` static, passes the six-agent preview
+  test with a 144 ms uncached-token maximum, and verifies all three admin copy
+  surfaces call the non-blocking keepalive prewarm helper. Mobile Chromium
+  received the shell in 539 ms, completed guest hydration by 662 ms, reported
+  zero horizontal overflow and no console errors, and preserved the invalid
+  gate behavior.

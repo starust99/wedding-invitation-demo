@@ -674,11 +674,27 @@ export function InviteAdminPanel() {
     }
   }
 
+  function prewarmInvitePreview(url: string) {
+    void fetch(url, {
+      credentials: "omit",
+      keepalive: true,
+    })
+      .then((response) => response.arrayBuffer())
+      .catch(() => {
+        // Copying the URL must remain available even if background warming is interrupted.
+      });
+  }
+
+  function copyInviteUrl(token: string) {
+    const url = buildInviteUrl(token, window.location.origin);
+    void navigator.clipboard.writeText(url);
+    prewarmInvitePreview(url);
+    setMessage("Đã sao chép link.");
+  }
+
   function copyInviteLink() {
     if (!selectedInvitee) return;
-    const url = buildInviteUrl(selectedInvitee.token, window.location.origin);
-    void navigator.clipboard.writeText(url);
-    setMessage("Đã sao chép link.");
+    copyInviteUrl(selectedInvitee.token);
   }
 
   async function exportInviteLinksWorkbook(targetInvitees: Invitee[] = invitees, label = "toàn bộ danh sách") {
@@ -1284,7 +1300,7 @@ export function InviteAdminPanel() {
                               <h3 className="truncate font-semibold text-[#2E2A25]">{invitee.displayLabel}</h3>
                               <p className="text-[11px] text-[#8A8178]">{householdModeLabels[invitee.householdMode]} · {invitee.guestGroup || "Chưa phân nhóm"}</p>
                             </div>
-                            <button type="button" aria-label="Sao chép link thiệp" onClick={(event) => { event.stopPropagation(); void navigator.clipboard.writeText(buildInviteUrl(invitee.token, window.location.origin)); setMessage("Đã sao chép link."); }} className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-[#E8DDCC] bg-white text-[#5F6F4E]"><Copy className="h-4 w-4" /></button>
+                            <button type="button" aria-label="Sao chép link thiệp" onClick={(event) => { event.stopPropagation(); copyInviteUrl(invitee.token); }} className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-[#E8DDCC] bg-white text-[#5F6F4E]"><Copy className="h-4 w-4" /></button>
                           </div>
                           <p className="mt-2 text-xs text-[#665D54]">{rsvp ? <><b>{attendingLabel(rsvp.attending)}</b> · {rsvp.guestCount} người <span className="text-[#8A8178]">(ước lượng)</span></> : inviteStatusLabels[invitee.inviteStatus]}</p>
                         </div>
@@ -1354,8 +1370,7 @@ export function InviteAdminPanel() {
                               <button
                                 type="button"
                                 onClick={() => {
-                                  void navigator.clipboard.writeText(buildInviteUrl(invitee.token, window.location.origin));
-                                  setMessage("Đã sao chép link.");
+                                  copyInviteUrl(invitee.token);
                                 }}
                                 className="inline-flex h-8 w-8 items-center justify-center rounded-full hover:bg-[#5F6F4E]/10 text-[#5F6F4E]"
                                 title="Sao chép link thiệp"

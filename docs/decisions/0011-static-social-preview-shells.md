@@ -32,6 +32,12 @@ hydrates guest and RSVP state through `/api/invites/<token>` while the opening
 sequence is visible. Do not store guest or RSVP values in the edge-cached HTML,
 branch by crawler user agent, or reintroduce a redirect gateway.
 
+When an administrator copies an individual invitation URL, start a non-blocking
+same-origin keepalive fetch after writing the clipboard. This warms the page
+cache during the natural app-switch interval before Messenger receives the
+paste. Clipboard success must not depend on the prewarm request, and workbook
+exports must not fan out requests across the whole guest list.
+
 ## Alternatives Considered
 
 1. Cache the full personalized server render for 60–300 seconds and invalidate
@@ -49,6 +55,8 @@ Positive:
   cross-network database queries.
 - Subsequent crawls are served from the edge, and the response is safe to cache
   because it contains no guest data.
+- Individual copy actions normally absorb the one cold render before the link
+  reaches Messenger.
 - Human visitors and crawlers still receive the same real invitation shell at
   the shared URL.
 - Guest and RSVP freshness remains controlled by the existing dynamic API.

@@ -1,4 +1,14 @@
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
+
+const adminPanelSource = readFileSync(
+  new URL("../src/components/admin/InviteAdminPanel.tsx", import.meta.url),
+  "utf8",
+);
+assert.match(adminPanelSource, /function prewarmInvitePreview\(url: string\)/);
+assert.match(adminPanelSource, /credentials: "omit"/);
+assert.match(adminPanelSource, /keepalive: true/);
+assert.match(adminPanelSource, /navigator\.clipboard\.writeText\(url\);\s*prewarmInvitePreview\(url\);/);
 
 const baseUrl = (process.env.INVITE_PREVIEW_BASE_URL || "http://localhost:3000").replace(/\/$/, "");
 const token = process.env.INVITE_PREVIEW_TOKEN || "gia-dinh-anh-chi-hien-hong-b30c877d";
@@ -117,5 +127,5 @@ assert.equal(image.byteLength, 1024);
 assert.deepEqual([...image.slice(0, 2)], [0xff, 0xd8], "OG image must be a valid JPEG stream");
 
 console.log(
-  `Invite preview checks passed: ${userAgents.length} crawler/browser agents received the edge-cacheable /w invitation with OG metadata in the first ${largestPage.headBytes} bytes (response-header max ${Math.max(...sharedHeaderTimes).toFixed(0)}ms); /t compatibility, robots.txt, and JPEG range delivery also passed.`,
+  `Invite preview checks passed: ${userAgents.length} crawler/browser agents received the edge-cacheable /w invitation with OG metadata in the first ${largestPage.headBytes} bytes (response-header max ${Math.max(...sharedHeaderTimes).toFixed(0)}ms); admin copy prewarming, /t compatibility, robots.txt, and JPEG range delivery also passed.`,
 );

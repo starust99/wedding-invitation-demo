@@ -7,14 +7,17 @@ an alternate public route to the same token-scoped invitation content.
 
 ## Application Flow
 
-1. Admin copy/export calls `buildInviteUrl()` and receives `/w/<token>`.
-2. A social crawler receives params-only generic wedding metadata and the real
+1. Admin copy calls `buildInviteUrl()`, writes `/w/<token>` to the clipboard,
+   and starts a non-blocking keepalive fetch to warm the static response.
+2. Workbook export still emits the same `/w/<token>` contract without issuing
+   an unbounded batch of prewarm requests.
+3. A social crawler receives params-only generic wedding metadata and the real
    invitation client shell without waiting for Supabase.
-3. The response is cached at the edge for 24 hours by token. It contains no
+4. The response is cached at the edge for 24 hours by token. It contains no
    guest or RSVP data.
-4. A guest opens the same shell; `InviteTokenPage` hydrates the token-scoped
+5. A guest opens the same shell; `InviteTokenPage` hydrates the token-scoped
    invitee through `/api/invites/<token>` while the opening sequence is visible.
-5. Invalid tokens receive the shell first, then switch to the existing invalid
+6. Invalid tokens receive the shell first, then switch to the existing invalid
    invitation gate when the API responds with 404.
 
 ## Interface Contract
@@ -58,3 +61,6 @@ rendering requires Meta or Messenger.
 5. Persist only invitee lookups with a short TTL. Kept as a future API/runtime
    optimization, but unnecessary for the thumbnail critical path once the
    shared shell no longer waits for the database.
+6. Prewarm every exported workbook URL. Rejected because large guest lists
+   would create an unnecessary burst; individual copy actions cover the normal
+   paste-into-chat workflow with bounded work.

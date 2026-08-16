@@ -4,6 +4,8 @@
 
 - Admin copy and export actions produce one short, absolute invitation URL for
   each guest.
+- Copy actions start a non-blocking same-origin prewarm request so the shared
+  page is normally an edge hit by the time the link reaches a chat composer.
 - The shared URL is the real invitation page. It must not be a preview-only
   gateway that immediately redirects with JavaScript.
 - Opening the shared URL preserves the personalized invitation experience. The
@@ -39,5 +41,7 @@
   URL.
 - Production requests expose a public edge-cache policy and demonstrate a warm
   Meta-crawler response-header time below 500 ms under normal conditions.
+- Focused checks preserve the copy-and-prewarm handoff without making clipboard
+  success depend on the background request.
 - Final rendering inside Messenger remains provider-controlled and must be
   checked with Meta Sharing Debugger or a fresh Messenger share after deploy.
