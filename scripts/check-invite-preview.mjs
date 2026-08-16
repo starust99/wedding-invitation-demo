@@ -9,6 +9,18 @@ const invitesSource = readFileSync(
   new URL("../src/lib/invites.ts", import.meta.url),
   "utf8",
 );
+const inviteSpreadsheetSource = readFileSync(
+  new URL("../src/lib/invite-spreadsheet.ts", import.meta.url),
+  "utf8",
+);
+const inviteCsvSource = readFileSync(
+  new URL("../src/lib/csv.ts", import.meta.url),
+  "utf8",
+);
+const inviteAccessGateSource = readFileSync(
+  new URL("../src/components/InviteAccessGate.tsx", import.meta.url),
+  "utf8",
+);
 const sharePageSource = readFileSync(
   new URL("../src/lib/invite-share-page.tsx", import.meta.url),
   "utf8",
@@ -26,7 +38,12 @@ assert.match(adminPanelSource, /credentials: "omit"/);
 assert.match(adminPanelSource, /keepalive: true/);
 assert.match(adminPanelSource, /navigator\.clipboard\.writeText\(url\);\s*prewarmInvitePreview\(url\);/);
 assert.match(adminPanelSource, /if \(!selectedInvitee\?\.token\) return;\s*prewarmInvitePreview\(buildInviteUrl\(selectedInvitee\.token, window\.location\.origin\)\);/);
-assert.match(invitesSource, /return `\$\{base\}\/g\/\$\{encodeURIComponent\(token\)\}`;/);
+assert.match(invitesSource, /export const publishedInviteRoute = "\/g";/);
+assert.match(invitesSource, /return `\$\{publishedInviteRoute\}\/\$\{encodeURIComponent\(token\)\}`;/);
+assert.match(invitesSource, /return `\$\{base\}\$\{buildInvitePath\(token\)\}`;/);
+assert.match(inviteSpreadsheetSource, /inviteUrl: buildInviteUrl\(invitee\.token, origin\)/);
+assert.match(inviteCsvSource, /escapeCsv\(buildInviteUrl\(invitee\.token, origin\)\)/);
+assert.match(inviteAccessGateSource, /\(dạng \/g\/…\)/);
 assert.match(sharePageSource, /unstable_cache\(/);
 assert.match(sharePageSource, /invitee\.guestName\s*\|\|\s*invitee\.displayLabel/);
 assert.match(shareCacheSource, /sharedInvitationRoutes = \["\/g", "\/w", "\/t"\]/);

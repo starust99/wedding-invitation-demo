@@ -23,9 +23,10 @@ the shared-page cache.
 
 ## Decision
 
-Newly copied and exported links use the fresh compact `/g/<token>` namespace.
-Existing `/w/<token>` and `/t/<token>` links render the same corrected content
-and remain backward compatible.
+The fresh compact `/g/<token>` namespace is the canonical published invitation
+URL. Every Admin copy and export surface emits `/g`; existing `/w/<token>` and
+`/t/<token>` links render the same corrected content only for backward
+compatibility.
 
 Each shared route performs one token-keyed invitee lookup on first generation,
 then caches a public invitation projection and the rendered page for 24 hours.

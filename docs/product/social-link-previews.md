@@ -2,10 +2,11 @@
 
 ## Product Contract
 
-- Admin copy and export actions produce one short, absolute invitation URL for
-  each guest.
-- Newly copied and exported links use the compact `/g/<token>` route. Existing
-  `/w`, `/t`, `/i`, and `/m` links remain valid.
+- `/g/<token>` is the canonical published invitation URL.
+- Every Admin publishing surface uses that route: per-guest copy, recently
+  imported-link export, full-list workbook export, and CSV serialization.
+- Existing `/w`, `/t`, `/i`, and `/m` links remain valid only for backward
+  compatibility; Admin never emits them as newly published links.
 - Selecting a guest in the admin starts a bounded same-origin prewarm request;
   copy actions repeat it without making clipboard success depend on warming.
 - The shared URL is the real invitation page. It must not be a preview-only

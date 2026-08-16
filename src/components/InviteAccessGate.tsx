@@ -11,7 +11,7 @@ const copy: Record<InviteAccessGateProps["variant"], { kicker: string; title: st
   home: {
     kicker: "nhatphuong.love",
     title: "Thiệp mời riêng",
-    body: "Vui lòng mở đúng link thiệp mời đã được gửi cho bạn (dạng /i/…). Trang này không hiển thị nội dung thiệp chung.",
+    body: "Vui lòng mở đúng link thiệp mời đã được gửi cho bạn (dạng /g/…). Trang này không hiển thị nội dung thiệp chung.",
   },
   "invalid-token": {
     kicker: "Link không hợp lệ",

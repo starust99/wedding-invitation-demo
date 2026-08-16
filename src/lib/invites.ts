@@ -504,13 +504,15 @@ export function normalizeInviteToken(value: string) {
   return slugify(value).slice(0, 56);
 }
 
+export const publishedInviteRoute = "/g";
+
 export function buildInvitePath(token: string) {
-  return `/i/${encodeURIComponent(token)}`;
+  return `${publishedInviteRoute}/${encodeURIComponent(token)}`;
 }
 
 export function buildInviteUrl(token: string, origin = "") {
   const base = origin.replace(/\/$/, "");
-  return `${base}/g/${encodeURIComponent(token)}`;
+  return `${base}${buildInvitePath(token)}`;
 }
 
 export function generateInviteToken(seed: string, existingTokens: Set<string>) {
