@@ -14,6 +14,7 @@ separating origin correctness from Messenger's provider-controlled rendering.
 | E2E | Shared SSR contains the real personalized invitation and the API refreshes current state after hydration; invalid tokens return not found. |
 | Platform | Production checks cover Meta agents, Zalo agents, normal browser, `robots.txt`, and HTML/JPEG range requests. |
 | Performance | Primary OG image begins before byte 4096; warm edge timing is measured without asserting an external-provider SLA. |
+| Intro regression | A new session opening canonical `/g/<token>` shows the splash even when persistent storage says an older route was seen; reveal state uses the same route-token matcher. |
 | Logs/Audit | No durable business data changes; production request evidence is captured in the story. |
 
 ## Fixtures

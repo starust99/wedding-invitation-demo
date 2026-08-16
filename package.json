@@ -19,6 +19,7 @@
     "check:smart-calendar": "node scripts/check-smart-calendar.mjs",
     "check:calendar-handoff": "node scripts/check-calendar-handoff.mjs",
     "check:invite-preview": "node scripts/check-invite-preview.mjs",
+    "check:published-invite-intro": "node scripts/check-published-invite-intro.mjs",
     "check:slow-invite-experience": "node scripts/check-slow-invite-experience.mjs",
     "capture:browser": "node scripts/capture-browser-shots.mjs",
     "gitnexus:index": "gitnexus analyze --index-only",

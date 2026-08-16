@@ -21,6 +21,14 @@ const inviteAccessGateSource = readFileSync(
   new URL("../src/components/InviteAccessGate.tsx", import.meta.url),
   "utf8",
 );
+const splashIntroSource = readFileSync(
+  new URL("../src/components/WeddingSplashIntro.tsx", import.meta.url),
+  "utf8",
+);
+const cinematicRevealSource = readFileSync(
+  new URL("../src/components/ui/CinematicReveal.tsx", import.meta.url),
+  "utf8",
+);
 const sharePageSource = readFileSync(
   new URL("../src/lib/invite-share-page.tsx", import.meta.url),
   "utf8",
@@ -44,6 +52,8 @@ assert.match(invitesSource, /return `\$\{base\}\$\{buildInvitePath\(token\)\}`;/
 assert.match(inviteSpreadsheetSource, /inviteUrl: buildInviteUrl\(invitee\.token, origin\)/);
 assert.match(inviteCsvSource, /escapeCsv\(buildInviteUrl\(invitee\.token, origin\)\)/);
 assert.match(inviteAccessGateSource, /\(dạng \/g\/…\)/);
+assert.match(splashIntroSource, /pathname\.match\(\/\^\\\/\(\?:g\|i\|m\|t\|w\)\\\/\(\[\^\/\?#\]\+\)\/\)/);
+assert.match(cinematicRevealSource, /pathname\.match\(\/\^\\\/\(\?:g\|i\|m\|t\|w\)\\\/\(\[\^\/\?#\]\+\)\/\)/);
 assert.match(sharePageSource, /unstable_cache\(/);
 assert.match(sharePageSource, /invitee\.guestName\s*\|\|\s*invitee\.displayLabel/);
 assert.match(shareCacheSource, /sharedInvitationRoutes = \["\/g", "\/w", "\/t"\]/);

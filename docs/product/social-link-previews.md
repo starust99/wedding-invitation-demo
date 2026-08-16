@@ -11,6 +11,10 @@
   copy actions repeat it without making clipboard success depend on warming.
 - The shared URL is the real invitation page. It must not be a preview-only
   gateway that immediately redirects with JavaScript.
+- Opening a canonical `/g/<token>` link shows the same full invitation intro as
+  the original guest route. A persistent “seen” record from an older URL must
+  not suppress the intro in a new browser session; explicit return/skip links
+  and a repeat open within the same session may still bypass it.
 - Opening the shared URL preserves the personalized invitation experience. The
   edge-cached HTML contains a public invitation projection so `Cụm tên khách`
   is present in SSR content and OG metadata. Phone, email, admin notes, and RSVP
