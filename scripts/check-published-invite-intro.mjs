@@ -43,6 +43,11 @@ try {
   const firstSession = await openCanonicalInvite({ sessionSeen: false });
   const splash = firstSession.page.locator("#wedding-splash-screen");
   await splash.waitFor({ state: "visible", timeout: 15_000 });
+  await firstSession.page.waitForFunction(
+    () => document.documentElement.classList.contains("splash-active"),
+    undefined,
+    { timeout: 15_000 },
+  );
   const firstState = await firstSession.page.evaluate(() => ({
     splashActive: document.documentElement.classList.contains("splash-active"),
     splashSkipped: document.documentElement.classList.contains("splash-skipped"),
