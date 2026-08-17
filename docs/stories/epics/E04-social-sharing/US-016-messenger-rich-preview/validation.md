@@ -48,6 +48,14 @@ INVITE_PREVIEW_BASE_URL=https://nhatphuong.love npm run check:invite-preview
 - GitHub `main` commit `43f2cfd` deployed successfully as Vercel production
   deployment `dpl_9zWG5bB2ApprvVERrZgDCM5fFiXj` and was aliased to
   `https://nhatphuong.love`.
+- A temporary exact-path production proxy probe on deployments
+  `dpl_dLuLXQ9tqXwmqJWekDu4NSpbi4Aa` and
+  `dpl_CZbpEUHw8j5ZJpAmPG4UaWtxVfZZ` logged a control curl but received no
+  request when fresh valid `/g` URLs were pasted into Messenger.com E2EE. The
+  composer still rendered its bare-domain fallback, including after a reload.
+  Therefore the origin has no Messenger-Web-specific request signature to
+  route dynamically without also changing other clients. The probe was removed
+  immediately after this result.
 - The production preview check passed for all six agents. The Meta responses
   carried OG metadata in the first 7,600 bytes; `/t`, `robots.txt`, and JPEG
   Range delivery also passed. Measured `/w` TTFB was 1.17–1.26 seconds for the

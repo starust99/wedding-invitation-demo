@@ -5,20 +5,8 @@ function isLoginPage(pathname: string) {
   return pathname === "/admin/login";
 }
 
-const messengerWebProbePath = "/g/gia-dinh-thao-vu-0a462aa5";
-
 export function proxy(request: NextRequest) {
   const { pathname, search } = request.nextUrl;
-
-  if (pathname === messengerWebProbePath) {
-    console.info(JSON.stringify({
-      event: "messenger-web-preview-probe",
-      userAgent: request.headers.get("user-agent") ?? "",
-      accept: request.headers.get("accept") ?? "",
-      purpose: request.headers.get("purpose") ?? request.headers.get("sec-purpose") ?? "",
-    }));
-    return NextResponse.next();
-  }
 
   if (isLoginPage(pathname)) {
     return NextResponse.next();
@@ -37,5 +25,5 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/admin/:path*", "/g/gia-dinh-thao-vu-0a462aa5"],
+  matcher: ["/admin/:path*"],
 };

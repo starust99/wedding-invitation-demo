@@ -52,8 +52,10 @@ rendering requires Meta or Messenger.
 1. Keep the JavaScript redirect bridge and add more tags. Rejected because all
    required tags already validate and the bridge is the largest difference from
    content URLs such as YouTube.
-2. Split responses by crawler user agent. Rejected because it creates cloaking
-   and makes CDN caching and platform behavior harder to reason about.
+2. Split responses by crawler user agent. Rejected because it creates cloaking,
+   makes CDN caching harder to reason about, and cannot target Messenger Web:
+   a production probe proved that its E2EE composer can return a bare-domain
+   preview without sending any request to the invitation origin.
 3. Add query parameters for cache busting. Rejected because the user requires a
    clean short link and Meta caches the page object by shared URL.
 4. Cache the full personalized SSR response including RSVP. Rejected because it
