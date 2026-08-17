@@ -25,6 +25,17 @@ const nextConfig: NextConfig = {
   async redirects() {
     return [
       {
+        source: "/:path*",
+        has: [
+          {
+            type: "host",
+            value: "www.nhatphuong.love",
+          },
+        ],
+        destination: "https://nhatphuong.love/:path*",
+        permanent: true,
+      },
+      {
         source: "/admin/editor.",
         destination: "/admin/editor",
         permanent: false,

@@ -29,6 +29,10 @@
   physical filename, so a new release creates a new crawler object without
   adding a query string to the guest-facing URL.
 - `robots.txt` explicitly allows social preview crawlers and ordinary visitors.
+- The apex domain returns a public 200 page with OG metadata. The `www` host
+  has valid TLS and permanently consolidates onto the canonical apex host.
+- A legacy `image_src` link points to the same preview image for older unfurl
+  implementations that do not fully implement Open Graph.
 - Essential title, description, canonical, and primary image metadata appears
   within the first 4 KiB of HTML.
 

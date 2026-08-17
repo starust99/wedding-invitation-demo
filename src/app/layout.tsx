@@ -99,6 +99,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="vi" data-scroll-behavior="smooth" className={fontVariables} suppressHydrationWarning>
+      <head>
+        <link rel="image_src" href={invitationOgImageUrl} />
+      </head>
       <body>
         <script
           dangerouslySetInnerHTML={{

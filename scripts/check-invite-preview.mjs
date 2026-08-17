@@ -45,6 +45,14 @@ const nextConfigSource = readFileSync(
   new URL("../next.config.ts", import.meta.url),
   "utf8",
 );
+const rootLayoutSource = readFileSync(
+  new URL("../src/app/layout.tsx", import.meta.url),
+  "utf8",
+);
+const proxySource = readFileSync(
+  new URL("../src/proxy.ts", import.meta.url),
+  "utf8",
+);
 assert.match(adminPanelSource, /async function prewarmInvitePreview\(url: string\): Promise<boolean>/);
 assert.match(adminPanelSource, /async function prepareInvitePreviews\(targetInvitees: Invitee\[\], origin: string\)/);
 assert.match(adminPanelSource, /credentials: "omit"/);
@@ -67,6 +75,11 @@ assert.match(sharePageSource, /invitee\.guestName\s*\|\|\s*invitee\.displayLabel
 assert.match(canonicalShareRouteSource, /export async function generateStaticParams\(\)/);
 assert.match(canonicalShareRouteSource, /await listSharedInvitationTokens\(\)/);
 assert.match(shareCacheSource, /sharedInvitationRoutes = \["\/g", "\/w", "\/t"\]/);
+assert.match(rootLayoutSource, /<link rel="image_src" href=\{invitationOgImageUrl\} \/>/);
+assert.match(proxySource, /matcher: \["\/admin\/:path\*"\]/);
+assert.doesNotMatch(proxySource, /matcher: \["\/",/);
+assert.match(nextConfigSource, /type: "host",\s*value: "www\.nhatphuong\.love"/);
+assert.match(nextConfigSource, /destination: "https:\/\/nhatphuong\.love\/:path\*"/);
 for (const crawler of ["facebookexternalhit", "Facebot", "meta-externalagent", "meta-externalfetcher", "Zalo", "TelegramBot", "Viber", "Line", "KakaoTalk", "Pinterestbot"]) {
   assert.ok(nextConfigSource.includes(crawler), `htmlLimitedBots must include ${crawler}`);
 }
@@ -158,6 +171,11 @@ async function assertInvitationPage(route, userAgent, expectedGuestName) {
   const absolutePageUrl = `https://nhatphuong.love${route}`;
 
   assert.match(head, /property="og:title"/i, `${userAgent}: OG title must be emitted inside head`);
+  assert.match(
+    head,
+    new RegExp(`<link rel="image_src" href="${escapeRegExp(imageUrl)}"`, "i"),
+    `${userAgent}: legacy image_src fallback must use the canonical preview image`,
+  );
   assert.match(head, /property="og:description"/i, `${userAgent}: OG description must be emitted inside head`);
   assert.equal(
     getMetaContent(head, "og:title"),
@@ -204,6 +222,16 @@ async function assertInvitationPage(route, userAgent, expectedGuestName) {
 }
 
 const expectedGuestName = await resolveExpectedGuestName();
+
+const rootResponse = await fetch(`${baseUrl}/`, {
+  headers: { "user-agent": userAgents[0] },
+  redirect: "manual",
+});
+assert.equal(rootResponse.status, 200, "the apex domain must be a public page, not an Admin redirect");
+assert.notEqual(rootResponse.headers.get("location"), "/admin/login?next=%2F");
+const rootHtml = await rootResponse.text();
+assert.match(rootHtml.slice(0, rootHtml.indexOf("</head>") + 7), /property="og:image"/i);
+
 let largestPage = { bytes: 0, headBytes: 0 };
 const sharedHeaderTimes = [];
 for (const userAgent of userAgents) {
@@ -240,6 +268,19 @@ assert.match(robotsResponse.headers.get("content-type") || "", /^text\/plain/i);
 const robots = await robotsResponse.text();
 assert.match(robots, /User-Agent: facebookexternalhit[\s\S]*Allow: \//i);
 assert.match(robots, /User-Agent: \*[\s\S]*Allow: \//i);
+
+if (new URL(baseUrl).hostname === "nhatphuong.love") {
+  const wwwResponse = await fetch(`https://www.nhatphuong.love${sharedRoute}`, {
+    headers: { "user-agent": userAgents[0] },
+    redirect: "manual",
+  });
+  assert.equal(wwwResponse.status, 308, "www must use a valid TLS endpoint and permanently redirect");
+  assert.equal(
+    wwwResponse.headers.get("location"),
+    `https://nhatphuong.love${sharedRoute}`,
+    "www must consolidate crawler objects onto the canonical apex URL",
+  );
+}
 
 const imageHeadResponse = await fetch(`${baseUrl}${imagePath}`, {
   method: "HEAD",
@@ -306,5 +347,5 @@ assert.equal(image.byteLength, 1024);
 assert.deepEqual([...image.slice(0, 2)], [0xff, 0xd8], "OG image must be a valid JPEG stream");
 
 console.log(
-  `Invite preview checks passed: ${userAgents.length} crawler/browser agents received personalized Cụm tên khách metadata on the edge-cacheable /g invitation, with a baseline 1200x630 OG image inside the first 4096 bytes (full head ${largestPage.headBytes} bytes, response-header max ${Math.max(...sharedHeaderTimes).toFixed(0)}ms); /w and /t compatibility, build-time /g generation, publish-ready Admin warming, robots.txt, and HTML/JPEG range delivery also passed.`,
+  `Invite preview checks passed: ${userAgents.length} crawler/browser agents received personalized Cụm tên khách metadata on the edge-cacheable /g invitation, with legacy image_src and a baseline 1200x630 OG image inside the first 4096 bytes (full head ${largestPage.headBytes} bytes, response-header max ${Math.max(...sharedHeaderTimes).toFixed(0)}ms); public apex/domain consolidation, /w and /t compatibility, build-time /g generation, publish-ready Admin warming, robots.txt, and HTML/JPEG range delivery also passed.`,
 );

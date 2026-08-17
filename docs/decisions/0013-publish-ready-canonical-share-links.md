@@ -45,6 +45,11 @@ first-4-KiB metadata budget. Expand the HTML-limited crawler set to cover the
 major messaging and social unfurl agents without returning different content
 by user agent.
 
+The apex host must remain a public 200 page instead of redirecting anonymous
+visitors to Admin. Attach the `www` host to the same deployment with valid TLS,
+permanently redirect it to the apex host, and include a legacy `image_src`
+fallback so older unfurl clients converge on the same physical image object.
+
 ## Alternatives Considered
 
 1. Create another short namespace whenever a provider caches a bad object.
@@ -70,6 +75,8 @@ Positive:
 - The image matches the broadest documented preview-card convention and is
   roughly one tenth the previous transfer size.
 - `/g` stays stable, personalized, direct-rendered, and intro-safe.
+- The domain root and `www` alias no longer emit crawler-hostile authentication
+  redirects or invalid TLS responses.
 
 Tradeoffs:
 
