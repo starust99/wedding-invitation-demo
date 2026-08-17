@@ -52,6 +52,9 @@ Hard gates:
 7. Capture the actual Messenger Web preview request signature through a
    temporary non-guest probe before introducing any client-specific routing;
    remove the probe immediately after the signature is recorded.
+8. Test a request-time `/mw/<token>` canary without exposing it in Admin. Keep
+   `/g` unchanged; publish a Web-only copy surface only if the canary produces
+   a real Messenger Web thumbnail.
 
 ## Stop Conditions
 

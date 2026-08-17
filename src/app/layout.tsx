@@ -115,7 +115,7 @@ export default function RootLayout({
                 var isExplicitSkip = search.indexOf("view=main") !== -1 || search.indexOf("from=rsvp") !== -1 || search.indexOf("skip_intro=1") !== -1 || hash.indexOf("rsvp") !== -1 || hash.indexOf("thank-you") !== -1;
                 var isExplicitForce = search.indexOf("intro=1") !== -1 || href.indexOf("intro=1") !== -1;
 
-                var guestPathMatch = path.match(/^\/(?:g|i|m|t|w)\/([^/?#]+)/);
+                var guestPathMatch = path.match(/^\/(?:g|i|m|mw|t|w)\/([^/?#]+)/);
                 var isGuestPath = Boolean(guestPathMatch);
                 var token = guestPathMatch ? guestPathMatch[1] : "public";
                 var sessionSeen = false;
