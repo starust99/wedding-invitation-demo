@@ -58,13 +58,16 @@ git diff --check
   values.
 - Focused workbook/RSVP checks, guest-copy checks, TypeScript, scoped ESLint,
   the production build, and `git diff --check` passed.
-- RSVP branching coverage verifies the custom crossed fork-and-knife asset and
+- RSVP branching coverage verifies the custom serving-cloche asset and
   `11:30 – Chủ Nhật, 20/12/2026` in the regular separate step, the close-guest
   inline row, and the review summary.
 - The ImageGen-authored asset was chroma-keyed to true transparency, normalized
   to flat dusty rose, and rendered at `390x844`, `768x1024`, and `1440x1000`.
   Both the inline and dedicated invitation states keep the icon legible inside
   their existing paper badges without layout overflow.
+- Visual comparison against the ceremony and banquet icons verifies a centered
+  silhouette, balanced left/right mass, and matching stroke weight at the real
+  `32–40px` rendered size.
 - `npm run check:post-ceremony-rsvp` passed. It covers blank/`Có`
   workbook parsing, invalid-value rejection, legacy workbook compatibility,
   invite mapping, direct RSVP columns, round trips, and all server-authority

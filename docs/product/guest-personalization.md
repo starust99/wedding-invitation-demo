@@ -116,7 +116,7 @@ top `Chỉnh sửa` action that returns to the original event choices without lo
 them. The completion hand cue appears only when the current step has every
 required answer; reduced-motion users keep the cue visible without animation.
 Both the inline and separate intimate-party invitations use the same custom
-crossed fork-and-knife icon and show `11:30 – Chủ Nhật, 20/12/2026`. The
+covered-serving cloche icon and show `11:30 – Chủ Nhật, 20/12/2026`. The
 separate card keeps `Nhà Thờ Giáo Xứ Tam Hải` as its own location line, and
 review repeats the same time/date.
 
