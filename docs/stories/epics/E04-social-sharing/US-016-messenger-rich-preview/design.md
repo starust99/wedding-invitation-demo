@@ -67,3 +67,6 @@ rendering requires Meta or Messenger.
 6. Prewarm every exported workbook URL. Rejected because large guest lists
    would create an unnecessary burst; individual copy actions cover the normal
    paste-into-chat workflow with bounded work.
+7. Add a second dynamic URL for Messenger Web. Rejected because `/g/<token>`
+   must remain the one universal link; senders and older guests must never need
+   to select a platform-specific invitation URL.

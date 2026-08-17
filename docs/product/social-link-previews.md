@@ -3,6 +3,9 @@
 ## Product Contract
 
 - `/g/<token>` is the canonical published invitation URL.
+- `/g/<token>` is also the only link a sender or guest must choose. Admin must
+  not expose platform-specific alternatives such as a separate Messenger Web
+  URL, query-string mode, or second copy button.
 - Every Admin publishing surface uses that route: per-guest copy, recently
   imported-link export, full-list workbook export, and CSV serialization.
 - Existing `/w`, `/t`, `/i`, and `/m` links remain valid only for backward
