@@ -7,7 +7,13 @@ import { cache } from "react";
 import { InviteTokenPage } from "@/components/InviteTokenPage";
 import { sharedInvitationCacheTag } from "@/lib/invite-share-cache";
 import { mapInviteeRow, type InviteeDatabaseRow } from "@/lib/invite-mapper";
-import { invitationOgImageUrl } from "@/lib/invite-preview";
+import {
+  invitationOgImageAlt,
+  invitationOgImageHeight,
+  invitationOgImageType,
+  invitationOgImageUrl,
+  invitationOgImageWidth,
+} from "@/lib/invite-preview";
 import type { Invitee } from "@/lib/invites";
 import { getSupabaseServerClient, hasSupabaseEnv } from "@/lib/supabase-server";
 
@@ -18,10 +24,10 @@ export type SharedInvitationTokenRouteProps = {
 const ogImage = {
   url: invitationOgImageUrl,
   secureUrl: invitationOgImageUrl,
-  width: 1672,
-  height: 941,
-  type: "image/jpeg",
-  alt: "Nhật & Phương Wedding Thumbnail",
+  width: invitationOgImageWidth,
+  height: invitationOgImageHeight,
+  type: invitationOgImageType,
+  alt: invitationOgImageAlt,
 };
 
 const sharedInviteeColumns = [
@@ -110,6 +116,33 @@ const getSharedInvitee = cache((token: string) => unstable_cache(
     tags: [sharedInvitationCacheTag(token)],
   },
 )());
+
+export async function listSharedInvitationTokens(): Promise<string[]> {
+  if (!hasSupabaseEnv()) {
+    try {
+      const fs = require("fs");
+      const path = require("path");
+      const cachePath = path.join(process.cwd(), "invitees-cache.json");
+      if (!fs.existsSync(cachePath)) return [];
+      const invitees = JSON.parse(fs.readFileSync(cachePath, "utf8")) as Array<{ token?: string }>;
+      return [...new Set(invitees.map((invitee) => String(invitee.token || "").trim()).filter(Boolean))];
+    } catch {
+      return [];
+    }
+  }
+
+  const { data, error } = await getSupabaseServerClient()
+    .from("invitees")
+    .select("token");
+
+  if (error) throw error;
+
+  return [...new Set(
+    (data || [])
+      .map((invitee) => String(invitee.token || "").trim())
+      .filter(Boolean),
+  )];
+}
 
 function resolveMetadataGuestName(invitee: Invitee) {
   // `guestName` is the product's "Cụm tên khách" and must stay identical to

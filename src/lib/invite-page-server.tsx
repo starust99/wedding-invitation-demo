@@ -6,7 +6,13 @@ import { cache } from "react";
 import { InviteTokenPage } from "@/components/InviteTokenPage";
 import { mapInviteeRow } from "@/lib/invite-mapper";
 import type { InviteeDatabaseRow } from "@/lib/invite-mapper";
-import { invitationOgImageUrl } from "@/lib/invite-preview";
+import {
+  invitationOgImageAlt,
+  invitationOgImageHeight,
+  invitationOgImageType,
+  invitationOgImageUrl,
+  invitationOgImageWidth,
+} from "@/lib/invite-preview";
 import { mapRSVPRow } from "@/lib/rsvp-mapper";
 import type { RSVPDatabaseRow } from "@/lib/rsvp-mapper";
 import { getSupabaseServerClient, hasSupabaseEnv } from "@/lib/supabase-server";
@@ -18,10 +24,10 @@ export type InvitationTokenRouteProps = {
 const ogImage = {
   url: invitationOgImageUrl,
   secureUrl: invitationOgImageUrl,
-  width: 1672,
-  height: 941,
-  type: "image/jpeg",
-  alt: "Nhật & Phương Wedding Thumbnail",
+  width: invitationOgImageWidth,
+  height: invitationOgImageHeight,
+  type: invitationOgImageType,
+  alt: invitationOgImageAlt,
 };
 
 const fetchInviteeDataFromServer = cache(async (token: string) => {

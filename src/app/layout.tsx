@@ -4,7 +4,13 @@ import "./globals.css";
 import { PageTransitionEffect } from "@/components/PageTransitionEffect";
 import { InvitationWatercolorBackdrop } from "@/components/InvitationWatercolorBackdrop";
 import { BackgroundMusic } from "@/components/wedding/BackgroundMusic";
-import { invitationOgImageUrl } from "@/lib/invite-preview";
+import {
+  invitationOgImageAlt,
+  invitationOgImageHeight,
+  invitationOgImageType,
+  invitationOgImageUrl,
+  invitationOgImageWidth,
+} from "@/lib/invite-preview";
 
 const cormorantGaramond = Cormorant_Garamond({
   display: "swap",
@@ -63,10 +69,10 @@ export const metadata: Metadata = {
     images: [
       {
         url: invitationOgImageUrl,
-        width: 1672,
-        height: 941,
-        type: "image/jpeg",
-        alt: "Nhật & Phương Wedding Thumbnail",
+        width: invitationOgImageWidth,
+        height: invitationOgImageHeight,
+        type: invitationOgImageType,
+        alt: invitationOgImageAlt,
       },
     ],
     locale: "vi_VN",

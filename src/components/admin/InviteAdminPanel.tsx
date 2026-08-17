@@ -138,15 +138,63 @@ function downloadBlob(filename: string, blob: Blob) {
   URL.revokeObjectURL(url);
 }
 
-function prewarmInvitePreview(url: string) {
-  void fetch(url, {
-    credentials: "omit",
-    keepalive: true,
-  })
-    .then((response) => response.arrayBuffer())
-    .catch(() => {
-      // Copying the URL must remain available even if background warming is interrupted.
-    });
+async function prewarmInvitePreview(url: string): Promise<boolean> {
+  const retryDelays = [0, 250, 750];
+
+  for (const retryDelay of retryDelays) {
+    if (retryDelay > 0) {
+      await new Promise((resolve) => window.setTimeout(resolve, retryDelay));
+    }
+
+    try {
+      const response = await fetch(url, {
+        cache: "reload",
+        credentials: "omit",
+        keepalive: true,
+      });
+      if (!response.ok) continue;
+
+      const html = await response.text();
+      if (
+        html.includes('property="og:image"')
+        && html.includes('data-od-id="token-wedding-invitation"')
+      ) {
+        return true;
+      }
+    } catch {
+      // A short retry absorbs an ISR fill race without blocking clipboard access.
+    }
+  }
+
+  return false;
+}
+
+async function prepareInvitePreviews(targetInvitees: Invitee[], origin: string) {
+  const uniqueInvitees = [...new Map(
+    targetInvitees
+      .filter((invitee) => invitee.token)
+      .map((invitee) => [invitee.token, invitee]),
+  ).values()];
+  const failedTokens: string[] = [];
+  let cursor = 0;
+
+  async function worker() {
+    while (cursor < uniqueInvitees.length) {
+      const invitee = uniqueInvitees[cursor];
+      cursor += 1;
+      const ready = await prewarmInvitePreview(buildInviteUrl(invitee.token, origin));
+      if (!ready) failedTokens.push(invitee.token);
+    }
+  }
+
+  await Promise.all(
+    Array.from({ length: Math.min(4, uniqueInvitees.length) }, () => worker()),
+  );
+
+  return {
+    readyCount: uniqueInvitees.length - failedTokens.length,
+    failedTokens,
+  };
 }
 
 export function InviteAdminPanel() {
@@ -185,7 +233,7 @@ export function InviteAdminPanel() {
 
   useEffect(() => {
     if (!selectedInvitee?.token) return;
-    prewarmInvitePreview(buildInviteUrl(selectedInvitee.token, window.location.origin));
+    void prewarmInvitePreview(buildInviteUrl(selectedInvitee.token, window.location.origin));
   }, [selectedInvitee?.token]);
 
   useEffect(() => {
@@ -387,7 +435,12 @@ export function InviteAdminPanel() {
         if (!response.ok) throw new Error("Không lưu được khách mời.");
         const result = await response.json() as { invitee: Invitee };
         setInvitees((current) => current.map((item) => item.id === result.invitee.id ? result.invitee : item));
-        setMessage("Đã lưu khách mời.");
+        const preparation = await prepareInvitePreviews([result.invitee], window.location.origin);
+        if (preparation.failedTokens.length > 0) {
+          setError("Đã lưu khách mời nhưng link xem trước chưa sẵn sàng. Hãy bấm Lưu lại trước khi gửi link.");
+        } else {
+          setMessage("Đã lưu khách mời và chuẩn bị xong link gửi khách.");
+        }
       } else {
         writeLocalInvitees(invitees);
         setMessage("Đã lưu khách mời vào bộ nhớ trình duyệt.");
@@ -411,8 +464,14 @@ export function InviteAdminPanel() {
         const response = await fetch(`/api/admin/invites/${selectedInvitee.id}/token-regenerate`, { method: "POST" });
         if (!response.ok) throw new Error("Không tạo lại token được.");
         const result = await response.json() as { token: string };
-        setInvitees((current) => current.map((item) => item.id === selectedInvitee.id ? { ...item, token: result.token, updatedAt: new Date().toISOString() } : item));
-        setMessage("Đã tạo token mới.");
+        const regeneratedInvitee = { ...selectedInvitee, token: result.token, updatedAt: new Date().toISOString() };
+        setInvitees((current) => current.map((item) => item.id === selectedInvitee.id ? regeneratedInvitee : item));
+        const preparation = await prepareInvitePreviews([regeneratedInvitee], window.location.origin);
+        if (preparation.failedTokens.length > 0) {
+          setError("Đã tạo token mới nhưng link xem trước chưa sẵn sàng. Hãy thử lại trước khi gửi.");
+        } else {
+          setMessage("Đã tạo token mới và chuẩn bị xong link gửi khách.");
+        }
       } else {
         const existingTokens = new Set(invitees.filter((item) => item.id !== selectedInvitee.id).map((item) => item.token));
         const nextToken = generateInviteToken(selectedInvitee.displayLabel || selectedInvitee.guestName, existingTokens);
@@ -570,7 +629,16 @@ export function InviteAdminPanel() {
       setLastImportedInviteeIds([nextSelectedId]);
       setIsAddingInvitee(false);
       setSimpleInviteEntry(emptySimpleInviteEntry);
-      setMessage("Đã tạo khách mời mới.");
+      if (backend === "supabase") {
+        const preparation = await prepareInvitePreviews([savedInvitee], window.location.origin);
+        if (preparation.failedTokens.length > 0) {
+          setError("Đã tạo khách mời nhưng link xem trước chưa sẵn sàng. Hãy bấm Lưu trước khi gửi.");
+        } else {
+          setMessage("Đã tạo khách mời và chuẩn bị xong link gửi khách.");
+        }
+      } else {
+        setMessage("Đã tạo khách mời mới.");
+      }
     } catch (addError) {
       setError(addError instanceof Error ? addError.message : "Không tạo được khách mời.");
     } finally {
@@ -641,7 +709,12 @@ export function InviteAdminPanel() {
         setInvitees([...byToken.values()]);
         setLastImportedInviteeIds(savedInvitees.map((invitee) => invitee.id));
         setSelectedInviteeId(savedInvitees[0]?.id || selectedInviteeId);
-        setMessage(`Đã nhập ${nextInvitees.length} khách mời từ Excel. Có thể xuất file link riêng cho đúng đợt vừa nạp ngay bây giờ.`);
+        const preparation = await prepareInvitePreviews(savedInvitees, window.location.origin);
+        if (preparation.failedTokens.length > 0) {
+          setError(`Đã nhập khách mời nhưng ${preparation.failedTokens.length} link chưa sẵn sàng. Hãy thử nhập lại hoặc lưu từng khách trước khi xuất.`);
+        } else {
+          setMessage(`Đã nhập và chuẩn bị xong ${preparation.readyCount} link khách mời. Có thể xuất file link riêng cho đúng đợt vừa nạp ngay bây giờ.`);
+        }
       } else {
         const merged = upsertLocalInvitees(nextInvitees);
         setInvitees(merged);
@@ -694,7 +767,7 @@ export function InviteAdminPanel() {
   function copyInviteUrl(token: string) {
     const url = buildInviteUrl(token, window.location.origin);
     void navigator.clipboard.writeText(url);
-    prewarmInvitePreview(url);
+    void prewarmInvitePreview(url);
     setMessage("Đã sao chép link.");
   }
 
@@ -710,6 +783,14 @@ export function InviteAdminPanel() {
     try {
       if (targetInvitees.length === 0) {
         throw new Error("Chưa có khách mời để xuất link.");
+      }
+
+      if (backend === "supabase") {
+        setMessage(`Đang chuẩn bị ${targetInvitees.length} link trước khi xuất…`);
+        const preparation = await prepareInvitePreviews(targetInvitees, window.location.origin);
+        if (preparation.failedTokens.length > 0) {
+          throw new Error(`${preparation.failedTokens.length} link chưa sẵn sàng nên chưa xuất file. Hãy thử lại sau ít phút.`);
+        }
       }
 
       const response = await fetch("/api/admin/invite-links-workbook", {

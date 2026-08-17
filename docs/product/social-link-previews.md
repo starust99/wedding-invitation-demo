@@ -7,6 +7,9 @@
   imported-link export, full-list workbook export, and CSV serialization.
 - Existing `/w`, `/t`, `/i`, and `/m` links remain valid only for backward
   compatibility; Admin never emits them as newly published links.
+- Existing `/g` links are generated during the production build. Creating,
+  editing, regenerating, or importing guests prepares the affected links, and
+  workbook export verifies every included link before releasing the file.
 - Selecting a guest in the admin starts a bounded same-origin prewarm request;
   copy actions repeat it without making clipboard success depend on warming.
 - The shared URL is the real invitation page. It must not be a preview-only
@@ -22,22 +25,25 @@
   hydration.
 - The first HTML response exposes a complete Open Graph card with a title,
   description, canonical page URL, locale, and an absolute HTTPS JPEG image.
-- Preview media uses a versioned physical filename so a new release creates a
-  new crawler object without adding a query string to the guest-facing URL.
+- Preview media is a baseline 1200×630 JPEG below 300 KiB and uses a versioned
+  physical filename, so a new release creates a new crawler object without
+  adding a query string to the guest-facing URL.
 - `robots.txt` explicitly allows social preview crawlers and ordinary visitors.
 - Essential title, description, canonical, and primary image metadata appears
   within the first 4 KiB of HTML.
 
 ## Platform Expectations
 
-- Messenger, Facebook, Zalo, and other chat crawlers receive HTTP 200 HTML with
-  Open Graph metadata in `<head>`.
+- Messenger, Facebook, Zalo, WhatsApp, Slack, Discord, Telegram, X/Twitter,
+  LinkedIn, Apple Messages, Viber, LINE, KakaoTalk, Pinterest, and ordinary
+  browsers receive HTTP 200 HTML with Open Graph metadata in `<head>`.
 - Human visitors and social crawlers receive the same invitation content at the
   shared URL; no user-agent-specific cloaking is used.
 - The guest-facing path stays compact and contains no cache-busting query.
 - Shared HTML performs at most one invitee query on cold generation and no RSVP
-  query. The token-keyed public projection and rendered route are cacheable at
-  the edge for 24 hours and invalidated after admin mutations.
+  query. Existing tokens are generated at build time. The token-keyed public
+  projection and rendered route are cacheable at the edge for 24 hours and
+  invalidated, regenerated, and verified after admin mutations.
 - OG title and description use the invitee's exact `Cụm tên khách`; they must
   never silently fall back to generic `Quý khách` for a valid token.
 - Invalid shared tokens return the normal status-correct not-found response.
@@ -53,6 +59,8 @@
   are recorded as evidence, not treated as a deterministic provider SLA.
 - A 0–4095 byte HTML range contains the primary OG title and image.
 - Focused checks preserve the copy-and-prewarm handoff without making clipboard
-  success depend on the background request.
+  success depend on the background request. Export does depend on successful
+  publish-readiness verification so a cold or invalid link is not distributed
+  in a workbook.
 - Final rendering inside Messenger remains provider-controlled and must be
   checked with Meta Sharing Debugger or a fresh Messenger share after deploy.

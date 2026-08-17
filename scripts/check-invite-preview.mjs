@@ -37,15 +37,22 @@ const shareCacheSource = readFileSync(
   new URL("../src/lib/invite-share-cache.ts", import.meta.url),
   "utf8",
 );
+const canonicalShareRouteSource = readFileSync(
+  new URL("../src/app/g/[token]/page.tsx", import.meta.url),
+  "utf8",
+);
 const nextConfigSource = readFileSync(
   new URL("../next.config.ts", import.meta.url),
   "utf8",
 );
-assert.match(adminPanelSource, /function prewarmInvitePreview\(url: string\)/);
+assert.match(adminPanelSource, /async function prewarmInvitePreview\(url: string\): Promise<boolean>/);
+assert.match(adminPanelSource, /async function prepareInvitePreviews\(targetInvitees: Invitee\[\], origin: string\)/);
 assert.match(adminPanelSource, /credentials: "omit"/);
 assert.match(adminPanelSource, /keepalive: true/);
-assert.match(adminPanelSource, /navigator\.clipboard\.writeText\(url\);\s*prewarmInvitePreview\(url\);/);
-assert.match(adminPanelSource, /if \(!selectedInvitee\?\.token\) return;\s*prewarmInvitePreview\(buildInviteUrl\(selectedInvitee\.token, window\.location\.origin\)\);/);
+assert.match(adminPanelSource, /navigator\.clipboard\.writeText\(url\);\s*void prewarmInvitePreview\(url\);/);
+assert.match(adminPanelSource, /if \(!selectedInvitee\?\.token\) return;\s*void prewarmInvitePreview\(buildInviteUrl\(selectedInvitee\.token, window\.location\.origin\)\);/);
+assert.match(adminPanelSource, /await prepareInvitePreviews\(targetInvitees, window\.location\.origin\)/);
+assert.match(adminPanelSource, /link chưa sẵn sàng nên chưa xuất file/);
 assert.match(invitesSource, /export const publishedInviteRoute = "\/g";/);
 assert.match(invitesSource, /return `\$\{publishedInviteRoute\}\/\$\{encodeURIComponent\(token\)\}`;/);
 assert.match(invitesSource, /return `\$\{base\}\$\{buildInvitePath\(token\)\}`;/);
@@ -55,9 +62,12 @@ assert.match(inviteAccessGateSource, /\(dạng \/g\/…\)/);
 assert.match(splashIntroSource, /pathname\.match\(\/\^\\\/\(\?:g\|i\|m\|t\|w\)\\\/\(\[\^\/\?#\]\+\)\/\)/);
 assert.match(cinematicRevealSource, /pathname\.match\(\/\^\\\/\(\?:g\|i\|m\|t\|w\)\\\/\(\[\^\/\?#\]\+\)\/\)/);
 assert.match(sharePageSource, /unstable_cache\(/);
+assert.match(sharePageSource, /export async function listSharedInvitationTokens\(\): Promise<string\[\]>/);
 assert.match(sharePageSource, /invitee\.guestName\s*\|\|\s*invitee\.displayLabel/);
+assert.match(canonicalShareRouteSource, /export async function generateStaticParams\(\)/);
+assert.match(canonicalShareRouteSource, /await listSharedInvitationTokens\(\)/);
 assert.match(shareCacheSource, /sharedInvitationRoutes = \["\/g", "\/w", "\/t"\]/);
-for (const crawler of ["facebookexternalhit", "Facebot", "meta-externalagent", "meta-externalfetcher", "Zalo"]) {
+for (const crawler of ["facebookexternalhit", "Facebot", "meta-externalagent", "meta-externalfetcher", "Zalo", "TelegramBot", "Viber", "Line", "KakaoTalk", "Pinterestbot"]) {
   assert.ok(nextConfigSource.includes(crawler), `htmlLimitedBots must include ${crawler}`);
 }
 
@@ -68,7 +78,7 @@ const compatibilityRoutes = [
   `/w/${encodeURIComponent(token)}`,
   `/t/${encodeURIComponent(token)}`,
 ];
-const imagePath = "/assets/meta/og-wedding-20260816.jpg";
+const imagePath = "/assets/meta/og-wedding-1200x630-20260817.jpg";
 const imageUrl = `https://nhatphuong.love${imagePath}`;
 const maxHeaderMs = Number(process.env.INVITE_PREVIEW_MAX_HEADER_MS || 0);
 const userAgents = [
@@ -79,6 +89,15 @@ const userAgents = [
   "meta-externalfetcher/1.1 (+https://developers.facebook.com/docs/sharing/webmasters/crawler)",
   "ZaloBot/1.0",
   "Mozilla/5.0 ZaloPC/24.8",
+  "WhatsApp/2.24.17.79 A",
+  "Slackbot-LinkExpanding 1.0 (+https://api.slack.com/robots)",
+  "Discordbot/2.0",
+  "TelegramBot (like TwitterBot)",
+  "Twitterbot/1.0",
+  "LinkedInBot/1.0",
+  "Applebot/0.1",
+  "Viber/21.7.0.0",
+  "Line/14.12.0",
   "Mozilla/5.0 (Linux; Android 15) AppleWebKit/537.36 Chrome/139.0 Mobile Safari/537.36",
 ];
 
@@ -162,8 +181,8 @@ async function assertInvitationPage(route, userAgent, expectedGuestName) {
   );
   assert.match(head, /property="og:image:secure_url"/i);
   assert.match(head, /property="og:image:type" content="image\/jpeg"/i);
-  assert.match(head, /property="og:image:width" content="1672"/i);
-  assert.match(head, /property="og:image:height" content="941"/i);
+  assert.match(head, /property="og:image:width" content="1200"/i);
+  assert.match(head, /property="og:image:height" content="630"/i);
   assert.match(
     head,
     new RegExp(`<link rel="canonical" href="${escapeRegExp(absolutePageUrl)}"`, "i"),
@@ -228,7 +247,50 @@ const imageHeadResponse = await fetch(`${baseUrl}${imagePath}`, {
 });
 assert.equal(imageHeadResponse.status, 200);
 assert.equal(imageHeadResponse.headers.get("content-type"), "image/jpeg");
-assert.ok(Number(imageHeadResponse.headers.get("content-length")) > 100_000);
+assert.ok(Number(imageHeadResponse.headers.get("content-length")) > 10_000);
+assert.ok(Number(imageHeadResponse.headers.get("content-length")) < 300_000);
+assert.match(imageHeadResponse.headers.get("cache-control") || "", /max-age=31536000/);
+assert.match(imageHeadResponse.headers.get("cache-control") || "", /immutable/);
+
+const imageFullResponse = await fetch(`${baseUrl}${imagePath}`, {
+  headers: { "user-agent": userAgents[0] },
+});
+assert.equal(imageFullResponse.status, 200);
+const fullImage = new Uint8Array(await imageFullResponse.arrayBuffer());
+assert.deepEqual([...fullImage.slice(0, 2)], [0xff, 0xd8], "OG image must be a valid JPEG stream");
+
+function readJpegFrame(bytes) {
+  let offset = 2;
+  while (offset + 8 < bytes.length) {
+    if (bytes[offset] !== 0xff) {
+      offset += 1;
+      continue;
+    }
+    const marker = bytes[offset + 1];
+    if (marker === 0xd8 || marker === 0xd9) {
+      offset += 2;
+      continue;
+    }
+    const segmentLength = (bytes[offset + 2] << 8) | bytes[offset + 3];
+    if (marker === 0xc0 || marker === 0xc2) {
+      return {
+        marker,
+        height: (bytes[offset + 5] << 8) | bytes[offset + 6],
+        width: (bytes[offset + 7] << 8) | bytes[offset + 8],
+      };
+    }
+    if (segmentLength < 2) break;
+    offset += 2 + segmentLength;
+  }
+  return null;
+}
+
+const jpegFrame = readJpegFrame(fullImage);
+assert.deepEqual(
+  jpegFrame,
+  { marker: 0xc0, width: 1200, height: 630 },
+  "OG image must be a baseline 1200x630 JPEG",
+);
 
 const imageResponse = await fetch(`${baseUrl}${imagePath}`, {
   headers: {
@@ -244,5 +306,5 @@ assert.equal(image.byteLength, 1024);
 assert.deepEqual([...image.slice(0, 2)], [0xff, 0xd8], "OG image must be a valid JPEG stream");
 
 console.log(
-  `Invite preview checks passed: ${userAgents.length} crawler/browser agents received personalized Cụm tên khách metadata on the edge-cacheable /g invitation, with OG image inside the first 4096 bytes (full head ${largestPage.headBytes} bytes, response-header max ${Math.max(...sharedHeaderTimes).toFixed(0)}ms); /w and /t compatibility, admin copy prewarming, robots.txt, and HTML/JPEG range delivery also passed.`,
+  `Invite preview checks passed: ${userAgents.length} crawler/browser agents received personalized Cụm tên khách metadata on the edge-cacheable /g invitation, with a baseline 1200x630 OG image inside the first 4096 bytes (full head ${largestPage.headBytes} bytes, response-header max ${Math.max(...sharedHeaderTimes).toFixed(0)}ms); /w and /t compatibility, build-time /g generation, publish-ready Admin warming, robots.txt, and HTML/JPEG range delivery also passed.`,
 );
