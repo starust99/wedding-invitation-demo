@@ -115,10 +115,10 @@ The separate intimate-party step does not repeat the ceremony card. It keeps a
 top `Chỉnh sửa` action that returns to the original event choices without losing
 them. The completion hand cue appears only when the current step has every
 required answer; reduced-motion users keep the cue visible without animation.
-Both the inline and separate intimate-party invitations use the same restrained
-utensils icon and show `11:30 – Chủ Nhật, 20/12/2026`. The separate card keeps
-`Nhà Thờ Giáo Xứ Tam Hải` as its own location line, and review repeats the same
-time/date.
+Both the inline and separate intimate-party invitations use the same custom
+crossed fork-and-knife icon and show `11:30 – Chủ Nhật, 20/12/2026`. The
+separate card keeps `Nhà Thờ Giáo Xứ Tam Hải` as its own location line, and
+review repeats the same time/date.
 
 Invitation scope and the guest answer are separate fields. For guests invited
 from the start, the answer applies only while ceremony attendance is `Có`. For

@@ -60,6 +60,12 @@ cue on `Xem lại và hoàn tất`. Review and success states repeat the answer 
 when applicable. Admin retains invite scope editing, response status, filtering,
 estimated counts, and export columns.
 
+The inline and dedicated intimate-party invitations share a custom crossed
+fork-and-knife raster icon. Its dusty-rose monoline treatment follows the
+existing ceremony and banquet icon family without reusing a generic library
+glyph; the surrounding paper badge remains a UI surface rather than part of the
+asset.
+
 The step transition must work with touch interaction across mobile, tablet,
 desktop, and in-app browsers. Reduced-motion users see an instant transition
 and a static hand cue.

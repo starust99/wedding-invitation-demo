@@ -87,7 +87,7 @@ try {
   await regular.page.getByText("Sau Thánh lễ hôn phối", { exact: true }).waitFor();
   await regular.page.getByText("11:30 – Chủ Nhật, 20/12/2026", { exact: true }).waitFor();
   await regular.page.getByText("Nhà Thờ Giáo Xứ Tam Hải", { exact: true }).waitFor();
-  assert.equal(await regular.page.locator("svg.lucide-utensils-crossed").count(), 1);
+  assert.equal(await regular.page.locator('img[data-rsvp-intimate-party-icon="true"]').count(), 1);
   await regular.page.getByText("Kính mời Quý khách dự buổi tiệc chung vui cùng gia đình sau Thánh lễ", { exact: true }).waitFor();
 
   const editButton = regular.page.getByRole("button", { name: "Chỉnh sửa", exact: true });
@@ -134,7 +134,7 @@ try {
   await close.page.getByRole("button", { name: "Có", exact: true }).nth(0).click();
   await close.page.getByText("Tiệc thân mật", { exact: true }).waitFor();
   await close.page.getByText("11:30 – Chủ Nhật, 20/12/2026", { exact: true }).waitFor();
-  assert.equal(await close.page.locator("svg.lucide-utensils-crossed").count(), 1);
+  assert.equal(await close.page.locator('img[data-rsvp-intimate-party-icon="true"]').count(), 1);
   await close.page.getByRole("button", { name: "Có", exact: true }).nth(1).click();
   await close.page.getByRole("button", { name: "Có", exact: true }).nth(2).click();
   await close.page.getByRole("button", { name: "Xem lại và hoàn tất", exact: true }).waitFor();

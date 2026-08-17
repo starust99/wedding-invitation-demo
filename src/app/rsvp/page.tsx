@@ -17,7 +17,6 @@ import {
   CalendarDays,
   Church,
   Images,
-  UtensilsCrossed,
   Wine,
   X,
 } from "lucide-react";
@@ -1651,10 +1650,14 @@ export default function RSVPPage() {
                 <div className="rsvp-paper-card mx-auto mb-7 grid w-full max-w-2xl justify-items-center rounded-[1.8rem] px-5 py-7 text-center sm:px-9 sm:py-10">
                   <div className="w-full max-w-xl">
                     <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-[1.2rem] border border-[#f2e5e0] bg-white shadow-[0_8px_20px_rgba(242,229,224,0.5)] sm:h-16 sm:w-16 sm:rounded-[1.5rem]">
-                      <UtensilsCrossed
+                      <Image
+                        data-rsvp-intimate-party-icon="true"
+                        src="/assets/wedding/ui/rsvp/intimate-party-cutlery-custom.png"
+                        alt=""
                         aria-hidden="true"
-                        className="h-7 w-7 text-[#8f5d5d] sm:h-9 sm:w-9"
-                        strokeWidth={1.35}
+                        width={48}
+                        height={48}
+                        className="h-9 w-9 object-contain sm:h-10 sm:w-10"
                       />
                     </div>
                     <p className="text-base font-bold uppercase tracking-[0.12em] text-[#7a6a5d] sm:text-lg">
@@ -1870,10 +1873,14 @@ export default function RSVPPage() {
                         <div className="flex flex-col items-center gap-3 sm:flex-row sm:justify-between">
                           <div className="flex min-w-0 flex-1 flex-col items-center gap-3 sm:flex-row sm:text-left">
                             <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[1rem] border border-[#f2e5e0] bg-white shadow-[0_6px_16px_rgba(242,229,224,0.45)]">
-                              <UtensilsCrossed
+                              <Image
+                                data-rsvp-intimate-party-icon="true"
+                                src="/assets/wedding/ui/rsvp/intimate-party-cutlery-custom.png"
+                                alt=""
                                 aria-hidden="true"
-                                className="h-6 w-6 text-[#8f5d5d]"
-                                strokeWidth={1.35}
+                                width={32}
+                                height={32}
+                                className="h-8 w-8 object-contain"
                               />
                             </div>
                             <div className="text-center sm:text-left">
