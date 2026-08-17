@@ -24,7 +24,9 @@ cannot protect links copied from an exported workbook.
 ## Decision
 
 Keep `/g/<token>` as the permanent canonical guest URL. Do not rotate the route
-or append query-string cache busters.
+or append query-string cache busters. It is the only published guest link;
+Admin must not expose a second platform-specific URL or ask senders to choose a
+Messenger Web mode.
 
 Treat a link as published only after it is ready:
 
@@ -63,6 +65,11 @@ fallback so older unfurl clients converge on the same physical image object.
    and does nothing for workbook links.
 5. Make metadata generic and fully static. Rejected because the card must show
    the exact guest-name cluster rather than `Quý khách`.
+6. Add a second request-time route for Messenger Web. Rejected because the
+   product requires one universal link, and a production probe showed that the
+   E2EE Web composer can return a bare-domain fallback without making any
+   request to the invitation origin. There is no Web-only request signature on
+   which to base safe routing.
 
 ## Consequences
 
