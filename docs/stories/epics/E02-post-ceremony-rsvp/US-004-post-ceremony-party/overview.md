@@ -16,6 +16,9 @@ exist.
 The invite workbook exposes an optional `Tham gia tiệc sau Hôn phối` column.
 Blank means the question does not apply. `Có` means the guest sees a conditional
 post-ceremony-party question after choosing to attend the ceremony.
+The workbook no longer exposes the derived `Lời mời trong thiệp` column;
+invitation copy continues to be generated from the guest identity during
+import/runtime, and older workbooks containing the column remain compatible.
 
 Invitation eligibility and the guest's answer are persisted separately,
 validated by the server, summarized in Admin, and included in RSVP exports.

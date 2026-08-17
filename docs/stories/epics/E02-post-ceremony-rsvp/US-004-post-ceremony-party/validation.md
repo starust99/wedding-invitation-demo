@@ -11,7 +11,7 @@ and RSVP behavior.
 | Layer | Cases |
 | --- | --- |
 | Unit | Blank/`Có` parsing, invalid value rejection, mapper round trips, initial-invite and Terracotta-decline normalization |
-| Integration | Template validation list, old workbook compatibility, API server authority, direct event columns |
+| Integration | Seven-column template, omitted derived invitation-copy column, old workbook compatibility, validation list, API server authority, direct event columns |
 | E2E | Initial close-guest row, regular-guest separate step, direct review after Terracotta acceptance, edit preservation, draft reload, review, Admin status |
 | Platform | Mobile, iPad portrait/landscape, desktop, in-app-browser user agents |
 | Performance | Conditional reveal adds no network request or heavy asset |
@@ -25,6 +25,7 @@ and RSVP behavior.
 - Eligible guest with ceremony yes and after-party no.
 - Eligible guest with ceremony no.
 - Legacy workbook without the new column.
+- Legacy workbook that still contains `Lời mời trong thiệp`.
 - Legacy RSVP row with event attendance inside `lodging_guests`.
 
 ## Commands
@@ -42,6 +43,24 @@ git diff --check
 
 ## Acceptance Evidence
 
+- The generated invite workbook now has exactly seven visible columns and no
+  `Lời mời trong thiệp` column. The title/subtitle merge, autofilter, protected
+  formula cells, guest-group dropdown, optional `Có` dropdown, and very-hidden
+  lookup sheet remain intact.
+- Import accepts both the new seven-column workbook and an older workbook that
+  still contains `Lời mời trong thiệp`; stale legacy copy is ignored and
+  regenerated from the guest identity. The four Họ nội/Họ ngoại lodging groups
+  remain present in the existing `Nhóm khách` dropdown, so no new column was
+  introduced.
+- The workbook was rendered and visually inspected across `A1:G12`; headers,
+  widths, merged title bands, dropdown indicators, and empty input rows were
+  legible with no clipped content. Formula inspection found no Excel error
+  values.
+- Focused workbook/RSVP checks, guest-copy checks, TypeScript, scoped ESLint,
+  the production build, and `git diff --check` passed.
+- RSVP branching coverage verifies the intimate-party icon and
+  `11:30 – Chủ Nhật, 20/12/2026` in the regular separate step, the close-guest
+  inline row, and the review summary.
 - `npm run check:post-ceremony-rsvp` passed. It covers blank/`Có`
   workbook parsing, invalid-value rejection, legacy workbook compatibility,
   invite mapping, direct RSVP columns, round trips, and all server-authority

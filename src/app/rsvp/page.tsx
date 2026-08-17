@@ -17,6 +17,7 @@ import {
   CalendarDays,
   Church,
   Images,
+  UtensilsCrossed,
   Wine,
   X,
 } from "lucide-react";
@@ -495,18 +496,6 @@ function formatAlbumAvailableDate(value: string) {
   return value;
 }
 
-function formatPostCeremonyDate(dateLabel: string) {
-  const dateMatch = dateLabel.match(/(\d{1,2})[.\/-](\d{1,2})[.\/-](\d{4})/);
-  const date = dateMatch
-    ? `${dateMatch[1].padStart(2, "0")}/${dateMatch[2].padStart(2, "0")}/${dateMatch[3]}`
-    : dateLabel;
-  const weekday = dateLabel.match(/(Chúa Nhật|Chủ Nhật|Thứ Hai|Thứ Ba|Thứ Tư|Thứ Năm|Thứ Sáu|Thứ Bảy)/i)?.[0]
-    ?.replace(/^Chúa Nhật$/i, "Chủ Nhật");
-  return `${weekday ? `${weekday}, ` : ""}${date} · Tam Hải`;
-}
-
-
-
 export default function RSVPPage() {
   const shouldReduceMotion = useReducedMotion();
   const publishedSettings = usePublishedSettings();
@@ -515,7 +504,7 @@ export default function RSVPPage() {
   const churchReviewDateLine = formatRsvpEventDate(runtimeConfig.eventDetailsConfig.content.churchDate, runtimeConfig.eventDetailsConfig.content.churchTime, "—");
   const banquetDateLine = formatRsvpEventDate(runtimeConfig.event.dateLabel, runtimeConfig.event.welcomeTime);
   const banquetReviewDateLine = formatRsvpEventDate(runtimeConfig.event.dateLabel, runtimeConfig.event.welcomeTime, "—");
-  const postCeremonyDateLine = formatPostCeremonyDate(runtimeConfig.eventDetailsConfig.content.churchDate);
+  const postCeremonyDateLine = formatRsvpEventDate(runtimeConfig.eventDetailsConfig.content.churchDate, "11:30", "–");
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isReviewing, setIsReviewing] = useState(false);
   const [isPostCeremonyStep, setIsPostCeremonyStep] = useState(false);
@@ -1524,7 +1513,7 @@ export default function RSVPPage() {
                       <div className="flex flex-col items-center justify-center gap-2 py-4 text-center">
                         <div className="text-center">
                           <p className="text-base font-semibold text-[#252934] sm:text-lg">Tiệc thân mật</p>
-                          <p className="mt-1 text-sm font-normal leading-relaxed text-[#7a6a5d]">Sau Thánh lễ Hôn phối</p>
+                          <p className="mt-1 text-sm font-normal leading-relaxed text-[#7a6a5d]">{postCeremonyDateLine}</p>
                         </div>
                         <ReviewAttendanceStatus attending={formValues.attendingPostCeremonyParty === "yes"} />
                       </div>
@@ -1661,14 +1650,24 @@ export default function RSVPPage() {
 
                 <div className="rsvp-paper-card mx-auto mb-7 grid w-full max-w-2xl justify-items-center rounded-[1.8rem] px-5 py-7 text-center sm:px-9 sm:py-10">
                   <div className="w-full max-w-xl">
+                    <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-[1.2rem] border border-[#f2e5e0] bg-white shadow-[0_8px_20px_rgba(242,229,224,0.5)] sm:h-16 sm:w-16 sm:rounded-[1.5rem]">
+                      <UtensilsCrossed
+                        aria-hidden="true"
+                        className="h-7 w-7 text-[#8f5d5d] sm:h-9 sm:w-9"
+                        strokeWidth={1.35}
+                      />
+                    </div>
                     <p className="text-base font-bold uppercase tracking-[0.12em] text-[#7a6a5d] sm:text-lg">
                       Tiệc thân mật
                     </p>
                     <p className="mt-3 text-base font-semibold leading-relaxed text-[#252934]">
                       Sau Thánh lễ hôn phối
                     </p>
-                    <p className="mt-1 text-sm font-normal leading-relaxed text-[#7a6a5d] sm:text-base">
+                    <p className="mt-1 text-sm font-semibold leading-relaxed text-[#252934] sm:text-base">
                       {postCeremonyDateLine}
+                    </p>
+                    <p className="mt-0.5 text-sm font-normal leading-relaxed text-[#7a6a5d] sm:text-base">
+                      Nhà Thờ Giáo Xứ Tam Hải
                     </p>
                     <p className="mx-auto mt-5 max-w-lg text-sm font-normal leading-relaxed text-[#252934]/78 sm:text-base">
                       Kính mời Quý khách dự buổi tiệc chung vui cùng gia đình sau Thánh lễ
@@ -1869,13 +1868,25 @@ export default function RSVPPage() {
                         className="mx-auto mt-3 w-full max-w-xl border-t border-[#d7c6a8]/48 bg-[#fffaf2]/32 px-2 pb-1 pt-5 sm:px-3 sm:pt-6"
                       >
                         <div className="flex flex-col items-center gap-3 sm:flex-row sm:justify-between">
-                          <div className="text-center sm:text-left">
-                            <p className="text-sm font-bold tracking-[0.1em] text-[#7a6a5d] uppercase">
-                              Tiệc thân mật
-                            </p>
-                            <p className="mt-1 text-sm leading-relaxed text-[#252934]/72">
-                              Kính mời Quý khách dự buổi tiệc chung vui cùng gia đình sau Thánh lễ
-                            </p>
+                          <div className="flex min-w-0 flex-1 flex-col items-center gap-3 sm:flex-row sm:text-left">
+                            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[1rem] border border-[#f2e5e0] bg-white shadow-[0_6px_16px_rgba(242,229,224,0.45)]">
+                              <UtensilsCrossed
+                                aria-hidden="true"
+                                className="h-6 w-6 text-[#8f5d5d]"
+                                strokeWidth={1.35}
+                              />
+                            </div>
+                            <div className="text-center sm:text-left">
+                              <p className="text-sm font-bold tracking-[0.1em] text-[#7a6a5d] uppercase">
+                                Tiệc thân mật
+                              </p>
+                              <p className="mt-1 text-sm font-semibold leading-relaxed text-[#252934]">
+                                {postCeremonyDateLine}
+                              </p>
+                              <p className="mt-1 text-sm leading-relaxed text-[#252934]/72">
+                                Kính mời Quý khách dự buổi tiệc chung vui cùng gia đình sau Thánh lễ
+                              </p>
+                            </div>
                           </div>
                           <div className="flex shrink-0 flex-col items-center gap-1 sm:gap-1.5">
                             <span className="text-[11px] font-bold tracking-[0.14em] text-[#7a6a5d]/75 uppercase">

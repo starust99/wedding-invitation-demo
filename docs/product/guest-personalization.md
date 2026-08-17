@@ -78,6 +78,28 @@ not add non-breaking characters to stored invitation data.
 - `Bố` and `Mẹ` are single-person invitations with expected count `1`.
 - `Bố mẹ`, `Ba mẹ`, and `Ông bà` are couple invitations with expected count `2`.
 
+## Invite Workbook Classification
+
+The visible invite workbook keeps seven columns: `STT`, `Cụm danh xưng`,
+`Tên khách`, `Cụm tên khách`, `Đơn vị khách`, `Nhóm khách`, and
+`Tham gia tiệc sau Hôn phối`. `Lời mời trong thiệp` is derived from the guest
+identity at runtime and is not an administrator input, so new templates do not
+export that column. Import remains compatible with older workbooks that still
+contain it and ignores any stale value in favor of the runtime-derived copy.
+
+No extra lodging column is required. The two existing classification inputs
+have separate responsibilities:
+
+- `Tham gia tiệc sau Hôn phối` controls the initial intimate-party invitation
+  scope described below.
+- `Nhóm khách` controls Terracotta lodging eligibility. Guests in the
+  `[Nhà Trai] Họ nội`, `[Nhà Trai] Họ ngoại`, `[Nhà Gái] Họ nội`, or
+  `[Nhà Gái] Họ ngoại` groups are asked about lodging only when they accept the
+  Terracotta wedding. The two Nhà Trai family groups may choose only the night
+  of 26/12 or no stay; the two Nhà Gái family groups may choose 25/12, 26/12,
+  both nights, or no stay. Other groups answer the banquet party-size question
+  instead of lodging.
+
 ## Post-Ceremony Party
 
 The invite workbook contains `Tham gia tiệc sau Hôn phối`:
@@ -93,6 +115,10 @@ The separate intimate-party step does not repeat the ceremony card. It keeps a
 top `Chỉnh sửa` action that returns to the original event choices without losing
 them. The completion hand cue appears only when the current step has every
 required answer; reduced-motion users keep the cue visible without animation.
+Both the inline and separate intimate-party invitations use the same restrained
+utensils icon and show `11:30 – Chủ Nhật, 20/12/2026`. The separate card keeps
+`Nhà Thờ Giáo Xứ Tam Hải` as its own location line, and review repeats the same
+time/date.
 
 Invitation scope and the guest answer are separate fields. For guests invited
 from the start, the answer applies only while ceremony attendance is `Có`. For

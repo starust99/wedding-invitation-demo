@@ -42,13 +42,26 @@ assert.equal(sheet.views[0]?.xSplit, 4);
 assert.equal(sheet.views[0]?.ySplit, 4);
 assert(sheet.sheetProtection, "The input sheet must protect formula and presentation cells.");
 assert.deepEqual(
-  [1, 2, 3, 4, 5, 6, 7, 8].map((column) => sheet.getCell(4, column).text),
-  ["STT", "Cụm danh xưng", "Tên khách", "Cụm tên khách", "Đơn vị khách", "Nhóm khách", "Tham gia tiệc sau Hôn phối", "Lời mời trong thiệp"],
+  [1, 2, 3, 4, 5, 6, 7].map((column) => sheet.getCell(4, column).text),
+  ["STT", "Cụm danh xưng", "Tên khách", "Cụm tên khách", "Đơn vị khách", "Nhóm khách", "Tham gia tiệc sau Hôn phối"],
 );
+assert.equal(sheet.getCell("H4").text, "", "The derived invitation sentence must not be exported as an input column.");
+assert.equal(sheet.getCell("G1").isMerged, true);
+assert.equal(sheet.getCell("H1").isMerged, false);
 assert.equal(sheet.getCell("G5").text, "", "New rows must leave the optional field blank.");
 assert.equal(sheet.getCell("G5").dataValidation.allowBlank, true);
 assert.equal(sheet.getCell("G5").dataValidation.type, "list");
 assert.notEqual(sheet.getCell("G5").dataValidation.showInputMessage, true);
+assert.equal(sheet.getCell("F5").dataValidation.type, "list");
+const guestGroupOptions = spreadsheet.getSimpleInviteEntryOptions().guestGroups;
+for (const lodgingGroup of [
+  "[Nhà Trai] Họ nội",
+  "[Nhà Trai] Họ ngoại",
+  "[Nhà Gái] Họ nội",
+  "[Nhà Gái] Họ ngoại",
+]) {
+  assert(guestGroupOptions.includes(lodgingGroup), `Missing lodging classification group: ${lodgingGroup}`);
+}
 assert.equal(sheet.getCell("A5").protection.locked, true);
 assert.equal(sheet.getCell("B5").protection.locked, false);
 assert.equal(sheet.getCell("D5").protection.locked, true);
@@ -103,6 +116,20 @@ const legacyParsed = await spreadsheet.parseInviteWorkbook(await legacyWorkbook.
 assert.deepEqual(legacyParsed.errors, []);
 assert.equal(legacyParsed.hasPostCeremonyPartyColumn, false);
 assert.equal(legacyParsed.invitees[0].postCeremonyPartyInvited, false);
+
+const oldTemplateWorkbook = await spreadsheet.buildInviteTemplateWorkbook({ coupleDisplayName: "Nhật & Phương" });
+const oldTemplateSheet = oldTemplateWorkbook.getWorksheet("Danh sách khách mời");
+oldTemplateSheet.getCell("H4").value = "Lời mời trong thiệp";
+oldTemplateSheet.getCell("B5").value = "Anh";
+oldTemplateSheet.getCell("C5").value = "Dũng";
+oldTemplateSheet.getCell("F5").value = "[Nhật] Bạn bè & Đồng nghiệp";
+oldTemplateSheet.getCell("G5").value = "Có";
+oldTemplateSheet.getCell("H5").value = "Nội dung cũ không còn là nguồn dữ liệu.";
+const oldTemplateParsed = await spreadsheet.parseInviteWorkbook(await oldTemplateWorkbook.xlsx.writeBuffer());
+assert.deepEqual(oldTemplateParsed.errors, []);
+assert.equal(oldTemplateParsed.invitees.length, 1);
+assert.equal(oldTemplateParsed.invitees[0].postCeremonyPartyInvited, true);
+assert.notEqual(oldTemplateParsed.invitees[0].insideInviteLine, oldTemplateSheet.getCell("H5").text);
 
 const linkWorkbook = await spreadsheet.buildInviteLinksWorkbook(parsed.invitees, "https://nhatphuong.love");
 const linkSheet = linkWorkbook.getWorksheet("Link thiệp mời");

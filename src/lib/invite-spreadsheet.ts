@@ -137,7 +137,6 @@ const columns = [
   { key: "guestUnit", header: "Đơn vị khách", width: 22 },
   { key: "guestGroup", header: "Nhóm khách", width: 40 },
   { key: "postCeremonyPartyInvited", header: "Tham gia tiệc sau Hôn phối", width: 32 },
-  { key: "insideInviteLine", header: "Lời mời trong thiệp", width: 66 },
 ] as const;
 
 const inviteColumn = {
@@ -148,7 +147,6 @@ const inviteColumn = {
   guestUnit: 5,
   guestGroup: 6,
   postCeremonyPartyInvited: 7,
-  insideInviteLine: 8,
 } as const;
 
 export type SimpleInviteEntry = {
@@ -195,8 +193,6 @@ const legacyFallbackRowValues: LegacyRowValues = {
   guestGroup: "[Nhật] Bạn bè & Đồng nghiệp",
   audienceTagsText: "bạn bè;đồng nghiệp",
 };
-
-const spreadsheetInsideInviteHeading = "TRÂN TRỌNG & THÂN MỜI";
 
 type InferredTemplateValues = {
   salutationCluster: string;
@@ -478,12 +474,6 @@ function guestUnitFormula(rowIndex: number) {
   return `IF(${clusterCell}="","",IFERROR(VLOOKUP(${clusterCell},${termLookupRange()},4,FALSE),${excelText("Chưa xác định")}))`;
 }
 
-function insideInviteFormula(rowIndex: number, options: ReturnType<typeof resolveSpreadsheetOptions>) {
-  const guestCell = `$D${rowIndex}`;
-  const coupleName = options.coupleDisplayName;
-  return `IF(${guestCell}="","",${excelText(spreadsheetInsideInviteHeading)}&CHAR(10)&${guestCell}&${excelText(" đến chung vui và ghi dấu những khoảnh khắc đáng nhớ cùng ")}&${excelText(coupleName)}&${excelText(".")})`;
-}
-
 function sequenceFormula(rowIndex: number) {
   const guestCell = `$D${rowIndex}`;
   return `IF(${guestCell}="","",COUNTIF($D$${firstDataRow}:${guestCell},"<>"))`;
@@ -570,7 +560,8 @@ function styleFormulaCell(cell: ExcelJS.Cell) {
 }
 
 function buildTitleBanner(worksheet: ExcelJS.Worksheet, options: ReturnType<typeof resolveSpreadsheetOptions>) {
-  worksheet.mergeCells(`A${titleRowIndex}:H${titleRowIndex}`);
+  const lastColumn = columnLetter(columns.length);
+  worksheet.mergeCells(`A${titleRowIndex}:${lastColumn}${titleRowIndex}`);
   const titleCell = worksheet.getCell(titleRowIndex, 1);
   titleCell.value = "DANH SÁCH KHÁCH MỜI";
   titleCell.font = { name: "Georgia", size: 24, bold: true, color: { argb: palette.white } };
@@ -578,7 +569,7 @@ function buildTitleBanner(worksheet: ExcelJS.Worksheet, options: ReturnType<type
   titleCell.alignment = { horizontal: "center", vertical: "middle" };
   worksheet.getRow(titleRowIndex).height = 48;
 
-  worksheet.mergeCells(`A${subtitleRowIndex}:H${subtitleRowIndex}`);
+  worksheet.mergeCells(`A${subtitleRowIndex}:${lastColumn}${subtitleRowIndex}`);
   const subtitleCell = worksheet.getCell(subtitleRowIndex, 1);
   subtitleCell.value = `Lễ thành hôn ${options.coupleDisplayName}`;
   subtitleCell.font = { name: "Arial", size: 13, italic: true, color: { argb: palette.text } };
@@ -590,8 +581,7 @@ function buildTitleBanner(worksheet: ExcelJS.Worksheet, options: ReturnType<type
   worksheet.getRow(headerRowIndex - 1).height = 8;
 }
 
-function applyFormulaCells(row: ExcelJS.Row, rowIndex: number, options: ReturnType<typeof resolveSpreadsheetOptions>, values?: TemplateRowValues) {
-  const preview = values ? rowPreview(values, options) : undefined;
+function applyFormulaCells(row: ExcelJS.Row, rowIndex: number, values?: TemplateRowValues) {
   const inferred = values ? inferTemplateValues(values) : undefined;
 
   const sequenceCell = row.getCell(inviteColumn.sequence);
@@ -607,10 +597,6 @@ function applyFormulaCells(row: ExcelJS.Row, rowIndex: number, options: ReturnTy
   const guestUnitCell = row.getCell(inviteColumn.guestUnit);
   guestUnitCell.value = { formula: guestUnitFormula(rowIndex), result: inferred ? householdModeLabels[inferred.householdMode] : "" };
   styleFormulaCell(guestUnitCell);
-
-  const insideCell = row.getCell(inviteColumn.insideInviteLine);
-  insideCell.value = { formula: insideInviteFormula(rowIndex, options), result: preview?.insideInviteLine ?? "" };
-  styleFormulaCell(insideCell);
 }
 
 function applyTemplateRows(worksheet: ExcelJS.Worksheet, options: ReturnType<typeof resolveSpreadsheetOptions>, startRowIndex = firstDataRow) {
@@ -659,7 +645,7 @@ function applyTemplateRows(worksheet: ExcelJS.Worksheet, options: ReturnType<typ
       error: "Để trống nếu không hỏi. Chỉ chọn Có với khách được mời dự tiệc sau Hôn phối.",
     };
 
-    applyFormulaCells(row, rowIndex, options);
+    applyFormulaCells(row, rowIndex);
   }
 }
 
