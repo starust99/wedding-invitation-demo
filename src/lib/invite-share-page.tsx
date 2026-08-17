@@ -157,7 +157,7 @@ function resolveMetadataGuestName(invitee: Invitee) {
 
 export async function buildSharedInvitationMetadata(
   token: string,
-  publicRoute: "/g" | "/mw" | "/t" | "/w",
+  publicRoute: "/g" | "/t" | "/w",
 ): Promise<Metadata> {
   const invitee = await getSharedInvitee(token);
 
