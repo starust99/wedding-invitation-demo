@@ -86,7 +86,7 @@ try {
   assert.equal(await regular.page.getByText("TIỆC CƯỚI", { exact: true }).count(), 0);
   await regular.page.getByText("Sau Thánh lễ hôn phối", { exact: true }).waitFor();
   await regular.page.getByText("11:30 – Chủ Nhật, 20/12/2026", { exact: true }).waitFor();
-  await regular.page.getByText("Nhà Thờ Giáo Xứ Tam Hải", { exact: true }).waitFor();
+  assert.equal(await regular.page.getByText("Nhà Thờ Giáo Xứ Tam Hải", { exact: true }).count(), 0);
   assert.equal(await regular.page.locator('img[data-rsvp-intimate-party-icon="true"]').count(), 1);
   await regular.page.getByText("Kính mời Quý khách dự buổi tiệc chung vui cùng gia đình sau Thánh lễ", { exact: true }).waitFor();
 

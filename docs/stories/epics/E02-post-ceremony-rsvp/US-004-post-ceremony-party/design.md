@@ -60,6 +60,10 @@ cue on `Xem lại và hoàn tất`. Review and success states repeat the answer 
 when applicable. Admin retains invite scope editing, response status, filtering,
 estimated counts, and export columns.
 
+The dedicated intimate-party card shows no venue. The family will choose the
+meal location on the day, so the interface must not imply that the gathering is
+held at Nhà Thờ Giáo Xứ Tam Hải.
+
 The inline and dedicated intimate-party invitations share a custom covered
 serving cloche raster icon. Its dusty-rose monoline treatment follows the
 existing ceremony and banquet icon family without reusing a generic library

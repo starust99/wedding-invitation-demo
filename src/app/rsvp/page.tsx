@@ -1669,9 +1669,6 @@ export default function RSVPPage() {
                     <p className="mt-1 text-sm font-semibold leading-relaxed text-[#252934] sm:text-base">
                       {postCeremonyDateLine}
                     </p>
-                    <p className="mt-0.5 text-sm font-normal leading-relaxed text-[#7a6a5d] sm:text-base">
-                      Nhà Thờ Giáo Xứ Tam Hải
-                    </p>
                     <p className="mx-auto mt-5 max-w-lg text-sm font-normal leading-relaxed text-[#252934]/78 sm:text-base">
                       Kính mời Quý khách dự buổi tiệc chung vui cùng gia đình sau Thánh lễ
                     </p>
