@@ -60,6 +60,13 @@ cue on `Xem lại và hoàn tất`. Review and success states repeat the answer 
 when applicable. Admin retains invite scope editing, response status, filtering,
 estimated counts, and export columns.
 
+At tablet and desktop widths, ceremony, intimate-party, and banquet rows share
+the same three-column grid: `64px` icon, flexible event copy, and `184px`
+response control, separated by equal `24px` column gaps. The icon badges use the same
+dimensions and every event title, date, and response control begins on a shared
+vertical guide. Each response pill is full-width with two equal, non-wrapping
+segments. Mobile keeps the centered stacked layout.
+
 The dedicated intimate-party card shows no venue. The family will choose the
 meal location on the day, so the interface must not imply that the gathering is
 held at Nhà Thờ Giáo Xứ Tam Hải.

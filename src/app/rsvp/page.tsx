@@ -1790,9 +1790,15 @@ export default function RSVPPage() {
                 <div className="rsvp-paper-card mb-6 grid gap-1 rounded-[1.6rem] p-4 text-center sm:gap-2 sm:p-8">
                   
                   {/* Sự kiện 1: Thánh lễ */}
-                  <div className="py-2 sm:py-6 flex flex-col items-center sm:flex-row sm:justify-between sm:items-center gap-2 sm:gap-6 text-center sm:text-left">
+                  <div
+                    data-rsvp-event-row="ceremony"
+                    className="flex flex-col items-center gap-2 py-2 text-center sm:grid sm:grid-cols-[4rem_minmax(0,1fr)_11.5rem] sm:items-center sm:gap-x-6 sm:gap-y-0 sm:py-6 sm:text-left"
+                  >
                     {/* Badge */}
-                    <div className="flex h-13 w-13 sm:h-16 sm:w-16 shrink-0 items-center justify-center rounded-[1.2rem] sm:rounded-[1.6rem] bg-white border border-[#f2e5e0] shadow-[0_8px_20px_rgba(242,229,224,0.5)] mb-1.5 sm:mb-0">
+                    <div
+                      data-rsvp-event-icon="true"
+                      className="mb-1.5 flex h-13 w-13 shrink-0 items-center justify-center rounded-[1.2rem] border border-[#f2e5e0] bg-white shadow-[0_8px_20px_rgba(242,229,224,0.5)] sm:mb-0 sm:h-16 sm:w-16 sm:rounded-[1.6rem]"
+                    >
                       <Church
                         aria-hidden="true"
                         className="h-8 w-8 text-[#8f5d5d] sm:h-10 sm:w-10"
@@ -1801,11 +1807,11 @@ export default function RSVPPage() {
                     </div>
                     
                     {/* Chữ */}
-                    <div className="mb-2 sm:mb-0 sm:ml-5 sm:flex-1 text-center sm:text-left">
+                    <div data-rsvp-event-copy="true" className="mb-2 min-w-0 text-center sm:mb-0 sm:text-left">
                       <p className="text-lg sm:text-base font-bold tracking-[0.12em] text-[#7a6a5d] uppercase mb-1 leading-snug">
                         THÁNH LỄ HÔN PHỐI
                       </p>
-                      <p className="text-sm sm:text-sm font-semibold text-[#252934] mb-0.5 leading-relaxed">
+                      <p className="mb-0.5 text-sm font-semibold leading-relaxed text-[#252934] sm:whitespace-nowrap">
                         {churchReviewDateLine}
                       </p>
                       <p className="text-sm sm:text-sm text-[#252934]/72 leading-relaxed">
@@ -1814,11 +1820,14 @@ export default function RSVPPage() {
                     </div>
 
                     {/* Segmented Pill */}
-                    <div className="flex flex-col items-center gap-1 sm:gap-1.5 shrink-0 self-center sm:self-auto">
+                    <div
+                      data-rsvp-event-response="true"
+                      className="flex w-[11.5rem] shrink-0 flex-col items-center gap-1 self-center sm:gap-1.5"
+                    >
                       <span className="text-[11px] font-bold tracking-[0.14em] text-[#7a6a5d] uppercase">
                         Tham dự:
                       </span>
-                      <div className="flex h-11 items-center rounded-full bg-white/80 p-1 ring-1 ring-serenity/30 shadow-[0_4px_14px_rgba(63,70,66,0.08)] shrink-0">
+                      <div className="flex h-11 w-full shrink-0 items-center rounded-full bg-white/80 p-1 ring-1 ring-serenity/30 shadow-[0_4px_14px_rgba(63,70,66,0.08)]">
                         <button
                           type="button"
                           aria-pressed={formValues.attendingCeremony === "yes"}
@@ -1828,7 +1837,7 @@ export default function RSVPPage() {
                             setValue("attendingCeremony", "yes", { shouldDirty: true, shouldValidate: true });
                           }}
                           className={[
-                            "h-full px-7 rounded-full text-sm font-semibold transition-all duration-200",
+                            "h-full basis-1/2 whitespace-nowrap rounded-full px-0 text-sm font-semibold transition-all duration-200",
                             formValues.attendingCeremony === "yes"
                               ? "bg-[#7a8a5c] text-white shadow-sm"
                               : "text-[#252934] hover:bg-[#252934]/5"
@@ -1845,7 +1854,7 @@ export default function RSVPPage() {
                             setValue("attendingCeremony", "no", { shouldDirty: true, shouldValidate: true });
                           }}
                           className={[
-                            "h-full px-7 rounded-full text-sm font-semibold transition-all duration-200",
+                            "h-full basis-1/2 whitespace-nowrap rounded-full px-0 text-sm font-semibold transition-all duration-200",
                             formValues.attendingCeremony === "no"
                               ? "bg-[#7a4a4a] text-white shadow-sm"
                               : "text-[#252934] hover:bg-[#252934]/5"
@@ -1865,38 +1874,45 @@ export default function RSVPPage() {
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -6 }}
                         transition={{ duration: 0.22, ease: "easeOut" }}
-                        className="mx-auto mt-3 w-full max-w-xl border-t border-[#d7c6a8]/48 bg-[#fffaf2]/32 px-2 pb-1 pt-5 sm:px-3 sm:pt-6"
+                        className="mt-3 w-full border-t border-[#d7c6a8]/48 bg-[#fffaf2]/32 px-2 pb-1 pt-5 sm:px-0 sm:pb-2 sm:pt-6"
                       >
-                        <div className="flex flex-col items-center gap-3 sm:flex-row sm:justify-between">
-                          <div className="flex min-w-0 flex-1 flex-col items-center gap-3 sm:flex-row sm:text-left">
-                            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[1rem] border border-[#f2e5e0] bg-white shadow-[0_6px_16px_rgba(242,229,224,0.45)]">
-                              <Image
-                                data-rsvp-intimate-party-icon="true"
-                                src="/assets/wedding/ui/rsvp/intimate-party-cloche.png"
-                                alt=""
-                                aria-hidden="true"
-                                width={32}
-                                height={32}
-                                className="h-8 w-8 object-contain"
-                              />
-                            </div>
-                            <div className="text-center sm:text-left">
-                              <p className="text-sm font-bold tracking-[0.1em] text-[#7a6a5d] uppercase">
-                                Tiệc thân mật
-                              </p>
-                              <p className="mt-1 text-sm font-semibold leading-relaxed text-[#252934]">
-                                {postCeremonyDateLine}
-                              </p>
-                              <p className="mt-1 text-sm leading-relaxed text-[#252934]/72">
-                                Kính mời Quý khách dự buổi tiệc chung vui cùng gia đình sau Thánh lễ
-                              </p>
-                            </div>
+                        <div
+                          data-rsvp-event-row="intimate-party"
+                          className="flex flex-col items-center gap-3 sm:grid sm:grid-cols-[4rem_minmax(0,1fr)_11.5rem] sm:items-center sm:gap-x-6 sm:gap-y-0"
+                        >
+                          <div
+                            data-rsvp-event-icon="true"
+                            className="flex h-13 w-13 shrink-0 items-center justify-center rounded-[1.2rem] border border-[#f2e5e0] bg-white shadow-[0_6px_16px_rgba(242,229,224,0.45)] sm:h-16 sm:w-16 sm:rounded-[1.6rem]"
+                          >
+                            <Image
+                              data-rsvp-intimate-party-icon="true"
+                              src="/assets/wedding/ui/rsvp/intimate-party-cloche.png"
+                              alt=""
+                              aria-hidden="true"
+                              width={40}
+                              height={40}
+                              className="h-8 w-8 object-contain sm:h-10 sm:w-10"
+                            />
                           </div>
-                          <div className="flex shrink-0 flex-col items-center gap-1 sm:gap-1.5">
-                            <span className="text-[11px] font-bold tracking-[0.14em] text-[#7a6a5d]/75 uppercase">
+                          <div data-rsvp-event-copy="true" className="min-w-0 text-center sm:text-left">
+                            <p className="text-sm font-bold uppercase leading-snug tracking-[0.12em] text-[#7a6a5d] sm:text-base">
+                              Tiệc thân mật
+                            </p>
+                            <p className="mt-1 text-sm font-semibold leading-relaxed text-[#252934] sm:whitespace-nowrap">
+                              {postCeremonyDateLine}
+                            </p>
+                            <p className="mt-1 text-sm leading-relaxed text-[#252934]/72">
+                              Kính mời Quý khách dự buổi tiệc chung vui cùng gia đình sau Thánh lễ
+                            </p>
+                          </div>
+                          <div
+                            data-rsvp-event-response="true"
+                            className="flex w-[11.5rem] shrink-0 flex-col items-center gap-1 sm:gap-1.5"
+                          >
+                            <span className="text-[11px] font-bold uppercase tracking-[0.14em] text-[#7a6a5d]">
                               Tham dự:
                             </span>
-                            <div className="flex h-11 items-center rounded-full bg-white/90 p-1 ring-1 ring-serenity/30 shadow-[0_4px_14px_rgba(63,70,66,0.08)]">
+                            <div className="flex h-11 w-full items-center rounded-full bg-white/80 p-1 ring-1 ring-serenity/30 shadow-[0_4px_14px_rgba(63,70,66,0.08)]">
                               <button
                                 type="button"
                                 aria-pressed={formValues.attendingPostCeremonyParty === "yes"}
@@ -1906,7 +1922,7 @@ export default function RSVPPage() {
                                   setValue("attendingPostCeremonyParty", "yes", { shouldDirty: true, shouldValidate: true });
                                 }}
                                 className={[
-                                  "h-full rounded-full px-6 text-sm font-semibold transition-all duration-200",
+                                  "h-full basis-1/2 whitespace-nowrap rounded-full px-0 text-sm font-semibold transition-all duration-200",
                                   formValues.attendingPostCeremonyParty === "yes"
                                     ? "bg-[#7a8a5c] text-white shadow-sm"
                                     : "text-[#252934] hover:bg-[#252934]/5",
@@ -1923,7 +1939,7 @@ export default function RSVPPage() {
                                   setValue("attendingPostCeremonyParty", "no", { shouldDirty: true, shouldValidate: true });
                                 }}
                                 className={[
-                                  "h-full rounded-full px-6 text-sm font-semibold transition-all duration-200",
+                                  "h-full basis-1/2 whitespace-nowrap rounded-full px-0 text-sm font-semibold transition-all duration-200",
                                   formValues.attendingPostCeremonyParty === "no"
                                     ? "bg-[#7a4a4a] text-white shadow-sm"
                                     : "text-[#252934] hover:bg-[#252934]/5",
@@ -1967,9 +1983,15 @@ export default function RSVPPage() {
                   className="rsvp-paper-card mb-6 grid gap-1 rounded-[1.6rem] p-4 text-center sm:gap-2 sm:p-8"
                 >
                   {/* Sự kiện 2: Tiệc cưới */}
-                  <div className="py-2 sm:py-6 flex flex-col items-center sm:flex-row sm:justify-between sm:items-center gap-2 sm:gap-6 text-center sm:text-left">
+                  <div
+                    data-rsvp-event-row="banquet"
+                    className="flex flex-col items-center gap-2 py-2 text-center sm:grid sm:grid-cols-[4rem_minmax(0,1fr)_11.5rem] sm:items-center sm:gap-x-6 sm:gap-y-0 sm:py-6 sm:text-left"
+                  >
                     {/* Badge */}
-                    <div className="flex h-13 w-13 sm:h-16 sm:w-16 shrink-0 items-center justify-center rounded-[1.2rem] sm:rounded-[1.6rem] bg-white border border-[#f2e5e0] shadow-[0_8px_20px_rgba(242,229,224,0.5)] mb-1.5 sm:mb-0">
+                    <div
+                      data-rsvp-event-icon="true"
+                      className="mb-1.5 flex h-13 w-13 shrink-0 items-center justify-center rounded-[1.2rem] border border-[#f2e5e0] bg-white shadow-[0_8px_20px_rgba(242,229,224,0.5)] sm:mb-0 sm:h-16 sm:w-16 sm:rounded-[1.6rem]"
+                    >
                       <Wine
                         aria-hidden="true"
                         className="h-8 w-8 text-[#8f5d5d] sm:h-10 sm:w-10"
@@ -1978,11 +2000,11 @@ export default function RSVPPage() {
                     </div>
                     
                     {/* Chữ */}
-                    <div className="mb-2 sm:mb-0 sm:ml-5 sm:flex-1 text-center sm:text-left">
+                    <div data-rsvp-event-copy="true" className="mb-2 min-w-0 text-center sm:mb-0 sm:text-left">
                       <p className="text-lg sm:text-base font-bold tracking-[0.12em] text-[#7a6a5d] uppercase mb-1 leading-snug">
                         TIỆC CƯỚI
                       </p>
-                      <p className="text-sm sm:text-sm font-semibold text-[#252934] mb-0.5 leading-relaxed">
+                      <p className="mb-0.5 text-sm font-semibold leading-relaxed text-[#252934] sm:whitespace-nowrap">
                         {banquetReviewDateLine}
                       </p>
                       <p className="text-sm sm:text-sm text-[#252934]/72 leading-relaxed">
@@ -1991,11 +2013,14 @@ export default function RSVPPage() {
                     </div>
 
                     {/* Segmented Pill */}
-                    <div className="flex flex-col items-center gap-1 sm:gap-1.5 shrink-0 self-center sm:self-auto">
+                    <div
+                      data-rsvp-event-response="true"
+                      className="flex w-[11.5rem] shrink-0 flex-col items-center gap-1 self-center sm:gap-1.5"
+                    >
                       <span className="text-[11px] font-bold tracking-[0.14em] text-[#7a6a5d] uppercase">
                         Tham dự:
                       </span>
-                      <div className="flex h-11 items-center rounded-full bg-white/80 p-1 ring-1 ring-serenity/30 shadow-[0_4px_14px_rgba(63,70,66,0.08)] shrink-0">
+                      <div className="flex h-11 w-full shrink-0 items-center rounded-full bg-white/80 p-1 ring-1 ring-serenity/30 shadow-[0_4px_14px_rgba(63,70,66,0.08)]">
                         <button
                           type="button"
                           aria-pressed={formValues.attendingBanquet === "yes"}
@@ -2005,7 +2030,7 @@ export default function RSVPPage() {
                             setValue("attendingBanquet", "yes", { shouldDirty: true, shouldValidate: true });
                           }}
                           className={[
-                            "h-full px-7 rounded-full text-sm font-semibold transition-all duration-200",
+                            "h-full basis-1/2 whitespace-nowrap rounded-full px-0 text-sm font-semibold transition-all duration-200",
                             formValues.attendingBanquet === "yes"
                               ? "bg-[#7a8a5c] text-white shadow-sm"
                               : "text-[#252934] hover:bg-[#252934]/5"
@@ -2022,7 +2047,7 @@ export default function RSVPPage() {
                             setValue("attendingBanquet", "no", { shouldDirty: true, shouldValidate: true });
                           }}
                           className={[
-                            "h-full px-7 rounded-full text-sm font-semibold transition-all duration-200",
+                            "h-full basis-1/2 whitespace-nowrap rounded-full px-0 text-sm font-semibold transition-all duration-200",
                             formValues.attendingBanquet === "no"
                               ? "bg-[#7a4a4a] text-white shadow-sm"
                               : "text-[#252934] hover:bg-[#252934]/5"

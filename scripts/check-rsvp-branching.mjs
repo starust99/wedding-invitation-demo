@@ -68,6 +68,27 @@ async function selectPrimaryEvents(page, { ceremony, banquet }) {
   assert.equal(await banquetButton.getAttribute("aria-pressed"), "true");
 }
 
+async function readEventColumnGuides(page, eventName) {
+  const row = page.locator(`[data-rsvp-event-row="${eventName}"]`);
+  const [icon, copy, response] = await Promise.all([
+    row.locator('[data-rsvp-event-icon="true"]').boundingBox(),
+    row.locator('[data-rsvp-event-copy="true"]').boundingBox(),
+    row.locator('[data-rsvp-event-response="true"]').boundingBox(),
+  ]);
+  assert.ok(icon && copy && response, `Expected measurable ${eventName} RSVP columns.`);
+  return {
+    iconCenter: icon.x + icon.width / 2,
+    copyLeft: copy.x,
+    responseLeft: response.x,
+  };
+}
+
+function assertEventColumnsAligned(reference, candidate, candidateName) {
+  assert.ok(Math.abs(reference.iconCenter - candidate.iconCenter) <= 1, `${candidateName} icon column must align.`);
+  assert.ok(Math.abs(reference.copyLeft - candidate.copyLeft) <= 1, `${candidateName} copy column must align.`);
+  assert.ok(Math.abs(reference.responseLeft - candidate.responseLeft) <= 1, `${candidateName} response column must align.`);
+}
+
 const browser = await chromium.launch({ headless: true });
 
 try {
@@ -129,12 +150,16 @@ try {
   await direct.context.close();
 
   const closeInvitee = createInvitee({ token: "rsvp-initial-party-test", invited: true });
-  const close = await openRsvp(browser, closeInvitee);
+  const close = await openRsvp(browser, closeInvitee, { viewport: { width: 768, height: 1024 } });
   assert.equal(await close.page.getByRole("button", { name: "Tiếp tục", exact: true }).count(), 0);
   await close.page.getByRole("button", { name: "Có", exact: true }).nth(0).click();
   await close.page.getByText("Tiệc thân mật", { exact: true }).waitFor();
   await close.page.getByText("11:30 – Chủ Nhật, 20/12/2026", { exact: true }).waitFor();
   assert.equal(await close.page.locator('img[data-rsvp-intimate-party-icon="true"]').count(), 1);
+  await close.page.waitForTimeout(350);
+  const ceremonyGuides = await readEventColumnGuides(close.page, "ceremony");
+  assertEventColumnsAligned(ceremonyGuides, await readEventColumnGuides(close.page, "intimate-party"), "Intimate-party");
+  assertEventColumnsAligned(ceremonyGuides, await readEventColumnGuides(close.page, "banquet"), "Banquet");
   await close.page.getByRole("button", { name: "Có", exact: true }).nth(1).click();
   await close.page.getByRole("button", { name: "Có", exact: true }).nth(2).click();
   await close.page.getByRole("button", { name: "Xem lại và hoàn tất", exact: true }).waitFor();

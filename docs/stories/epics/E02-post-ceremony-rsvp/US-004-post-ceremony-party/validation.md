@@ -71,6 +71,10 @@ git diff --check
 - Visual comparison against the ceremony and banquet icons verifies a centered
   silhouette, balanced left/right mass, and matching stroke weight at the real
   `32–40px` rendered size.
+- Tablet and desktop checks compare the ceremony and intimate-party rows'
+  icon centers, copy left edges, and response-control left edges. Each shared
+  column guide must differ by no more than one rendered pixel; mobile remains a
+  centered stack without horizontal overflow.
 - `npm run check:post-ceremony-rsvp` passed. It covers blank/`Có`
   workbook parsing, invalid-value rejection, legacy workbook compatibility,
   invite mapping, direct RSVP columns, round trips, and all server-authority
