@@ -31,7 +31,7 @@ async function requireExplicitStayDecision(page) {
     "'Không nghỉ lại' must expose an unselected state to assistive technology.",
   );
 
-  await page.getByRole("button", { name: "Xem lại và hoàn tất", exact: true }).click();
+  await page.getByRole("button", { name: "Tiếp tục", exact: true }).click();
   await page.getByText("Vui lòng chọn phương án lưu trú.", { exact: true }).waitFor();
   assert.equal(
     await page.getByRole("heading", { name: "Xem lại hồi đáp", exact: true }).count(),
@@ -52,7 +52,7 @@ async function fillLodgingGuest(page) {
     false,
     "Choosing a lodging night must not focus the guest-name field or open the mobile keyboard.",
   );
-  await page.getByRole("button", { name: "Xem lại và hoàn tất", exact: true }).click();
+  await page.getByRole("button", { name: "Tiếp tục", exact: true }).click();
   const missingNameError = page.getByText("Nhập họ tên người lưu trú.", { exact: true });
   await missingNameError.waitFor();
   await fullName.fill("Nguyễn Văn A");
@@ -119,7 +119,7 @@ try {
   await delay(3_000);
   await assertDraftValue(firstPass);
 
-  await page.getByRole("button", { name: "Xem lại và hoàn tất", exact: true }).click();
+  await page.getByRole("button", { name: "Tiếp tục", exact: true }).click();
   await page.getByRole("heading", { name: "Xem lại hồi đáp", exact: true }).waitFor();
   assert.match(await page.locator("main").innerText(), /Nguyễn Văn A/);
 
@@ -207,7 +207,7 @@ try {
   await friendPage.getByText("1 người", { exact: true }).waitFor();
   await friendPage.getByRole("button", { name: "Tăng số người tham dự", exact: true }).click();
   await friendPage.getByText("2 người", { exact: true }).waitFor();
-  await friendPage.getByRole("button", { name: "Xem lại và hoàn tất", exact: true }).click();
+  await friendPage.getByRole("button", { name: "Tiếp tục", exact: true }).click();
   await friendPage.getByRole("heading", { name: "Xem lại hồi đáp", exact: true }).waitFor();
   const banquetReviewRow = friendPage.getByText("Tiệc cưới", { exact: true }).locator("xpath=../..");
   await banquetReviewRow.getByText("Số người tham dự:", { exact: false }).waitFor();

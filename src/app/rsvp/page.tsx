@@ -8,6 +8,7 @@ import { useFieldArray, useForm, useWatch } from "react-hook-form";
 import { z } from "zod";
 import {
   ArrowLeft,
+  ArrowRight,
   ClipboardCheck,
   CircleHelp,
   Mail,
@@ -51,6 +52,7 @@ import {
   isFamilyLodgingGuestGroup,
   isGroomFamilyLodgingGuestGroup,
 } from "@/lib/rsvp-guest-group";
+import { doesPostCeremonyPartyApply } from "@/lib/post-ceremony-rsvp";
 
 const rsvpSuccessUtilityVariants: Variants = {
   tucked: {
@@ -124,54 +126,68 @@ const rsvpFormFieldsSchema = z.object({
   notes: z.string().trim().optional(),
 });
 
-const rsvpSchema = rsvpFormFieldsSchema
-  .superRefine((data, ctx) => {
-    if (!data.attendingCeremony) {
-      ctx.addIssue({ code: "custom", path: ["attendingCeremony"], message: "Vui lòng chọn phản hồi cho Thánh lễ Hôn phối." });
-    }
-    if (!data.attendingBanquet) {
-      ctx.addIssue({ code: "custom", path: ["attendingBanquet"], message: "Vui lòng chọn phản hồi cho Tiệc cưới." });
-    }
-    if (data.postCeremonyPartyInvited && data.attendingCeremony === "yes" && !data.attendingPostCeremonyParty) {
-      ctx.addIssue({ code: "custom", path: ["attendingPostCeremonyParty"], message: "Vui lòng chọn phản hồi cho Tiệc thân mật." });
-    }
-    if (isFamilyLodgingGuestGroup(data.guestGroup) && data.attendingBanquet === "yes" && data.stayDecision === null) {
-      ctx.addIssue({ code: "custom", path: ["stayDecision"], message: "Vui lòng chọn phương án lưu trú." });
-    }
-    if (
-      isGroomFamilyLodgingGuestGroup(data.guestGroup)
-      && data.attendingBanquet === "yes"
-      && data.stayDecision !== null
-      && data.stayDecision !== "26"
-      && data.stayDecision !== "none"
-    ) {
-      ctx.addIssue({ code: "custom", path: ["stayDecision"], message: "Vui lòng chọn lại phương án lưu trú." });
-    }
-    
-    if (data.attending !== "no" && data.guestCount < 1) {
-      ctx.addIssue({ code: "custom", path: ["guestCount"], message: "Nếu tham dự, số người cần từ 1 trở lên." });
-    }
-
-    if (
-      isFamilyLodgingGuestGroup(data.guestGroup)
-      && data.attending === "yes"
-      && data.attendingBanquet === "yes"
-      && data.stayDecision !== null
-      && data.stayDecision !== "none"
-    ) {
-      if (data.lodgingGuests.length < 1) {
-        ctx.addIssue({ code: "custom", path: ["lodgingGuests"], message: "Vui lòng thêm ít nhất một người lưu trú." });
-      }
-      data.lodgingGuests.forEach((guest, index) => {
-        if (!guest.fullName || guest.fullName.trim().length < 2) {
-          ctx.addIssue({ code: "custom", path: ["lodgingGuests", index, "fullName"], message: "Nhập họ tên người lưu trú." });
-        }
-        if (guest.isChild && (typeof guest.age !== "number" || isNaN(guest.age))) {
-          ctx.addIssue({ code: "custom", path: ["lodgingGuests", index, "age"], message: "Nhập tuổi của bé" });
-        }
-      });
-    }
+function validateRsvpForm(
+  data: z.output<typeof rsvpFormFieldsSchema>,
+  ctx: z.RefinementCtx,
+  { requirePostCeremonyParty }: { requirePostCeremonyParty: boolean },
+) {
+  if (!data.attendingCeremony) {
+    ctx.addIssue({ code: "custom", path: ["attendingCeremony"], message: "Vui lòng chọn phản hồi cho Thánh lễ Hôn phối." });
+  }
+  if (!data.attendingBanquet) {
+    ctx.addIssue({ code: "custom", path: ["attendingBanquet"], message: "Vui lòng chọn phản hồi cho Tiệc cưới." });
+  }
+  const postCeremonyPartyApplies = doesPostCeremonyPartyApply({
+    invited: data.postCeremonyPartyInvited,
+    attendingCeremony: data.attendingCeremony === "yes",
+    attendingBanquet: data.attendingBanquet === "yes",
   });
+  if (requirePostCeremonyParty && postCeremonyPartyApplies && !data.attendingPostCeremonyParty) {
+    ctx.addIssue({ code: "custom", path: ["attendingPostCeremonyParty"], message: "Vui lòng chọn phản hồi cho Tiệc thân mật." });
+  }
+  if (isFamilyLodgingGuestGroup(data.guestGroup) && data.attendingBanquet === "yes" && data.stayDecision === null) {
+    ctx.addIssue({ code: "custom", path: ["stayDecision"], message: "Vui lòng chọn phương án lưu trú." });
+  }
+  if (
+    isGroomFamilyLodgingGuestGroup(data.guestGroup)
+    && data.attendingBanquet === "yes"
+    && data.stayDecision !== null
+    && data.stayDecision !== "26"
+    && data.stayDecision !== "none"
+  ) {
+    ctx.addIssue({ code: "custom", path: ["stayDecision"], message: "Vui lòng chọn lại phương án lưu trú." });
+  }
+
+  if (data.attending !== "no" && data.guestCount < 1) {
+    ctx.addIssue({ code: "custom", path: ["guestCount"], message: "Nếu tham dự, số người cần từ 1 trở lên." });
+  }
+
+  if (
+    isFamilyLodgingGuestGroup(data.guestGroup)
+    && data.attending === "yes"
+    && data.attendingBanquet === "yes"
+    && data.stayDecision !== null
+    && data.stayDecision !== "none"
+  ) {
+    if (data.lodgingGuests.length < 1) {
+      ctx.addIssue({ code: "custom", path: ["lodgingGuests"], message: "Vui lòng thêm ít nhất một người lưu trú." });
+    }
+    data.lodgingGuests.forEach((guest, index) => {
+      if (!guest.fullName || guest.fullName.trim().length < 2) {
+        ctx.addIssue({ code: "custom", path: ["lodgingGuests", index, "fullName"], message: "Nhập họ tên người lưu trú." });
+      }
+      if (guest.isChild && (typeof guest.age !== "number" || isNaN(guest.age))) {
+        ctx.addIssue({ code: "custom", path: ["lodgingGuests", index, "age"], message: "Nhập tuổi của bé" });
+      }
+    });
+  }
+}
+
+const initialRsvpStepSchema = rsvpFormFieldsSchema
+  .superRefine((data, ctx) => validateRsvpForm(data, ctx, { requirePostCeremonyParty: false }));
+
+const rsvpSchema = rsvpFormFieldsSchema
+  .superRefine((data, ctx) => validateRsvpForm(data, ctx, { requirePostCeremonyParty: true }));
 
 type RSVPFormInput = z.input<typeof rsvpSchema>;
 type RSVPFormOutput = z.output<typeof rsvpSchema>;
@@ -479,17 +495,30 @@ function formatAlbumAvailableDate(value: string) {
   return value;
 }
 
+function formatPostCeremonyDate(dateLabel: string) {
+  const dateMatch = dateLabel.match(/(\d{1,2})[.\/-](\d{1,2})[.\/-](\d{4})/);
+  const date = dateMatch
+    ? `${dateMatch[1].padStart(2, "0")}/${dateMatch[2].padStart(2, "0")}/${dateMatch[3]}`
+    : dateLabel;
+  const weekday = dateLabel.match(/(Chúa Nhật|Chủ Nhật|Thứ Hai|Thứ Ba|Thứ Tư|Thứ Năm|Thứ Sáu|Thứ Bảy)/i)?.[0]
+    ?.replace(/^Chúa Nhật$/i, "Chủ Nhật");
+  return `${weekday ? `${weekday}, ` : ""}${date} · Tam Hải`;
+}
+
 
 
 export default function RSVPPage() {
+  const shouldReduceMotion = useReducedMotion();
   const publishedSettings = usePublishedSettings();
   const runtimeConfig = publishedSettings.content;
   const churchDateLine = formatRsvpEventDate(runtimeConfig.eventDetailsConfig.content.churchDate, runtimeConfig.eventDetailsConfig.content.churchTime);
   const churchReviewDateLine = formatRsvpEventDate(runtimeConfig.eventDetailsConfig.content.churchDate, runtimeConfig.eventDetailsConfig.content.churchTime, "—");
   const banquetDateLine = formatRsvpEventDate(runtimeConfig.event.dateLabel, runtimeConfig.event.welcomeTime);
   const banquetReviewDateLine = formatRsvpEventDate(runtimeConfig.event.dateLabel, runtimeConfig.event.welcomeTime, "—");
+  const postCeremonyDateLine = formatPostCeremonyDate(runtimeConfig.eventDetailsConfig.content.churchDate);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isReviewing, setIsReviewing] = useState(false);
+  const [isPostCeremonyStep, setIsPostCeremonyStep] = useState(false);
   const [guestIdentity, setGuestIdentity] = useState<GuestIdentity>({});
   const [inviteeContext, setInviteeContext] = useState<Invitee | null>(null);
   const [inviteToken, setInviteToken] = useState("");
@@ -563,8 +592,13 @@ export default function RSVPPage() {
   const canRequestLodging = isFamilyLodgingGuestGroup(activeGuestGroup);
   const hasGroomFamilyLodgingOptions = isGroomFamilyLodgingGuestGroup(activeGuestGroup);
   const canRegisterStay = attending !== "no";
-  const shouldAskPostCeremonyParty = postCeremonyPartyInvited && attendingCeremony === "yes";
-  const isReadyForReview = rsvpSchema.safeParse({
+  const shouldAskPostCeremonyParty = doesPostCeremonyPartyApply({
+    invited: Boolean(postCeremonyPartyInvited),
+    attendingCeremony: attendingCeremony === "yes",
+    attendingBanquet: attendingBanquet === "yes",
+  });
+  const isRegularGuestFlow = !Boolean(postCeremonyPartyInvited);
+  const currentRsvpValues = {
     ...getValues(),
     attending,
     attendingCeremony,
@@ -576,6 +610,10 @@ export default function RSVPPage() {
     stayDecision,
     accommodationNeeded,
     lodgingGuests: watchedLodgingGuests ?? [],
+  };
+  const isReadyForInitialContinue = initialRsvpStepSchema.safeParse(currentRsvpValues).success;
+  const isReadyForReview = rsvpSchema.safeParse({
+    ...currentRsvpValues,
   }).success;
   useEffect(() => {
     const activeToken = inviteToken || inviteeContext?.token || "";
@@ -983,14 +1021,18 @@ export default function RSVPPage() {
   ]);
 
   useEffect(() => {
-    if ((!postCeremonyPartyInvited || attendingCeremony !== "yes") && attendingPostCeremonyParty !== null) {
+    if (!shouldAskPostCeremonyParty && attendingPostCeremonyParty !== null) {
       setValue("attendingPostCeremonyParty", null, {
         shouldDirty: hasUserEditedFormRef.current,
         shouldValidate: false,
       });
     }
 
-    if (attendingCeremony === "no" && attendingBanquet === "no" && attending !== "no") {
+    const isAttendingAnyEvent = attendingCeremony === "yes"
+      || attendingBanquet === "yes"
+      || (shouldAskPostCeremonyParty && attendingPostCeremonyParty === "yes");
+
+    if (attendingCeremony === "no" && attendingBanquet === "no" && !isAttendingAnyEvent && attending !== "no") {
       setValue("attending", "no", { shouldDirty: true });
       setValue("guestCount", 0, { shouldDirty: true });
       setValue("accommodationNeeded", false, { shouldDirty: true });
@@ -1005,7 +1047,7 @@ export default function RSVPPage() {
       replace([]);
     }
 
-    if (attendingCeremony === "yes" || attendingBanquet === "yes") {
+    if (isAttendingAnyEvent) {
       if (attending !== "yes") {
         setValue("attending", "yes", { shouldDirty: true });
       }
@@ -1028,6 +1070,7 @@ export default function RSVPPage() {
     replace,
     selectedGuestCount,
     setValue,
+    shouldAskPostCeremonyParty,
   ]);
 
   function markFormAsEdited() {
@@ -1062,8 +1105,18 @@ export default function RSVPPage() {
     setSubmitError("");
 
     const resolvedGroup = data.guestGroup?.trim() || inviteeContext?.guestGroup || guestIdentity.group || "Khác";
+    const postCeremonyPartyApplies = doesPostCeremonyPartyApply({
+      invited: data.postCeremonyPartyInvited,
+      attendingCeremony: data.attendingCeremony === "yes",
+      attendingBanquet: data.attendingBanquet === "yes",
+    });
+    const resolvedAttendance = data.attendingCeremony === "yes"
+      || data.attendingBanquet === "yes"
+      || (postCeremonyPartyApplies && data.attendingPostCeremonyParty === "yes")
+      ? "yes"
+      : "no";
     const isStaying = isFamilyLodgingGuestGroup(resolvedGroup)
-      && data.attending === "yes"
+      && resolvedAttendance === "yes"
       && data.attendingBanquet === "yes"
       && data.stayDecision !== null
       && data.stayDecision !== "none";
@@ -1082,7 +1135,7 @@ export default function RSVPPage() {
       || guestIdentity.displayLabel
       || "Người được mời";
     const resolvedPhone = data.phone?.trim() || inviteeContext?.phone || "";
-    const resolvedGuestCount = data.attending === "no"
+    const resolvedGuestCount = resolvedAttendance === "no"
       ? 0
       : canRequestLodging
         ? normalizeGuestCount(data.guestCount || inviteeContext?.expectedGuestCount, 1)
@@ -1110,11 +1163,11 @@ export default function RSVPPage() {
       name: resolvedName,
       phone: resolvedPhone,
       attendingCeremony: data.attendingCeremony === "yes",
-      attendingPostCeremonyParty: data.postCeremonyPartyInvited && data.attendingCeremony === "yes"
+      attendingPostCeremonyParty: postCeremonyPartyApplies
         ? data.attendingPostCeremonyParty === "yes"
         : undefined,
       attendingBanquet: data.attendingBanquet === "yes",
-      attending: data.attending,
+      attending: resolvedAttendance,
       guestCount: resolvedGuestCount,
       guestGroup: resolvedGroup,
       dietaryNote: undefined,
@@ -1156,25 +1209,53 @@ export default function RSVPPage() {
     }
   }
 
+  function scrollToFirstRsvpError() {
+    // React Hook Form updates the inline error nodes after validation resolves.
+    // Wait for that render, then bring the first exact field requiring input into view.
+    window.requestAnimationFrame(() => {
+      window.requestAnimationFrame(() => {
+        const firstError = document.querySelector<HTMLElement>('[data-rsvp-error="true"]');
+        if (!firstError) return;
+        firstError.scrollIntoView({ behavior: shouldReduceMotion ? "auto" : "smooth", block: "center" });
+        firstError.focus({ preventScroll: true });
+      });
+    });
+  }
+
+  function showReview() {
+    setIsReviewing(true);
+    window.scrollTo({ top: 0, behavior: shouldReduceMotion ? "auto" : "smooth" });
+  }
+
   const handleGoToReview = async () => {
     if (isHydratingGuest) return;
     setSubmitError("");
     const isValid = await trigger();
     if (isValid) {
-      setIsReviewing(true);
-      window.scrollTo({ top: 0, behavior: "smooth" });
+      showReview();
     } else {
-      // React Hook Form updates the inline error nodes after trigger resolves.
-      // Wait for that render, then bring the first exact field requiring input into view.
-      window.requestAnimationFrame(() => {
-        window.requestAnimationFrame(() => {
-          const firstError = document.querySelector<HTMLElement>('[data-rsvp-error="true"]');
-          if (!firstError) return;
-          firstError.scrollIntoView({ behavior: "smooth", block: "center" });
-          firstError.focus({ preventScroll: true });
-        });
-      });
+      scrollToFirstRsvpError();
     }
+  };
+
+  const handleRegularGuestContinue = async () => {
+    if (isHydratingGuest || guestRsvpLocked) return;
+    setSubmitError("");
+
+    if (!isReadyForInitialContinue) {
+      await trigger(["attendingCeremony", "attendingBanquet", "guestCount", "stayDecision", "lodgingGuests"]);
+      scrollToFirstRsvpError();
+      return;
+    }
+
+    if (attendingBanquet === "no") {
+      clearErrors("attendingPostCeremonyParty");
+      setIsPostCeremonyStep(true);
+      window.scrollTo({ top: 0, behavior: shouldReduceMotion ? "auto" : "smooth" });
+      return;
+    }
+
+    showReview();
   };
 
   function persistLocalRsvp(payload: Omit<RSVPResponse, "id" | "submittedAt">) {
@@ -1407,7 +1488,7 @@ export default function RSVPPage() {
                   type="button"
                   onClick={() => {
                     setIsReviewing(false);
-                    window.scrollTo({ top: 0, behavior: "smooth" });
+                    window.scrollTo({ top: 0, behavior: shouldReduceMotion ? "auto" : "smooth" });
                   }}
                   className="inline-flex min-h-11 items-center justify-center rounded-full border border-serenity/30 bg-white/92 px-4 text-sm font-semibold text-[#252934] shadow-xs transition hover:bg-white"
                 >
@@ -1439,7 +1520,7 @@ export default function RSVPPage() {
                       <ReviewAttendanceStatus attending={formValues.attendingCeremony === "yes"} />
                     </div>
 
-                    {formValues.postCeremonyPartyInvited && formValues.attendingCeremony === "yes" ? (
+                    {shouldAskPostCeremonyParty ? (
                       <div className="flex flex-col items-center justify-center gap-2 py-4 text-center">
                         <div className="text-center">
                           <p className="text-base font-semibold text-[#252934] sm:text-lg">Tiệc thân mật</p>
@@ -1544,6 +1625,142 @@ export default function RSVPPage() {
                 </div>
               </div>
             </motion.div>
+          ) : isPostCeremonyStep && isRegularGuestFlow ? (
+            <motion.div
+              key="post-ceremony-step"
+              initial={shouldReduceMotion ? false : { opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: shouldReduceMotion ? 0 : 0.32, ease: [0.16, 1, 0.3, 1] }}
+              className="flex w-full flex-col"
+            >
+              <aside className="mx-auto mb-8 max-w-2xl px-4 text-center">
+                <h1 className="wedding-type-title text-[#252934]">Lời hồi đáp</h1>
+              </aside>
+
+              <form
+                onSubmit={(event) => {
+                  event.preventDefault();
+                  if (!guestRsvpLocked) void handleGoToReview();
+                }}
+                onInputCapture={markFormAsEdited}
+                onChangeCapture={markFormAsEdited}
+                className="w-full px-4 text-center sm:px-8"
+              >
+                <div className="mx-auto mb-4 flex w-full max-w-2xl justify-start">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsPostCeremonyStep(false);
+                      window.scrollTo({ top: 0, behavior: shouldReduceMotion ? "auto" : "smooth" });
+                    }}
+                    className="inline-flex min-h-11 items-center justify-center rounded-full border border-serenity/30 bg-white/92 px-4 text-sm font-semibold text-[#252934] shadow-xs transition hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-serenity focus-visible:ring-offset-2"
+                  >
+                    <ArrowLeft className="mr-2 h-4 w-4 shrink-0" /> Chỉnh sửa
+                  </button>
+                </div>
+
+                <div className="rsvp-paper-card mx-auto mb-7 grid w-full max-w-2xl justify-items-center rounded-[1.8rem] px-5 py-7 text-center sm:px-9 sm:py-10">
+                  <div className="w-full max-w-xl">
+                    <p className="text-base font-bold uppercase tracking-[0.12em] text-[#7a6a5d] sm:text-lg">
+                      Tiệc thân mật
+                    </p>
+                    <p className="mt-3 text-base font-semibold leading-relaxed text-[#252934]">
+                      Sau Thánh lễ hôn phối
+                    </p>
+                    <p className="mt-1 text-sm font-normal leading-relaxed text-[#7a6a5d] sm:text-base">
+                      {postCeremonyDateLine}
+                    </p>
+                    <p className="mx-auto mt-5 max-w-lg text-sm font-normal leading-relaxed text-[#252934]/78 sm:text-base">
+                      Kính mời Quý khách dự buổi tiệc chung vui cùng gia đình sau Thánh lễ
+                    </p>
+
+                    <div className="mt-6 flex flex-col items-center gap-1.5">
+                      <span className="text-[11px] font-bold uppercase tracking-[0.14em] text-[#7a6a5d]">
+                        Tham dự:
+                      </span>
+                      <div className="flex h-12 items-center rounded-full bg-white/90 p-1 ring-1 ring-serenity/30 shadow-[0_4px_14px_rgba(63,70,66,0.08)]">
+                        <button
+                          type="button"
+                          aria-pressed={attendingPostCeremonyParty === "yes"}
+                          onClick={() => {
+                            markFormAsEdited();
+                            clearErrors("attendingPostCeremonyParty");
+                            setValue("attendingPostCeremonyParty", "yes", { shouldDirty: true, shouldValidate: true });
+                          }}
+                          className={[
+                            "h-full min-w-20 rounded-full px-6 text-sm font-semibold transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-serenity focus-visible:ring-offset-2",
+                            attendingPostCeremonyParty === "yes"
+                              ? "bg-[#7a8a5c] text-white shadow-sm"
+                              : "text-[#252934] hover:bg-[#252934]/5",
+                          ].join(" ")}
+                        >
+                          Có
+                        </button>
+                        <button
+                          type="button"
+                          aria-pressed={attendingPostCeremonyParty === "no"}
+                          onClick={() => {
+                            markFormAsEdited();
+                            clearErrors("attendingPostCeremonyParty");
+                            setValue("attendingPostCeremonyParty", "no", { shouldDirty: true, shouldValidate: true });
+                          }}
+                          className={[
+                            "h-full min-w-20 rounded-full px-6 text-sm font-semibold transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-serenity focus-visible:ring-offset-2",
+                            attendingPostCeremonyParty === "no"
+                              ? "bg-[#7a4a4a] text-white shadow-sm"
+                              : "text-[#252934] hover:bg-[#252934]/5",
+                          ].join(" ")}
+                        >
+                          Không
+                        </button>
+                      </div>
+                    </div>
+
+                    {errors.attendingPostCeremonyParty ? (
+                      <p
+                        role="alert"
+                        tabIndex={-1}
+                        data-rsvp-error="true"
+                        className={`${rsvpAlertTextClass} mt-3 text-center`}
+                      >
+                        {errors.attendingPostCeremonyParty.message}
+                      </p>
+                    ) : null}
+                  </div>
+                </div>
+
+                <div className="mt-4 flex justify-center">
+                  <div className="relative inline-flex max-w-full">
+                    <motion.button
+                      type="button"
+                      onClick={handleGoToReview}
+                      disabled={guestRsvpLocked || isHydratingGuest}
+                      className="wedding-type-button rsvp-final-cta inline-flex min-h-13 items-center justify-center gap-2.5 rounded-full bg-rose-quartz text-base font-semibold text-[#252934] shadow-[0_12px_32px_rgba(146,168,209,0.18)] ring-1 ring-rose-quartz/70 disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7a8a5c] focus-visible:ring-offset-2"
+                      whileTap={shouldReduceMotion ? undefined : { scale: 0.98 }}
+                    >
+                      <ClipboardCheck className="h-5 w-5 shrink-0" />
+                      <span>Xem lại và hoàn tất</span>
+                    </motion.button>
+
+                    {isReadyForReview && !isHydratingGuest && !guestRsvpLocked ? (
+                      <span className="rsvp-review-tap-guide" aria-hidden="true">
+                        <span className="rsvp-tap-guide-ripple" />
+                        <Image
+                          className="rsvp-tap-guide-image"
+                          src="/assets/wedding/ui/rsvp/tap-hand-neutral.webp"
+                          alt=""
+                          width={160}
+                          height={160}
+                          sizes="72px"
+                          unoptimized
+                          draggable={false}
+                        />
+                      </span>
+                    ) : null}
+                  </div>
+                </div>
+              </form>
+            </motion.div>
           ) : (
             <div className="flex flex-col w-full">
               {/* Hero */}
@@ -1556,7 +1773,9 @@ export default function RSVPPage() {
               <form
                 onSubmit={(e) => {
                   e.preventDefault();
-                  if (!guestRsvpLocked) handleGoToReview();
+                  if (!guestRsvpLocked) {
+                    void (isRegularGuestFlow ? handleRegularGuestContinue() : handleGoToReview());
+                  }
                 }}
                 onInputCapture={markFormAsEdited}
                 onChangeCapture={markFormAsEdited}
@@ -1603,6 +1822,7 @@ export default function RSVPPage() {
                       <div className="flex h-11 items-center rounded-full bg-white/80 p-1 ring-1 ring-serenity/30 shadow-[0_4px_14px_rgba(63,70,66,0.08)] shrink-0">
                         <button
                           type="button"
+                          aria-pressed={formValues.attendingCeremony === "yes"}
                           onClick={() => {
                             markFormAsEdited();
                             clearErrors("attendingCeremony");
@@ -1619,6 +1839,7 @@ export default function RSVPPage() {
                         </button>
                         <button
                           type="button"
+                          aria-pressed={formValues.attendingCeremony === "no"}
                           onClick={() => {
                             markFormAsEdited();
                             clearErrors(["attendingCeremony", "attendingPostCeremonyParty"]);
@@ -1638,7 +1859,7 @@ export default function RSVPPage() {
                   </div>
 
                   <AnimatePresence initial={false}>
-                    {shouldAskPostCeremonyParty ? (
+                    {postCeremonyPartyInvited && shouldAskPostCeremonyParty ? (
                       <motion.div
                         key="post-ceremony-party-question"
                         initial={{ opacity: 0, y: -8 }}
@@ -1663,6 +1884,7 @@ export default function RSVPPage() {
                             <div className="flex h-11 items-center rounded-full bg-white/90 p-1 ring-1 ring-serenity/30 shadow-[0_4px_14px_rgba(63,70,66,0.08)]">
                               <button
                                 type="button"
+                                aria-pressed={formValues.attendingPostCeremonyParty === "yes"}
                                 onClick={() => {
                                   markFormAsEdited();
                                   clearErrors("attendingPostCeremonyParty");
@@ -1679,6 +1901,7 @@ export default function RSVPPage() {
                               </button>
                               <button
                                 type="button"
+                                aria-pressed={formValues.attendingPostCeremonyParty === "no"}
                                 onClick={() => {
                                   markFormAsEdited();
                                   clearErrors("attendingPostCeremonyParty");
@@ -1760,6 +1983,7 @@ export default function RSVPPage() {
                       <div className="flex h-11 items-center rounded-full bg-white/80 p-1 ring-1 ring-serenity/30 shadow-[0_4px_14px_rgba(63,70,66,0.08)] shrink-0">
                         <button
                           type="button"
+                          aria-pressed={formValues.attendingBanquet === "yes"}
                           onClick={() => {
                             markFormAsEdited();
                             clearErrors("attendingBanquet");
@@ -1776,6 +2000,7 @@ export default function RSVPPage() {
                         </button>
                         <button
                           type="button"
+                          aria-pressed={formValues.attendingBanquet === "no"}
                           onClick={() => {
                             markFormAsEdited();
                             clearErrors(["attendingBanquet", "stayDecision", "lodgingGuests"]);
@@ -2124,16 +2349,27 @@ export default function RSVPPage() {
                   <div className="relative inline-flex max-w-full">
                     <motion.button
                       type="button"
-                      onClick={handleGoToReview}
+                      onClick={isRegularGuestFlow ? handleRegularGuestContinue : handleGoToReview}
                       disabled={guestRsvpLocked || isHydratingGuest}
-                      className="wedding-type-button rsvp-final-cta inline-flex min-h-13 items-center justify-center gap-2.5 rounded-full bg-rose-quartz text-base font-semibold text-[#252934] shadow-[0_12px_32px_rgba(146,168,209,0.18)] ring-1 ring-rose-quartz/70 disabled:opacity-60"
-                      whileTap={{ scale: 0.98 }}
+                      className="wedding-type-button rsvp-final-cta inline-flex min-h-13 items-center justify-center gap-2.5 rounded-full bg-rose-quartz text-base font-semibold text-[#252934] shadow-[0_12px_32px_rgba(146,168,209,0.18)] ring-1 ring-rose-quartz/70 disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7a8a5c] focus-visible:ring-offset-2"
+                      whileTap={shouldReduceMotion ? undefined : { scale: 0.98 }}
                     >
-                      <ClipboardCheck className="h-5 w-5 shrink-0" />
-                      <span>Xem lại và hoàn tất</span>
+                      {isRegularGuestFlow ? (
+                        <>
+                          <span>Tiếp tục</span>
+                          <ArrowRight className="h-5 w-5 shrink-0" />
+                        </>
+                      ) : (
+                        <>
+                          <ClipboardCheck className="h-5 w-5 shrink-0" />
+                          <span>Xem lại và hoàn tất</span>
+                        </>
+                      )}
                     </motion.button>
 
-                    {isReadyForReview && !isHydratingGuest && !guestRsvpLocked ? (
+                    {(isRegularGuestFlow ? isReadyForInitialContinue : isReadyForReview)
+                      && !isHydratingGuest
+                      && !guestRsvpLocked ? (
                       <span className="rsvp-review-tap-guide" aria-hidden="true">
                         <span className="rsvp-tap-guide-ripple" />
                         <Image

@@ -66,6 +66,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ tok
   const postCeremonyParty = resolvePostCeremonyPartyAnswer({
     invited: Boolean(invitee.post_ceremony_party_invited),
     attendingCeremony: body.attendingCeremony,
+    attendingBanquet: body.attendingBanquet,
     answer: body.attendingPostCeremonyParty,
   });
   if (!postCeremonyParty.ok) {
@@ -73,7 +74,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ tok
   }
 
   const expectedGuestCount = Math.max(1, Number(invitee.expected_guest_count) || 1);
-  const attending = body.attendingCeremony || body.attendingBanquet ? "yes" : "no";
+  const attending = body.attendingCeremony || body.attendingBanquet || postCeremonyParty.value === true ? "yes" : "no";
   const guestGroup = invitee.guest_group as string;
   const accommodationNeeded = isFamilyLodgingGuestGroup(guestGroup)
     && attending === "yes"

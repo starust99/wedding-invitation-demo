@@ -69,6 +69,7 @@ export async function POST(request: Request) {
   const postCeremonyParty = resolvePostCeremonyPartyAnswer({
     invited: Boolean(matchingInvitee?.post_ceremony_party_invited),
     attendingCeremony: body.attendingCeremony === true,
+    attendingBanquet: body.attendingBanquet === true,
     answer: body.attendingPostCeremonyParty,
   });
   if (!postCeremonyParty.ok) {
@@ -93,6 +94,9 @@ export async function POST(request: Request) {
     inviteToken: matchingInvitee?.token || token,
     guestGroup: resolvedGuestGroup,
     attendingPostCeremonyParty: postCeremonyParty.value,
+    attending: body.attendingCeremony === true || body.attendingBanquet === true || postCeremonyParty.value === true
+      ? "yes"
+      : "no",
   };
 
   let existingId: string | null = null;
@@ -134,7 +138,7 @@ export async function POST(request: Request) {
     await supabase
       .from("invitees")
       .update({
-        invite_status: getInviteStatusFromRsvp(body.attending),
+        invite_status: getInviteStatusFromRsvp(payload.attending),
         updated_at: new Date().toISOString(),
       })
       .eq("id", matchingInvitee.id);

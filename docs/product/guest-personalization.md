@@ -82,14 +82,22 @@ not add non-breaking characters to stored invitation data.
 
 The invite workbook contains `Tham gia tiệc sau Hôn phối`:
 
-- Blank means the question does not apply to the invitee.
-- `Có` means the invitee is asked whether they will attend the gathering after
-  the wedding ceremony.
+- `Có` means the invitee is invited from the start and sees the intimate-party
+  question inside the ceremony card after accepting the wedding ceremony.
+- Blank means the invitee starts with only the ceremony and Terracotta wedding
+  choices. If they decline Terracotta, `Tiếp tục` opens a separate intimate-party
+  step; accepting Terracotta proceeds directly to review.
 - No other non-blank value is valid.
 
-The RSVP question appears only after an eligible invitee chooses to attend the
-wedding ceremony. Invitation scope and the guest answer are separate fields.
-The answer is cleared when the question no longer applies.
+The separate intimate-party step does not repeat the ceremony card. It keeps a
+top `Chỉnh sửa` action that returns to the original event choices without losing
+them. The completion hand cue appears only when the current step has every
+required answer; reduced-motion users keep the cue visible without animation.
+
+Invitation scope and the guest answer are separate fields. For guests invited
+from the start, the answer applies only while ceremony attendance is `Có`. For
+other guests, it applies only while Terracotta attendance is `Không`. The answer
+is cleared when its corresponding condition no longer applies.
 
 Admin estimates the post-ceremony headcount from the existing RSVP guest count;
 guests are not asked for another number.

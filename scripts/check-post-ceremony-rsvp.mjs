@@ -202,6 +202,7 @@ assert.deepEqual(
   postCeremony.resolvePostCeremonyPartyAnswer({
     invited: true,
     attendingCeremony: true,
+    attendingBanquet: true,
     answer: true,
   }),
   { ok: true, applies: true, value: true },
@@ -210,6 +211,7 @@ assert.equal(
   postCeremony.resolvePostCeremonyPartyAnswer({
     invited: true,
     attendingCeremony: true,
+    attendingBanquet: true,
     answer: undefined,
   }).ok,
   false,
@@ -218,6 +220,7 @@ assert.deepEqual(
   postCeremony.resolvePostCeremonyPartyAnswer({
     invited: false,
     attendingCeremony: true,
+    attendingBanquet: true,
     answer: true,
   }),
   { ok: true, applies: false, value: undefined },
@@ -226,9 +229,29 @@ assert.deepEqual(
   postCeremony.resolvePostCeremonyPartyAnswer({
     invited: true,
     attendingCeremony: false,
+    attendingBanquet: false,
     answer: true,
   }),
   { ok: true, applies: false, value: undefined },
+);
+
+assert.deepEqual(
+  postCeremony.resolvePostCeremonyPartyAnswer({
+    invited: false,
+    attendingCeremony: true,
+    attendingBanquet: false,
+    answer: true,
+  }),
+  { ok: true, applies: true, value: true },
+);
+assert.equal(
+  postCeremony.resolvePostCeremonyPartyAnswer({
+    invited: false,
+    attendingCeremony: false,
+    attendingBanquet: false,
+    answer: undefined,
+  }).ok,
+  false,
 );
 
 console.log("Post-ceremony RSVP checks passed: workbook, validation, invite mapping, and RSVP persistence.");

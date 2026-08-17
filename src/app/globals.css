@@ -1865,6 +1865,20 @@ textarea {
   }
 }
 
+@media (prefers-reduced-motion: reduce) {
+  .rsvp-tap-guide,
+  .rsvp-review-tap-guide,
+  .rsvp-submit-tap-guide {
+    animation: none;
+    transform: none;
+    will-change: auto;
+  }
+
+  .rsvp-tap-guide-ripple {
+    display: none;
+  }
+}
+
 .save-date-countdown-card {
   display: grid;
   width: min(98%, 41rem);

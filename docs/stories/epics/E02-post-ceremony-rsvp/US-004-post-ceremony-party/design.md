@@ -8,10 +8,11 @@ nullable when the question is unanswered or does not apply.
 
 Rules:
 
-1. A blank workbook cell maps to `postCeremonyPartyInvited = false`.
+1. A blank workbook cell maps to `postCeremonyPartyInvited = false` and selects
+   the conditional fallback flow.
 2. The only non-blank workbook value accepted is `Có`.
-3. The guest question applies only when the invite flag and ceremony attendance
-   are both true.
+3. With the invite flag, the answer applies when ceremony attendance is true.
+   Without the flag, the answer applies when banquet attendance is false.
 4. A non-applicable answer is normalized to null by the server.
 5. The existing RSVP guest count is reused as an estimate for every attended
    event.
@@ -50,13 +51,18 @@ Backfill ceremony and banquet columns from legacy RSVP JSON, then normalize
 
 ## UI / Platform Impact
 
-RSVP reveals a compact nested row directly below the ceremony response using
-the existing wedding visual language. Review and success states repeat the
-answer only when applicable. Admin gains invite scope editing, response status,
-filtering, estimated counts, and export columns.
+RSVP keeps the compact nested row directly below the ceremony response for
+invitees who are eligible from the start. Other guests see `Tiếp tục`; declining
+Terracotta opens a dedicated intimate-party card without repeating the ceremony
+card, while accepting Terracotta goes directly to review. The dedicated step
+has a top `Chỉnh sửa` action, concise generic invitation copy, and the existing guided hand
+cue on `Xem lại và hoàn tất`. Review and success states repeat the answer only
+when applicable. Admin retains invite scope editing, response status, filtering,
+estimated counts, and export columns.
 
-The reveal must work with touch interaction and reduced motion across mobile,
-tablet, desktop, and in-app browsers.
+The step transition must work with touch interaction across mobile, tablet,
+desktop, and in-app browsers. Reduced-motion users see an instant transition
+and a static hand cue.
 
 ## Observability
 

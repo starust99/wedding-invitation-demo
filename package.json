@@ -13,6 +13,7 @@
     "check:dresscode-assets": "node scripts/check-dresscode-assets.mjs",
     "check:dresscode-browser": "node scripts/check-dresscode-browser.mjs",
     "check:post-ceremony-rsvp": "node scripts/check-post-ceremony-rsvp.mjs",
+    "check:rsvp-branching": "node scripts/check-rsvp-branching.mjs",
     "check:rsvp-resilience": "node scripts/check-rsvp-resilience.mjs",
     "check:rsvp-deadline-editor": "node scripts/check-rsvp-deadline-editor.mjs",
     "check:rsvp-lodging-copy": "node scripts/check-rsvp-lodging-copy.mjs",

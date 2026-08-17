@@ -21,6 +21,12 @@ Invitation eligibility and the guest's answer are persisted separately,
 validated by the server, summarized in Admin, and included in RSVP exports.
 Existing invites and responses remain readable.
 
+Guests with the invite flag see the intimate-party response inline with the
+ceremony, as before. Guests without the flag first answer only the ceremony and
+Terracotta wedding: a Terracotta acceptance goes straight to review, while a
+decline opens a separate intimate-party step with an edit path
+back to the preserved event choices.
+
 ## Affected Users
 
 - Wedding administrators importing guest spreadsheets and coordinating counts.
