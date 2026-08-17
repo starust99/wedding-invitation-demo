@@ -49,6 +49,9 @@ Hard gates:
 4. Reduce head preloads and add deterministic Meta/Zalo/range checks.
 5. Build, deploy, and smoke-test the fresh URL and image.
 6. Record evidence and remaining provider-controlled uncertainty.
+7. Capture the actual Messenger Web preview request signature through a
+   temporary non-guest probe before introducing any client-specific routing;
+   remove the probe immediately after the signature is recorded.
 
 ## Stop Conditions
 
