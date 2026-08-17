@@ -5,7 +5,7 @@ function isLoginPage(pathname: string) {
   return pathname === "/admin/login";
 }
 
-const messengerWebProbePath = "/g/messenger-web-probe-20260817";
+const messengerWebProbePath = "/g/gia-dinh-thao-vu-0a462aa5";
 
 export function proxy(request: NextRequest) {
   const { pathname, search } = request.nextUrl;
@@ -37,5 +37,5 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/admin/:path*", "/g/messenger-web-probe-20260817"],
+  matcher: ["/admin/:path*", "/g/gia-dinh-thao-vu-0a462aa5"],
 };
