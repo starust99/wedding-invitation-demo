@@ -1480,10 +1480,11 @@ export default function RSVPPage() {
                       role="status"
                       aria-live="polite"
                       title={submittedWishAt ? `Đã gửi lúc ${new Date(submittedWishAt).toLocaleString("vi-VN")}` : undefined}
-                      className="inline-flex min-h-11 items-center justify-center gap-2 px-4 text-sm font-semibold text-[#6e655e]/78"
+                      className="grid min-h-11 w-[208px] grid-cols-[18px_1fr_18px] items-center gap-2 px-3 text-sm font-semibold text-[#6e655e]/78"
                     >
-                      <CircleCheck aria-hidden="true" className="h-5 w-5 text-[#d7aaa8]" strokeWidth={1.8} />
-                      Đã gửi lời chúc
+                      <CircleCheck aria-hidden="true" className="h-[18px] w-[18px] text-[#d7aaa8]" strokeWidth={1.8} />
+                      <span className="whitespace-nowrap text-center">Đã gửi lời chúc</span>
+                      <span aria-hidden="true" />
                     </p>
                   ) : (
                     <button
@@ -1494,10 +1495,11 @@ export default function RSVPPage() {
                         setWishError("");
                         setSuccessDisclosure((current) => current === "wish" ? null : "wish");
                       }}
-                      className="wedding-type-button inline-flex h-11 min-w-[154px] items-center justify-center gap-2 rounded-full border border-serenity/24 bg-white/80 px-6 text-sm font-bold text-[#252934] transition hover:bg-white hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7a8a5c] focus-visible:ring-offset-2"
+                      className="wedding-type-button grid h-11 w-[208px] grid-cols-[18px_1fr_18px] items-center gap-2 rounded-full border border-serenity/24 bg-white/80 px-3 text-sm font-bold text-[#252934] transition hover:bg-white hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7a8a5c] focus-visible:ring-offset-2"
                     >
-                      <Mail aria-hidden="true" className="h-4 w-4" strokeWidth={1.8} />
-                      Gửi lời chúc
+                      <Mail aria-hidden="true" className="h-[18px] w-[18px]" strokeWidth={1.8} />
+                      <span className="whitespace-nowrap text-center">Gửi lời chúc</span>
+                      <span aria-hidden="true" />
                     </button>
                   )}
 
@@ -1507,18 +1509,18 @@ export default function RSVPPage() {
                     aria-controls="rsvp-gift-qr"
                     onClick={() => setSuccessDisclosure((current) => current === "gift" ? null : "gift")}
                     className={[
-                      "wedding-type-button inline-flex min-h-11 items-center justify-center gap-2 text-sm font-bold text-[#4f4a45] transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7a8a5c] focus-visible:ring-offset-2",
+                      "wedding-type-button grid min-h-11 w-[208px] grid-cols-[18px_1fr_18px] items-center gap-2 px-3 text-sm font-bold text-[#4f4a45] transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7a8a5c] focus-visible:ring-offset-2",
                       submittedWishMessage
-                        ? "mt-0.5 h-11 min-w-[160px] rounded-full border border-serenity/24 bg-white/80 px-6 hover:bg-white hover:shadow-sm"
-                        : "rounded-full px-4 text-[#5f5a54]/84 hover:bg-white/46 hover:text-[#252934]",
+                        ? "mt-0.5 h-11 rounded-full border border-serenity/24 bg-white/80 hover:bg-white hover:shadow-sm"
+                        : "rounded-full text-[#5f5a54]/84 hover:bg-white/46 hover:text-[#252934]",
                     ].join(" ")}
                   >
-                    <Gift aria-hidden="true" className="h-4.5 w-4.5" strokeWidth={1.75} />
-                    Gửi quà mừng
+                    <Gift aria-hidden="true" className="h-[18px] w-[18px]" strokeWidth={1.75} />
+                    <span className="whitespace-nowrap text-center">Gửi quà mừng</span>
                     <ChevronDown
                       aria-hidden="true"
                       className={[
-                        "h-4 w-4 transition-transform duration-200",
+                        "h-[18px] w-[18px] transition-transform duration-200",
                         successDisclosure === "gift" ? "rotate-180" : "",
                       ].join(" ")}
                     />
