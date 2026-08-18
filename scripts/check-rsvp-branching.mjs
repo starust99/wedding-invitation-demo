@@ -110,6 +110,11 @@ try {
   assert.equal(await regular.page.getByText("Nhà Thờ Giáo Xứ Tam Hải", { exact: true }).count(), 0);
   assert.equal(await regular.page.locator('img[data-rsvp-intimate-party-icon="true"]').count(), 1);
   await regular.page.getByText("Kính mời Quý khách dự buổi tiệc chung vui cùng gia đình sau Thánh lễ", { exact: true }).waitFor();
+  const unbreakableCeremonyPhrases = regular.page.locator('[data-rsvp-unbreakable-ceremony="true"]');
+  assert.equal(await unbreakableCeremonyPhrases.count(), 2);
+  for (const phrase of await unbreakableCeremonyPhrases.all()) {
+    assert.equal(await phrase.evaluate((element) => getComputedStyle(element).whiteSpace), "nowrap");
+  }
 
   const editButton = regular.page.getByRole("button", { name: "Chỉnh sửa", exact: true });
   const partyCard = regular.page.locator(".rsvp-paper-card");

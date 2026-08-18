@@ -1906,13 +1906,13 @@ export default function RSVPPage() {
                       Tiệc thân mật
                     </p>
                     <p className="mt-3 text-base font-semibold leading-relaxed text-[#252934]">
-                      Sau Thánh lễ hôn phối
+                      Sau <span data-rsvp-unbreakable-ceremony="true" className="whitespace-nowrap">Thánh lễ</span> hôn phối
                     </p>
                     <p className="mt-1 text-sm font-semibold leading-relaxed text-[#252934] sm:text-base">
                       {postCeremonyDateLine}
                     </p>
                     <p className="mx-auto mt-5 max-w-lg text-sm font-normal leading-relaxed text-[#252934]/78 sm:text-base">
-                      Kính mời Quý khách dự buổi tiệc chung vui cùng gia đình sau Thánh lễ
+                      Kính mời Quý khách dự buổi tiệc chung vui cùng gia đình sau <span data-rsvp-unbreakable-ceremony="true" className="whitespace-nowrap">Thánh lễ</span>
                     </p>
 
                     <div className="mt-6 flex flex-col items-center gap-1.5">
@@ -2144,7 +2144,7 @@ export default function RSVPPage() {
                               {postCeremonyDateLine}
                             </p>
                             <p className="mt-1 text-sm leading-relaxed text-[#252934]/72">
-                              Kính mời Quý khách dự buổi tiệc chung vui cùng gia đình sau Thánh lễ
+                              Kính mời Quý khách dự buổi tiệc chung vui cùng gia đình sau <span data-rsvp-unbreakable-ceremony="true" className="whitespace-nowrap">Thánh lễ</span>
                             </p>
                           </div>
                           <div
