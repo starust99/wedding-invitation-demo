@@ -5,6 +5,12 @@
 The RSVP confirmation screen keeps the existing `THÁNH LỄ` and `TIỆC CƯỚI`
 buttons. A guest makes no provider or browser choice on the wedding site.
 
+For a Nhà Trai invitation without `postCeremonyPartyInvited`, the confirmation
+screen does not render the ceremony action. A tokenized ceremony calendar
+request also returns not found so the calendar route cannot contradict the
+private invitation policy. Banquet and album actions remain available according
+to the effective RSVP events.
+
 Each button navigates to a same-origin smart calendar route. The server chooses
 the least-friction handoff:
 

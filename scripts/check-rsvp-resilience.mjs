@@ -9,12 +9,11 @@ function delay(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-async function selectBothEvents(page) {
+async function selectBanquetOnly(page) {
   const yesButtons = page.getByRole("button", { name: "Có", exact: true });
   await yesButtons.first().waitFor({ state: "visible" });
-  assert.equal(await yesButtons.count(), 2, "RSVP must expose exactly two event attendance choices.");
-  await yesButtons.nth(0).click();
-  await yesButtons.nth(1).click();
+  assert.equal(await yesButtons.count(), 1, "Banquet-only Nhà Trai RSVP must expose one attendance choice.");
+  await yesButtons.first().click();
 }
 
 async function requireExplicitStayDecision(page) {
@@ -31,7 +30,7 @@ async function requireExplicitStayDecision(page) {
     "'Không nghỉ lại' must expose an unselected state to assistive technology.",
   );
 
-  await page.getByRole("button", { name: "Tiếp tục", exact: true }).click();
+  await page.getByRole("button", { name: "Xem lại và hoàn tất", exact: true }).click();
   await page.getByText("Vui lòng chọn phương án lưu trú.", { exact: true }).waitFor();
   assert.equal(
     await page.getByRole("heading", { name: "Xem lại hồi đáp", exact: true }).count(),
@@ -52,7 +51,7 @@ async function fillLodgingGuest(page) {
     false,
     "Choosing a lodging night must not focus the guest-name field or open the mobile keyboard.",
   );
-  await page.getByRole("button", { name: "Tiếp tục", exact: true }).click();
+  await page.getByRole("button", { name: "Xem lại và hoàn tất", exact: true }).click();
   const missingNameError = page.getByText("Nhập họ tên người lưu trú.", { exact: true });
   await missingNameError.waitFor();
   await fullName.fill("Nguyễn Văn A");
@@ -99,7 +98,8 @@ try {
 
   await page.goto(`${baseUrl}/rsvp?invite=${token}`, { waitUntil: "domcontentloaded" });
 
-  await selectBothEvents(page);
+  await selectBanquetOnly(page);
+  assert.equal(await page.getByText("THÁNH LỄ HÔN PHỐI", { exact: true }).count(), 0);
   await page.getByText(
     "Gia đình sẽ chuẩn bị phòng tại Resort Terracotta cho Quý khách. Xin Quý khách vui lòng xác nhận nhu cầu nghỉ lại.",
     { exact: true },
@@ -119,7 +119,7 @@ try {
   await delay(3_000);
   await assertDraftValue(firstPass);
 
-  await page.getByRole("button", { name: "Tiếp tục", exact: true }).click();
+  await page.getByRole("button", { name: "Xem lại và hoàn tất", exact: true }).click();
   await page.getByRole("heading", { name: "Xem lại hồi đáp", exact: true }).waitFor();
   assert.match(await page.locator("main").innerText(), /Nguyễn Văn A/);
 
@@ -145,7 +145,7 @@ try {
     0,
     "Interactive RSVP controls must stay hidden until direct-link hydration finishes.",
   );
-  await directPage.getByText("THÁNH LỄ HÔN PHỐI", { exact: true }).waitFor({ timeout: 30_000 });
+  await directPage.getByText("TIỆC CƯỚI", { exact: true }).waitFor({ timeout: 30_000 });
   await directContext.close();
 
   const friendToken = "rsvp-friend-count-test";
@@ -235,7 +235,7 @@ try {
   assert.equal(await invalidPage.getByText(/Admin/i).count(), 0, "Invalid public invites must not expose admin actions or labels.");
   await invalidContext.close();
 
-  console.log("RSVP resilience checks passed: family lodging, non-family party size, delayed hydration, review, reload draft, and direct-link loading gate.");
+  console.log("RSVP resilience checks passed: Nhà Trai banquet-only family lodging, non-family party size, delayed hydration, review, reload draft, and direct-link loading gate.");
 } finally {
   await browser.close();
 }

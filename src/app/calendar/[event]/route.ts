@@ -7,6 +7,7 @@ import {
 } from "@/lib/wedding-calendar";
 import { defaultSettings, normalizeSettings, settingsSchemaVersion } from "@/lib/site-settings";
 import { getSupabaseServerClient, hasSupabaseEnv } from "@/lib/supabase-server";
+import { resolveInviteEventAccess } from "@/lib/invite-event-access";
 
 export const dynamic = "force-dynamic";
 
@@ -56,6 +57,29 @@ export async function GET(
 
   const requestUrl = new URL(request.url);
   const inviteToken = requestUrl.searchParams.get("invite")?.trim();
+
+  if (eventId === "thanh-le" && inviteToken && hasSupabaseEnv()) {
+    const { data: invitee, error: inviteeError } = await getSupabaseServerClient()
+      .from("invitees")
+      .select("guest_group, post_ceremony_party_invited")
+      .eq("token", inviteToken)
+      .maybeSingle();
+
+    const eventAccess = resolveInviteEventAccess({
+      guestGroup: invitee?.guest_group,
+      postCeremonyPartyInvited: invitee?.post_ceremony_party_invited,
+    });
+    if (inviteeError || !invitee || !eventAccess.canViewCeremony) {
+      return new Response("Không tìm thấy sự kiện.", {
+        status: inviteeError ? 500 : 404,
+        headers: {
+          ...sharedHeaders,
+          "Content-Type": "text/plain; charset=utf-8",
+        },
+      });
+    }
+  }
+
   const personalInvitationUrl = inviteToken
     ? `https://nhatphuong.love/i/${encodeURIComponent(inviteToken)}`
     : "https://nhatphuong.love";

@@ -8,6 +8,16 @@ function normalizeGuestGroup(value?: string | null) {
 }
 
 /**
+ * Every workbook group owned by the groom's family uses the `[Nhà Trai]`
+ * prefix. Match the normalized prefix instead of enumerating today's groups so
+ * future parent/family groups inherit the same event-access policy.
+ */
+export function isGroomSideGuestGroup(value?: string | null) {
+  const group = normalizeGuestGroup(value);
+  return /^nha trai(?: |$)/.test(group);
+}
+
+/**
  * Resort lodging is reserved for the paternal and maternal family groups
  * imported from the guest workbook. Parent friends, colleagues and other
  * invitees answer the party-size question instead.

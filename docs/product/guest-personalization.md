@@ -104,11 +104,23 @@ have separate responsibilities:
 
 The invite workbook contains `Tham gia tiệc sau Hôn phối`:
 
+- For every guest group whose normalized name begins with `[Nhà Trai]`, `Có`
+  also grants access to the wedding-ceremony information and response. Blank
+  makes the personalized invitation banquet-only: ceremony and intimate-party
+  information are omitted from the invitation, RSVP, review, confirmation,
+  gallery, and tokenized calendar flow.
+- A banquet-only Nhà Trai guest does not receive the fallback intimate-party
+  invitation after declining Terracotta.
+- This event-access rule does not change lodging. Nhà Trai Họ nội/Họ ngoại may
+  still register the night of 26/12 after accepting Terracotta; Nhà Trai Khách
+  ba/Khách mẹ remain ineligible for lodging.
+
 - `Có` means the invitee is invited from the start and sees the intimate-party
   question inside the ceremony card after accepting the wedding ceremony.
-- Blank means the invitee starts with only the ceremony and Terracotta wedding
-  choices. If they decline Terracotta, `Tiếp tục` opens a separate intimate-party
-  step; accepting Terracotta proceeds directly to review.
+- For guests outside Nhà Trai, blank means the invitee starts with only the
+  ceremony and Terracotta wedding choices. If they decline Terracotta,
+  `Tiếp tục` opens a separate intimate-party step; accepting Terracotta proceeds
+  directly to review.
 - No other non-blank value is valid.
 
 The separate intimate-party step does not repeat the ceremony card. It keeps a

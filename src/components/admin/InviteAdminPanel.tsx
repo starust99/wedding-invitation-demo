@@ -51,6 +51,7 @@ import {
 import { applyTheme } from "@/lib/site-settings";
 import { usePublishedSettings } from "@/lib/use-published-settings";
 import { AlbumGroupManager } from "@/components/admin/AlbumGroupManager";
+import { resolveInviteEventAccess } from "@/lib/invite-event-access";
 
 type SimpleInviteEntry = {
   salutationCluster: string;
@@ -331,20 +332,45 @@ export function InviteAdminPanel() {
       ?? (response.inviteToken ? inviteeByToken.get(response.inviteToken) : undefined);
   }, [inviteeById, inviteeByToken]);
 
+  const eventAccessForResponse = useCallback((response: RSVPResponse) => {
+    const invitee = inviteeForResponse(response);
+    return resolveInviteEventAccess({
+      guestGroup: invitee?.guestGroup || response.guestGroup,
+      postCeremonyPartyInvited: invitee?.postCeremonyPartyInvited,
+    });
+  }, [inviteeForResponse]);
+
+  const effectiveCeremonyAttendance = useCallback((response: RSVPResponse) => {
+    return eventAccessForResponse(response).canViewCeremony && response.attendingCeremony === true;
+  }, [eventAccessForResponse]);
+
+  const ceremonyStatusLabel = useCallback((response: RSVPResponse) => {
+    if (!eventAccessForResponse(response).canViewCeremony) return "Không áp dụng";
+    return response.attendingCeremony ? "Có" : "Không";
+  }, [eventAccessForResponse]);
+
   const postCeremonyStatus = useCallback((response: RSVPResponse) => {
     const invitee = inviteeForResponse(response);
-    if (!invitee?.postCeremonyPartyInvited || response.attendingCeremony !== true) return "not_applicable";
+    if (!eventAccessForResponse(response).canViewCeremony || !invitee?.postCeremonyPartyInvited || response.attendingCeremony !== true) return "not_applicable";
     if (response.attendingPostCeremonyParty === true) return "yes";
     if (response.attendingPostCeremonyParty === false) return "no";
     return "pending";
-  }, [inviteeForResponse]);
+  }, [eventAccessForResponse, inviteeForResponse]);
 
   const enrichResponsesForExport = useCallback((source: RSVPResponse[]) => {
-    return source.map((response) => ({
-      ...response,
-      postCeremonyPartyInvited: Boolean(inviteeForResponse(response)?.postCeremonyPartyInvited),
-    }));
-  }, [inviteeForResponse]);
+    return source.map((response) => {
+      const canViewCeremony = eventAccessForResponse(response).canViewCeremony;
+      return {
+        ...response,
+        attending: canViewCeremony
+          ? response.attending
+          : response.attendingBanquet ? "yes" : "no",
+        attendingCeremony: canViewCeremony ? response.attendingCeremony : false,
+        attendingPostCeremonyParty: canViewCeremony ? response.attendingPostCeremonyParty : undefined,
+        postCeremonyPartyInvited: Boolean(inviteeForResponse(response)?.postCeremonyPartyInvited),
+      };
+    });
+  }, [eventAccessForResponse, inviteeForResponse]);
 
   const selectedRsvp = selectedInvitee?.id ? rsvpByInviteeId.get(selectedInvitee.id) : undefined;
   const visibleInvitees = useMemo(() => {
@@ -856,8 +882,8 @@ export function InviteAdminPanel() {
   }, [responses, attendingFilter, postCeremonyFilter, accommodationFilter, wishFilter, groupFilter, postCeremonyStatus]);
 
   const notAttending = useMemo(() => responses.filter((response) => response.attending === "no").length, [responses]);
-  const ceremonyGuests = useMemo(() => responses.filter((response) => response.attending === "yes" && response.attendingCeremony).reduce((sum, response) => sum + response.guestCount, 0), [responses]);
-  const postCeremonyPartyGuests = useMemo(() => responses.filter((response) => response.attending === "yes" && response.attendingPostCeremonyParty).reduce((sum, response) => sum + response.guestCount, 0), [responses]);
+  const ceremonyGuests = useMemo(() => responses.filter((response) => response.attending === "yes" && effectiveCeremonyAttendance(response)).reduce((sum, response) => sum + response.guestCount, 0), [effectiveCeremonyAttendance, responses]);
+  const postCeremonyPartyGuests = useMemo(() => responses.filter((response) => response.attending === "yes" && eventAccessForResponse(response).canViewCeremony && response.attendingPostCeremonyParty).reduce((sum, response) => sum + response.guestCount, 0), [eventAccessForResponse, responses]);
   const banquetGuests = useMemo(() => responses.filter((response) => response.attending === "yes" && response.attendingBanquet).reduce((sum, response) => sum + response.guestCount, 0), [responses]);
   const stayingGuests = useMemo(() => responses.reduce((sum, response) => sum + (response.stayingGuestCount ?? response.lodgingGuests?.length ?? 0), 0), [responses]);
   const accommodationRequests = useMemo(() => responses.filter((response) => response.accommodationNeeded).length, [responses]);
@@ -1189,7 +1215,7 @@ export function InviteAdminPanel() {
                           <span className="shrink-0 rounded-full bg-[#F3EEE2] px-2.5 py-1 text-[11px] font-semibold text-[#665D54]">{attendingLabel(response.attending)}</span>
                         </div>
                         <div className="mt-3 flex flex-wrap gap-1.5 text-[11px] text-[#665D54]">
-                          <span className="rounded-md bg-[#F8F3EA] px-2 py-1">Thánh lễ: <b>{response.attendingCeremony ? "Có" : "Không"}</b></span>
+                          <span className="rounded-md bg-[#F8F3EA] px-2 py-1">Thánh lễ: <b>{ceremonyStatusLabel(response)}</b></span>
                           <span className="rounded-md bg-[#F8F3EA] px-2 py-1">Tiệc cưới: <b>{response.attendingBanquet ? "Có" : "Không"}</b></span>
                           {postCeremonyStatus(response) !== "not_applicable" && <span className="rounded-md bg-[#F8F3EA] px-2 py-1">Tiệc sau lễ: <b>{postCeremonyStatus(response) === "yes" ? "Có" : postCeremonyStatus(response) === "no" ? "Không" : "Chưa trả lời"}</b></span>}
                         </div>
@@ -1255,7 +1281,7 @@ export function InviteAdminPanel() {
                         <td className="p-4 text-xs">{response.phone}</td>
                         <td className="p-4 text-xs font-semibold">{attendingLabel(response.attending)}</td>
                         <td className="p-4 text-[11px] leading-relaxed text-[#665d54]">
-                          <span className="block">Thánh lễ: <b>{response.attendingCeremony ? "Có" : "Không"}</b></span>
+                          <span className="block">Thánh lễ: <b>{ceremonyStatusLabel(response)}</b></span>
                           {postCeremonyStatus(response) !== "not_applicable" ? (
                             <span className="block">Tiệc sau lễ: <b>{
                               postCeremonyStatus(response) === "yes"

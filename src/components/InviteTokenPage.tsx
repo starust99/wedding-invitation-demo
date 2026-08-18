@@ -17,6 +17,7 @@ import { readRSVPResponses, removeRSVPResponses } from "@/lib/rsvp-storage";
 import { applyTheme } from "@/lib/site-settings";
 import { usePublishedSettings } from "@/lib/use-published-settings";
 import { useScrollRecovery } from "@/hooks/use-scroll-recovery";
+import { resolveInviteEventAccess } from "@/lib/invite-event-access";
 
 type InvitePayload = {
   backend: "local" | "supabase";
@@ -195,11 +196,20 @@ export function InviteTokenPage({ token, initialInvitee }: { token: string; init
   const activeRsvpObj = invitee?.rsvp || localRsvp;
   const hasHashThankYou = typeof window !== "undefined" && window.location.hash.includes("thank-you");
   const shouldShowThankYou = Boolean(activeRsvpObj || (invitee?.inviteStatus && invitee.inviteStatus !== "invited") || hasHashThankYou);
-  const isDeclinedResponse = activeRsvpObj?.attending === "no" || invitee?.inviteStatus === "rsvp_no";
+  const eventAccess = resolveInviteEventAccess({
+    guestGroup: invitee?.guestGroup,
+    postCeremonyPartyInvited: invitee?.postCeremonyPartyInvited,
+  });
+  const effectiveRsvpAttending = !eventAccess.canViewCeremony && typeof activeRsvpObj?.attendingBanquet === "boolean"
+    ? activeRsvpObj.attendingBanquet ? "yes" : "no"
+    : activeRsvpObj?.attending;
+  const isDeclinedResponse = effectiveRsvpAttending === "no" || invitee?.inviteStatus === "rsvp_no";
   const hasExplicitEventSelections = typeof activeRsvpObj?.attendingCeremony === "boolean"
     || typeof activeRsvpObj?.attendingBanquet === "boolean";
-  const showChurchCard = !shouldShowThankYou
-    || (!isDeclinedResponse && (!hasExplicitEventSelections || activeRsvpObj?.attendingCeremony === true));
+  const showChurchCard = eventAccess.canViewCeremony && (
+    !shouldShowThankYou
+    || (!isDeclinedResponse && (!hasExplicitEventSelections || activeRsvpObj?.attendingCeremony === true))
+  );
   const showBanquetCard = !shouldShowThankYou
     || (!isDeclinedResponse && (!hasExplicitEventSelections || activeRsvpObj?.attendingBanquet === true));
 
@@ -252,8 +262,8 @@ export function InviteTokenPage({ token, initialInvitee }: { token: string; init
           <ThankYouSection
             config={config}
             guestIdentity={guestIdentity}
-            rsvpAttending={activeRsvpObj?.attending || (invitee?.inviteStatus === "rsvp_no" ? "no" : invitee?.inviteStatus && invitee.inviteStatus !== "invited" ? "yes" : "yes")}
-            rsvpAttendingCeremony={activeRsvpObj?.attendingCeremony}
+            rsvpAttending={effectiveRsvpAttending || (invitee?.inviteStatus === "rsvp_no" ? "no" : invitee?.inviteStatus && invitee.inviteStatus !== "invited" ? "yes" : "yes")}
+            rsvpAttendingCeremony={eventAccess.canViewCeremony ? activeRsvpObj?.attendingCeremony : false}
             rsvpAttendingBanquet={activeRsvpObj?.attendingBanquet}
             rsvpHref={rsvpHref}
             embedded

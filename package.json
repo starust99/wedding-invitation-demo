@@ -12,6 +12,8 @@
     "check:couple-name-wrap": "node scripts/check-couple-name-wrap.mjs",
     "check:dresscode-assets": "node scripts/check-dresscode-assets.mjs",
     "check:dresscode-browser": "node scripts/check-dresscode-browser.mjs",
+    "check:event-access": "node scripts/check-event-access.mjs",
+    "check:event-access-browser": "node scripts/check-event-access-browser.mjs",
     "check:post-ceremony-rsvp": "node scripts/check-post-ceremony-rsvp.mjs",
     "check:rsvp-branching": "node scripts/check-rsvp-branching.mjs",
     "check:rsvp-wishes": "node scripts/check-rsvp-wishes.mjs",

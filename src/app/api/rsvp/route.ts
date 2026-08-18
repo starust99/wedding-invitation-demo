@@ -8,6 +8,7 @@ import {
 } from "@/lib/rsvp-mapper";
 import { getSupabaseServerClient, hasSupabaseEnv } from "@/lib/supabase-server";
 import { resolvePostCeremonyPartyAnswer } from "@/lib/post-ceremony-rsvp";
+import { resolveInviteEventAccess } from "@/lib/invite-event-access";
 import { isGroomFamilyLodgingGuestGroup } from "@/lib/rsvp-guest-group";
 import { preserveLegacyRsvpWishNotes } from "@/lib/rsvp-wish";
 
@@ -67,17 +68,23 @@ export async function POST(request: Request) {
     }
   }
 
+  const resolvedGuestGroup = matchingInvitee?.guest_group || body.guestGroup || "";
+  const eventAccess = resolveInviteEventAccess({
+    guestGroup: resolvedGuestGroup,
+    postCeremonyPartyInvited: matchingInvitee?.post_ceremony_party_invited,
+  });
+  const attendingCeremony = eventAccess.canViewCeremony && body.attendingCeremony === true;
   const postCeremonyParty = resolvePostCeremonyPartyAnswer({
     invited: Boolean(matchingInvitee?.post_ceremony_party_invited),
-    attendingCeremony: body.attendingCeremony === true,
+    attendingCeremony,
     attendingBanquet: body.attendingBanquet === true,
     answer: body.attendingPostCeremonyParty,
+    allowFallback: eventAccess.canUsePostCeremonyFallback,
   });
   if (!postCeremonyParty.ok) {
     return NextResponse.json({ error: postCeremonyParty.error }, { status: 400 });
   }
 
-  const resolvedGuestGroup = matchingInvitee?.guest_group || body.guestGroup || "";
   if (
     body.accommodationNeeded === true
     && isGroomFamilyLodgingGuestGroup(resolvedGuestGroup)
@@ -94,8 +101,9 @@ export async function POST(request: Request) {
     inviteeId: matchingInvitee?.id || body.inviteeId,
     inviteToken: matchingInvitee?.token || token,
     guestGroup: resolvedGuestGroup,
+    attendingCeremony,
     attendingPostCeremonyParty: postCeremonyParty.value,
-    attending: body.attendingCeremony === true || body.attendingBanquet === true || postCeremonyParty.value === true
+    attending: attendingCeremony || body.attendingBanquet === true || postCeremonyParty.value === true
       ? "yes"
       : "no",
   };

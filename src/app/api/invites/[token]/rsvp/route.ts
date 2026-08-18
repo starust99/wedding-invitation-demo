@@ -9,6 +9,7 @@ import {
 import type { RSVPResponse } from "@/lib/rsvp-storage";
 import { getSupabaseServerClient, hasSupabaseEnv } from "@/lib/supabase-server";
 import { resolvePostCeremonyPartyAnswer } from "@/lib/post-ceremony-rsvp";
+import { resolveInviteEventAccess } from "@/lib/invite-event-access";
 import { preserveLegacyRsvpWishNotes } from "@/lib/rsvp-wish";
 import {
   isFamilyLodgingGuestGroup,
@@ -64,19 +65,26 @@ export async function POST(request: Request, { params }: { params: Promise<{ tok
   if (inviteeError) return NextResponse.json({ error: inviteeError.message }, { status: 500 });
   if (!invitee) return NextResponse.json({ error: "Invite not found" }, { status: 404 });
 
+  const guestGroup = invitee.guest_group as string;
+  const eventAccess = resolveInviteEventAccess({
+    guestGroup,
+    postCeremonyPartyInvited: invitee.post_ceremony_party_invited,
+  });
+  const attendingCeremony = eventAccess.canViewCeremony && body.attendingCeremony;
+
   const postCeremonyParty = resolvePostCeremonyPartyAnswer({
     invited: Boolean(invitee.post_ceremony_party_invited),
-    attendingCeremony: body.attendingCeremony,
+    attendingCeremony,
     attendingBanquet: body.attendingBanquet,
     answer: body.attendingPostCeremonyParty,
+    allowFallback: eventAccess.canUsePostCeremonyFallback,
   });
   if (!postCeremonyParty.ok) {
     return NextResponse.json({ error: postCeremonyParty.error }, { status: 400 });
   }
 
   const expectedGuestCount = Math.max(1, Number(invitee.expected_guest_count) || 1);
-  const attending = body.attendingCeremony || body.attendingBanquet || postCeremonyParty.value === true ? "yes" : "no";
-  const guestGroup = invitee.guest_group as string;
+  const attending = attendingCeremony || body.attendingBanquet || postCeremonyParty.value === true ? "yes" : "no";
   const accommodationNeeded = isFamilyLodgingGuestGroup(guestGroup)
     && attending === "yes"
     && body.attendingBanquet
@@ -99,6 +107,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ tok
     displayLabel: invitee.display_label as string,
     name: invitee.display_label as string,
     guestGroup,
+    attendingCeremony,
     attendingPostCeremonyParty: postCeremonyParty.value,
     attending,
     guestCount: attending === "no"

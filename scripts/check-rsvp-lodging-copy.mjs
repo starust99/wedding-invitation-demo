@@ -56,7 +56,7 @@ assert.match(thankYouSource, /Thông tin Tiệc cưới/);
 assert.doesNotMatch(thankYouSource, /Đến Nhà thờ|Đến Tiệc cưới/);
 assert.match(thankYouSource, /wedding:reveal-event-card/);
 assert.match(thankYouSource, /wedding-type-body font-sans mx-auto mt-4 max-w-xl text-\[#3f4642\]\/95/);
-assert.match(inviteTokenPageSource, /const showChurchCard = !shouldShowThankYou/);
+assert.match(inviteTokenPageSource, /const showChurchCard = eventAccess\.canViewCeremony && \(/);
 assert.match(inviteTokenPageSource, /activeRsvpObj\?\.attendingCeremony === true/);
 assert.match(inviteTokenPageSource, /const showBanquetCard = !shouldShowThankYou/);
 assert.match(inviteTokenPageSource, /activeRsvpObj\?\.attendingBanquet === true/);

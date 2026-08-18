@@ -7,7 +7,7 @@ const baseUrl = (process.env.RSVP_TEST_BASE_URL || "http://localhost:3000").repl
 const screenshotDir = process.env.RSVP_BRANCHING_SCREENSHOT_DIR;
 if (screenshotDir) mkdirSync(screenshotDir, { recursive: true });
 
-function createInvitee({ token, invited }) {
+function createInvitee({ token, invited, guestGroup = "[Nhật] Bạn bè & Đồng nghiệp" }) {
   const now = "2026-08-17T00:00:00.000Z";
   return {
     id: `11111111-1111-4111-8111-${invited ? "111111111111" : "222222222222"}`,
@@ -28,7 +28,7 @@ function createInvitee({ token, invited }) {
     coupleReference: "Nhật & Phương",
     householdMode: "single",
     plusOnePolicy: "none",
-    guestGroup: "[Nhật] Bạn bè & Đồng nghiệp",
+    guestGroup,
     audienceTags: [],
     expectedGuestCount: 1,
     postCeremonyPartyInvited: invited,
@@ -59,7 +59,7 @@ async function openRsvp(browser, invitee, options = {}) {
     });
   });
   await page.goto(`${baseUrl}/rsvp?invite=${invitee.token}`, { waitUntil: "domcontentloaded" });
-  await page.getByText("THÁNH LỄ HÔN PHỐI", { exact: true }).waitFor();
+  await page.getByText("TIỆC CƯỚI", { exact: true }).waitFor();
   return { context, page, consoleErrors };
 }
 
@@ -96,6 +96,41 @@ function assertEventColumnsAligned(reference, candidate, candidateName) {
 const browser = await chromium.launch({ headless: true });
 
 try {
+  const groomParentGuest = createInvitee({
+    token: "rsvp-groom-banquet-only-test",
+    invited: false,
+    guestGroup: "[Nhà Trai] Khách ba",
+  });
+  const groomBanquetOnly = await openRsvp(browser, groomParentGuest);
+  assert.equal(await groomBanquetOnly.page.getByText("THÁNH LỄ HÔN PHỐI", { exact: true }).count(), 0);
+  assert.equal(await groomBanquetOnly.page.getByText("Tiệc thân mật", { exact: true }).count(), 0);
+  assert.equal(await groomBanquetOnly.page.getByRole("button", { name: "Tiếp tục", exact: true }).count(), 0);
+  assert.equal(await groomBanquetOnly.page.getByRole("button", { name: "Xem lại và hoàn tất", exact: true }).count(), 1);
+  await groomBanquetOnly.page.getByRole("button", { name: "Không", exact: true }).click();
+  await groomBanquetOnly.page.locator(".rsvp-review-tap-guide").waitFor();
+  await groomBanquetOnly.page.getByRole("button", { name: "Xem lại và hoàn tất", exact: true }).click();
+  await groomBanquetOnly.page.getByRole("heading", { name: "Xem lại hồi đáp", exact: true }).waitFor();
+  assert.equal(await groomBanquetOnly.page.getByText("Thánh lễ Hôn phối", { exact: true }).count(), 0);
+  await groomBanquetOnly.page.getByText("Tiệc cưới", { exact: true }).waitFor();
+  assert.deepEqual(groomBanquetOnly.consoleErrors, []);
+  await groomBanquetOnly.context.close();
+
+  const groomRelative = createInvitee({
+    token: "rsvp-groom-lodging-test",
+    invited: false,
+    guestGroup: "[Nhà Trai] Họ nội",
+  });
+  const groomLodging = await openRsvp(browser, groomRelative);
+  await groomLodging.page.getByRole("button", { name: "Có", exact: true }).click();
+  await groomLodging.page.getByText("LƯU TRÚ", { exact: true }).waitFor();
+  await groomLodging.page.getByRole("button", { name: /Đêm 26\/12/ }).waitFor();
+  await groomLodging.page.getByRole("button", { name: "Không nghỉ lại", exact: true }).waitFor();
+  assert.equal(await groomLodging.page.getByRole("button", { name: /Đêm 25\/12/ }).count(), 0);
+  assert.equal(await groomLodging.page.getByRole("button", { name: /Cả hai đêm/ }).count(), 0);
+  assert.equal(await groomLodging.page.getByText("THÁNH LỄ HÔN PHỐI", { exact: true }).count(), 0);
+  assert.deepEqual(groomLodging.consoleErrors, []);
+  await groomLodging.context.close();
+
   const regularInvitee = createInvitee({ token: "rsvp-conditional-party-test", invited: false });
   const regular = await openRsvp(browser, regularInvitee);
   assert.equal(await regular.page.getByText("Tiệc thân mật", { exact: true }).count(), 0);
@@ -196,7 +231,7 @@ try {
   assert.deepEqual(reduced.consoleErrors, []);
   await reduced.context.close();
 
-  console.log("RSVP branching checks passed: regular decline step, preserved edits, direct review, initial close-guest invitation, review summary, and reduced motion.");
+  console.log("RSVP branching checks passed: Nhà Trai banquet-only access and lodging, regular decline step, preserved edits, direct review, initial close-guest invitation, review summary, and reduced motion.");
 } finally {
   await browser.close();
 }

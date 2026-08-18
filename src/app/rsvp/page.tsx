@@ -60,6 +60,7 @@ import {
   isGroomFamilyLodgingGuestGroup,
 } from "@/lib/rsvp-guest-group";
 import { doesPostCeremonyPartyApply } from "@/lib/post-ceremony-rsvp";
+import { resolveInviteEventAccess } from "@/lib/invite-event-access";
 import { RSVP_WISH_MAX_LENGTH } from "@/lib/rsvp-wish";
 
 const rsvpSuccessUtilityVariants: Variants = {
@@ -139,7 +140,11 @@ function validateRsvpForm(
   ctx: z.RefinementCtx,
   { requirePostCeremonyParty }: { requirePostCeremonyParty: boolean },
 ) {
-  if (!data.attendingCeremony) {
+  const eventAccess = resolveInviteEventAccess({
+    guestGroup: data.guestGroup,
+    postCeremonyPartyInvited: data.postCeremonyPartyInvited,
+  });
+  if (eventAccess.canViewCeremony && !data.attendingCeremony) {
     ctx.addIssue({ code: "custom", path: ["attendingCeremony"], message: "Vui lòng chọn phản hồi cho Thánh lễ Hôn phối." });
   }
   if (!data.attendingBanquet) {
@@ -149,6 +154,7 @@ function validateRsvpForm(
     invited: data.postCeremonyPartyInvited,
     attendingCeremony: data.attendingCeremony === "yes",
     attendingBanquet: data.attendingBanquet === "yes",
+    allowFallback: eventAccess.canUsePostCeremonyFallback,
   });
   if (requirePostCeremonyParty && postCeremonyPartyApplies && !data.attendingPostCeremonyParty) {
     ctx.addIssue({ code: "custom", path: ["attendingPostCeremonyParty"], message: "Vui lòng chọn phản hồi cho Tiệc thân mật." });
@@ -586,11 +592,19 @@ export default function RSVPPage() {
   const formValues = useWatch({ control }) as RSVPFormInput;
   const returnHref = inviteToken ? `/i/${encodeURIComponent(inviteToken)}?view=main` : "/?view=main";
 
+  const activeGuestGroup = formValues.guestGroup?.trim() || inviteeContext?.guestGroup || guestIdentity.group || "";
+  const eventAccess = resolveInviteEventAccess({
+    guestGroup: activeGuestGroup,
+    postCeremonyPartyInvited,
+  });
+  const effectiveAttendingCeremony = eventAccess.canViewCeremony ? attendingCeremony : "no";
   const inviteCopy = useMemo(() => buildInvitationCopy(inviteeContext ?? guestIdentity), [guestIdentity, inviteeContext]);
-  const submissionCopy = useMemo(() => buildSubmissionCopy(attending, attendingCeremony, attendingBanquet, inviteCopy, inviteeContext ?? guestIdentity), [attending, attendingCeremony, attendingBanquet, inviteCopy, guestIdentity, inviteeContext]);
+  const submissionCopy = useMemo(
+    () => buildSubmissionCopy(attending, effectiveAttendingCeremony, attendingBanquet, inviteCopy, inviteeContext ?? guestIdentity),
+    [attending, effectiveAttendingCeremony, attendingBanquet, inviteCopy, guestIdentity, inviteeContext],
+  );
   const lodgingGuests = normalizeLodgingGuests((watchedLodgingGuests ?? []) as Array<Partial<LodgingGuestForm> | undefined>);
   const terracottaNote = buildTerracottaNote(lodgingGuests);
-  const activeGuestGroup = formValues.guestGroup?.trim() || inviteeContext?.guestGroup || guestIdentity.group || "";
   const canRequestLodging = isFamilyLodgingGuestGroup(activeGuestGroup);
   const hasGroomFamilyLodgingOptions = isGroomFamilyLodgingGuestGroup(activeGuestGroup);
   const canRegisterStay = attending !== "no";
@@ -598,8 +612,9 @@ export default function RSVPPage() {
     invited: Boolean(postCeremonyPartyInvited),
     attendingCeremony: attendingCeremony === "yes",
     attendingBanquet: attendingBanquet === "yes",
+    allowFallback: eventAccess.canUsePostCeremonyFallback,
   });
-  const isRegularGuestFlow = !Boolean(postCeremonyPartyInvited);
+  const isRegularGuestFlow = eventAccess.canUsePostCeremonyFallback;
   const currentRsvpValues = {
     ...getValues(),
     attending,
@@ -1010,6 +1025,31 @@ export default function RSVPPage() {
   ]);
 
   useEffect(() => {
+    if (eventAccess.canViewCeremony) return;
+
+    if (attendingCeremony !== "no") {
+      setValue("attendingCeremony", "no", {
+        shouldDirty: hasUserEditedFormRef.current,
+        shouldValidate: false,
+      });
+    }
+    if (attendingPostCeremonyParty !== null) {
+      setValue("attendingPostCeremonyParty", null, {
+        shouldDirty: hasUserEditedFormRef.current,
+        shouldValidate: false,
+      });
+    }
+    clearErrors(["attendingCeremony", "attendingPostCeremonyParty"]);
+    setIsPostCeremonyStep(false);
+  }, [
+    attendingCeremony,
+    attendingPostCeremonyParty,
+    clearErrors,
+    eventAccess.canViewCeremony,
+    setValue,
+  ]);
+
+  useEffect(() => {
     if (
       isHydratingGuest
       || !hasGroomFamilyLodgingOptions
@@ -1114,12 +1154,18 @@ export default function RSVPPage() {
     setSubmitError("");
 
     const resolvedGroup = data.guestGroup?.trim() || inviteeContext?.guestGroup || guestIdentity.group || "Khác";
+    const resolvedEventAccess = resolveInviteEventAccess({
+      guestGroup: resolvedGroup,
+      postCeremonyPartyInvited: data.postCeremonyPartyInvited,
+    });
+    const resolvedAttendingCeremony = resolvedEventAccess.canViewCeremony && data.attendingCeremony === "yes";
     const postCeremonyPartyApplies = doesPostCeremonyPartyApply({
       invited: data.postCeremonyPartyInvited,
-      attendingCeremony: data.attendingCeremony === "yes",
+      attendingCeremony: resolvedAttendingCeremony,
       attendingBanquet: data.attendingBanquet === "yes",
+      allowFallback: resolvedEventAccess.canUsePostCeremonyFallback,
     });
-    const resolvedAttendance = data.attendingCeremony === "yes"
+    const resolvedAttendance = resolvedAttendingCeremony
       || data.attendingBanquet === "yes"
       || (postCeremonyPartyApplies && data.attendingPostCeremonyParty === "yes")
       ? "yes"
@@ -1171,7 +1217,7 @@ export default function RSVPPage() {
       displayLabel: inviteeContext?.displayLabel ?? guestIdentity.displayLabel,
       name: resolvedName,
       phone: resolvedPhone,
-      attendingCeremony: data.attendingCeremony === "yes",
+      attendingCeremony: resolvedAttendingCeremony,
       attendingPostCeremonyParty: postCeremonyPartyApplies
         ? data.attendingPostCeremonyParty === "yes"
         : undefined,
@@ -1379,7 +1425,7 @@ export default function RSVPPage() {
     return localResponse;
   }
 
-  const hasCeremony = formValues.attendingCeremony === "yes";
+  const hasCeremony = eventAccess.canViewCeremony && formValues.attendingCeremony === "yes";
   const hasBanquet = formValues.attendingBanquet === "yes";
   const activeInviteToken = inviteToken || inviteeContext?.token || "";
   const calendarInviteQuery = activeInviteToken ? `?invite=${encodeURIComponent(activeInviteToken)}` : "";
@@ -1744,6 +1790,7 @@ export default function RSVPPage() {
                 <section className="w-full border-t border-serenity/16 py-5 text-center sm:py-6">
                   <h3 className="mb-2 text-base font-semibold text-[#252934] sm:text-lg">Sự kiện</h3>
                   <div className="divide-y divide-serenity/14">
+                    {eventAccess.canViewCeremony ? (
                     <div className="flex flex-col items-center justify-center gap-2 py-4 text-center first:pt-2">
                       <div className="text-center">
                         <p className="whitespace-nowrap text-base font-semibold text-[#252934] sm:text-lg">Thánh lễ Hôn phối</p>
@@ -1751,6 +1798,7 @@ export default function RSVPPage() {
                       </div>
                       <ReviewAttendanceStatus attending={formValues.attendingCeremony === "yes"} />
                     </div>
+                    ) : null}
 
                     {shouldAskPostCeremonyParty ? (
                       <div className="flex flex-col items-center justify-center gap-2 py-4 text-center">
@@ -2031,6 +2079,7 @@ export default function RSVPPage() {
                 ) : null}
 
                 {/* Khối Thánh lễ và tiệc sau Thánh lễ */}
+                {eventAccess.canViewCeremony ? (
                 <div className="rsvp-paper-card mb-6 grid gap-1 rounded-[1.6rem] p-4 text-center sm:gap-2 sm:p-8">
                   
                   {/* Sự kiện 1: Thánh lễ */}
@@ -2219,6 +2268,7 @@ export default function RSVPPage() {
                     </p>
                   )}
                 </div>
+                ) : null}
 
                 {/* Khối Tiệc cưới và lưu trú */}
                 <motion.div

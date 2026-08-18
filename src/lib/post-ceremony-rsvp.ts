@@ -3,6 +3,7 @@ type PostCeremonyPartyInput = {
   attendingCeremony: boolean;
   attendingBanquet: boolean;
   answer: unknown;
+  allowFallback?: boolean;
 };
 
 export type PostCeremonyPartyResolution =
@@ -14,8 +15,9 @@ export function doesPostCeremonyPartyApply({
   invited,
   attendingCeremony,
   attendingBanquet,
+  allowFallback = true,
 }: Omit<PostCeremonyPartyInput, "answer">) {
-  return invited ? attendingCeremony : !attendingBanquet;
+  return invited ? attendingCeremony : allowFallback && !attendingBanquet;
 }
 
 export function resolvePostCeremonyPartyAnswer({
@@ -23,8 +25,9 @@ export function resolvePostCeremonyPartyAnswer({
   attendingCeremony,
   attendingBanquet,
   answer,
+  allowFallback = true,
 }: PostCeremonyPartyInput): PostCeremonyPartyResolution {
-  const applies = doesPostCeremonyPartyApply({ invited, attendingCeremony, attendingBanquet });
+  const applies = doesPostCeremonyPartyApply({ invited, attendingCeremony, attendingBanquet, allowFallback });
   if (!applies) return { ok: true, applies: false, value: undefined };
   if (typeof answer !== "boolean") {
     return {

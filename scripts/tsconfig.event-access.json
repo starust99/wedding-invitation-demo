@@ -1,0 +1,17 @@
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "outDir": "../.tmp-event-access-check",
+    "target": "ES2022",
+    "module": "CommonJS",
+    "moduleResolution": "Node",
+    "noEmit": false,
+    "incremental": false,
+    "isolatedModules": false
+  },
+  "include": [
+    "../src/lib/invite-event-access.ts",
+    "../src/lib/post-ceremony-rsvp.ts",
+    "../src/lib/rsvp-guest-group.ts"
+  ]
+}
