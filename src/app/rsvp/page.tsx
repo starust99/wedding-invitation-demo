@@ -51,6 +51,8 @@ import {
 import { getInviteStatusFromRsvp, readLocalInvitees, upsertLocalInvitees, writeLocalInvitees, type Invitee } from "@/lib/invites";
 import { usePageTransition } from "@/components/PageTransitionEffect";
 import { CoupleNameText } from "@/components/ui/CoupleNameText";
+import { GuestNameText } from "@/components/ui/GuestNameText";
+import { keepExactPhraseTogether } from "@/lib/couple-name-display";
 import { findAnyStoredInviteToken } from "@/lib/guest-personalization";
 import { usePublishedSettings } from "@/lib/use-published-settings";
 import {
@@ -1557,7 +1559,7 @@ export default function RSVPPage() {
                             setWishDraft(event.target.value);
                             if (wishError) setWishError("");
                           }}
-                          placeholder="Viết lời chúc dành cho Nhật & Phương…"
+                          placeholder={keepExactPhraseTogether("Viết lời chúc dành cho Nhật & Phương…", weddingConfig.couple.displayName)}
                           aria-describedby="rsvp-wish-counter rsvp-wish-error"
                           className="block min-h-36 w-full resize-none rounded-[1.35rem] bg-transparent px-4 pb-14 pt-4 text-left text-base font-normal leading-relaxed text-[#3f3b37] outline-none placeholder:text-[#7a6a5d]/46"
                         />
@@ -1730,8 +1732,8 @@ export default function RSVPPage() {
                 <header className="pb-5 text-center sm:pb-6">
                   <p className="mb-1.5 text-sm font-medium text-[#7a6a5d]">Hồi đáp của</p>
                   <div className="mx-auto w-full max-w-lg text-center">
-                    <strong className="block text-lg font-semibold text-[#252934] sm:text-xl">
-                      {inviteeContext?.displayLabel || guestIdentity.displayLabel || formValues.name || inviteCopy.shortRecipientLabel}
+                    <strong className="block text-balance text-lg font-semibold text-[#252934] sm:text-xl">
+                      <GuestNameText text={inviteeContext?.displayLabel || guestIdentity.displayLabel || formValues.name || inviteCopy.shortRecipientLabel} />
                     </strong>
                     {formValues.phone && (
                       <span className="mt-1 block text-sm font-normal text-[#7a6a5d]">{formValues.phone}</span>
@@ -1744,7 +1746,7 @@ export default function RSVPPage() {
                   <div className="divide-y divide-serenity/14">
                     <div className="flex flex-col items-center justify-center gap-2 py-4 text-center first:pt-2">
                       <div className="text-center">
-                        <p className="text-base font-semibold text-[#252934] sm:text-lg">Thánh lễ Hôn phối</p>
+                        <p className="whitespace-nowrap text-base font-semibold text-[#252934] sm:text-lg">Thánh lễ Hôn phối</p>
                         <p className="mt-1 text-sm font-normal leading-relaxed text-[#7a6a5d]">{churchDateLine}</p>
                       </div>
                       <ReviewAttendanceStatus attending={formValues.attendingCeremony === "yes"} />
@@ -1753,7 +1755,7 @@ export default function RSVPPage() {
                     {shouldAskPostCeremonyParty ? (
                       <div className="flex flex-col items-center justify-center gap-2 py-4 text-center">
                         <div className="text-center">
-                          <p className="text-base font-semibold text-[#252934] sm:text-lg">Tiệc thân mật</p>
+                          <p className="whitespace-nowrap text-base font-semibold text-[#252934] sm:text-lg">Tiệc thân mật</p>
                           <p className="mt-1 text-sm font-normal leading-relaxed text-[#7a6a5d]">{postCeremonyDateLine}</p>
                         </div>
                         <ReviewAttendanceStatus attending={formValues.attendingPostCeremonyParty === "yes"} />
@@ -1762,7 +1764,7 @@ export default function RSVPPage() {
 
                     <div className="flex flex-col items-center justify-center gap-2 py-4 text-center last:pb-1">
                       <div className="text-center">
-                        <p className="text-base font-semibold text-[#252934] sm:text-lg">Tiệc cưới</p>
+                        <p className="whitespace-nowrap text-base font-semibold text-[#252934] sm:text-lg">Tiệc cưới</p>
                         <p className="mt-1 text-sm font-normal leading-relaxed text-[#7a6a5d]">{banquetDateLine}</p>
                       </div>
                       <ReviewAttendanceStatus attending={formValues.attendingBanquet === "yes"} />
@@ -1902,7 +1904,7 @@ export default function RSVPPage() {
                         className="h-9 w-9 object-contain sm:h-10 sm:w-10"
                       />
                     </div>
-                    <p className="text-base font-bold uppercase tracking-[0.12em] text-[#7a6a5d] sm:text-lg">
+                    <p className="whitespace-nowrap text-base font-bold uppercase tracking-[0.12em] text-[#7a6a5d] sm:text-lg">
                       Tiệc thân mật
                     </p>
                     <p className="mt-3 text-base font-semibold leading-relaxed text-[#252934]">
@@ -2050,14 +2052,14 @@ export default function RSVPPage() {
                     
                     {/* Chữ */}
                     <div data-rsvp-event-copy="true" className="mb-2 min-w-0 text-center sm:mb-0 sm:text-left">
-                      <p className="text-lg sm:text-base font-bold tracking-[0.12em] text-[#7a6a5d] uppercase mb-1 leading-snug">
+                      <p className="whitespace-nowrap text-lg sm:text-base font-bold tracking-[0.12em] text-[#7a6a5d] uppercase mb-1 leading-snug">
                         THÁNH LỄ HÔN PHỐI
                       </p>
                       <p className="mb-0.5 text-sm font-semibold leading-relaxed text-[#252934] sm:whitespace-nowrap">
                         {churchReviewDateLine}
                       </p>
                       <p className="text-sm sm:text-sm text-[#252934]/72 leading-relaxed">
-                        Nhà Thờ Giáo Xứ Tam Hải
+                        <span className="whitespace-nowrap">Nhà Thờ Giáo Xứ Tam Hải</span>
                       </p>
                     </div>
 
@@ -2137,7 +2139,7 @@ export default function RSVPPage() {
                             />
                           </div>
                           <div data-rsvp-event-copy="true" className="min-w-0 text-center sm:text-left">
-                            <p className="text-sm font-bold uppercase leading-snug tracking-[0.12em] text-[#7a6a5d] sm:text-base">
+                            <p className="whitespace-nowrap text-sm font-bold uppercase leading-snug tracking-[0.12em] text-[#7a6a5d] sm:text-base">
                               Tiệc thân mật
                             </p>
                             <p className="mt-1 text-sm font-semibold leading-relaxed text-[#252934] sm:whitespace-nowrap">
@@ -2243,14 +2245,14 @@ export default function RSVPPage() {
                     
                     {/* Chữ */}
                     <div data-rsvp-event-copy="true" className="mb-2 min-w-0 text-center sm:mb-0 sm:text-left">
-                      <p className="text-lg sm:text-base font-bold tracking-[0.12em] text-[#7a6a5d] uppercase mb-1 leading-snug">
+                      <p className="whitespace-nowrap text-lg sm:text-base font-bold tracking-[0.12em] text-[#7a6a5d] uppercase mb-1 leading-snug">
                         TIỆC CƯỚI
                       </p>
                       <p className="mb-0.5 text-sm font-semibold leading-relaxed text-[#252934] sm:whitespace-nowrap">
                         {banquetReviewDateLine}
                       </p>
                       <p className="text-sm sm:text-sm text-[#252934]/72 leading-relaxed">
-                        Terracotta Hotel & Resort Đà Lạt
+                        <span className="whitespace-nowrap">Terracotta Hotel &amp; Resort Đà Lạt</span>
                       </p>
                     </div>
 

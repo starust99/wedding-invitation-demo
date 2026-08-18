@@ -10,6 +10,7 @@ import { usePageTransition } from "@/components/PageTransitionEffect";
 import type { RSVPResponse } from "@/lib/rsvp-storage";
 import { InvitationCardDivider } from "@/components/InvitationCardDivider";
 import { InvitationResponseCardShell } from "@/components/InvitationResponseCardShell";
+import { CoupleNameText } from "@/components/ui/CoupleNameText";
 
 function normalizeGuestGroup(value?: string) {
   return value?.trim().toLocaleLowerCase("vi") ?? "";
@@ -112,7 +113,7 @@ export function ThankYouSection({
                 </h3>
                 <InvitationCardDivider className="mt-1.5" />
                 <p suppressHydrationWarning className="invitation-response-copy wedding-type-body font-sans mx-auto mt-4 max-w-xl text-[#3f4642]/95">
-                  {thankYouMessage}
+                  <CoupleNameText text={thankYouMessage} coupleName={config.couple.displayName} />
                 </p>
               </div>
 

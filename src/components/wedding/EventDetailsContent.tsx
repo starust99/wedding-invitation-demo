@@ -537,7 +537,7 @@ export function EventDetailsContent({
         >
 
           {/* Main Title */}
-          <motion.h4 variants={revealChurchImmediately ? instantCardItemVariant : cardItemVariant} className="font-serif text-[1.2rem] sm:text-[1.35rem] font-bold tracking-[0.14em] md:tracking-[0.18em] uppercase text-[#3f4642] mt-1 mb-1.5 leading-tight">
+          <motion.h4 variants={revealChurchImmediately ? instantCardItemVariant : cardItemVariant} className="whitespace-nowrap font-serif text-[1.2rem] sm:text-[1.35rem] font-bold tracking-[0.14em] md:tracking-[0.18em] uppercase text-[#3f4642] mt-1 mb-1.5 leading-tight">
             Thánh lễ hôn phối
           </motion.h4>
 
@@ -621,7 +621,7 @@ export function EventDetailsContent({
         >
 
           {/* Main Title */}
-          <motion.h4 variants={revealBanquetImmediately ? instantCardItemVariant : cardItemVariant} className="font-serif text-[1.2rem] sm:text-[1.35rem] font-bold tracking-[0.14em] md:tracking-[0.18em] uppercase text-[#3f4642] mt-1 mb-1.5 leading-tight">
+          <motion.h4 variants={revealBanquetImmediately ? instantCardItemVariant : cardItemVariant} className="whitespace-nowrap font-serif text-[1.2rem] sm:text-[1.35rem] font-bold tracking-[0.14em] md:tracking-[0.18em] uppercase text-[#3f4642] mt-1 mb-1.5 leading-tight">
             Tiệc cưới
           </motion.h4>
 

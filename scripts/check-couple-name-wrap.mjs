@@ -54,6 +54,7 @@ const coveredRenderPoints = [
   "src/components/wedding/ReferenceWeddingHero.tsx",
   "src/components/wedding/HeroContent.tsx",
   "src/app/rsvp/page.tsx",
+  "src/components/ThankYouSection.tsx",
   "src/components/InviteAccessGate.tsx",
   "src/components/admin/VersionSnapshotsPanel.tsx",
 ];
@@ -68,5 +69,10 @@ assert.doesNotMatch(heroContentSource, /splitNames/, "The editor hero must not f
 
 const rsvpSource = readFileSync(join(rootDir, "src/app/rsvp/page.tsx"), "utf8");
 assert.match(rsvpSource, /keepExactPhraseTogether/, "RSVP placeholder copy must keep the couple name together.");
+
+const guestNameComponentSource = readFileSync(join(rootDir, "src/components/ui/GuestNameText.tsx"), "utf8");
+assert.match(guestNameComponentSource, /WHOLE_NAME_NOWRAP_LIMIT/);
+assert.match(guestNameComponentSource, /data-guest-name="true"/);
+assert.match(guestNameComponentSource, /whitespace-nowrap/);
 
 console.log("Couple-name wrapping checks passed: segmentation, placeholders, and UI render coverage.");

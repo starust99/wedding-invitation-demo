@@ -450,6 +450,10 @@ h3 {
   text-wrap: balance;
 }
 
+.public-invitation-page p {
+  text-wrap: pretty;
+}
+
 button,
 a,
 input,

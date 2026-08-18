@@ -39,7 +39,7 @@ function HeroGuestNameText({ text }: { text: string }) {
   return (
     <>
       <span className="sr-only">{text.replace(/\s*&\s*/g, " và ")}</span>
-      <span aria-hidden="true">
+      <span aria-hidden="true" className={text.length <= 34 ? "whitespace-nowrap" : undefined}>
         {names[0]}
         {names.slice(1).map((name, index) => (
           <span key={`${name}-${index}`} className="hero-guest-name-joined-part">

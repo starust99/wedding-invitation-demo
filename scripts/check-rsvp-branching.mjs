@@ -1,7 +1,11 @@
 import assert from "node:assert/strict";
+import { mkdirSync } from "node:fs";
+import { join } from "node:path";
 import { chromium } from "playwright";
 
 const baseUrl = (process.env.RSVP_TEST_BASE_URL || "http://localhost:3000").replace(/\/$/, "");
+const screenshotDir = process.env.RSVP_BRANCHING_SCREENSHOT_DIR;
+if (screenshotDir) mkdirSync(screenshotDir, { recursive: true });
 
 function createInvitee({ token, invited }) {
   const now = "2026-08-17T00:00:00.000Z";
@@ -9,14 +13,14 @@ function createInvitee({ token, invited }) {
     id: `11111111-1111-4111-8111-${invited ? "111111111111" : "222222222222"}`,
     token,
     inviteUnit: "individual",
-    guestName: "Anh Minh",
-    displayLabel: "Anh Minh",
+    guestName: "Gia đình Nga & Phong",
+    displayLabel: "Gia đình Nga & Phong",
     salutationCluster: "Anh",
-    displaySalutation: "Anh Minh",
-    invitationName: "Anh Minh",
+    displaySalutation: "Gia đình Nga & Phong",
+    invitationName: "Gia đình Nga & Phong",
     honorific: "Anh",
-    envelopeLine: "Anh Minh",
-    insideInviteLine: "Anh Minh",
+    envelopeLine: "Gia đình Nga & Phong",
+    insideInviteLine: "Gia đình Nga & Phong",
     invitedBy: "couple",
     relationship: "Bạn",
     hostRelationship: "Bạn",
@@ -115,6 +119,7 @@ try {
   for (const phrase of await unbreakableCeremonyPhrases.all()) {
     assert.equal(await phrase.evaluate((element) => getComputedStyle(element).whiteSpace), "nowrap");
   }
+  if (screenshotDir) await regular.page.screenshot({ path: join(screenshotDir, "01-intimate-standalone.png"), fullPage: true });
 
   const editButton = regular.page.getByRole("button", { name: "Chỉnh sửa", exact: true });
   const partyCard = regular.page.locator(".rsvp-paper-card");
@@ -138,6 +143,11 @@ try {
   await regular.page.locator(".rsvp-review-tap-guide").waitFor();
   await regular.page.getByRole("button", { name: "Xem lại và hoàn tất", exact: true }).click();
   await regular.page.getByRole("heading", { name: "Xem lại hồi đáp", exact: true }).waitFor();
+  const protectedGuestName = regular.page.locator('[data-guest-name="true"]');
+  await protectedGuestName.waitFor();
+  assert.equal(await protectedGuestName.textContent(), "Gia đình Nga & Phong");
+  assert.equal(await protectedGuestName.evaluate((element) => getComputedStyle(element).whiteSpace), "nowrap");
+  if (screenshotDir) await regular.page.screenshot({ path: join(screenshotDir, "02-review-protected-name.png"), fullPage: true });
   await regular.page.getByText("Thánh lễ Hôn phối", { exact: true }).waitFor();
   await regular.page.getByText("Tiệc thân mật", { exact: true }).waitFor();
   await regular.page.getByText("11:30 – Chủ Nhật, 20/12/2026", { exact: true }).waitFor();
@@ -165,6 +175,10 @@ try {
   const ceremonyGuides = await readEventColumnGuides(close.page, "ceremony");
   assertEventColumnsAligned(ceremonyGuides, await readEventColumnGuides(close.page, "intimate-party"), "Intimate-party");
   assertEventColumnsAligned(ceremonyGuides, await readEventColumnGuides(close.page, "banquet"), "Banquet");
+  if (screenshotDir) await close.page.screenshot({ path: join(screenshotDir, "03-close-event-row.png"), fullPage: true });
+  await close.page.setViewportSize({ width: 320, height: 720 });
+  const narrowViewportOverflow = await close.page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+  assert(narrowViewportOverflow <= 1, `Expected protected RSVP phrases not to overflow at 320px, received ${narrowViewportOverflow}px.`);
   await close.page.getByRole("button", { name: "Có", exact: true }).nth(1).click();
   await close.page.getByRole("button", { name: "Có", exact: true }).nth(2).click();
   await close.page.getByRole("button", { name: "Xem lại và hoàn tất", exact: true }).waitFor();
