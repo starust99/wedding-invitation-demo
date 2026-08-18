@@ -30,6 +30,8 @@ export type RSVPResponse = {
   childrenCount: number;
   elderlySupportNeeded: boolean;
   notes?: string;
+  wishMessage?: string;
+  wishSentAt?: string;
   submittedAt: string;
 };
 
@@ -74,6 +76,33 @@ export function saveRSVPResponse(response: Omit<RSVPResponse, "id" | "submittedA
 export function clearRSVPResponses() {
   window.localStorage.removeItem(rsvpStorageKey);
   window.dispatchEvent(new Event("wedding-rsvp-updated"));
+}
+
+export function saveRSVPWishLocally(input: {
+  inviteeId?: string;
+  inviteToken?: string;
+  wishMessage: string;
+  wishSentAt: string;
+}) {
+  if (typeof window === "undefined") return undefined;
+
+  const responses = readRSVPResponses();
+  const index = responses.findIndex((response) => (
+    (input.inviteeId && response.inviteeId === input.inviteeId)
+    || (input.inviteToken && response.inviteToken === input.inviteToken)
+  ));
+  if (index < 0) return undefined;
+
+  const updated = {
+    ...responses[index],
+    wishMessage: input.wishMessage,
+    wishSentAt: input.wishSentAt,
+  };
+  const next = [...responses];
+  next[index] = updated;
+  window.localStorage.setItem(rsvpStorageKey, JSON.stringify(next));
+  window.dispatchEvent(new Event("wedding-rsvp-updated"));
+  return updated;
 }
 
 export function removeRSVPResponses(predicate: (response: RSVPResponse) => boolean) {

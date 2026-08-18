@@ -10,7 +10,10 @@ import {
   ArrowLeft,
   ArrowRight,
   ClipboardCheck,
+  CircleCheck,
   CircleHelp,
+  ChevronDown,
+  Gift,
   Mail,
   Minus,
   Plus,
@@ -18,6 +21,7 @@ import {
   Church,
   Images,
   Wine,
+  Send,
   X,
 } from "lucide-react";
 import {
@@ -26,6 +30,7 @@ import {
   saveRSVPResponse,
   readRSVPResponses,
   removeRSVPResponses,
+  saveRSVPWishLocally,
   type LodgingGuest,
   type RSVPResponse,
 } from "@/lib/rsvp-storage";
@@ -53,6 +58,7 @@ import {
   isGroomFamilyLodgingGuestGroup,
 } from "@/lib/rsvp-guest-group";
 import { doesPostCeremonyPartyApply } from "@/lib/post-ceremony-rsvp";
+import { RSVP_WISH_MAX_LENGTH } from "@/lib/rsvp-wish";
 
 const rsvpSuccessUtilityVariants: Variants = {
   tucked: {
@@ -518,6 +524,12 @@ export default function RSVPPage() {
   const [isAdminBypassed, setIsAdminBypassed] = useState(false);
   const [calendarHandoffHelp, setCalendarHandoffHelp] = useState<CalendarHandoffGuidance | null>(null);
   const [shouldRevealSuccessUtility, setShouldRevealSuccessUtility] = useState(false);
+  const [successDisclosure, setSuccessDisclosure] = useState<"wish" | "gift" | null>(null);
+  const [wishDraft, setWishDraft] = useState("");
+  const [submittedWishMessage, setSubmittedWishMessage] = useState("");
+  const [submittedWishAt, setSubmittedWishAt] = useState("");
+  const [wishError, setWishError] = useState("");
+  const [isSendingWish, setIsSendingWish] = useState(false);
   const hasUserEditedFormRef = useRef(false);
   const calendarHandoffCleanupRef = useRef<(() => void) | null>(null);
   const successConfirmationRef = useRef<HTMLDivElement>(null);
@@ -612,7 +624,10 @@ export default function RSVPPage() {
   useEffect(() => {
     if (isSubmitted) {
       hasUserEditedFormRef.current = false;
+      return;
     }
+    setSuccessDisclosure(null);
+    setWishError("");
   }, [isSubmitted]);
 
   useEffect(() => {
@@ -730,6 +745,8 @@ export default function RSVPPage() {
     function applyInvite(invitee: Invitee) {
       if (cancelled) return;
       const response = invitee.rsvp;
+      setSubmittedWishMessage(response?.wishMessage ?? "");
+      setSubmittedWishAt(response?.wishSentAt ?? "");
       const identity: GuestIdentity = {
         name: invitee.guestName || invitee.displayLabel,
         honorific: invitee.honorific,
@@ -793,6 +810,8 @@ export default function RSVPPage() {
     function applyResponseOnly(response: RSVPResponse) {
       if (cancelled) return;
       if (hasUserEditedFormRef.current) return;
+      setSubmittedWishMessage(response.wishMessage ?? "");
+      setSubmittedWishAt(response.wishSentAt ?? "");
       setValue("name", response.name || "", { shouldDirty: false });
       setValue("phone", response.phone || "", { shouldDirty: false });
       const hydratedGuestGroup = response.guestGroup || "";
@@ -1179,14 +1198,20 @@ export default function RSVPPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
+      const result = await apiResponse.json().catch(() => null) as {
+        error?: string;
+        response?: RSVPResponse;
+      } | null;
 
       if (!apiResponse.ok) {
-        const result = await apiResponse.json().catch(() => null) as { error?: string } | null;
         throw new Error(result?.error || "Máy chủ chưa ghi nhận được hồi đáp.");
       }
 
       clearRsvpDraft(targetToken);
-      persistLocalRsvp(payload);
+      const localResponse = persistLocalRsvp(payload);
+      const savedResponse = result?.response ?? localResponse;
+      setSubmittedWishMessage(savedResponse.wishMessage ?? "");
+      setSubmittedWishAt(savedResponse.wishSentAt ?? "");
       setIsSubmitted(true);
     } catch (error) {
       setSubmitError(
@@ -1194,6 +1219,86 @@ export default function RSVPPage() {
           ? `Chưa gửi được hồi đáp: ${error.message} Vui lòng thử lại.`
           : "Chưa gửi được hồi đáp. Vui lòng kiểm tra kết nối và thử lại.",
       );
+    }
+  }
+
+  function applySubmittedWish(response: RSVPResponse) {
+    const message = response.wishMessage?.trim();
+    if (!message) return false;
+
+    const wishSentAt = response.wishSentAt || new Date().toISOString();
+    setSubmittedWishMessage(message);
+    setSubmittedWishAt(wishSentAt);
+    setWishDraft("");
+    setWishError("");
+    setSuccessDisclosure(null);
+    saveRSVPWishLocally({
+      inviteeId: response.inviteeId,
+      inviteToken: response.inviteToken,
+      wishMessage: message,
+      wishSentAt,
+    });
+
+    if (inviteeContext) {
+      const updatedInvitee = {
+        ...inviteeContext,
+        rsvp: { ...response, wishMessage: message, wishSentAt },
+        updatedAt: new Date().toISOString(),
+      };
+      setInviteeContext(updatedInvitee);
+      upsertLocalInvitees([updatedInvitee]);
+    }
+
+    return true;
+  }
+
+  async function submitWish() {
+    if (isSendingWish || submittedWishMessage) return;
+
+    const message = wishDraft.trim();
+    if (!message) {
+      setWishError("Quý khách vui lòng viết đôi lời trước khi gửi.");
+      return;
+    }
+    if (message.length > RSVP_WISH_MAX_LENGTH) {
+      setWishError(`Lời chúc tối đa ${RSVP_WISH_MAX_LENGTH} ký tự.`);
+      return;
+    }
+
+    const targetToken = inviteToken || inviteeContext?.token || "";
+    if (!targetToken) {
+      setWishError("Chưa tìm thấy lời mời riêng để ghi nhận lời chúc.");
+      return;
+    }
+
+    setIsSendingWish(true);
+    setWishError("");
+    try {
+      const apiResponse = await fetch(`/api/invites/${encodeURIComponent(targetToken)}/wish`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message }),
+      });
+      const result = await apiResponse.json().catch(() => null) as {
+        error?: string;
+        response?: RSVPResponse;
+      } | null;
+
+      if (result?.response?.wishMessage && applySubmittedWish(result.response)) {
+        return;
+      }
+      if (!apiResponse.ok) {
+        throw new Error(result?.error || "Chưa ghi nhận được lời chúc.");
+      }
+      throw new Error("Máy chủ chưa trả về lời chúc vừa gửi.");
+    } catch (error) {
+      setWishError(
+        error instanceof Error && error.message
+          ? `${error.message} Vui lòng thử lại.`
+          : "Chưa gửi được lời chúc. Vui lòng kiểm tra kết nối và thử lại.",
+      );
+    } finally {
+      setIsSendingWish(false);
     }
   }
 
@@ -1368,6 +1473,138 @@ export default function RSVPPage() {
                     </p>
                   ))}
                 </div>
+
+                <div className="mt-6 flex w-full max-w-lg flex-col items-center gap-1.5 sm:mt-7">
+                  {submittedWishMessage ? (
+                    <p
+                      role="status"
+                      aria-live="polite"
+                      title={submittedWishAt ? `Đã gửi lúc ${new Date(submittedWishAt).toLocaleString("vi-VN")}` : undefined}
+                      className="inline-flex min-h-11 items-center justify-center gap-2 px-4 text-sm font-semibold text-[#6e655e]/78"
+                    >
+                      <CircleCheck aria-hidden="true" className="h-5 w-5 text-[#d7aaa8]" strokeWidth={1.8} />
+                      Đã gửi lời chúc
+                    </p>
+                  ) : (
+                    <button
+                      type="button"
+                      aria-expanded={successDisclosure === "wish"}
+                      aria-controls="rsvp-wish-composer"
+                      onClick={() => {
+                        setWishError("");
+                        setSuccessDisclosure((current) => current === "wish" ? null : "wish");
+                      }}
+                      className="wedding-type-button inline-flex h-11 min-w-[154px] items-center justify-center gap-2 rounded-full border border-serenity/24 bg-white/80 px-6 text-sm font-bold text-[#252934] transition hover:bg-white hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7a8a5c] focus-visible:ring-offset-2"
+                    >
+                      <Mail aria-hidden="true" className="h-4 w-4" strokeWidth={1.8} />
+                      Gửi lời chúc
+                    </button>
+                  )}
+
+                  <button
+                    type="button"
+                    aria-expanded={successDisclosure === "gift"}
+                    aria-controls="rsvp-gift-qr"
+                    onClick={() => setSuccessDisclosure((current) => current === "gift" ? null : "gift")}
+                    className={[
+                      "wedding-type-button inline-flex min-h-11 items-center justify-center gap-2 text-sm font-bold text-[#4f4a45] transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7a8a5c] focus-visible:ring-offset-2",
+                      submittedWishMessage
+                        ? "mt-0.5 h-11 min-w-[160px] rounded-full border border-serenity/24 bg-white/80 px-6 hover:bg-white hover:shadow-sm"
+                        : "rounded-full px-4 text-[#5f5a54]/84 hover:bg-white/46 hover:text-[#252934]",
+                    ].join(" ")}
+                  >
+                    <Gift aria-hidden="true" className="h-4.5 w-4.5" strokeWidth={1.75} />
+                    Gửi quà mừng
+                    <ChevronDown
+                      aria-hidden="true"
+                      className={[
+                        "h-4 w-4 transition-transform duration-200",
+                        successDisclosure === "gift" ? "rotate-180" : "",
+                      ].join(" ")}
+                    />
+                  </button>
+                </div>
+
+                <AnimatePresence initial={false} mode="wait">
+                  {successDisclosure === "wish" && !submittedWishMessage ? (
+                    <motion.form
+                      key="wish-composer"
+                      id="rsvp-wish-composer"
+                      onSubmit={(event) => {
+                        event.preventDefault();
+                        void submitWish();
+                      }}
+                      initial={shouldReduceMotion ? false : { opacity: 0, height: 0, y: -6 }}
+                      animate={{ opacity: 1, height: "auto", y: 0 }}
+                      exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, height: 0, y: -4 }}
+                      transition={{ duration: shouldReduceMotion ? 0 : 0.24, ease: [0.16, 1, 0.3, 1] }}
+                      className="mt-4 w-full max-w-lg overflow-hidden"
+                    >
+                      <label htmlFor="rsvp-wish-message" className="sr-only">Lời chúc dành cho Nhật và Phương</label>
+                      <div className="relative rounded-[1.35rem] border border-[#dccdc4] bg-white/78 shadow-[inset_0_1px_0_rgba(255,255,255,0.85),0_10px_28px_rgba(92,82,71,0.04)] transition focus-within:border-[#b9a69a] focus-within:bg-white/92 focus-within:ring-4 focus-within:ring-serenity/12">
+                        <textarea
+                          id="rsvp-wish-message"
+                          value={wishDraft}
+                          maxLength={RSVP_WISH_MAX_LENGTH}
+                          rows={4}
+                          autoFocus
+                          onChange={(event) => {
+                            setWishDraft(event.target.value);
+                            if (wishError) setWishError("");
+                          }}
+                          placeholder="Viết lời chúc dành cho Nhật & Phương…"
+                          aria-describedby="rsvp-wish-counter rsvp-wish-error"
+                          className="block min-h-36 w-full resize-none rounded-[1.35rem] bg-transparent px-4 pb-14 pt-4 text-left text-base font-normal leading-relaxed text-[#3f3b37] outline-none placeholder:text-[#7a6a5d]/46"
+                        />
+                        <span
+                          id="rsvp-wish-counter"
+                          className="pointer-events-none absolute bottom-4 left-4 text-[11px] font-medium tabular-nums text-[#7a6a5d]/58"
+                        >
+                          {wishDraft.length}/{RSVP_WISH_MAX_LENGTH}
+                        </span>
+                        <button
+                          type="submit"
+                          disabled={isSendingWish}
+                          className="wedding-type-button absolute bottom-2.5 right-2.5 inline-flex min-h-11 min-w-20 items-center justify-center gap-1.5 rounded-full bg-[#f6d8d6] px-4 text-xs font-bold text-[#3f3b37] shadow-sm ring-1 ring-[#e8c4c2]/74 transition hover:-translate-y-0.5 hover:bg-[#f3cecc] disabled:translate-y-0 disabled:cursor-wait disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7a8a5c] focus-visible:ring-offset-2"
+                        >
+                          <Send aria-hidden="true" className="h-3.5 w-3.5" strokeWidth={1.9} />
+                          {isSendingWish ? "Đang gửi" : "Gửi"}
+                        </button>
+                      </div>
+                      <p
+                        id="rsvp-wish-error"
+                        role={wishError ? "alert" : undefined}
+                        className="mt-2 min-h-5 text-center text-sm font-medium leading-relaxed text-[#B4232F]"
+                      >
+                        {wishError}
+                      </p>
+                    </motion.form>
+                  ) : successDisclosure === "gift" ? (
+                    <motion.div
+                      key="gift-qr"
+                      id="rsvp-gift-qr"
+                      role="region"
+                      aria-label="Mã QR gửi quà mừng"
+                      initial={shouldReduceMotion ? false : { opacity: 0, height: 0, y: -6 }}
+                      animate={{ opacity: 1, height: "auto", y: 0 }}
+                      exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, height: 0, y: -4 }}
+                      transition={{ duration: shouldReduceMotion ? 0 : 0.24, ease: [0.16, 1, 0.3, 1] }}
+                      className="mt-4 w-full max-w-lg overflow-hidden"
+                    >
+                      <div className="mx-auto w-[min(13.75rem,78vw)] rounded-[1.55rem] border border-white/90 bg-white/92 p-3 shadow-[0_14px_38px_rgba(92,82,71,0.09),inset_0_1px_0_rgba(255,255,255,0.95)]">
+                        <Image
+                          src="/assets/wedding/ui/rsvp/cash-gift-qr.png"
+                          alt="Mã QR gửi quà mừng đến Nhật và Phương"
+                          width={468}
+                          height={464}
+                          className="h-auto w-full rounded-[1rem]"
+                          draggable={false}
+                          unoptimized
+                        />
+                      </div>
+                    </motion.div>
+                  ) : null}
+                </AnimatePresence>
               </motion.div>
 
               {shouldShowAttendanceCalendar ? (

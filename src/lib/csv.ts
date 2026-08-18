@@ -28,6 +28,8 @@ const columns: Array<[string, (response: RSVPResponse) => string | number | bool
   ["Số trẻ em", (response) => response.childrenCount],
   ["Cần hỗ trợ người lớn tuổi", (response) => response.elderlySupportNeeded],
   ["Ghi chú", (response) => response.notes],
+  ["Lời chúc", (response) => response.wishMessage],
+  ["Thời gian gửi lời chúc", (response) => response.wishSentAt],
   ["Thời gian gửi", (response) => response.submittedAt],
 ];
 

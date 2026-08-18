@@ -24,6 +24,8 @@ create table if not exists rsvp_responses (
   children_count int not null default 0 check (children_count >= 0),
   elderly_support_needed boolean not null default false,
   notes text,
+  wish_message text,
+  wish_sent_at timestamptz,
   submitted_at timestamptz not null default now()
 );
 
@@ -33,17 +35,32 @@ alter table rsvp_responses add column if not exists display_label text;
 alter table rsvp_responses add column if not exists attending_ceremony boolean;
 alter table rsvp_responses add column if not exists attending_banquet boolean;
 alter table rsvp_responses add column if not exists attending_post_ceremony_party boolean;
+alter table rsvp_responses add column if not exists wish_message text;
+alter table rsvp_responses add column if not exists wish_sent_at timestamptz;
 alter table rsvp_responses add column if not exists lodging_guests jsonb not null default '[]'::jsonb;
 alter table rsvp_responses drop constraint if exists rsvp_post_ceremony_requires_ceremony;
 alter table rsvp_responses
   add constraint rsvp_post_ceremony_requires_ceremony
   check (attending_post_ceremony_party is null or attending_ceremony is true);
+alter table rsvp_responses drop constraint if exists rsvp_wish_message_contract;
+alter table rsvp_responses
+  add constraint rsvp_wish_message_contract
+  check (
+    (wish_message is null and wish_sent_at is null)
+    or (
+      wish_message is not null
+      and wish_sent_at is not null
+      and char_length(wish_message) between 1 and 500
+      and char_length(btrim(wish_message)) >= 1
+    )
+  );
 
 create index if not exists rsvp_responses_submitted_at_idx on rsvp_responses (submitted_at desc);
 create index if not exists rsvp_responses_attending_idx on rsvp_responses (attending);
 create index if not exists rsvp_responses_accommodation_needed_idx on rsvp_responses (accommodation_needed);
 create index if not exists rsvp_responses_invitee_id_idx on rsvp_responses (invitee_id);
 create index if not exists rsvp_responses_invite_token_idx on rsvp_responses (invite_token);
+create index if not exists rsvp_responses_wish_sent_at_idx on rsvp_responses (wish_sent_at desc) where wish_sent_at is not null;
 create unique index if not exists rsvp_responses_invitee_id_unique_idx on rsvp_responses (invitee_id) where invitee_id is not null;
 create unique index if not exists rsvp_responses_invite_token_unique_idx on rsvp_responses (invite_token) where invite_token is not null;
 

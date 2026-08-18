@@ -1,4 +1,5 @@
 import type { LodgingGuest, RSVPResponse } from "@/lib/rsvp-storage";
+import { parseLegacyRsvpWish } from "@/lib/rsvp-wish";
 
 export type RSVPDatabaseRow = {
   id: string;
@@ -24,6 +25,8 @@ export type RSVPDatabaseRow = {
   children_count: number;
   elderly_support_needed: boolean;
   notes: string | null;
+  wish_message?: string | null;
+  wish_sent_at?: string | null;
   submitted_at: string;
 };
 
@@ -94,6 +97,7 @@ function parseLegacyRsvpMetadata(value: unknown): LegacyRsvpMetadata {
 
 export function mapRSVPRow(row: RSVPDatabaseRow): RSVPResponse {
   const legacyMetadata = parseLegacyRsvpMetadata(row.lodging_guests);
+  const legacyWish = parseLegacyRsvpWish(row.notes);
 
   return {
     id: row.id,
@@ -118,7 +122,9 @@ export function mapRSVPRow(row: RSVPDatabaseRow): RSVPResponse {
     roomType: row.room_type ?? undefined,
     childrenCount: row.children_count,
     elderlySupportNeeded: row.elderly_support_needed,
-    notes: row.notes ?? undefined,
+    notes: legacyWish ? undefined : row.notes ?? undefined,
+    wishMessage: row.wish_message ?? legacyWish?.message,
+    wishSentAt: row.wish_sent_at ?? legacyWish?.sentAt,
     submittedAt: row.submitted_at,
   };
 }

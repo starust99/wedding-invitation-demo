@@ -124,6 +124,7 @@ assert(banquet.body.includes("Sự đồng hành của gia đình anh chị"));
 for (const submission of [decline, both, ceremony, banquet]) {
   assert(submission.body.endsWith("\n\nChân thành cảm ơn!"));
   assert.equal(submission.body.match(/Chân thành cảm ơn!/g)?.length, 1);
+  assert.equal(submission.body.includes("Lời hồi đáp đã được gửi thành công"), false);
 }
 
 const fallback = copy.buildRsvpSubmissionCopy({

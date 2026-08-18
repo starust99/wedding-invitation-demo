@@ -222,6 +222,7 @@ export function InviteAdminPanel() {
   const [attendingFilter, setAttendingFilter] = useState("all");
   const [postCeremonyFilter, setPostCeremonyFilter] = useState("all");
   const [accommodationFilter, setAccommodationFilter] = useState("all");
+  const [wishFilter, setWishFilter] = useState("all");
   const [groupFilter, setGroupFilter] = useState("all");
   const [selectedResponseIds, setSelectedResponseIds] = useState<Set<string>>(() => new Set());
   const [deletingRsvp, setDeletingRsvp] = useState(false);
@@ -847,10 +848,12 @@ export function InviteAdminPanel() {
       if (postCeremonyFilter !== "all" && postCeremonyStatus(response) !== postCeremonyFilter) return false;
       if (accommodationFilter === "yes" && !response.accommodationNeeded) return false;
       if (accommodationFilter === "no" && response.accommodationNeeded) return false;
+      if (wishFilter === "yes" && !response.wishMessage) return false;
+      if (wishFilter === "no" && response.wishMessage) return false;
       if (groupFilter !== "all" && response.guestGroup !== groupFilter) return false;
       return true;
     });
-  }, [responses, attendingFilter, postCeremonyFilter, accommodationFilter, groupFilter, postCeremonyStatus]);
+  }, [responses, attendingFilter, postCeremonyFilter, accommodationFilter, wishFilter, groupFilter, postCeremonyStatus]);
 
   const notAttending = useMemo(() => responses.filter((response) => response.attending === "no").length, [responses]);
   const ceremonyGuests = useMemo(() => responses.filter((response) => response.attending === "yes" && response.attendingCeremony).reduce((sum, response) => sum + response.guestCount, 0), [responses]);
@@ -859,6 +862,7 @@ export function InviteAdminPanel() {
   const stayingGuests = useMemo(() => responses.reduce((sum, response) => sum + (response.stayingGuestCount ?? response.lodgingGuests?.length ?? 0), 0), [responses]);
   const accommodationRequests = useMemo(() => responses.filter((response) => response.accommodationNeeded).length, [responses]);
   const childrenStaying = useMemo(() => responses.reduce((sum, response) => sum + response.childrenCount, 0), [responses]);
+  const wishesReceived = useMemo(() => responses.filter((response) => response.wishMessage).length, [responses]);
 
   const stayingDec25 = useMemo(() => responses.reduce((sum, response) => {
     const isDec25 = response.checkInDate === "2026-12-25" || (response as any).stayDecision === "25" || (response as any).stayDecision === "both";
@@ -1065,11 +1069,12 @@ export function InviteAdminPanel() {
                 </div>
               ))}
             </div>
-            {(postCeremonyPartyGuests > 0 || childrenStaying > 0 || notAttending > 0) && (
+            {(postCeremonyPartyGuests > 0 || childrenStaying > 0 || notAttending > 0 || wishesReceived > 0) && (
               <div className="flex flex-wrap gap-x-5 gap-y-2 border-t border-[#E8DDCC] bg-[#FCFAF4] px-4 py-3 text-xs text-[#665D54] sm:px-5">
                 <span>Tiệc thân mật: <b>{postCeremonyPartyGuests} người</b> <i>(ước lượng)</i></span>
                 <span>Trẻ em lưu trú: <b>{childrenStaying}</b> <i>(ước lượng)</i></span>
                 <span>Lời từ chối: <b>{notAttending}</b></span>
+                <span>Lời chúc: <b>{wishesReceived}</b></span>
               </div>
             )}
           </section>
@@ -1082,7 +1087,7 @@ export function InviteAdminPanel() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-4">
+              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-5">
                   <select aria-label="Lọc theo phản hồi" value={attendingFilter} onChange={(event) => setAttendingFilter(event.target.value)} className="min-h-11 w-full rounded-xl border border-[#E8DDCC] bg-white px-3 text-sm outline-none transition focus:border-[#5F6F4E]">
                     <option value="all">Phản hồi: tất cả</option>
                     <option value="yes">Đã xác nhận</option>
@@ -1104,6 +1109,11 @@ export function InviteAdminPanel() {
                   <select aria-label="Lọc theo nhóm khách" value={groupFilter} onChange={(event) => setGroupFilter(event.target.value)} className="min-h-11 w-full rounded-xl border border-[#E8DDCC] bg-white px-3 text-sm outline-none transition focus:border-[#5F6F4E]">
                     <option value="all">Nhóm khách: tất cả</option>
                     {groups.map((group) => <option key={group} value={group}>{group}</option>)}
+                  </select>
+                  <select aria-label="Lọc theo lời chúc" value={wishFilter} onChange={(event) => setWishFilter(event.target.value)} className="min-h-11 w-full rounded-xl border border-[#E8DDCC] bg-white px-3 text-sm outline-none transition focus:border-[#5F6F4E]">
+                    <option value="all">Lời chúc: tất cả</option>
+                    <option value="yes">Đã gửi lời chúc</option>
+                    <option value="no">Chưa gửi lời chúc</option>
                   </select>
               </div>
 
@@ -1187,6 +1197,12 @@ export function InviteAdminPanel() {
                           <p><span className="text-[#8A8178]">Số người</span><br /><b>{response.guestCount} <span className="font-normal">(ước lượng)</span></b></p>
                           <p><span className="text-[#8A8178]">Lưu trú</span><br /><b>{response.accommodationNeeded ? `${response.stayingGuestCount ?? response.lodgingGuests?.length ?? 0} người` : "Không"}</b>{response.accommodationNeeded && <span className="block text-[11px] text-[#8A8178]">Ước lượng</span>}</p>
                         </div>
+                        {response.wishMessage ? (
+                          <div className="mt-3 rounded-lg bg-[#F8F3EA] px-3 py-2.5 text-xs leading-relaxed text-[#665D54]">
+                            <p className="font-semibold text-[#2E2A25]">Lời chúc · {formatDate(response.wishSentAt || "")}</p>
+                            <p className="mt-1 whitespace-pre-wrap">{response.wishMessage}</p>
+                          </div>
+                        ) : null}
                       </div>
                     </div>
                   </article>
@@ -1210,13 +1226,14 @@ export function InviteAdminPanel() {
                       <th className="p-4">Nhóm</th>
                       <th className="p-4">Lưu trú</th>
                       <th className="p-4">Người lưu trú</th>
+                      <th className="p-4">Lời chúc</th>
                       <th className="p-4">Lưu ý</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-[#E8DDCC]">
                     {filteredResponses.length === 0 ? (
                       <tr>
-                        <td colSpan={10} className="p-8 text-center text-[#8A8178] bg-[#FCFAF4]/30">
+                        <td colSpan={11} className="p-8 text-center text-[#8A8178] bg-[#FCFAF4]/30">
                           Chưa có lời hồi đáp phù hợp.
                         </td>
                       </tr>
@@ -1254,6 +1271,14 @@ export function InviteAdminPanel() {
                         <td className="p-4 text-xs">{response.guestGroup}</td>
                         <td className="p-4 text-xs">{response.accommodationNeeded ? <>{response.stayingGuestCount ?? response.lodgingGuests?.length ?? 0} người <span className="block text-[10px] text-[#8A8178]">Ước lượng</span></> : "Không"}</td>
                         <td className="p-4 text-xs max-w-[200px] truncate text-[#665d54]">{response.accommodationNeeded ? (response.lodgingGuests?.length ? summarizeLodgingGuests(response.lodgingGuests) : "Chưa có danh sách") : "Không"}</td>
+                        <td className="max-w-[260px] p-4 text-xs text-[#665d54]">
+                          {response.wishMessage ? (
+                            <>
+                              <p className="line-clamp-3 whitespace-pre-wrap">{response.wishMessage}</p>
+                              <p className="mt-1 text-[10px] text-[#8A8178]">{formatDate(response.wishSentAt || "")}</p>
+                            </>
+                          ) : "—"}
+                        </td>
                         <td className="p-4 text-xs max-w-[220px] truncate text-[#665d54]">{response.dietaryNote || response.notes || "—"}</td>
                       </tr>
                     ))}
@@ -1712,6 +1737,14 @@ export function InviteAdminPanel() {
                           </p>
                           {selectedRsvp.accommodationNeeded && <p>Cần lưu trú: <b>{selectedRsvp.stayingGuestCount ?? selectedRsvp.lodgingGuests?.length ?? 0} người</b> <span className="text-[#8A8178]">(ước lượng)</span> ({selectedRsvp.lodgingGuests?.length ? summarizeLodgingGuests(selectedRsvp.lodgingGuests) : "Chưa điền tên"}).</p>}
                           {(selectedRsvp.dietaryNote || selectedRsvp.notes) && <p>Ghi chú/Ẩm thực: <i>{selectedRsvp.dietaryNote || selectedRsvp.notes}</i></p>}
+                          {selectedRsvp.wishMessage ? (
+                            <div className="mt-3 rounded-lg border border-[#E8DDCC] bg-white px-3 py-2.5">
+                              <p className="font-semibold text-[#2E2A25]">Lời chúc · {formatDate(selectedRsvp.wishSentAt || "")}</p>
+                              <p className="mt-1 whitespace-pre-wrap leading-relaxed">{selectedRsvp.wishMessage}</p>
+                            </div>
+                          ) : (
+                            <p className="text-[#8A8178]">Chưa gửi lời chúc.</p>
+                          )}
                         </div>
                       ) : (
                         <p className="mt-2 text-[#8A8178]">Khách chưa hồi đáp RSVP.</p>

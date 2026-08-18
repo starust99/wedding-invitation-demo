@@ -59,6 +59,8 @@ function normalizeResponses(value: unknown): RSVPResponse[] {
       childrenCount: Number(response.childrenCount) || 0,
       elderlySupportNeeded: Boolean(response.elderlySupportNeeded),
       notes: response.notes ? text(response.notes) : undefined,
+      wishMessage: response.wishMessage ? text(response.wishMessage) : undefined,
+      wishSentAt: response.wishSentAt ? text(response.wishSentAt) : undefined,
       submittedAt: text(response.submittedAt),
     } satisfies RSVPResponse];
   });
@@ -111,6 +113,7 @@ function addSummarySheet(workbook: ExcelJS.Workbook, responses: RSVPResponse[], 
     ["Tổng người ở lại", stayingGuests],
     ["Trẻ em ở lại", responses.reduce((sum, response) => sum + response.childrenCount, 0)],
     ["Người lớn tuổi cần hỗ trợ", responses.filter((response) => response.elderlySupportNeeded).length],
+    ["Số lời chúc đã nhận", responses.filter((response) => response.wishMessage).length],
   ].forEach(([label, value]) => worksheet.addRow({ label, value }));
 
   worksheet.eachRow((row, rowIndex) => {
@@ -146,6 +149,8 @@ function addResponsesSheet(workbook: ExcelJS.Workbook, responses: RSVPResponse[]
     { key: "lodgingGuests", header: "Danh sách người lưu trú", width: 58 },
     { key: "dietaryNote", header: "Ghi chú thực đơn", width: 30 },
     { key: "notes", header: "Ghi chú khác", width: 34 },
+    { key: "wishMessage", header: "Lời chúc", width: 52 },
+    { key: "wishSentAt", header: "Thời gian gửi lời chúc", width: 24 },
     { key: "submittedAt", header: "Thời gian gửi", width: 24 },
   ];
 
@@ -173,11 +178,13 @@ function addResponsesSheet(workbook: ExcelJS.Workbook, responses: RSVPResponse[]
       lodgingGuests: summarizeLodgingGuests(response.lodgingGuests),
       dietaryNote: response.dietaryNote,
       notes: response.notes,
+      wishMessage: response.wishMessage,
+      wishSentAt: response.wishSentAt,
       submittedAt: response.submittedAt,
     });
   });
 
-  styleWorksheet(worksheet, "A1:S1");
+  styleWorksheet(worksheet, "A1:U1");
 }
 
 function addLodgingSheet(workbook: ExcelJS.Workbook, responses: RSVPResponse[]) {

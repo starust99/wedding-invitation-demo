@@ -62,27 +62,27 @@ export function buildRsvpSubmissionCopy(input: {
   if (isYes(input.attendingCeremony) && isYes(input.attendingBanquet)) {
     return {
       title: "Đã xác nhận",
-      body: withClosingThanks(`Lời hồi đáp đã được gửi thành công!\n\nThật hạnh phúc khi biết ${recipientLower} sẽ có mặt ở cả Thánh lễ Hôn phối lẫn Tiệc cưới để chung vui cùng ${coupleDisplayName}.\n\nSự hiện diện của ${recipientLower} chính là món quà ý nghĩa nhất.`),
+      body: withClosingThanks(`Thật hạnh phúc khi biết ${recipientLower} sẽ có mặt ở cả Thánh lễ Hôn phối lẫn Tiệc cưới để chung vui cùng ${coupleDisplayName}.\n\nSự hiện diện của ${recipientLower} chính là món quà ý nghĩa nhất.`),
       showCalendar: true,
     };
   }
   if (isYes(input.attendingCeremony) && isNo(input.attendingBanquet)) {
     return {
       title: "Đã xác nhận",
-      body: withClosingThanks(`Lời hồi đáp đã được gửi thành công!\n\nCảm ơn ${recipient} đã sắp xếp thời gian đến chứng kiến và hiệp thông trong Thánh lễ Hôn phối của ${coupleDisplayName}.\n\nDù rất tiếc không thể đồng hành trong buổi Tiệc cưới, sự hiện diện và lời cầu nguyện của ${recipientLower} tại Thánh đường đã là món quà vô cùng trân quý.`),
+      body: withClosingThanks(`Cảm ơn ${recipient} đã sắp xếp thời gian đến chứng kiến và hiệp thông trong Thánh lễ Hôn phối của ${coupleDisplayName}.\n\nDù rất tiếc không thể đồng hành trong buổi Tiệc cưới, sự hiện diện và lời cầu nguyện của ${recipientLower} tại Thánh đường đã là món quà vô cùng trân quý.`),
       showCalendar: true,
     };
   }
   if (isNo(input.attendingCeremony) && isYes(input.attendingBanquet)) {
     return {
       title: "Đã xác nhận",
-      body: withClosingThanks(`Lời hồi đáp đã được gửi thành công!\n\nCảm ơn ${recipient} đã sắp xếp thời gian đến chung vui tại Tiệc cưới của ${coupleDisplayName}.\n\nSự đồng hành của ${recipientLower} chắc chắn sẽ giúp ngày vui thêm trọn vẹn và đong đầy ý nghĩa. Hẹn sớm gặp tại Đà Lạt!`),
+      body: withClosingThanks(`Cảm ơn ${recipient} đã sắp xếp thời gian đến chung vui tại Tiệc cưới của ${coupleDisplayName}.\n\nSự đồng hành của ${recipientLower} chắc chắn sẽ giúp ngày vui thêm trọn vẹn và đong đầy ý nghĩa. Hẹn sớm gặp tại Đà Lạt!`),
       showCalendar: true,
     };
   }
   return {
     title: "Đã xác nhận",
-    body: withClosingThanks(`Lời hồi đáp đã được gửi thành công.\n\n${input.fallbackClosingLine}`),
+    body: withClosingThanks(input.fallbackClosingLine),
     showCalendar: true,
   };
 }

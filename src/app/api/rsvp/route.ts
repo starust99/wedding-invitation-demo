@@ -9,6 +9,7 @@ import {
 import { getSupabaseServerClient, hasSupabaseEnv } from "@/lib/supabase-server";
 import { resolvePostCeremonyPartyAnswer } from "@/lib/post-ceremony-rsvp";
 import { isGroomFamilyLodgingGuestGroup } from "@/lib/rsvp-guest-group";
+import { preserveLegacyRsvpWishNotes } from "@/lib/rsvp-wish";
 
 export const dynamic = "force-dynamic";
 
@@ -100,26 +101,30 @@ export async function POST(request: Request) {
   };
 
   let existingId: string | null = null;
+  let existingNotes: string | null = null;
   if (matchingInvitee?.id || matchingInvitee?.token || payload.inviteToken) {
     const filter = matchingInvitee?.id
       ? `invitee_id.eq.${matchingInvitee.id}`
       : `invite_token.eq.${payload.inviteToken}`;
     const { data: existing } = await supabase
       .from("rsvp_responses")
-      .select("id")
+      .select("id, notes")
       .or(filter)
       .order("submitted_at", { ascending: false })
       .limit(1)
       .maybeSingle();
     if (existing?.id) {
       existingId = existing.id;
+      existingNotes = existing.notes;
     }
   }
 
   const submittedAt = new Date().toISOString();
   const mutate = (includeEventAttendanceColumns: boolean) => {
+    const rsvpInsert = toRSVPInsert(payload, { includeEventAttendanceColumns });
     const insertPayload = {
-      ...toRSVPInsert(payload, { includeEventAttendanceColumns }),
+      ...rsvpInsert,
+      notes: preserveLegacyRsvpWishNotes(existingNotes, rsvpInsert.notes),
       submitted_at: submittedAt,
     };
     const mutation = existingId

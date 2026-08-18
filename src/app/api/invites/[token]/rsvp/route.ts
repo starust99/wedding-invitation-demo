@@ -9,6 +9,7 @@ import {
 import type { RSVPResponse } from "@/lib/rsvp-storage";
 import { getSupabaseServerClient, hasSupabaseEnv } from "@/lib/supabase-server";
 import { resolvePostCeremonyPartyAnswer } from "@/lib/post-ceremony-rsvp";
+import { preserveLegacyRsvpWishNotes } from "@/lib/rsvp-wish";
 import {
   isFamilyLodgingGuestGroup,
   isGroomFamilyLodgingGuestGroup,
@@ -113,7 +114,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ tok
 
   const existing = await supabase
     .from("rsvp_responses")
-    .select("id")
+    .select("id, notes")
     .or(`invitee_id.eq.${invitee.id},invite_token.eq.${token}`)
     .order("submitted_at", { ascending: false })
     .limit(1)
@@ -123,8 +124,10 @@ export async function POST(request: Request, { params }: { params: Promise<{ tok
 
   const submittedAt = new Date().toISOString();
   const mutate = (includeEventAttendanceColumns: boolean) => {
+    const rsvpInsert = toRSVPInsert(payload, { includeEventAttendanceColumns });
     const insertPayload = {
-      ...toRSVPInsert(payload, { includeEventAttendanceColumns }),
+      ...rsvpInsert,
+      notes: preserveLegacyRsvpWishNotes(existing.data?.notes, rsvpInsert.notes),
       submitted_at: submittedAt,
     };
     const mutation = existing.data
