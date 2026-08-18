@@ -1507,18 +1507,23 @@ export default function RSVPPage() {
                     aria-controls="rsvp-gift-qr"
                     onClick={() => setSuccessDisclosure((current) => current === "gift" ? null : "gift")}
                     className={[
-                      "wedding-type-button inline-grid min-h-11 grid-cols-[18px_auto_18px] items-center gap-2 text-sm font-bold text-[#4f4a45] transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7a8a5c] focus-visible:ring-offset-2",
+                      "wedding-type-button inline-grid min-h-11 items-center font-bold text-[#4f4a45] transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7a8a5c] focus-visible:ring-offset-2",
                       submittedWishMessage
-                        ? "mt-0.5 h-11 rounded-full border border-serenity/24 bg-white/80 px-5 hover:bg-white hover:shadow-sm"
-                        : "rounded-full px-2 text-[#5f5a54]/84 hover:bg-white/46 hover:text-[#252934]",
+                        ? "mt-0.5 h-11 grid-cols-[18px_auto_18px] gap-2 rounded-full border border-serenity/24 bg-white/80 px-5 text-sm hover:bg-white hover:shadow-sm"
+                        : "grid-cols-[16px_auto_16px] gap-1.5 rounded-full px-2 text-xs text-[#5f5a54]/84 hover:bg-white/46 hover:text-[#252934]",
                     ].join(" ")}
                   >
-                    <Gift aria-hidden="true" className="h-[18px] w-[18px]" strokeWidth={1.75} />
+                    <Gift
+                      aria-hidden="true"
+                      className={submittedWishMessage ? "h-[18px] w-[18px]" : "h-4 w-4"}
+                      strokeWidth={1.75}
+                    />
                     <span className="whitespace-nowrap text-center">Gửi quà mừng</span>
                     <ChevronDown
                       aria-hidden="true"
                       className={[
-                        "h-[18px] w-[18px] transition-transform duration-200",
+                        submittedWishMessage ? "h-[18px] w-[18px]" : "h-4 w-4",
+                        "transition-transform duration-200",
                         successDisclosure === "gift" ? "rotate-180" : "",
                       ].join(" ")}
                     />
