@@ -31,6 +31,8 @@ example or changing RSVP persistence.
   accepting integer ages only.
 - A missing child age reports exactly `Nhập tuổi của bé` below the matching
   field.
+- A missing guest name reports below the name column without moving the
+  adjacent child toggle out of line with the name input on tablet and desktop.
 - RSVP data shape, draft restoration, and submission behavior remain unchanged.
 
 ## Design Notes
@@ -72,3 +74,5 @@ Add a focused lodging-copy and typography regression check.
 - Mobile rendered the approved helper, `VD: 5`, numeric input attributes, and
   `Nhập tuổi của bé`; 390px, 768px, and 1440px checks found no horizontal
   overflow and the browser console stayed clean.
+- The RSVP resilience browser check forces the missing-name error at 768px and
+  verifies the name input and child toggle stay top-aligned within 1px.

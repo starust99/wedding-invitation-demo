@@ -2511,44 +2511,49 @@ export default function RSVPPage() {
 
                                       {/* Input fields */}
                                       <div className="grid grid-cols-1 gap-3.5">
-                                        <div className="grid grid-cols-1 gap-1">
-                                          <div className="grid grid-cols-1 sm:grid-cols-12 gap-3.5 items-start">
-                                            <div className="sm:col-span-7 w-full">
-                                              <Field
-                                                label={<span className="text-sm font-bold tracking-wider text-[#252934]/68">Họ tên</span>}
-                                                error={guestErrors?.fullName?.message}
-                                              >
-                                                <input
-                                                  className={inputClass}
-                                                  placeholder="VD: Nguyễn Văn A"
-                                                  {...register(`lodgingGuests.${index}.fullName`, {
-                                                    onChange: (event) => {
-                                                      if (event.target.value.trim().length >= 2) {
-                                                        clearErrors(`lodgingGuests.${index}.fullName`);
-                                                      }
-                                                    },
-                                                  })}
-                                                />
-                                              </Field>
-                                            </div>
-                                            <div className="sm:col-span-5 flex flex-col w-full h-full justify-end">
-                                              <span className="text-xs font-bold tracking-wider text-transparent select-none mb-2 hidden sm:block" aria-hidden="true">Spacer</span>
-                                              <label className="flex cursor-pointer items-center gap-2 rounded-xl border border-serenity/18 bg-white/70 px-3 py-2.5 text-xs font-semibold text-[#252934] transition hover:bg-white shadow-sm w-full justify-center h-13 shrink-0">
-                                                <input
-                                                  type="checkbox"
-                                                  className="h-4 w-4 rounded text-serenity accent-serenity focus:ring-serenity/30"
-                                                  {...register(`lodgingGuests.${index}.isChild`, {
-                                                    onChange: (event) => {
-                                                      if (!event.target.checked) {
-                                                        clearErrors(`lodgingGuests.${index}.age`);
-                                                      }
-                                                    },
-                                                  })}
-                                                />
-                                                <span>Là trẻ em (dưới 11 tuổi)</span>
-                                              </label>
-                                            </div>
-                                          </div>
+                                        <div className="grid grid-cols-1 items-start gap-2 sm:grid-cols-12 sm:gap-x-3.5">
+                                          <label className="grid w-full justify-items-center gap-2 text-center text-sm font-bold text-[#252934]/68 sm:col-span-7 sm:col-start-1 sm:row-start-1">
+                                            <span className="text-sm font-bold tracking-wider text-[#252934]/68">Họ tên</span>
+                                            <input
+                                              data-rsvp-lodging-name-input="true"
+                                              className={inputClass}
+                                              placeholder="VD: Nguyễn Văn A"
+                                              {...register(`lodgingGuests.${index}.fullName`, {
+                                                onChange: (event) => {
+                                                  if (event.target.value.trim().length >= 2) {
+                                                    clearErrors(`lodgingGuests.${index}.fullName`);
+                                                  }
+                                                },
+                                              })}
+                                            />
+                                          </label>
+                                          {guestErrors?.fullName?.message ? (
+                                            <span
+                                              role="alert"
+                                              tabIndex={-1}
+                                              data-rsvp-error="true"
+                                              className={`${rsvpAlertTextClass} text-center sm:col-span-7 sm:col-start-1 sm:row-start-2`}
+                                            >
+                                              {guestErrors.fullName.message}
+                                            </span>
+                                          ) : null}
+                                          <label
+                                            data-rsvp-lodging-child-toggle="true"
+                                            className="flex h-13 w-full shrink-0 cursor-pointer items-center justify-center gap-2 rounded-xl border border-serenity/18 bg-white/70 px-3 py-2.5 text-xs font-semibold text-[#252934] shadow-sm transition hover:bg-white sm:col-span-5 sm:col-start-8 sm:row-start-1 sm:self-end"
+                                          >
+                                            <input
+                                              type="checkbox"
+                                              className="h-4 w-4 rounded text-serenity accent-serenity focus:ring-serenity/30"
+                                              {...register(`lodgingGuests.${index}.isChild`, {
+                                                onChange: (event) => {
+                                                  if (!event.target.checked) {
+                                                    clearErrors(`lodgingGuests.${index}.age`);
+                                                  }
+                                                },
+                                              })}
+                                            />
+                                            <span>Là trẻ em (dưới 11 tuổi)</span>
+                                          </label>
                                         </div>
 
                                         {isChild && (

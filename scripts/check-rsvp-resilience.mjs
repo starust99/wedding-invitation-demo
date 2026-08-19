@@ -131,6 +131,33 @@ try {
   assert.deepEqual(consoleErrors, [], `Browser console errors: ${consoleErrors.join(" | ")}`);
   await context.close();
 
+  const alignmentContext = await browser.newContext({ viewport: { width: 768, height: 1024 } });
+  await alignmentContext.addInitScript((invitee) => {
+    window.localStorage.setItem("wedding-demo-invitees", JSON.stringify([invitee]));
+  }, familyInvitee);
+  const alignmentPage = await alignmentContext.newPage();
+  await alignmentPage.route(`**${inviteApiPath}`, async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({ invitee: familyInvitee }),
+    });
+  });
+  await alignmentPage.goto(`${baseUrl}/rsvp?invite=${token}`, { waitUntil: "domcontentloaded" });
+  await selectBanquetOnly(alignmentPage);
+  await alignmentPage.getByRole("button", { name: /Đêm 26\/12/ }).click();
+  await alignmentPage.getByRole("button", { name: "Xem lại và hoàn tất", exact: true }).click();
+  await alignmentPage.getByText("Nhập họ tên người lưu trú.", { exact: true }).waitFor();
+
+  const nameInputBox = await alignmentPage.locator('[data-rsvp-lodging-name-input="true"]').boundingBox();
+  const childToggleBox = await alignmentPage.locator('[data-rsvp-lodging-child-toggle="true"]').boundingBox();
+  assert.ok(nameInputBox && childToggleBox, "Lodging alignment controls must be measurable.");
+  assert.ok(
+    Math.abs(nameInputBox.y - childToggleBox.y) <= 1,
+    `Child toggle moved out of line after validation (${nameInputBox.y}px vs ${childToggleBox.y}px).`,
+  );
+  await alignmentContext.close();
+
   const directContext = await browser.newContext({ viewport: { width: 390, height: 844 } });
   const directPage = await directContext.newPage();
   await directPage.route(`**${inviteApiPath}`, async (route) => {
@@ -235,7 +262,7 @@ try {
   assert.equal(await invalidPage.getByText(/Admin/i).count(), 0, "Invalid public invites must not expose admin actions or labels.");
   await invalidContext.close();
 
-  console.log("RSVP resilience checks passed: Nhà Trai banquet-only family lodging, non-family party size, delayed hydration, review, reload draft, and direct-link loading gate.");
+  console.log("RSVP resilience checks passed: Nhà Trai banquet-only family lodging, validation alignment, non-family party size, delayed hydration, review, reload draft, and direct-link loading gate.");
 } finally {
   await browser.close();
 }
