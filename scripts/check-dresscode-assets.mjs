@@ -25,6 +25,10 @@ const splashSource = await readFile(
   path.join(root, "src/components/WeddingSplashIntro.tsx"),
   "utf8",
 );
+const preloadSource = await readFile(
+  path.join(root, "src/lib/wedding-preload-assets.ts"),
+  "utf8",
+);
 const sectionSource = await readFile(
   path.join(root, "src/components/wedding/DressCodeSection.tsx"),
   "utf8",
@@ -54,12 +58,8 @@ for (const publicPath of expectedAssets) {
     `${publicPath} exceeds the 400 KiB preload budget (${fileStat.size} bytes).`,
   );
   assert(
-    splashSource.includes(`"${publicPath}"`),
-    `${publicPath} is missing from the blocking invitation preload phase.`,
-  );
-  assert(
-    !splashSource.includes(`${publicPath}?`),
-    `${publicPath} must use the same cache key in preload and render paths.`,
+    preloadSource.includes(`"${publicPath}"`),
+    `${publicPath} is missing from the deferred wedding asset manifest.`,
   );
 }
 
@@ -68,25 +68,19 @@ assert(
   `Dress-code preload set exceeds 2.7 MiB (${totalBytes} bytes).`,
 );
 assert(
-  splashSource.includes("...dressCodeImages") &&
-    splashSource.includes("GlobalImageCache.preloadRequiredBatch"),
-  "Dress-code images must stay inside the required splash preload batch.",
+  !splashSource.includes("DRESS_CODE_IMAGE_SRCS"),
+  "Dress-code images must not block the critical envelope preload lane.",
 );
 assert(
   sectionSource.includes("unoptimized"),
   "Dress-code rendering must reuse the exact preloaded URL instead of a transformed Next.js URL.",
 );
 assert(
-  sectionSource.includes('"/assets/dresscode-theme-v5.webp"'),
-  "Dress-code master image is missing from the rendered section.",
+  sectionSource.includes("DRESS_CODE_IMAGE_SRCS") &&
+    sectionSource.includes("WEDDING_DEFERRED_ASSET_WARMUP_EVENT") &&
+    sectionSource.includes('"low"'),
+  "Dress-code images must warm in the low-priority post-gate lane.",
 );
-
-for (const publicPath of expectedAssets.slice(1)) {
-  assert(
-    sectionSource.includes(`"${publicPath}"`),
-    `${publicPath} is missing from the interactive dress-code palette.`,
-  );
-}
 
 assert(
   detailsSource.includes('dressCodeImageSrc: "/assets/dresscode-theme-v5.webp"'),
@@ -95,5 +89,5 @@ assert(
 
 console.log(
   `Dress-code assets passed: ${expectedAssets.length} WebP files, ` +
-    `${(totalBytes / 1024 / 1024).toFixed(2)} MiB total, all 1086x1448 and in the blocking preload batch.`,
+    `${(totalBytes / 1024 / 1024).toFixed(2)} MiB total, all 1086x1448 and in the deferred preload lane.`,
 );

@@ -4,6 +4,11 @@ import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { AnimatePresence, MotionConfig, motion, useInView } from "framer-motion";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { GlobalImageCache } from "@/lib/global-image-cache";
+import {
+  DRESS_CODE_IMAGE_SRCS,
+  WEDDING_DEFERRED_ASSET_WARMUP_EVENT,
+} from "@/lib/wedding-preload-assets";
 
 export type DressColorId = "pink" | "blue" | "yellow" | "green" | "cream" | "beige" | "brown";
 
@@ -15,50 +20,50 @@ export type DressCodeColor = {
   objectPosition?: string;
 };
 
-const MASTER_IMAGE = "/assets/dresscode-theme-v5.webp";
+const MASTER_IMAGE = DRESS_CODE_IMAGE_SRCS[0];
 
 const DRESS_COLORS: DressCodeColor[] = [
   {
     id: "pink",
     name: "Hồng nhạt",
     hex: "#e8cfce",
-    imgSrc: "/assets/dresscode-pink-v7.webp",
+    imgSrc: DRESS_CODE_IMAGE_SRCS[1],
   },
   {
     id: "blue",
     name: "Xanh biển nhạt",
     hex: "#d0d9e0",
-    imgSrc: "/assets/dresscode-blue-v5.webp",
+    imgSrc: DRESS_CODE_IMAGE_SRCS[2],
   },
   {
     id: "yellow",
     name: "Vàng nhạt",
     hex: "#fae8c5",
-    imgSrc: "/assets/dresscode-yellow-v5.webp",
+    imgSrc: DRESS_CODE_IMAGE_SRCS[3],
   },
   {
     id: "green",
     name: "Xanh lá xô thơm",
     hex: "#bcc5b0",
-    imgSrc: "/assets/dresscode-green-v5.webp",
+    imgSrc: DRESS_CODE_IMAGE_SRCS[4],
   },
   {
     id: "cream",
     name: "Kem",
     hex: "#f5e9d2",
-    imgSrc: "/assets/dresscode-cream-v5.webp",
+    imgSrc: DRESS_CODE_IMAGE_SRCS[5],
   },
   {
     id: "beige",
     name: "Be",
     hex: "#ddd1be",
-    imgSrc: "/assets/dresscode-beige-v5.webp",
+    imgSrc: DRESS_CODE_IMAGE_SRCS[6],
   },
   {
     id: "brown",
     name: "Nâu nhạt",
     hex: "#b3967d",
-    imgSrc: "/assets/dresscode-brown-v5.webp",
+    imgSrc: DRESS_CODE_IMAGE_SRCS[7],
   },
 ];
 
@@ -98,12 +103,36 @@ export function DressCodeSection({
   const [hintPaused, setHintPaused] = useState(false);
   const selectedColor = DRESS_COLORS.find((color) => color.id === selectedColorId) || null;
 
-  // Keep every illustration warm in the browser cache before the guest starts browsing.
+  // Warm the unchanged full-quality illustrations only after the blocking
+  // envelope lane is ready. The 6.4-second opening animation and long scroll
+  // to this section provide a natural background-loading window.
   useEffect(() => {
-    [MASTER_IMAGE, ...DRESS_COLORS.map((color) => color.imgSrc)].forEach((src) => {
-      const image = new window.Image();
-      image.src = src;
-    });
+    let warmupStarted = false;
+    const warmup = () => {
+      if (warmupStarted) return;
+      warmupStarted = true;
+      void GlobalImageCache.preloadRequiredBatch(
+        [...DRESS_CODE_IMAGE_SRCS],
+        undefined,
+        4,
+        "low",
+      ).catch(() => {
+        // The visible Next Image remains the final retry path if a weak
+        // connection drops a background request.
+      });
+    };
+
+    window.addEventListener(WEDDING_DEFERRED_ASSET_WARMUP_EVENT, warmup);
+    const initialCheck = window.setTimeout(() => {
+      const splashMissing = !document.getElementById("wedding-splash-screen");
+      const splashSkipped = document.documentElement.classList.contains("splash-skipped");
+      if (splashMissing || splashSkipped) warmup();
+    }, 0);
+
+    return () => {
+      window.clearTimeout(initialCheck);
+      window.removeEventListener(WEDDING_DEFERRED_ASSET_WARMUP_EVENT, warmup);
+    };
   }, []);
 
   useEffect(() => {

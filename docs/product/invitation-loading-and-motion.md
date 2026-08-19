@@ -7,9 +7,10 @@ The private invitation must never reveal an unfinished visual state.
 - The preload gate covers the complete splash sequence, music, and the assets
   needed for the first visible hero frame.
 - The approved dress-code master and all seven color illustrations share their
-  exact render URLs with the preload gate. They are WebP files at 1086x1448,
-  remain below 400 KiB each, and stay below 2.7 MiB as a complete set so color
-  changes are instant without sacrificing clarity in the 512px display frame.
+  exact versioned render URLs with the post-gate warmup lane. They are WebP
+  files at 1086x1448, remain below 400 KiB each, and stay below 2.7 MiB as a
+  complete set. Warmup starts before the 6.4-second envelope animation so color
+  changes remain instant without making below-the-fold artwork block opening.
 - The hero entrance choreography starts only after the splash exit has fully
   completed. A slow request or a prior storage write must not let any part of
   the names-logo reveal finish behind the splash.
@@ -44,9 +45,13 @@ The private invitation must never reveal an unfinished visual state.
 ## Validation Expectations
 
 - Verify a first visit with cache disabled and a throttled network.
-- Verify all eight dress-code files complete during the splash preload phase,
-  use the same URL when rendered, and do not trigger a second network transfer
-  when a guest changes the selected color.
+- Verify all eight dress-code files start only after the critical splash lane,
+  complete before the guest reaches the palette, use the same versioned URL
+  when rendered, and do not trigger a second network transfer on color change.
+- Verify the canonical `/g` invitation publishes byte-weighted preload timing
+  for Chromium and WebKit without including a token, guest name, IP, or RSVP.
+- Verify versioned critical assets receive a one-year immutable browser cache
+  while unversioned assets retain the shorter fallback cache policy.
 - Verify the splash-to-hero handoff visibly changes from preparing to animating.
 - Sample the splash-to-hero handoff frame by frame and verify that no
   `hero-preparing` frame renders a reveal layer above zero opacity.

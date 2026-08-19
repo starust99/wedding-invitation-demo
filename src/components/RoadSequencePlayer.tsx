@@ -3,6 +3,7 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useReducedMotion } from "framer-motion";
 import { GlobalImageCache } from "@/lib/global-image-cache";
+import { weddingAsset } from "@/lib/wedding-preload-assets";
 
 const TOTAL_FRAMES = 108;
 const FRAME_RATE = 10;
@@ -20,7 +21,7 @@ const VIEWPORT_ZOOM_SETTLE_MS = 400;
 
 const FRAME_SRCS = Array.from({ length: TOTAL_FRAMES }, (_, index) => {
   const frameNumber = String(index + 1).padStart(3, "0");
-  return `/assets/timeline-frames/frame_${frameNumber}.webp`;
+  return weddingAsset(`/assets/timeline-frames/frame_${frameNumber}.webp`);
 });
 
 let timelineWarmupPromise: Promise<void> | null = null;

@@ -98,7 +98,7 @@ try {
     }
   });
 
-  await fallbackPage.goto(`${baseUrl}/i/${token}?intro=1`, {
+  await fallbackPage.goto(`${baseUrl}/g/${token}?intro=1`, {
     waitUntil: "domcontentloaded",
     timeout: 60_000,
   });
@@ -226,12 +226,11 @@ try {
   await timelineWrap.scrollIntoViewIfNeeded();
   await timelineWrap.waitFor({ state: "visible" });
   const timelinePoster = timelineWrap.locator(
-    'img.timeline-path-poster[src="/assets/timeline-frames/frame_001.webp"]',
+    'img.timeline-path-poster[src^="/assets/timeline-frames/frame_001.webp?v="]',
   );
   await timelinePoster.waitFor({ state: "visible" });
-  assert.equal(
-    await timelinePoster.getAttribute("src"),
-    "/assets/timeline-frames/frame_001.webp",
+  assert.ok(
+    (await timelinePoster.getAttribute("src"))?.startsWith("/assets/timeline-frames/frame_001.webp?v="),
     "The timeline must retain the exact first frame as its poster while remaining frames are unavailable.",
   );
 
@@ -327,7 +326,7 @@ try {
       landscapeMobileRequests.add(pathname);
     }
   });
-  await landscapePage.goto(`${baseUrl}/i/${token}?intro=1`, {
+  await landscapePage.goto(`${baseUrl}/g/${token}?intro=1`, {
     waitUntil: "domcontentloaded",
     timeout: 60_000,
   });
@@ -382,7 +381,7 @@ try {
     }
   });
 
-  await zaloPage.goto(`${baseUrl}/i/${token}`, {
+  await zaloPage.goto(`${baseUrl}/g/${token}`, {
     waitUntil: "domcontentloaded",
     timeout: 60_000,
   });

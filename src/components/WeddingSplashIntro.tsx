@@ -6,11 +6,20 @@ import { SplashSequencePlayer } from "./SplashSequencePlayer";
 import { GlobalImageCache } from "@/lib/global-image-cache";
 import type { GuestIdentity } from "@/lib/guest-personalization";
 import type { WeddingConfig } from "@/lib/site-settings";
+import {
+  PRELOADER_LOGO_SRC,
+  SPLASH_POSTER_DESKTOP_SRC,
+  SPLASH_POSTER_MOBILE_SRC,
+  WEDDING_AUDIO_BYTES,
+  WEDDING_AUDIO_SRC,
+  WEDDING_DEFERRED_ASSET_WARMUP_EVENT,
+  getCriticalStaticAssets,
+  getSplashFolder,
+  getSplashFrameAssets,
+  type SplashViewport,
+} from "@/lib/wedding-preload-assets";
 
 type SplashStatus = "checking" | "closed" | "opening" | "hidden";
-type SplashViewport = "mobile" | "desktop-ipad" | "desktop";
-
-const WEDDING_AUDIO_SRC = "/assets/audio/co-chut-ngot-ngao.mp3";
 
 function isTabletDevice() {
   const userAgent = window.navigator.userAgent || "";
@@ -43,13 +52,9 @@ function getSplashViewport(): SplashViewport {
   return "desktop";
 }
 
-function getSplashFolder(viewport: SplashViewport) {
-  if (viewport === "mobile") return "splash-frames-mobile";
-  if (viewport === "desktop-ipad") return "splash-frames-desktop-ipad";
-  return "splash-frames-desktop";
-}
-
-async function preloadWeddingAudio() {
+async function preloadWeddingAudio(
+  onProgress?: (loadedBytes: number, totalBytes: number) => void,
+) {
   const audio = document.querySelector<HTMLAudioElement>("#wedding-audio");
   if (!audio) throw new Error("Wedding audio element is unavailable");
 
@@ -67,17 +72,44 @@ async function preloadWeddingAudio() {
     const response = await fetch(WEDDING_AUDIO_SRC, {
       cache: "force-cache",
       signal: controller.signal,
-    });
+      priority: "high",
+    } as RequestInit & { priority: "high" });
     if (!response.ok) {
       throw new Error(`Wedding music request failed with ${response.status}`);
     }
 
     // Reading the complete response avoids relying on canplaythrough. Several
     // embedded WebViews intentionally postpone media buffering until a gesture.
-    const audioBlob = await response.blob();
+    // Consume the stream ourselves so the visible percentage continues moving
+    // while this relatively large file is crossing a slow connection.
+    const announcedBytes = Number(response.headers.get("content-length")) || WEDDING_AUDIO_BYTES;
+    const reader = response.body?.getReader();
+    let audioBlob: Blob;
+
+    if (reader) {
+      const chunks: BlobPart[] = [];
+      let loadedBytes = 0;
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        if (value) {
+          const stableChunk = value.slice();
+          chunks.push(stableChunk.buffer);
+          loadedBytes += stableChunk.byteLength;
+          onProgress?.(loadedBytes, announcedBytes);
+        }
+      }
+      audioBlob = new Blob(chunks, {
+        type: response.headers.get("content-type") || "audio/mpeg",
+      });
+    } else {
+      audioBlob = await response.blob();
+    }
+
     if (audioBlob.size === 0) {
       throw new Error("Wedding music response is empty");
     }
+    onProgress?.(audioBlob.size, announcedBytes);
 
     const blobUrl = URL.createObjectURL(audioBlob);
     const previousBlobUrl = audio.dataset.preloadedBlobUrl;
@@ -135,6 +167,50 @@ function markSplashSeen(key: string) {
   } catch {}
 }
 
+function getRuntimeClass() {
+  const userAgent = window.navigator.userAgent || "";
+  if (/FBAN|FBAV|Messenger|Zalo|Instagram|Line\//i.test(userAgent)) return "embedded-webview";
+  if (/AppleWebKit/i.test(userAgent) && !/Chrome|Chromium|CriOS|Edg|OPR/i.test(userAgent)) return "webkit";
+  if (/Chrome|Chromium|CriOS|Edg|OPR/i.test(userAgent)) return "chromium";
+  return "other";
+}
+
+function shouldReportPreloadMetric() {
+  try {
+    if (new URLSearchParams(window.location.search).get("preload_metrics") === "1") return true;
+    const storageKey = "wedding-preload-metric-sampled";
+    const saved = window.sessionStorage.getItem(storageKey);
+    if (saved) return saved === "1";
+    const sampled = window.crypto.getRandomValues(new Uint32Array(1))[0] % 5 === 0;
+    window.sessionStorage.setItem(storageKey, sampled ? "1" : "0");
+    return sampled;
+  } catch {
+    return false;
+  }
+}
+
+function reportPreloadMetric(payload: {
+  viewport: SplashViewport;
+  preloadDurationMs: number;
+  firstProgressMs: number;
+  criticalBytes: number;
+}) {
+  if (!shouldReportPreloadMetric()) return;
+  const body = JSON.stringify({ ...payload, runtimeClass: getRuntimeClass() });
+  try {
+    if (navigator.sendBeacon) {
+      navigator.sendBeacon("/api/preload-metrics", new Blob([body], { type: "application/json" }));
+      return;
+    }
+    void fetch("/api/preload-metrics", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body,
+      keepalive: true,
+    });
+  } catch {}
+}
+
 function hasSeenSplash(key: string) {
   try {
     return window.localStorage.getItem(key) === "1";
@@ -172,6 +248,9 @@ export function WeddingSplashIntro({
   const cacheReleaseTimer = useRef<number | null>(null);
   const openingStarted = useRef(false);
   const closingStarted = useRef(false);
+  const preloadStartedAt = useRef<number | null>(null);
+  const firstProgressAt = useRef<number | null>(null);
+  const preloadMetricReported = useRef(false);
 
   useEffect(() => {
     setViewport(getSplashViewport());
@@ -211,51 +290,24 @@ export function WeddingSplashIntro({
       setStatus("hidden");
       window.dispatchEvent(new Event("weddingTimelineWarmup"));
       window.dispatchEvent(new Event("weddingTimelineDecode"));
+      window.dispatchEvent(new Event(WEDDING_DEFERRED_ASSET_WARMUP_EVENT));
       return;
     }
 
     const activeViewport = viewport;
-    const splashFolder = getSplashFolder(activeViewport);
-
-    // The button is enabled only after the exact frame sequence for this
-    // viewport, the hero reveal, the first timeline frame, and music are ready.
-    const dressCodeImages = [
-      "/assets/dresscode-theme-v5.webp",
-      "/assets/dresscode-pink-v7.webp",
-      "/assets/dresscode-blue-v5.webp",
-      "/assets/dresscode-yellow-v5.webp",
-      "/assets/dresscode-green-v5.webp",
-      "/assets/dresscode-cream-v5.webp",
-      "/assets/dresscode-beige-v5.webp",
-      "/assets/dresscode-brown-v5.webp",
+    // Only artwork visible before or immediately after the envelope animation
+    // belongs to the blocking lane. Dress-code variants and timeline frames
+    // keep their exact files, but warm in the 6.4-second opening window.
+    const staticAssets = getCriticalStaticAssets(activeViewport);
+    const splashFrameAssets = getSplashFrameAssets(activeViewport);
+    const allAssetsToLoad = [
+      ...staticAssets.slice(0, 2),
+      ...splashFrameAssets.slice(0, 12),
+      ...staticAssets.slice(2),
+      ...splashFrameAssets.slice(12),
     ];
-
-    const staticImages = [
-      "/assets/preloader-logo.webp",
-      activeViewport === "mobile"
-        ? "/assets/wedding/ui/splash-poster-mobile.jpg"
-        : "/assets/wedding/ui/splash-closed.png",
-      "/assets/wedding/hero/hero-arch-composite.webp",
-      "/assets/hero-names-logo-v9-centered.png",
-      "/assets/music-icon.png",
-      "/assets/hero-corner-left-v2.png",
-      "/assets/hero-corner-right-v3.png",
-      "/assets/icon-cross-new.png",
-      "/assets/hero-invite-heading-v5.png",
-      "/assets/hero-invite-reveal-map-v2.png",
-      "/assets/timeline-frames/frame_001.webp",
-      ...dressCodeImages,
-    ];
-
-    const splashFrames: string[] = [];
-    for (let i = 1; i <= 109; i++) {
-      const numStr = String(i).padStart(3, "0");
-      splashFrames.push(`/assets/${splashFolder}/frame_${numStr}.webp`);
-    }
-
-    // Timeline keeps its original 108-frame canvas. Its remaining bytes warm
-    // in the background only after this critical lane is complete.
-    const allImagesToLoad = [...staticImages, ...splashFrames];
+    const allImagesToLoad = allAssetsToLoad.map((asset) => asset.src);
+    const imageWeights = new Map(allAssetsToLoad.map((asset) => [asset.src, asset.bytes]));
 
     let isCancelled = false;
     let checkReadyInterval: NodeJS.Timeout | null = null;
@@ -263,11 +315,26 @@ export function WeddingSplashIntro({
     const onAllComplete = () => {
       if (!isCancelled) {
         window.dispatchEvent(new Event("weddingTimelineWarmup"));
+        window.dispatchEvent(new Event(WEDDING_DEFERRED_ASSET_WARMUP_EVENT));
         checkReadyInterval = setInterval(() => {
           if (readyRef.current && !isCancelled) {
             if (checkReadyInterval) clearInterval(checkReadyInterval);
             setTimeout(() => {
               if (!isCancelled) {
+                const finishedAt = performance.now();
+                const startedAt = preloadStartedAt.current || finishedAt;
+                const firstProgress = firstProgressAt.current || finishedAt;
+                const metric = {
+                  viewport: activeViewport,
+                  preloadDurationMs: Math.max(0, finishedAt - startedAt),
+                  firstProgressMs: Math.max(0, firstProgress - startedAt),
+                  criticalBytes: Math.round(totalBytes),
+                };
+                window.dispatchEvent(new CustomEvent("weddingPreloadReady", { detail: metric }));
+                if (!preloadMetricReported.current) {
+                  preloadMetricReported.current = true;
+                  reportPreloadMetric(metric);
+                }
                 setPreloading(false);
                 setStatus("closed");
               }
@@ -280,25 +347,41 @@ export function WeddingSplashIntro({
     setPreloading(true);
     setPreloadError(false);
     setProgress(0);
+    preloadStartedAt.current = performance.now();
+    firstProgressAt.current = null;
+    preloadMetricReported.current = false;
 
-    const totalAssets = allImagesToLoad.length + 1;
-    let loadedImages = 0;
-    let audioLoaded = false;
+    const totalBytes = allAssetsToLoad.reduce((sum, asset) => sum + asset.bytes, 0) + WEDDING_AUDIO_BYTES;
+    let loadedImageBytes = 0;
+    let loadedAudioBytes = 0;
+    const completedImages = new Set<string>();
     const updateProgress = () => {
       if (isCancelled) return;
-      const loadedAssets = loadedImages + (audioLoaded ? 1 : 0);
-      setProgress(Math.min(100, Math.round((loadedAssets / totalAssets) * 100)));
+      const loadedBytes = loadedImageBytes + Math.min(WEDDING_AUDIO_BYTES, loadedAudioBytes);
+      const nextProgress = Math.min(100, Math.round((loadedBytes / totalBytes) * 100));
+      if (loadedBytes > 0 && firstProgressAt.current === null) {
+        firstProgressAt.current = performance.now();
+      }
+      setProgress(loadedBytes > 0 ? Math.max(1, nextProgress) : 0);
     };
 
     const imagePromise = GlobalImageCache.preloadRequiredBatch(
       allImagesToLoad,
-      (loadedCount) => {
-        loadedImages = loadedCount;
+      (_loadedCount, _total, _percent, src) => {
+        if (!completedImages.has(src)) {
+          completedImages.add(src);
+          loadedImageBytes += imageWeights.get(src) || 0;
+        }
         updateProgress();
       },
+      10,
+      "high",
     );
-    const audioPromise = preloadWeddingAudio().then(() => {
-      audioLoaded = true;
+    const audioPromise = preloadWeddingAudio((loadedBytes) => {
+      loadedAudioBytes = loadedBytes;
+      updateProgress();
+    }).then(() => {
+      loadedAudioBytes = WEDDING_AUDIO_BYTES;
       updateProgress();
     });
 
@@ -329,6 +412,7 @@ export function WeddingSplashIntro({
     window.dispatchEvent(new Event("playWeddingMusic"));
     window.dispatchEvent(new Event("unlockVideos"));
     window.dispatchEvent(new Event("weddingTimelineWarmup"));
+    window.dispatchEvent(new Event(WEDDING_DEFERRED_ASSET_WARMUP_EVENT));
     
     // Play full splash animation for exact 6.0 seconds, then transition cleanly into hero
     closeTimer.current = window.setTimeout(closeIntro, 6400);
@@ -427,16 +511,31 @@ export function WeddingSplashIntro({
                 />
               ) : null
             ) : (
-              viewport !== "mobile" ? (
+              viewport === null ? (
+                <picture className="h-full w-full">
+                  <source
+                    media="(max-width: 767px), (min-width: 768px) and (max-width: 1024px) and (orientation: portrait)"
+                    srcSet={SPLASH_POSTER_MOBILE_SRC}
+                  />
+                  <img
+                    src={SPLASH_POSTER_DESKTOP_SRC}
+                    alt=""
+                    fetchPriority="high"
+                    className="h-full w-full object-cover"
+                  />
+                </picture>
+              ) : viewport !== "mobile" ? (
                 <img 
-                  src="/assets/wedding/ui/splash-closed.png"
+                  src={SPLASH_POSTER_DESKTOP_SRC}
                   alt=""
+                  fetchPriority="high"
                   className="h-full w-full object-cover"
                 />
               ) : (
                 <img 
-                  src="/assets/wedding/ui/splash-poster-mobile.jpg"
+                  src={SPLASH_POSTER_MOBILE_SRC}
                   alt=""
+                  fetchPriority="high"
                   className="h-full w-full object-cover scale-[1.08]"
                 />
               )
@@ -487,8 +586,9 @@ export function WeddingSplashIntro({
                   {/* Preloader Logo */}
                   <div className="mb-6 select-none animate-pulse">
                     <img 
-                      src="/assets/preloader-logo.webp" 
+                      src={PRELOADER_LOGO_SRC}
                       alt="Nhật & Phương Logo" 
+                      fetchPriority="high"
                       className="w-32 h-32 sm:w-40 sm:h-40 object-contain mx-auto" 
                     />
                   </div>

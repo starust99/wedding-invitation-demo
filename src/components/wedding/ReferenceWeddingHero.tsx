@@ -8,6 +8,7 @@ import { checkIsIntroDone } from "@/components/ui/CinematicReveal";
 import { CoupleNameText } from "@/components/ui/CoupleNameText";
 import { HeroInviteHandwriting } from "@/components/wedding/HeroInviteHandwriting";
 import type { WeddingHeroEditorConfig } from "@/lib/wedding/hero-types";
+import { weddingAsset } from "@/lib/wedding-preload-assets";
 
 type ReferenceWeddingHeroProps = {
   config: WeddingHeroEditorConfig;
@@ -25,7 +26,11 @@ export type ReferenceWeddingHeroSummary = {
   welcomeTime?: string;
 };
 
-const heroCompositeSrc = "/assets/wedding/hero/hero-arch-composite.webp";
+const heroCompositeSrc = weddingAsset("/assets/wedding/hero/hero-arch-composite.webp");
+const heroNamesLogoSrc = weddingAsset("/assets/hero-names-logo-v9-centered.png");
+const heroCrossSrc = weddingAsset("/assets/icon-cross-new.png");
+const heroCornerLeftSrc = weddingAsset("/assets/hero-corner-left-v2.png");
+const heroCornerRightSrc = weddingAsset("/assets/hero-corner-right-v3.png");
 
 function stripRepeatedHeroInvitePrefix(text: string) {
   return text.replace(/^trân trọng kính mời\s+/i, "");
@@ -129,7 +134,7 @@ export function ReferenceWeddingHero({ config, summary }: ReferenceWeddingHeroPr
         >
           {/* Left Part: Long Nhật (clipped to keep left 40%) */}
           <img
-            src="/assets/hero-names-logo-v9-centered.png"
+            src={heroNamesLogoSrc}
             alt="Long Nhật"
             className="hero-champagne-ink absolute inset-0 w-full h-full object-contain pointer-events-none select-none"
             style={{ clipPath: "inset(0 60% 0 0)" }}
@@ -139,7 +144,7 @@ export function ReferenceWeddingHero({ config, summary }: ReferenceWeddingHeroPr
           {/* Middle Part: New Cross */}
           <div className="save-date-new-cross-container">
             <img
-              src="/assets/icon-cross-new.png"
+              src={heroCrossSrc}
               alt="Thập giá"
               className="hero-cross-gold save-date-new-cross pointer-events-none"
               draggable={false}
@@ -148,7 +153,7 @@ export function ReferenceWeddingHero({ config, summary }: ReferenceWeddingHeroPr
           
           {/* Right Part: Anh Phương (clipped to keep right 40%) */}
           <img
-            src="/assets/hero-names-logo-v9-centered.png"
+            src={heroNamesLogoSrc}
             alt="Anh Phương"
             className="hero-champagne-ink absolute inset-0 w-full h-full object-contain pointer-events-none select-none"
             style={{ clipPath: "inset(0 0 0 60%)" }}
@@ -208,10 +213,11 @@ export function ReferenceWeddingHero({ config, summary }: ReferenceWeddingHeroPr
               className={`save-date-hero-ornament save-date-hero-ornament-left hero-ornament-fade-left ${isDone ? "is-visible" : ""}`}
             >
               <Image
-                src="/assets/hero-corner-left-v2.png"
+                src={heroCornerLeftSrc}
                 alt=""
                 width={250}
                 height={250}
+                unoptimized
                 className="object-contain pointer-events-none"
               />
             </div>
@@ -221,10 +227,11 @@ export function ReferenceWeddingHero({ config, summary }: ReferenceWeddingHeroPr
               className={`save-date-hero-ornament save-date-hero-ornament-right hero-ornament-fade-right ${isDone ? "is-visible" : ""}`}
             >
               <Image
-                src="/assets/hero-corner-right-v3.png"
+                src={heroCornerRightSrc}
                 alt=""
                 width={250}
                 height={250}
+                unoptimized
                 className="object-contain pointer-events-none"
               />
             </div>

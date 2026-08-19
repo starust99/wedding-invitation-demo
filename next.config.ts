@@ -62,6 +62,22 @@ const nextConfig: NextConfig = {
         ],
       },
       {
+        source: "/assets/:path*",
+        has: [
+          {
+            type: "query",
+            key: "v",
+            value: "20260819-preload-v1",
+          },
+        ],
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=31536000, immutable",
+          },
+        ],
+      },
+      {
         source: "/assets/og-invitation-v2.jpg",
         headers: [
           {

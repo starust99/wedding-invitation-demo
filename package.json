@@ -25,6 +25,7 @@
     "check:invite-preview": "node scripts/check-invite-preview.mjs",
     "check:invite-link-sides": "node scripts/check-invite-link-sides.mjs",
     "check:published-invite-intro": "node scripts/check-published-invite-intro.mjs",
+    "check:preload-performance": "node scripts/check-preload-performance.mjs",
     "check:slow-invite-experience": "node scripts/check-slow-invite-experience.mjs",
     "capture:browser": "node scripts/capture-browser-shots.mjs",
     "gitnexus:index": "gitnexus analyze --index-only",

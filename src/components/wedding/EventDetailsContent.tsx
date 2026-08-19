@@ -9,6 +9,7 @@ import type { EventDetailsViewportMode, WeddingEventDetailsEditorConfig } from "
 import { DressCodeSection, type DressColorId } from "./DressCodeSection";
 import { RoadSequencePlayer } from "@/components/RoadSequencePlayer";
 import { resolveTimelineIcon } from "@/config/timeline-icons";
+import { TIMELINE_FIRST_FRAME_SRC } from "@/lib/wedding-preload-assets";
 
 function TimelineIcon({ title, icon, className }: { title: string; icon?: string; className?: string }) {
   const iconPath = resolveTimelineIcon(title, icon);
@@ -712,7 +713,7 @@ export function EventDetailsContent({
                 {/* Con đường: poster luôn sẵn sàng; canvas giữ 108 frame nhưng chỉ giải mã một cửa sổ nhỏ quanh frame đang chạy. */}
                 <div className={`timeline-garden-path-image timeline-path-video-wrap timeline-path-frames-wrap opacity-100 pointer-events-none ${isRoadReady ? "is-ready" : ""}`}>
                   <img
-                    src="/assets/timeline-frames/frame_001.webp"
+                    src={TIMELINE_FIRST_FRAME_SRC}
                     alt=""
                     aria-hidden="true"
                     loading="lazy"

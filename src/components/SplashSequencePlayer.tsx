@@ -2,6 +2,7 @@
 
 import React, { useEffect, useRef } from "react";
 import { GlobalImageCache } from "@/lib/global-image-cache";
+import { getSplashFrameSrc } from "@/lib/wedding-preload-assets";
 
 const TOTAL_FRAMES = 109;
 const FRAME_RATE = 18; // 18 frames per second (exact 6.05s video duration)
@@ -31,15 +32,8 @@ export function SplashSequencePlayer({
   useEffect(() => {
     // 1. Get pre-decoded images from GlobalImageCache or fallback load
     const images: HTMLImageElement[] = [];
-    const folder = variant === "mobile"
-      ? "splash-frames-mobile"
-      : variant === "desktop-ipad"
-        ? "splash-frames-desktop-ipad"
-        : "splash-frames-desktop";
-
     for (let i = 1; i <= TOTAL_FRAMES; i++) {
-      const numStr = String(i).padStart(3, "0");
-      const src = `/assets/${folder}/frame_${numStr}.webp`;
+      const src = getSplashFrameSrc(variant, i);
       const cached = GlobalImageCache.get(src);
       if (cached) {
         images.push(cached);

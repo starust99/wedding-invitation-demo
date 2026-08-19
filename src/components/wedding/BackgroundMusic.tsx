@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { WEDDING_AUDIO_SRC, weddingAsset } from "@/lib/wedding-preload-assets";
 
 export function BackgroundMusic() {
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -205,9 +206,9 @@ export function BackgroundMusic() {
       <audio
         id="wedding-audio"
         ref={audioRef}
-        src="/assets/audio/co-chut-ngot-ngao.mp3"
+        src={WEDDING_AUDIO_SRC}
         loop
-        preload="auto"
+        preload="none"
         playsInline
       />
 
@@ -221,7 +222,7 @@ export function BackgroundMusic() {
         >
           <div className="w-[36px] h-[36px] md:w-[45px] md:h-[45px] relative transition-transform duration-500 vinyl-spin-active">
             <img 
-              src="/assets/music-icon.png" 
+              src={weddingAsset("/assets/music-icon.png")}
               alt="Music Icon" 
               className="w-full h-full object-contain"
               draggable={false}

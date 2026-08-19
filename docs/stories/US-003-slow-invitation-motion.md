@@ -85,6 +85,14 @@ changes cannot silently restore blank canvases or early hero animation.
 - Timeline bytes warm separately after the critical splash lane, frames decode
   after splash disposal, and the static path remains visible until all 108
   frames are ready.
+- The canonical `/g` preload gate now contains only the exact splash sequence,
+  music, closed poster, and first-visible hero assets. Dress-code and timeline
+  bytes retain their original files but warm after the gate while the envelope
+  animation is running.
+- Preload progress is weighted by the estimated transferred bytes, including
+  streaming audio progress, instead of treating every file as the same size.
+- Versioned critical asset URLs use an immutable one-year cache, and sampled
+  preload timing is logged with coarse country/edge context but no guest data.
 - The private-invite cache synchronization no longer re-enters its own storage
   listener; the regression check caps invite lookups and observed three
   requests across two full browser contexts.

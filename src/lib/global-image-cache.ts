@@ -85,7 +85,11 @@ class GlobalImageCacheManager {
    * Unlike preload(), this rejects after the final retry instead of treating a
    * failed request as loaded.
    */
-  public preloadRequired(src: string, retries = 2): Promise<HTMLImageElement> {
+  public preloadRequired(
+    src: string,
+    retries = 2,
+    fetchPriority: "high" | "low" | "auto" = "auto",
+  ): Promise<HTMLImageElement> {
     const cached = this.cache.get(src);
     if (cached?.complete && cached.naturalWidth > 0) {
       return Promise.resolve(cached);
@@ -98,6 +102,7 @@ class GlobalImageCacheManager {
       new Promise<HTMLImageElement>((resolve, reject) => {
         const img = new Image();
         img.decoding = "async";
+        img.fetchPriority = fetchPriority;
 
         const finish = () => {
           if (img.naturalWidth <= 0) {
@@ -137,8 +142,9 @@ class GlobalImageCacheManager {
 
   public async preloadRequiredBatch(
     urls: string[],
-    onProgress?: (loaded: number, total: number, percent: number) => void,
+    onProgress?: (loaded: number, total: number, percent: number, src: string) => void,
     concurrency = 10,
+    fetchPriority: "high" | "low" | "auto" = "auto",
   ): Promise<HTMLImageElement[]> {
     if (urls.length === 0) return [];
 
@@ -149,12 +155,14 @@ class GlobalImageCacheManager {
     const worker = async () => {
       while (nextIndex < urls.length) {
         const currentIndex = nextIndex++;
-        results[currentIndex] = await this.preloadRequired(urls[currentIndex]);
+        const src = urls[currentIndex];
+        results[currentIndex] = await this.preloadRequired(src, 2, fetchPriority);
         loaded++;
         onProgress?.(
           loaded,
           urls.length,
           Math.min(100, Math.round((loaded / urls.length) * 100)),
+          src,
         );
       }
     };

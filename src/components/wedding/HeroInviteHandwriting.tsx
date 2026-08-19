@@ -2,14 +2,15 @@
 
 import { motion } from "framer-motion";
 import { useEffect, useId, useRef, useState } from "react";
+import { weddingAsset } from "@/lib/wedding-preload-assets";
 
 type HeroInviteHandwritingProps = {
   mode: "preparing" | "animating" | "static";
   onComplete?: () => void;
 };
 
-const HEADING_ASSET = "/assets/hero-invite-heading-v5.png";
-const REVEAL_MAP_ASSET = "/assets/hero-invite-reveal-map-v2.png";
+const HEADING_ASSET = weddingAsset("/assets/hero-invite-heading-v5.png");
+const REVEAL_MAP_ASSET = weddingAsset("/assets/hero-invite-reveal-map-v2.png");
 const CANVAS_WIDTH = 800;
 const CANVAS_HEIGHT = 267;
 const HERO_INVITE_INK = "#9B7134";
