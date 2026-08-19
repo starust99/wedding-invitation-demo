@@ -1,0 +1,16 @@
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "outDir": "../.tmp-invite-link-sides-check",
+    "target": "ES2022",
+    "module": "CommonJS",
+    "moduleResolution": "Node",
+    "noEmit": false,
+    "incremental": false,
+    "isolatedModules": false
+  },
+  "include": [
+    "../src/lib/invite-link-side.ts",
+    "../src/lib/invite-spreadsheet.ts"
+  ]
+}

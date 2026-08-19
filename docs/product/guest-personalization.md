@@ -100,6 +100,19 @@ have separate responsibilities:
   both nights, or no stay. Other groups answer the banquet party-size question
   instead of lodging.
 
+## Invitation Link Exports By Family Side
+
+Admin derives side-specific invitation-link workbooks from the existing
+`Nhóm khách` value, without adding another workbook column:
+
+- `Nhà trai` contains every normalized `[Nhà Trai]` group and `[Nhật]` guests.
+- `Nhà gái` contains every normalized `[Nhà Gái]` group and `[Phương]` guests.
+- Blank, custom, or unrecognized groups stay out of both side exports and
+  remain available through the full-list export.
+
+These exports preserve the canonical `/g/<token>` invitation URL and do not
+change guest identity, event access, lodging eligibility, or RSVP behavior.
+
 ## Post-Ceremony Party
 
 The invite workbook contains `Tham gia tiệc sau Hôn phối`:

@@ -52,6 +52,7 @@ import { applyTheme } from "@/lib/site-settings";
 import { usePublishedSettings } from "@/lib/use-published-settings";
 import { AlbumGroupManager } from "@/components/admin/AlbumGroupManager";
 import { resolveInviteEventAccess } from "@/lib/invite-event-access";
+import { filterInviteesByLinkSide } from "@/lib/invite-link-side";
 
 type SimpleInviteEntry = {
   salutationCluster: string;
@@ -393,6 +394,8 @@ export function InviteAdminPanel() {
     const byId = new Map(invitees.map((invitee) => [invitee.id, invitee]));
     return lastImportedInviteeIds.map((id) => byId.get(id)).filter((invitee): invitee is Invitee => Boolean(invitee));
   }, [invitees, lastImportedInviteeIds]);
+  const groomSideInvitees = useMemo(() => filterInviteesByLinkSide(invitees, "groom"), [invitees]);
+  const brideSideInvitees = useMemo(() => filterInviteesByLinkSide(invitees, "bride"), [invitees]);
   const allVisibleInviteesSelected = visibleInvitees.length > 0 && visibleInvitees.every((invitee) => selectedInviteeIds.has(invitee.id));
   const selectedInvitees = useMemo(
     () => invitees.filter((invitee) => selectedInviteeIds.has(invitee.id)),
@@ -803,7 +806,11 @@ export function InviteAdminPanel() {
     copyInviteUrl(selectedInvitee.token);
   }
 
-  async function exportInviteLinksWorkbook(targetInvitees: Invitee[] = invitees, label = "toàn bộ danh sách") {
+  async function exportInviteLinksWorkbook(
+    targetInvitees: Invitee[] = invitees,
+    label = "toàn bộ danh sách",
+    filenameScope = "",
+  ) {
     setMessage("");
     setError("");
 
@@ -836,7 +843,8 @@ export function InviteAdminPanel() {
         throw new Error(result?.error || "Không xuất được Excel link riêng.");
       }
 
-      downloadBlob(`danh-sach-link-thiep-moi-${new Date().toISOString().slice(0, 10)}.xlsx`, await response.blob());
+      const scopeSuffix = filenameScope ? `-${filenameScope}` : "";
+      downloadBlob(`danh-sach-link-thiep-moi${scopeSuffix}-${new Date().toISOString().slice(0, 10)}.xlsx`, await response.blob());
       setMessage(`Đã xuất Excel link thiệp mời độc bản cho ${label}.`);
     } catch (exportError) {
       setError(exportError instanceof Error ? exportError.message : "Không xuất được Excel link riêng.");
@@ -1363,22 +1371,36 @@ export function InviteAdminPanel() {
                   <h2 className="font-semibold text-[#2E2A25]">Nhập và xuất danh sách</h2>
                   <p className="mt-0.5 text-xs text-[#7B7168]">Tải mẫu, điền danh sách rồi tải lại lên.</p>
                 </div>
-                <div className="grid grid-cols-2 gap-2 lg:grid-cols-5">
+                <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
                   <button type="button" onClick={() => void downloadTemplate()} className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-lg border border-[#D6BFA3] bg-white px-3 text-xs font-semibold text-[#2E2A25] active:scale-[0.98] transition">
                     <Download className="h-3.5 w-3.5 text-[#5F6F4E]" /> Tải mẫu
                   </button>
                   <button type="button" onClick={() => importFileRef.current?.click()} className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-lg bg-[#5F6F4E] px-3 text-xs font-semibold text-white active:scale-[0.98] transition" disabled={busy}>
                     {busy ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <FileUp className="h-3.5 w-3.5" />} Tải Excel lên
                   </button>
-                  <button type="button" onClick={() => void exportInviteLinksWorkbook(lastImportedInvitees, "đợt vừa nạp")} className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-lg border border-[#D6BFA3] bg-white px-3 text-xs font-semibold text-[#2E2A25] active:scale-[0.98] transition disabled:opacity-40" disabled={lastImportedInvitees.length === 0}>
-                    <Download className="h-3.5 w-3.5 text-[#5F6F4E]" /> Link vừa nhập
-                  </button>
-                  <button type="button" onClick={() => void exportInviteLinksWorkbook()} className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-lg border border-[#D6BFA3] bg-white px-3 text-xs font-semibold text-[#2E2A25] active:scale-[0.98] transition disabled:opacity-40" disabled={busy || invitees.length === 0}>
-                    <Link2 className="h-3.5 w-3.5" /> Xuất toàn bộ link
-                  </button>
-                  <button type="button" onClick={startAddingInvitee} className="col-span-2 inline-flex min-h-11 items-center justify-center gap-1.5 rounded-lg border border-[#E8DDCC] bg-white px-3 text-xs font-semibold text-[#2E2A25] active:scale-[0.98] transition lg:col-span-1" disabled={busy}>
+                  <button type="button" onClick={startAddingInvitee} className="col-span-2 inline-flex min-h-11 items-center justify-center gap-1.5 rounded-lg border border-[#E8DDCC] bg-white px-3 text-xs font-semibold text-[#2E2A25] active:scale-[0.98] transition sm:col-span-1" disabled={busy}>
                     <Plus className="h-3.5 w-3.5 text-[#5F6F4E]" /> Thêm khách
                   </button>
+                </div>
+                <div className="mt-4 border-t border-[#E8DDCC] pt-4">
+                  <div className="mb-2.5 flex items-center justify-between gap-3">
+                    <p className="text-xs font-bold text-[#5F6F4E]">Xuất link thiệp</p>
+                    <p className="text-[11px] text-[#8A8178]">Tách sẵn theo phía mời</p>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2 lg:grid-cols-4">
+                    <button type="button" onClick={() => void exportInviteLinksWorkbook(lastImportedInvitees, "đợt vừa nạp", "vua-nhap")} className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-lg border border-[#D6BFA3] bg-white px-3 text-xs font-semibold text-[#2E2A25] transition active:scale-[0.98] disabled:opacity-40" disabled={busy || lastImportedInvitees.length === 0}>
+                      <Download className="h-3.5 w-3.5 text-[#5F6F4E]" /> Vừa nhập · {lastImportedInvitees.length}
+                    </button>
+                    <button type="button" onClick={() => void exportInviteLinksWorkbook(groomSideInvitees, "Nhà trai và khách của Nhật", "nha-trai")} className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-lg border border-[#D6BFA3] bg-white px-3 text-xs font-semibold text-[#2E2A25] transition active:scale-[0.98] disabled:opacity-40" disabled={busy || groomSideInvitees.length === 0}>
+                      <UsersRound className="h-3.5 w-3.5 text-[#5F6F4E]" /> Nhà trai · {groomSideInvitees.length}
+                    </button>
+                    <button type="button" onClick={() => void exportInviteLinksWorkbook(brideSideInvitees, "Nhà gái và khách của Phương", "nha-gai")} className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-lg border border-[#D6BFA3] bg-white px-3 text-xs font-semibold text-[#2E2A25] transition active:scale-[0.98] disabled:opacity-40" disabled={busy || brideSideInvitees.length === 0}>
+                      <UsersRound className="h-3.5 w-3.5 text-[#5F6F4E]" /> Nhà gái · {brideSideInvitees.length}
+                    </button>
+                    <button type="button" onClick={() => void exportInviteLinksWorkbook()} className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-lg border border-[#D6BFA3] bg-white px-3 text-xs font-semibold text-[#2E2A25] transition active:scale-[0.98] disabled:opacity-40" disabled={busy || invitees.length === 0}>
+                      <Link2 className="h-3.5 w-3.5 text-[#5F6F4E]" /> Toàn bộ · {invitees.length}
+                    </button>
+                  </div>
                 </div>
                 <input ref={importFileRef} type="file" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" className="hidden" onChange={(event) => void importWorkbookFile(event.target.files?.[0])} />
               </div>
