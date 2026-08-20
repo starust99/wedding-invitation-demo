@@ -12,6 +12,7 @@ import {
   type PlusOnePolicy,
 } from "@/lib/invites";
 import { buildInvitationCopy } from "@/lib/guest-personalization";
+import { resolveInviteLinkSide } from "@/lib/invite-link-side";
 import { weddingConfig } from "@/config/wedding.config";
 
 const inviteSheetName = "Danh sách khách mời";
@@ -121,6 +122,8 @@ const salutationDefinitions: SalutationDefinition[] = [
   { label: "Gia đình cháu", hostRelationship: "cháu", relationship: "cháu của cô dâu/chú rể", householdMode: "family", needsName: true, coupleHostPronoun: "anh chị", parentsHostPronoun: "cô chú", parentsCoupleReference: "hai anh chị" },
   { label: "Hai bạn", hostRelationship: "bạn", relationship: "bạn của cô dâu/chú rể", householdMode: "couple", needsName: true, coupleHostPronoun: "chúng mình", parentsHostPronoun: "gia đình chúng tôi" },
   { label: "Gia đình", hostRelationship: "bạn", relationship: "khách mời của cô dâu/chú rể", householdMode: "family", needsName: true, coupleHostPronoun: "chúng mình", parentsHostPronoun: "gia đình chúng tôi" },
+  { label: "Bà nội", hostRelationship: "bà nội", relationship: "bà nội của cô dâu/chú rể", householdMode: "single", needsName: false, coupleHostPronoun: "chúng con", parentsHostPronoun: "gia đình chúng con" },
+  { label: "Bà ngoại", hostRelationship: "bà ngoại", relationship: "bà ngoại của cô dâu/chú rể", householdMode: "single", needsName: false, coupleHostPronoun: "chúng con", parentsHostPronoun: "gia đình chúng con" },
   { label: "Bà", hostRelationship: "bà", relationship: "ông bà của cô dâu/chú rể", householdMode: "single", needsName: true, coupleHostPronoun: "chúng con", parentsHostPronoun: "gia đình chúng con" },
   { label: "Bạn", hostRelationship: "bạn", relationship: "bạn của cô dâu/chú rể", householdMode: "single", needsName: true, coupleHostPronoun: "chúng mình", parentsHostPronoun: "gia đình chúng tôi" },
   { label: "Bạn + Người thương", displayPrefix: "Bạn", displaySuffix: " & Người thương", sentenceSalutation: "Hai bạn", hostRelationship: "bạn", relationship: "bạn và người thương của cô dâu/chú rể", householdMode: "couple", plusOnePolicy: "lover", needsName: true, coupleHostPronoun: "chúng mình", parentsHostPronoun: "gia đình chúng tôi" },
@@ -1092,7 +1095,7 @@ export async function buildInviteLinksWorkbook(invitees: Invitee[], origin = "")
   worksheet.columns = [
     { key: "sequence", width: 10 },
     { key: "guestName", width: 38 },
-    { key: "internalNote", width: 24 },
+    { key: "guestGroup", width: 32 },
     { key: "postCeremonyPartyInvited", width: 38 },
     { key: "inviteUrl", width: 76 },
   ];
@@ -1125,7 +1128,7 @@ export async function buildInviteLinksWorkbook(invitees: Invitee[], origin = "")
   headerRow.values = [
     "STT",
     "Cụm tên khách",
-    "Ghi chú nội bộ",
+    "Nhóm khách",
     "Mời tham gia tiệc sau Hôn phối",
     "Link thiệp",
   ];
@@ -1142,9 +1145,13 @@ export async function buildInviteLinksWorkbook(invitees: Invitee[], origin = "")
   worksheet.autoFilter = "A4:E4";
 
   invitees.forEach((invitee, inviteeIndex) => {
+    const inviteSide = resolveInviteLinkSide(invitee.guestGroup);
+    const exportedGuestGroup = inviteSide === "bride"
+      ? clean(invitee.notes) || clean(invitee.guestGroup)
+      : clean(invitee.guestGroup) || clean(invitee.notes);
     const row = worksheet.addRow({
       guestName: invitee.invitationName || invitee.guestName || invitee.displayLabel,
-      internalNote: clean(invitee.notes) || null,
+      guestGroup: exportedGuestGroup || "Khác",
       postCeremonyPartyInvited: invitee.postCeremonyPartyInvited ? "Có" : "Không",
       inviteUrl: buildInviteUrl(invitee.token, origin),
     });
@@ -1178,8 +1185,8 @@ export async function buildInviteLinksWorkbook(invitees: Invitee[], origin = "")
     const guestCell = row.getCell(2);
     guestCell.font = { name: "Arial", size: 13, bold: true, color: { argb: palette.text } };
 
-    const internalNoteCell = row.getCell(3);
-    internalNoteCell.font = { name: "Arial", size: 11, italic: true, color: { argb: palette.muted } };
+    const guestGroupCell = row.getCell(3);
+    guestGroupCell.font = { name: "Arial", size: 11, italic: true, color: { argb: palette.muted } };
 
     const postCeremonyCell = row.getCell(4);
     const isInvited = cellText(postCeremonyCell) === "Có";

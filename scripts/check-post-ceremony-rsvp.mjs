@@ -58,6 +58,8 @@ assert.notEqual(sheet.getCell("G5").dataValidation.showInputMessage, true);
 assert.equal(sheet.getCell("F5").dataValidation.type, "list");
 const guestGroupOptions = spreadsheet.getSimpleInviteEntryOptions().guestGroups;
 assert(spreadsheet.getSimpleInviteEntryOptions().salutationClusters.includes("Cha"));
+assert(spreadsheet.getSimpleInviteEntryOptions().salutationClusters.includes("Bà nội"));
+assert(spreadsheet.getSimpleInviteEntryOptions().salutationClusters.includes("Bà ngoại"));
 for (const lodgingGroup of [
   "[Nhà Trai] Họ nội",
   "[Nhà Trai] Họ ngoại",
@@ -93,12 +95,16 @@ sheet.getCell("F8").value = "[Nhật] Bạn bè & Đồng nghiệp";
 sheet.getCell("B9").value = "Cha";
 sheet.getCell("C9").value = "Linh Hướng Giuse";
 sheet.getCell("F9").value = "[Nhà Gái] Khách ba";
+workbook.getWorksheet("_Dữ liệu hệ thống").getCell("N3").value = 9;
+workbook.getWorksheet("_Dữ liệu hệ thống").getCell("O3").value = "Công giáo";
+sheet.getCell("B10").value = "Bà ngoại";
+sheet.getCell("F10").value = "[Nhà Gái] Họ ngoại";
 await workbook.xlsx.writeFile(join(outputDir, "mau-danh-sach-khach-moi-co-du-lieu.xlsx"));
 
 const parsed = await spreadsheet.parseInviteWorkbook(await workbook.xlsx.writeBuffer());
 assert.deepEqual(parsed.errors, []);
 assert.equal(parsed.hasPostCeremonyPartyColumn, true);
-assert.equal(parsed.invitees.length, 5);
+assert.equal(parsed.invitees.length, 6);
 assert.equal(parsed.invitees[0].postCeremonyPartyInvited, true);
 assert.equal(parsed.invitees[0].notes, "DNCG");
 assert.equal(parsed.invitees[1].postCeremonyPartyInvited, false);
@@ -118,6 +124,12 @@ assert.equal(parsed.invitees[4].invitationName, "Cha Linh Hướng Giuse");
 assert.equal(parsed.invitees[4].honorific, "cha");
 assert.equal(parsed.invitees[4].householdMode, "single");
 assert.equal(parsed.invitees[4].expectedGuestCount, 1);
+assert.equal(parsed.invitees[4].notes, "Công giáo");
+assert.equal(parsed.invitees[5].displayLabel, "Bà ngoại");
+assert.equal(parsed.invitees[5].salutationCluster, "Bà ngoại");
+assert.equal(parsed.invitees[5].guestName, "Bà ngoại");
+assert.equal(parsed.invitees[5].householdMode, "single");
+assert.equal(parsed.invitees[5].expectedGuestCount, 1);
 
 sheet.getCell("G7").value = "Không";
 const invalid = await spreadsheet.parseInviteWorkbook(await workbook.xlsx.writeBuffer());
@@ -153,14 +165,15 @@ const linkSheet = linkWorkbook.getWorksheet("Link thiệp mời");
 assert(linkSheet, "Invite-link sheet is missing.");
 assert.deepEqual(
   [1, 2, 3, 4, 5].map((column) => linkSheet.getCell(4, column).text),
-  ["STT", "Cụm tên khách", "Ghi chú nội bộ", "Mời tham gia tiệc sau Hôn phối", "Link thiệp"],
+  ["STT", "Cụm tên khách", "Nhóm khách", "Mời tham gia tiệc sau Hôn phối", "Link thiệp"],
 );
 assert.equal(linkSheet.getCell("A5").result, 1);
 assert.match(linkSheet.getCell("A5").formula, /COUNTIF\(\$B\$5:B5/);
 assert.equal(linkSheet.getCell("B5").text, "Gia đình anh chị Tuấn");
-assert.equal(linkSheet.getCell("C5").text, "DNCG");
+assert.equal(linkSheet.getCell("C5").text, "[Nhật] Bạn bè & Đồng nghiệp");
 assert.equal(linkSheet.getCell("D5").text, "Có");
 assert.equal(linkSheet.getCell("E5").hyperlink, `https://nhatphuong.love/g/${parsed.invitees[0].token}`);
+assert.equal(linkSheet.getCell("C9").text, "Công giáo");
 
 const mappedInvitee = inviteMapper.mapInviteeRow({
   id: "11111111-1111-4111-8111-111111111111",

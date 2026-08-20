@@ -75,8 +75,11 @@ const groomWorkbook = await buildInviteLinksWorkbook(groomInvitees, "https://nha
 const groomSheet = groomWorkbook.getWorksheet("Link thiệp mời");
 assert.ok(groomSheet, "Groom-side link workbook must contain its worksheet.");
 assert.equal(groomSheet.rowCount, 6);
+assert.equal(groomSheet.getCell("C4").text, "Nhóm khách");
 assert.equal(groomSheet.getCell("B5").text, "Khách nhà trai");
 assert.equal(groomSheet.getCell("B6").text, "Bạn Nhật");
+assert.equal(groomSheet.getCell("C5").text, "[Nhà Trai] Họ nội");
+assert.equal(groomSheet.getCell("C6").text, "[Nhật] Bạn bè & Đồng nghiệp");
 assert.match(groomSheet.getCell("E5").text, /^https:\/\/nhatphuong\.love\/g\//);
 assert.doesNotMatch(groomSheet.getCell("B5").text + groomSheet.getCell("B6").text, /nhà gái|Phương/i);
 
@@ -86,21 +89,23 @@ assert.ok(brideSheet, "Bride-side link workbook must contain its worksheet.");
 assert.equal(brideSheet.rowCount, 6);
 assert.equal(brideSheet.getCell("B5").text, "Khách nhà gái");
 assert.equal(brideSheet.getCell("B6").text, "Bạn Phương");
+assert.equal(brideSheet.getCell("C5").text, "[Nhà Gái] Họ ngoại");
+assert.equal(brideSheet.getCell("C6").text, "[Phương] Bạn bè & Đồng nghiệp");
 assert.match(brideSheet.getCell("E6").text, /^https:\/\/nhatphuong\.love\/g\//);
 assert.doesNotMatch(brideSheet.getCell("B5").text + brideSheet.getCell("B6").text, /nhà trai|Nhật/i);
 
 const duplicateFamilyName = "Gia đình anh Trung";
 const duplicateInvitees = [
   createInvitee({ guestName: duplicateFamilyName, displayLabel: duplicateFamilyName, invitationName: duplicateFamilyName, guestGroup: "[Nhà Gái] Khách ba" }),
-  createInvitee({ guestName: duplicateFamilyName, displayLabel: duplicateFamilyName, invitationName: duplicateFamilyName, guestGroup: "[Nhà Gái] Khách ba", notes: "DNCG" }),
+  createInvitee({ guestName: duplicateFamilyName, displayLabel: duplicateFamilyName, invitationName: duplicateFamilyName, guestGroup: "[Nhà Gái] Khách ba", notes: "Công giáo" }),
 ];
 const duplicateWorkbook = await buildInviteLinksWorkbook(duplicateInvitees, "https://nhatphuong.love");
 const duplicateSheet = duplicateWorkbook.getWorksheet("Link thiệp mời");
 assert.ok(duplicateSheet, "Duplicate-name workbook must contain its worksheet.");
 assert.equal(duplicateSheet.getCell("B5").text, duplicateFamilyName);
 assert.equal(duplicateSheet.getCell("B6").text, duplicateFamilyName);
-assert.equal(duplicateSheet.getCell("C5").text, "");
-assert.equal(duplicateSheet.getCell("C6").text, "DNCG");
+assert.equal(duplicateSheet.getCell("C5").text, "[Nhà Gái] Khách ba");
+assert.equal(duplicateSheet.getCell("C6").text, "Công giáo");
 assert.match(duplicateSheet.getCell("E5").text, /^https:\/\/nhatphuong\.love\/g\//);
 assert.match(duplicateSheet.getCell("E6").text, /^https:\/\/nhatphuong\.love\/g\//);
 
@@ -111,6 +116,6 @@ const preservedDuplicates = preserveExistingInviteLinks(
 assert.equal(new Set(preservedDuplicates.map((invitee) => invitee.token)).size, 2);
 assert.equal(preservedDuplicates[0].token, duplicateInvitees[0].token);
 assert.equal(preservedDuplicates[1].token, duplicateInvitees[1].token);
-assert.equal(preservedDuplicates[1].notes, "DNCG");
+assert.equal(preservedDuplicates[1].notes, "Công giáo");
 
-console.log("Invite-link side checks passed: Nhà Trai includes Nhật, Nhà Gái includes Phương, unknown groups stay unassigned, and both workbooks contain only their intended guests.");
+console.log("Invite-link side checks passed: Nhà Trai exports system groups, Nhà Gái exports seating notes when available, unknown groups stay unassigned, and both workbooks contain only their intended guests.");
