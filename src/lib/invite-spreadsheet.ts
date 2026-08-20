@@ -12,7 +12,6 @@ import {
   type PlusOnePolicy,
 } from "@/lib/invites";
 import { buildInvitationCopy } from "@/lib/guest-personalization";
-import { resolveInviteLinkSide } from "@/lib/invite-link-side";
 import { weddingConfig } from "@/config/wedding.config";
 
 const inviteSheetName = "Danh sách khách mời";
@@ -152,6 +151,7 @@ const columns = [
   { key: "guestName", header: "Cụm tên khách", width: 34 },
   { key: "guestUnit", header: "Đơn vị khách", width: 22 },
   { key: "guestGroup", header: "Nhóm khách", width: 40 },
+  { key: "guestDetail", header: "Chi tiết (Optional)", width: 26 },
   { key: "postCeremonyPartyInvited", header: "Tham gia tiệc sau Hôn phối", width: 32 },
 ] as const;
 
@@ -162,13 +162,15 @@ const inviteColumn = {
   guestName: 4,
   guestUnit: 5,
   guestGroup: 6,
-  postCeremonyPartyInvited: 7,
+  guestDetail: 7,
+  postCeremonyPartyInvited: 8,
 } as const;
 
 export type SimpleInviteEntry = {
   salutationCluster: string;
   guestNameCore: string;
   guestGroup: string;
+  guestDetail?: string;
   postCeremonyPartyInvited?: string;
 };
 
@@ -649,6 +651,9 @@ function applyTemplateRows(worksheet: ExcelJS.Worksheet, options: ReturnType<typ
       error: "Ô này dùng danh sách chọn để tránh nhập sai.",
     };
 
+    const guestDetailCell = row.getCell(inviteColumn.guestDetail);
+    styleInputCell(guestDetailCell, false);
+
     const postCeremonyPartyCell = row.getCell(inviteColumn.postCeremonyPartyInvited);
     styleInputCell(postCeremonyPartyCell, true);
     postCeremonyPartyCell.dataValidation = {
@@ -905,6 +910,7 @@ export async function parseInviteWorkbook(buffer: ArrayBuffer, existingInvitees:
     relationship: findKeyByHeader(headers, ["Quan hệ với cô dâu chú rể", "relationship"]),
     householdMode: findKeyByHeader(headers, ["Đơn vị khách", "Mời đi cùng", "household_mode", "householdMode"]),
     guestGroup: findKeyByHeader(headers, ["Nhóm khách", "Nhóm khách mời", "guest_group", "guestGroup"]),
+    guestDetail: findKeyByHeader(headers, ["Chi tiết (Optional)", "Chi tiết", "guest_detail", "guestDetail", "notes"]),
     postCeremonyPartyInvited: findKeyByHeader(headers, ["Tham gia tiệc sau Hôn phối", "post_ceremony_party_invited", "postCeremonyPartyInvited"]),
     audienceTags: findKeyByHeader(headers, ["Nhóm xem album", "audience_tags", "audienceTags"]),
     token: findKeyByHeader(headers, ["token", "Mã link riêng", "ma link rieng"]),
@@ -931,6 +937,7 @@ export async function parseInviteWorkbook(buffer: ArrayBuffer, existingInvitees:
         salutationCluster: read(indexes.salutationCluster),
         guestNameCore: read(indexes.guestNameCore),
         guestGroup: read(indexes.guestGroup),
+        guestDetail: read(indexes.guestDetail),
         postCeremonyPartyInvited: read(indexes.postCeremonyPartyInvited),
       };
       if (!simplifiedValues.salutationCluster && !simplifiedValues.guestNameCore && !simplifiedValues.guestGroup) return;
@@ -984,7 +991,7 @@ export async function parseInviteWorkbook(buffer: ArrayBuffer, existingInvitees:
         postCeremonyPartyInvited: postCeremonyPartyValue === "co",
         phone: "",
         email: "",
-        notes: internalNotesByDataRow.get(rowIndex) ?? "",
+        notes: clean(simplifiedValues.guestDetail) || internalNotesByDataRow.get(rowIndex) || "",
       }, tokenPool, existingToken || undefined);
 
       usedTokens.add(invitee.token);
@@ -1064,7 +1071,7 @@ export async function parseInviteWorkbook(buffer: ArrayBuffer, existingInvitees:
       postCeremonyPartyInvited: postCeremonyPartyValue === "co",
       phone: "",
       email: "",
-      notes: "",
+      notes: clean(read(indexes.guestDetail)) || internalNotesByDataRow.get(rowIndex) || "",
     }, tokenPool, existingToken || undefined);
 
     usedTokens.add(invitee.token);
@@ -1081,7 +1088,7 @@ export async function buildInviteLinksWorkbook(invitees: Invitee[], origin = "")
   workbook.modified = new Date();
 
   const worksheet = workbook.addWorksheet("Link thiệp mời", {
-    views: [{ state: "frozen", xSplit: 3, ySplit: 4, topLeftCell: "D5", showGridLines: false }],
+    views: [{ state: "frozen", xSplit: 4, ySplit: 4, topLeftCell: "E5", showGridLines: false }],
     pageSetup: {
       orientation: "landscape",
       paperSize: 9,
@@ -1096,11 +1103,12 @@ export async function buildInviteLinksWorkbook(invitees: Invitee[], origin = "")
     { key: "sequence", width: 10 },
     { key: "guestName", width: 38 },
     { key: "guestGroup", width: 32 },
+    { key: "guestDetail", width: 26 },
     { key: "postCeremonyPartyInvited", width: 38 },
     { key: "inviteUrl", width: 76 },
   ];
 
-  worksheet.mergeCells("A1:E1");
+  worksheet.mergeCells("A1:F1");
   const titleCell = worksheet.getCell("A1");
   titleCell.value = "DANH SÁCH LINK THIỆP MỜI";
   titleCell.font = { name: "Georgia", size: 22, bold: true, color: { argb: palette.white } };
@@ -1108,7 +1116,7 @@ export async function buildInviteLinksWorkbook(invitees: Invitee[], origin = "")
   titleCell.alignment = { vertical: "middle", horizontal: "center" };
   worksheet.getRow(1).height = 46;
 
-  worksheet.mergeCells("A2:E2");
+  worksheet.mergeCells("A2:F2");
   const subtitleCell = worksheet.getCell("A2");
   subtitleCell.value = `Lễ thành hôn ${defaultCoupleDisplayName}`;
   subtitleCell.font = { name: "Arial", size: 12, italic: true, color: { argb: palette.text } };
@@ -1123,13 +1131,15 @@ export async function buildInviteLinksWorkbook(invitees: Invitee[], origin = "")
   worksheet.getCell("C3").fill = { type: "pattern", pattern: "solid", fgColor: { argb: palette.ivory } };
   worksheet.getCell("D3").fill = { type: "pattern", pattern: "solid", fgColor: { argb: palette.ivory } };
   worksheet.getCell("E3").fill = { type: "pattern", pattern: "solid", fgColor: { argb: palette.ivory } };
+  worksheet.getCell("F3").fill = { type: "pattern", pattern: "solid", fgColor: { argb: palette.ivory } };
 
   const headerRow = worksheet.getRow(4);
   headerRow.values = [
     "STT",
     "Cụm tên khách",
     "Nhóm khách",
-    "Mời tham gia tiệc sau Hôn phối",
+    "Chi tiết (Optional)",
+    "Tham gia tiệc sau Hôn phối",
     "Link thiệp",
   ];
   headerRow.height = 44;
@@ -1142,16 +1152,13 @@ export async function buildInviteLinksWorkbook(invitees: Invitee[], origin = "")
       bottom: { style: "thin", color: { argb: palette.champagne } },
     };
   });
-  worksheet.autoFilter = "A4:E4";
+  worksheet.autoFilter = "A4:F4";
 
   invitees.forEach((invitee, inviteeIndex) => {
-    const inviteSide = resolveInviteLinkSide(invitee.guestGroup);
-    const exportedGuestGroup = inviteSide === "bride"
-      ? clean(invitee.notes) || clean(invitee.guestGroup)
-      : clean(invitee.guestGroup) || clean(invitee.notes);
     const row = worksheet.addRow({
       guestName: invitee.invitationName || invitee.guestName || invitee.displayLabel,
-      guestGroup: exportedGuestGroup || "Khác",
+      guestGroup: clean(invitee.guestGroup) || "Khác",
+      guestDetail: clean(invitee.notes),
       postCeremonyPartyInvited: invitee.postCeremonyPartyInvited ? "Có" : "Không",
       inviteUrl: buildInviteUrl(invitee.token, origin),
     });
@@ -1188,7 +1195,10 @@ export async function buildInviteLinksWorkbook(invitees: Invitee[], origin = "")
     const guestGroupCell = row.getCell(3);
     guestGroupCell.font = { name: "Arial", size: 11, italic: true, color: { argb: palette.muted } };
 
-    const postCeremonyCell = row.getCell(4);
+    const guestDetailCell = row.getCell(4);
+    guestDetailCell.font = { name: "Arial", size: 11, italic: true, color: { argb: palette.muted } };
+
+    const postCeremonyCell = row.getCell(5);
     const isInvited = cellText(postCeremonyCell) === "Có";
     postCeremonyCell.alignment = { vertical: "middle", horizontal: "center" };
     postCeremonyCell.font = {
@@ -1204,7 +1214,7 @@ export async function buildInviteLinksWorkbook(invitees: Invitee[], origin = "")
     };
   });
 
-  worksheet.getColumn(5).eachCell((cell, rowIndex) => {
+  worksheet.getColumn(6).eachCell((cell, rowIndex) => {
     if (rowIndex <= 4) return;
     const url = cellText(cell);
     cell.value = { text: url, hyperlink: url, tooltip: "Bấm để mở thiệp" };
@@ -1213,7 +1223,7 @@ export async function buildInviteLinksWorkbook(invitees: Invitee[], origin = "")
   });
 
   worksheet.pageSetup.printTitlesRow = "1:4";
-  worksheet.pageSetup.printArea = `A1:E${Math.max(4, worksheet.rowCount)}`;
+  worksheet.pageSetup.printArea = `A1:F${Math.max(4, worksheet.rowCount)}`;
 
   return workbook;
 }
