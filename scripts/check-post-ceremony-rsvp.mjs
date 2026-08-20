@@ -58,8 +58,10 @@ assert.notEqual(sheet.getCell("G5").dataValidation.showInputMessage, true);
 assert.equal(sheet.getCell("F5").dataValidation.type, "list");
 const guestGroupOptions = spreadsheet.getSimpleInviteEntryOptions().guestGroups;
 assert(spreadsheet.getSimpleInviteEntryOptions().salutationClusters.includes("Cha"));
-assert(spreadsheet.getSimpleInviteEntryOptions().salutationClusters.includes("Bà nội"));
-assert(spreadsheet.getSimpleInviteEntryOptions().salutationClusters.includes("Bà ngoại"));
+const salutationOptions = spreadsheet.getSimpleInviteEntryOptions().salutationClusters;
+const bàOptionIndex = salutationOptions.indexOf("Bà");
+assert.equal(salutationOptions[bàOptionIndex + 1], "Bà nội");
+assert.equal(salutationOptions[bàOptionIndex + 2], "Bà ngoại");
 for (const lodgingGroup of [
   "[Nhà Trai] Họ nội",
   "[Nhà Trai] Họ ngoại",
