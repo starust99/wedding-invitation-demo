@@ -16,6 +16,7 @@ execFileSync(
     "tsc",
     "src/lib/guest-naming.ts",
     "src/lib/guest-rsvp-copy.ts",
+    "src/lib/guest-personalization.ts",
     "--outDir",
     outputDir,
     "--target",
@@ -29,6 +30,7 @@ execFileSync(
 
 const naming = require(join(outputDir, "guest-naming.js"));
 const copy = require(join(outputDir, "guest-rsvp-copy.js"));
+const personalization = require(join(outputDir, "guest-personalization.js"));
 
 const nameCases = [
   ["Gia đình anh chị", "Hiền & Hồng", "Gia đình anh chị Hiền & Hồng"],
@@ -41,6 +43,7 @@ const nameCases = [
   ["Gia đình", "Hải & Linh", "Gia đình Hải & Linh"],
   ["Dì", "Nên", "Dì Nên"],
   ["Anh chị", "Chi & Người thương", "Chị Chi & Người thương"],
+  ["Cha", "Linh Hướng Giuse", "Cha Linh Hướng Giuse"],
 ];
 
 for (const [cluster, core, full] of nameCases) {
@@ -56,6 +59,27 @@ assert.equal(
 );
 assert.equal(naming.resolveSalutationCluster("", "Bố"), "Bố");
 assert.equal(naming.resolveSalutationCluster("", "Mẹ"), "Mẹ");
+assert.equal(naming.resolveSalutationCluster("", "Cha Linh Hướng Giuse"), "Cha");
+
+const clergyIdentity = {
+  salutationCluster: "Cha",
+  displaySalutation: "Cha",
+  invitationName: "Cha Linh Hướng Giuse",
+  displayLabel: "Cha Linh Hướng Giuse",
+  guestName: "Cha Linh Hướng Giuse",
+  hostRelationship: "cha",
+  relationship: "linh mục",
+  invitedBy: "parents",
+  householdMode: "single",
+};
+const clergyCopy = personalization.buildInvitationCopy(clergyIdentity);
+assert.equal(clergyCopy.guestLabel, "Cha Linh Hướng Giuse");
+assert(clergyCopy.heroInvitationLine.startsWith("Cha Linh Hướng Giuse đến chung vui"));
+assert.equal(clergyCopy.greeting, "Cha thân mến");
+assert.equal(clergyCopy.presenceSubject, "Cha");
+assert.equal(clergyCopy.closingLine, "Sự hiện diện của Cha là niềm vinh hạnh và lời chúc phúc trọn vẹn nhất.");
+assert(clergyCopy.insideInviteLine.includes("\nCha đến chung vui"));
+assert.equal(clergyCopy.insideInviteLine.includes("\nCha Linh Hướng Giuse đến chung vui"), false);
 
 const clusterInput = {
   salutationCluster: "Gia đình anh chị",
@@ -154,4 +178,22 @@ const loverBoth = copy.buildRsvpSubmissionCopy({
 assert(loverBoth.body.includes("biết anh chị sẽ có mặt"));
 assert(loverBoth.body.includes("Sự hiện diện của anh chị chính là"));
 
-console.log(`Guest naming/copy checks passed (${nameCases.length} name patterns, 12 copy branches).`);
+const clergyClusterInput = {
+  salutationCluster: "Cha",
+  fullGuestName: "Cha Linh Hướng Giuse",
+};
+assert.equal(
+  copy.buildThankYouMessage({ ...clergyClusterInput, attending: "yes", attendingCeremony: true, attendingBanquet: true }),
+  "Xin chân thành cảm ơn! Hẹn gặp cha tại Thánh lễ Hôn phối và Tiệc cưới.",
+);
+const clergyBoth = copy.buildRsvpSubmissionCopy({
+  ...clergyClusterInput,
+  attending: "yes",
+  attendingCeremony: "yes",
+  attendingBanquet: "yes",
+  fallbackClosingLine: "",
+});
+assert(clergyBoth.body.includes("biết cha sẽ có mặt"));
+assert.equal(clergyBoth.body.includes("Cha Linh Hướng Giuse"), false);
+
+console.log(`Guest naming/copy checks passed (${nameCases.length} name patterns, 14 copy branches).`);

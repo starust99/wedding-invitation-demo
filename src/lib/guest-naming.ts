@@ -1,4 +1,5 @@
 const knownSalutationClusters = [
+  "Cha",
   "Gia đình chú thím",
   "Gia đình cô dượng",
   "Gia đình cô chú",

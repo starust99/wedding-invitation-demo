@@ -12,6 +12,9 @@ Persist the Excel salutation cluster, preserve sentence-style capitalization in
 the full guest name, and render full names versus short salutations only in the
 agreed private-invite and RSVP locations.
 
+Clergy rows keep `Cha` as their short salutation while the hero alone uses the
+full formal title and saint name assembled from the workbook.
+
 ## Affected Users
 
 - Wedding administrators importing guest spreadsheets.
@@ -26,4 +29,3 @@ agreed private-invite and RSVP locations.
 - Personalizing the public `/` route.
 - Rewriting dress-code, lodging, note, or other generic `Quý khách` copy.
 - Dropping legacy relationship columns from Supabase.
-

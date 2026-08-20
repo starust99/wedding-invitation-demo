@@ -18,6 +18,16 @@ Tên khách: Tuấn
 Cụm tên khách: Gia đình anh chị Tuấn
 ```
 
+Clergy use the same seven-column workbook without another title field:
+
+- `Cụm danh xưng` is `Cha`.
+- `Tên khách` contains the remaining formal title and saint name, for example
+  `Linh Hướng Giuse`.
+- The private hero renders the full `Cụm tên khách`, for example
+  `Cha Linh Hướng Giuse`.
+- Sentence copy, RSVP results, thank-you copy, and presence wording address the
+  invitee only as `Cha`; they do not repeat the formal title or saint name.
+
 ## Rendering Contract
 
 The public `/` route has no invite identity and keeps the generic `Quý khách`

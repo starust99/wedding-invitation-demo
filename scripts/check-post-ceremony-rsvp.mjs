@@ -55,6 +55,7 @@ assert.equal(sheet.getCell("G5").dataValidation.type, "list");
 assert.notEqual(sheet.getCell("G5").dataValidation.showInputMessage, true);
 assert.equal(sheet.getCell("F5").dataValidation.type, "list");
 const guestGroupOptions = spreadsheet.getSimpleInviteEntryOptions().guestGroups;
+assert(spreadsheet.getSimpleInviteEntryOptions().salutationClusters.includes("Cha"));
 for (const lodgingGroup of [
   "[Nhà Trai] Họ nội",
   "[Nhà Trai] Họ ngoại",
@@ -85,12 +86,15 @@ sheet.getCell("F7").value = "[Nhật] Bạn bè & Đồng nghiệp";
 sheet.getCell("B8").value = "Vợ chồng bạn";
 sheet.getCell("C8").value = "Bảo";
 sheet.getCell("F8").value = "[Nhật] Bạn bè & Đồng nghiệp";
+sheet.getCell("B9").value = "Cha";
+sheet.getCell("C9").value = "Linh Hướng Giuse";
+sheet.getCell("F9").value = "[Nhà Gái] Khách ba";
 await workbook.xlsx.writeFile(join(outputDir, "mau-danh-sach-khach-moi-co-du-lieu.xlsx"));
 
 const parsed = await spreadsheet.parseInviteWorkbook(await workbook.xlsx.writeBuffer());
 assert.deepEqual(parsed.errors, []);
 assert.equal(parsed.hasPostCeremonyPartyColumn, true);
-assert.equal(parsed.invitees.length, 4);
+assert.equal(parsed.invitees.length, 5);
 assert.equal(parsed.invitees[0].postCeremonyPartyInvited, true);
 assert.equal(parsed.invitees[1].postCeremonyPartyInvited, false);
 assert.equal(parsed.invitees[1].displayLabel, "Chị Chi & Người thương");
@@ -102,6 +106,13 @@ assert.equal(parsed.invitees[3].displayLabel, "Vợ chồng bạn Bảo");
 assert.equal(parsed.invitees[3].householdMode, "family");
 assert.equal(parsed.invitees[3].plusOnePolicy, "family");
 assert.equal(parsed.invitees[3].expectedGuestCount, 4);
+assert.equal(parsed.invitees[4].displayLabel, "Cha Linh Hướng Giuse");
+assert.equal(parsed.invitees[4].salutationCluster, "Cha");
+assert.equal(parsed.invitees[4].displaySalutation, "Cha");
+assert.equal(parsed.invitees[4].invitationName, "Cha Linh Hướng Giuse");
+assert.equal(parsed.invitees[4].honorific, "cha");
+assert.equal(parsed.invitees[4].householdMode, "single");
+assert.equal(parsed.invitees[4].expectedGuestCount, 1);
 
 sheet.getCell("G7").value = "Không";
 const invalid = await spreadsheet.parseInviteWorkbook(await workbook.xlsx.writeBuffer());

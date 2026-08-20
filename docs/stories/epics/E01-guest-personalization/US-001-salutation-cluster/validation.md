@@ -9,8 +9,8 @@ copy generation, and browser rendering.
 
 | Layer | Cases |
 | --- | --- |
-| Unit | Casing, Bố/Mẹ counts, paired names with `&`, fallback salutations, all ThankYou and RSVP result branches |
-| Integration | Generated workbook parses into exact salutation/full-name pairs and duplicate display names receive distinct tokens |
+| Unit | Casing, Bố/Mẹ counts, clergy short-form address, paired names with `&`, fallback salutations, all ThankYou and RSVP result branches |
+| Integration | Generated workbook parses into exact salutation/full-name pairs, including `Cha`, and duplicate display names receive distinct tokens |
 | E2E | Private hero, ThankYou, and RSVP review/result text |
 | Platform | Production build and responsive browser DOM |
 | Performance | No new network round trips on public pages |

@@ -227,6 +227,7 @@ export function resolveShortRecipientLabel(identity: GuestIdentity, fallbackLabe
     chau: "Cháu",
     bo: "Bố",
     me: "Mẹ",
+    cha: "Cha",
   };
 
   return kinshipTerms[normalizeText(firstWord)] ?? label;
@@ -290,7 +291,7 @@ type AddressProfile = {
 };
 
 const grandElderKeywords = ["ong", "ba", "ong ba", "noi", "ngoai", "ong noi", "ba noi", "ong ngoai", "ba ngoai"];
-const elderKeywords = ["bac", "co", "chu", "di", "cau", "mo", "thim", "duong", "phu huynh", "ba me", "bo me", "cha me", "bo", "me"];
+const elderKeywords = ["cha", "linh muc", "bac", "co", "chu", "di", "cau", "mo", "thim", "duong", "phu huynh", "ba me", "bo me", "cha me", "bo", "me"];
 const seniorKeywords = ["anh", "chi", "anh chi"];
 const juniorKeywords = ["em", "chau", "be", "nho tuoi", "dan em"];
 const peerKeywords = ["ban", "ban be", "ban than", "dong nghiep", "dong mon", "cung lop", "dai hoc", "cap 3", "hoi ban", "team"];
@@ -698,6 +699,24 @@ function resolveSinglePresence(guestLabel: string, recipientPronoun: string, aud
 }
 
 function resolveAddressProfile(input: InvitationCopyInput | undefined, tone: InvitationTone, guestLabel: string): AddressProfile {
+  if (normalizeText(input?.salutationCluster ?? "") === "cha") {
+    return {
+      audience: "elder",
+      guestLabel,
+      shortRecipientLabel: "Cha",
+      recipientPronoun: "Cha",
+      singleRecipient: "Cha",
+      coupleRecipient: "Cha",
+      familyRecipient: "Cha",
+      envelopeSingle: "Cha",
+      envelopeCouple: "Cha",
+      envelopeFamily: "Cha",
+      presenceSingle: "Cha",
+      presenceCouple: "Cha",
+      presenceFamily: "Cha",
+    };
+  }
+
   const audience = resolveGuestAudience(input);
   const recipientPronoun = resolveRecipientPronoun(input, tone, guestLabel, audience);
   const shortRecipientLabel = resolveShortRecipientLabel(input ?? {}, recipientPronoun);
@@ -843,7 +862,10 @@ export function buildInvitationCopy(input?: InvitationCopyInput): InvitationCopy
     ? familyHostSubject
     : sentenceCase(cleanHostPronoun);
 
-  const personalInviteLine = `${guestLabel} đến chung vui và ghi dấu những khoảnh khắc đáng nhớ cùng ${coupleDisplayName}.`;
+  const sentenceGuestLabel = normalizeText(input?.salutationCluster ?? "") === "cha"
+    ? shortRecipientLabel
+    : guestLabel;
+  const personalInviteLine = `${sentenceGuestLabel} đến chung vui và ghi dấu những khoảnh khắc đáng nhớ cùng ${coupleDisplayName}.`;
   const insideInviteLine = `${personalInviteHeading}\n${personalInviteLine}`;
   const guestFullNamePrefix = guestFullName.charAt(0).toUpperCase() + guestFullName.slice(1);
   const defaultHeroTemplate = `[Cụm tên khách] đến chung vui và ghi dấu những khoảnh khắc đáng nhớ cùng ${coupleDisplayName}.`;
@@ -881,7 +903,7 @@ export function buildInvitationCopy(input?: InvitationCopyInput): InvitationCopy
     recipientLine,
     invitedGuestLine,
     inviteScope,
-    greeting: `${guestLabel === "quý khách" ? "Quý khách" : guestLabel} thân mến`,
+    greeting: `${guestLabel === "quý khách" ? "Quý khách" : sentenceGuestLabel} thân mến`,
     heroInvitationLine,
     envelopeLine: `${isCoupleInvite(input) || isOpenCompanionInvite(input) ? "Kính mời" : envelopePrefix}: ${envelopeRecipientLine}`,
     insideInviteLine,

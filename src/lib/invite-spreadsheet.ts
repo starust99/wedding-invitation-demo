@@ -44,6 +44,7 @@ type SalutationDefinition = {
   label: string;
   displayPrefix?: string;
   displaySuffix?: string;
+  displaySalutation?: string;
   sentenceSalutation?: string;
   hostRelationship: string;
   relationship: string;
@@ -61,6 +62,16 @@ type GuestGroupDefinition = {
 };
 
 const salutationDefinitions: SalutationDefinition[] = [
+  {
+    label: "Cha",
+    displaySalutation: "Cha",
+    hostRelationship: "cha",
+    relationship: "linh mục",
+    householdMode: "single",
+    needsName: true,
+    coupleHostPronoun: "chúng con",
+    parentsHostPronoun: "gia đình chúng con",
+  },
   { label: "Ông bà", hostRelationship: "ông bà", relationship: "ông bà của cô dâu/chú rể", householdMode: "couple", needsName: false, coupleHostPronoun: "chúng con", parentsHostPronoun: "gia đình chúng con" },
   { label: "Bố mẹ", hostRelationship: "bố mẹ", relationship: "bố mẹ của cô dâu/chú rể", householdMode: "couple", needsName: false, coupleHostPronoun: "chúng con", parentsHostPronoun: "gia đình chúng con" },
   { label: "Ba mẹ", hostRelationship: "ba mẹ", relationship: "bố mẹ của cô dâu/chú rể", householdMode: "couple", needsName: false, coupleHostPronoun: "chúng con", parentsHostPronoun: "gia đình chúng con" },
@@ -245,7 +256,7 @@ function cleanRedundantPrefix(salutationCluster: string, guestNameCore: string):
   const normalizedFirst = normalizeText(firstWord);
 
   const prefixesToRemove = new Set([
-    "anh", "chi", "em", "co", "chu", "bac", "di", "duong", "cau", "mo", "thim", "ong", "ba", "thay", "co"
+    "anh", "chi", "em", "co", "chu", "bac", "di", "duong", "cau", "mo", "thim", "ong", "ba", "cha", "thay", "co",
   ]);
 
   if (prefixesToRemove.has(normalizedFirst)) {
@@ -305,7 +316,7 @@ function inferTemplateValues(values: TemplateRowValues): InferredTemplateValues 
   return {
     salutationCluster: clean(salutation.sentenceSalutation) || displayPrefixForSalutation(salutation),
     guestName: buildDisplayGuestName(values.salutationCluster, values.guestNameCore),
-    displaySalutation: buildDisplayGuestName(values.salutationCluster, values.guestNameCore),
+    displaySalutation: clean(salutation.displaySalutation) || buildDisplayGuestName(values.salutationCluster, values.guestNameCore),
     hostRelationship: salutation.hostRelationship,
     invitedBy,
     hostPronoun,
@@ -533,7 +544,7 @@ function deriveExpectedGuestCount(householdMode: HouseholdMode) {
 }
 
 function deriveHonorific(hostRelationship: string) {
-  const titleRelationships = new Set(["ông", "bà", "bác", "cô", "chú", "dì", "cậu", "mợ", "thím", "anh", "chị", "em", "cháu"]);
+  const titleRelationships = new Set(["cha", "ông", "bà", "bác", "cô", "chú", "dì", "cậu", "mợ", "thím", "anh", "chị", "em", "cháu"]);
   return titleRelationships.has(hostRelationship.toLowerCase()) ? hostRelationship : "";
 }
 
