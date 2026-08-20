@@ -115,6 +115,23 @@ assert.equal(duplicateSheet.getCell("D6").text, "Công giáo");
 assert.match(duplicateSheet.getCell("F5").text, /^https:\/\/nhatphuong\.love\/g\//);
 assert.match(duplicateSheet.getCell("F6").text, /^https:\/\/nhatphuong\.love\/g\//);
 
+const priestFullName = "Cha Linh Hướng Giuse";
+const priestWorkbook = await buildInviteLinksWorkbook([
+  createInvitee({
+    guestName: priestFullName,
+    displayLabel: priestFullName,
+    invitationName: "Cha",
+    salutationCluster: "Cha",
+    guestGroup: "[Nhà Gái] Khách ba",
+    notes: "Cha đạo",
+  }),
+], "https://nhatphuong.love");
+const priestSheet = priestWorkbook.getWorksheet("Link thiệp mời");
+assert.ok(priestSheet, "Priest link workbook must contain its worksheet.");
+assert.equal(priestSheet.getCell("B5").text, priestFullName);
+assert.equal(priestSheet.getCell("C5").text, "[Nhà Gái] Khách ba");
+assert.equal(priestSheet.getCell("D5").text, "Cha đạo");
+
 const preservedDuplicates = preserveExistingInviteLinks(
   duplicateInvitees.map((invitee) => createInvitee({ ...invitee, id: undefined, token: undefined })),
   duplicateInvitees,

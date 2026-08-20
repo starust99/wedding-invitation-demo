@@ -1156,7 +1156,10 @@ export async function buildInviteLinksWorkbook(invitees: Invitee[], origin = "")
 
   invitees.forEach((invitee, inviteeIndex) => {
     const row = worksheet.addRow({
-      guestName: invitee.invitationName || invitee.guestName || invitee.displayLabel,
+      // This is an admin-facing identity column, so prefer the full guest name.
+      // Some formal invitees (notably priests) intentionally use a short
+      // salutation such as "Cha" outside the hero invitation line.
+      guestName: invitee.guestName || invitee.displayLabel || invitee.invitationName,
       guestGroup: clean(invitee.guestGroup) || "Khác",
       guestDetail: clean(invitee.notes),
       postCeremonyPartyInvited: invitee.postCeremonyPartyInvited ? "Có" : "Không",
