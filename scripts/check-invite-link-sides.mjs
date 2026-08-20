@@ -22,8 +22,10 @@ symlinkSync(join(outputDir, "config"), join(outputDir, "node_modules", "@", "con
 
 const { buildInviteLinksWorkbook } = require(join(outputDir, "lib", "invite-spreadsheet.js"));
 const { filterInviteesByLinkSide, resolveInviteLinkSide } = require(join(outputDir, "lib", "invite-link-side.js"));
+const { preserveExistingInviteLinks } = require(join(outputDir, "lib", "invite-import.js"));
 const { createInvitee } = require(join(outputDir, "lib", "invites.js"));
 const adminPanelSource = readFileSync(join(rootDir, "src", "components", "admin", "InviteAdminPanel.tsx"), "utf8");
+const inviteApiSource = readFileSync(join(rootDir, "src", "app", "api", "invites", "[token]", "route.ts"), "utf8");
 
 assert.match(adminPanelSource, /filterInviteesByLinkSide\(invitees, "groom"\)/);
 assert.match(adminPanelSource, /filterInviteesByLinkSide\(invitees, "bride"\)/);
@@ -32,6 +34,7 @@ assert.match(adminPanelSource, /Nhà gái · \{brideSideInvitees\.length\}/);
 assert.match(adminPanelSource, /"Nhà trai và khách của Nhật", "nha-trai"/);
 assert.match(adminPanelSource, /"Nhà gái và khách của Phương", "nha-gai"/);
 assert.match(adminPanelSource, /danh-sach-link-thiep-moi\$\{scopeSuffix\}/);
+assert.match(inviteApiSource, /notes:\s*""/);
 
 const cases = [
   ["[Nhà Trai] Họ nội", "groom"],
@@ -74,7 +77,7 @@ assert.ok(groomSheet, "Groom-side link workbook must contain its worksheet.");
 assert.equal(groomSheet.rowCount, 6);
 assert.equal(groomSheet.getCell("B5").text, "Khách nhà trai");
 assert.equal(groomSheet.getCell("B6").text, "Bạn Nhật");
-assert.match(groomSheet.getCell("D5").text, /^https:\/\/nhatphuong\.love\/g\//);
+assert.match(groomSheet.getCell("E5").text, /^https:\/\/nhatphuong\.love\/g\//);
 assert.doesNotMatch(groomSheet.getCell("B5").text + groomSheet.getCell("B6").text, /nhà gái|Phương/i);
 
 const brideWorkbook = await buildInviteLinksWorkbook(brideInvitees, "https://nhatphuong.love");
@@ -83,7 +86,31 @@ assert.ok(brideSheet, "Bride-side link workbook must contain its worksheet.");
 assert.equal(brideSheet.rowCount, 6);
 assert.equal(brideSheet.getCell("B5").text, "Khách nhà gái");
 assert.equal(brideSheet.getCell("B6").text, "Bạn Phương");
-assert.match(brideSheet.getCell("D6").text, /^https:\/\/nhatphuong\.love\/g\//);
+assert.match(brideSheet.getCell("E6").text, /^https:\/\/nhatphuong\.love\/g\//);
 assert.doesNotMatch(brideSheet.getCell("B5").text + brideSheet.getCell("B6").text, /nhà trai|Nhật/i);
+
+const duplicateFamilyName = "Gia đình anh Trung";
+const duplicateInvitees = [
+  createInvitee({ guestName: duplicateFamilyName, displayLabel: duplicateFamilyName, invitationName: duplicateFamilyName, guestGroup: "[Nhà Gái] Khách ba" }),
+  createInvitee({ guestName: duplicateFamilyName, displayLabel: duplicateFamilyName, invitationName: duplicateFamilyName, guestGroup: "[Nhà Gái] Khách ba", notes: "DNCG" }),
+];
+const duplicateWorkbook = await buildInviteLinksWorkbook(duplicateInvitees, "https://nhatphuong.love");
+const duplicateSheet = duplicateWorkbook.getWorksheet("Link thiệp mời");
+assert.ok(duplicateSheet, "Duplicate-name workbook must contain its worksheet.");
+assert.equal(duplicateSheet.getCell("B5").text, duplicateFamilyName);
+assert.equal(duplicateSheet.getCell("B6").text, duplicateFamilyName);
+assert.equal(duplicateSheet.getCell("C5").text, "");
+assert.equal(duplicateSheet.getCell("C6").text, "DNCG");
+assert.match(duplicateSheet.getCell("E5").text, /^https:\/\/nhatphuong\.love\/g\//);
+assert.match(duplicateSheet.getCell("E6").text, /^https:\/\/nhatphuong\.love\/g\//);
+
+const preservedDuplicates = preserveExistingInviteLinks(
+  duplicateInvitees.map((invitee) => createInvitee({ ...invitee, id: undefined, token: undefined })),
+  duplicateInvitees,
+);
+assert.equal(new Set(preservedDuplicates.map((invitee) => invitee.token)).size, 2);
+assert.equal(preservedDuplicates[0].token, duplicateInvitees[0].token);
+assert.equal(preservedDuplicates[1].token, duplicateInvitees[1].token);
+assert.equal(preservedDuplicates[1].notes, "DNCG");
 
 console.log("Invite-link side checks passed: Nhà Trai includes Nhật, Nhà Gái includes Phương, unknown groups stay unassigned, and both workbooks contain only their intended guests.");

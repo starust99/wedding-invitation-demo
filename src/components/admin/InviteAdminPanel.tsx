@@ -53,6 +53,7 @@ import { usePublishedSettings } from "@/lib/use-published-settings";
 import { AlbumGroupManager } from "@/components/admin/AlbumGroupManager";
 import { resolveInviteEventAccess } from "@/lib/invite-event-access";
 import { filterInviteesByLinkSide } from "@/lib/invite-link-side";
+import { preserveExistingInviteLinks } from "@/lib/invite-import";
 
 type SimpleInviteEntry = {
   salutationCluster: string;
@@ -676,35 +677,6 @@ export function InviteAdminPanel() {
     }
   }
 
-  function preserveExistingInviteLinks(nextInvitees: Invitee[], hasPostCeremonyPartyColumn = true) {
-    const byKey = new Map<string, Invitee>();
-    for (const invitee of invitees) {
-      for (const key of [invitee.displayLabel, invitee.guestName, invitee.invitationName]) {
-        const normalized = normalizeInviteeMatchKey(key);
-        if (normalized && !byKey.has(normalized)) byKey.set(normalized, invitee);
-      }
-    }
-
-    return nextInvitees.map((invitee) => {
-      const match = byKey.get(normalizeInviteeMatchKey(invitee.displayLabel))
-        ?? byKey.get(normalizeInviteeMatchKey(invitee.guestName))
-        ?? byKey.get(normalizeInviteeMatchKey(invitee.invitationName));
-      if (!match) return invitee;
-
-      return {
-        ...invitee,
-        id: match.id,
-        token: match.token,
-        createdAt: match.createdAt,
-        inviteStatus: match.inviteStatus,
-        postCeremonyPartyInvited: hasPostCeremonyPartyColumn
-          ? invitee.postCeremonyPartyInvited
-          : match.postCeremonyPartyInvited,
-        rsvp: match.rsvp,
-      };
-    });
-  }
-
   async function importInvitees(parsed: InviteImportResult) {
     setBusy(true);
     setMessage("");
@@ -719,7 +691,7 @@ export function InviteAdminPanel() {
       }
 
       const hasPostCeremonyPartyColumn = parsed.hasPostCeremonyPartyColumn !== false;
-      const nextInvitees = preserveExistingInviteLinks(parsed.invitees, hasPostCeremonyPartyColumn);
+      const nextInvitees = preserveExistingInviteLinks(parsed.invitees, invitees, hasPostCeremonyPartyColumn);
       if (nextInvitees.length === 0) throw new Error("File Excel chưa có dòng khách mời hợp lệ.");
       if (!hasPostCeremonyPartyColumn) {
         setImportNotice("File Excel cũ chưa có cột Tham gia tiệc sau Hôn phối. Hệ thống đã giữ nguyên thiết lập hiện tại của khách cũ; khách mới mặc định không được hỏi.");

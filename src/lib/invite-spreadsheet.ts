@@ -26,6 +26,8 @@ const optionStartColumn = 1;
 const termLookupStartColumn = 5;
 const termLookupColumnCount = 7;
 const groupLookupStartColumn = termLookupStartColumn + termLookupColumnCount;
+const internalNoteRowColumn = groupLookupStartColumn + 2;
+const internalNoteValueColumn = internalNoteRowColumn + 1;
 const palette = {
   olive: "FF5F6F4E",
   oliveDark: "FF48563A",
@@ -701,7 +703,32 @@ function buildSystemSheet(workbook: ExcelJS.Workbook, options: ReturnType<typeof
     worksheet.getCell(targetRow, groupLookupStartColumn + 1).value = item.audienceTags;
   });
 
+  worksheet.getCell(1, internalNoteRowColumn).value = "Dòng dữ liệu";
+  worksheet.getCell(1, internalNoteValueColumn).value = "Ghi chú nội bộ";
+  worksheet.getColumn(internalNoteRowColumn).width = 18;
+  worksheet.getColumn(internalNoteValueColumn).width = 28;
+
   worksheet.state = "veryHidden";
+}
+
+function readInternalNotesByDataRow(workbook: ExcelJS.Workbook) {
+  const worksheet = workbook.getWorksheet(systemSheetName);
+  const notesByDataRow = new Map<number, string>();
+  if (!worksheet) return notesByDataRow;
+
+  const rowHeader = normalizeText(cellText(worksheet.getCell(1, internalNoteRowColumn)));
+  const noteHeader = normalizeText(cellText(worksheet.getCell(1, internalNoteValueColumn)));
+  if (rowHeader !== "dong du lieu" || noteHeader !== "ghi chu noi bo") return notesByDataRow;
+
+  for (let rowIndex = 2; rowIndex <= worksheet.rowCount; rowIndex += 1) {
+    const dataRow = Number(cellText(worksheet.getCell(rowIndex, internalNoteRowColumn)));
+    const note = clean(cellText(worksheet.getCell(rowIndex, internalNoteValueColumn)));
+    if (Number.isInteger(dataRow) && dataRow > headerRowIndex && note) {
+      notesByDataRow.set(dataRow, note);
+    }
+  }
+
+  return notesByDataRow;
 }
 
 function applyWorksheetColumns(worksheet: ExcelJS.Worksheet) {
@@ -882,6 +909,7 @@ export async function parseInviteWorkbook(buffer: ArrayBuffer, existingInvitees:
 
   const isSimplifiedWorkbook = Boolean(indexes.salutationCluster && indexes.guestNameCore && indexes.guestGroup);
   const hasPostCeremonyPartyColumn = Boolean(indexes.postCeremonyPartyInvited);
+  const internalNotesByDataRow = readInternalNotesByDataRow(workbook);
   if (!indexes.guestName && !isSimplifiedWorkbook) {
     return { invitees: [], errors: ["File Excel thiếu cột Cụm tên khách hoặc bộ 3 cột rút gọn."] };
   }
@@ -953,7 +981,7 @@ export async function parseInviteWorkbook(buffer: ArrayBuffer, existingInvitees:
         postCeremonyPartyInvited: postCeremonyPartyValue === "co",
         phone: "",
         email: "",
-        notes: "",
+        notes: internalNotesByDataRow.get(rowIndex) ?? "",
       }, tokenPool, existingToken || undefined);
 
       usedTokens.add(invitee.token);
@@ -1050,7 +1078,7 @@ export async function buildInviteLinksWorkbook(invitees: Invitee[], origin = "")
   workbook.modified = new Date();
 
   const worksheet = workbook.addWorksheet("Link thiệp mời", {
-    views: [{ state: "frozen", xSplit: 2, ySplit: 4, topLeftCell: "C5", showGridLines: false }],
+    views: [{ state: "frozen", xSplit: 3, ySplit: 4, topLeftCell: "D5", showGridLines: false }],
     pageSetup: {
       orientation: "landscape",
       paperSize: 9,
@@ -1064,11 +1092,12 @@ export async function buildInviteLinksWorkbook(invitees: Invitee[], origin = "")
   worksheet.columns = [
     { key: "sequence", width: 10 },
     { key: "guestName", width: 38 },
+    { key: "internalNote", width: 24 },
     { key: "postCeremonyPartyInvited", width: 38 },
     { key: "inviteUrl", width: 76 },
   ];
 
-  worksheet.mergeCells("A1:D1");
+  worksheet.mergeCells("A1:E1");
   const titleCell = worksheet.getCell("A1");
   titleCell.value = "DANH SÁCH LINK THIỆP MỜI";
   titleCell.font = { name: "Georgia", size: 22, bold: true, color: { argb: palette.white } };
@@ -1076,7 +1105,7 @@ export async function buildInviteLinksWorkbook(invitees: Invitee[], origin = "")
   titleCell.alignment = { vertical: "middle", horizontal: "center" };
   worksheet.getRow(1).height = 46;
 
-  worksheet.mergeCells("A2:D2");
+  worksheet.mergeCells("A2:E2");
   const subtitleCell = worksheet.getCell("A2");
   subtitleCell.value = `Lễ thành hôn ${defaultCoupleDisplayName}`;
   subtitleCell.font = { name: "Arial", size: 12, italic: true, color: { argb: palette.text } };
@@ -1090,11 +1119,13 @@ export async function buildInviteLinksWorkbook(invitees: Invitee[], origin = "")
   worksheet.getCell("B3").fill = { type: "pattern", pattern: "solid", fgColor: { argb: palette.ivory } };
   worksheet.getCell("C3").fill = { type: "pattern", pattern: "solid", fgColor: { argb: palette.ivory } };
   worksheet.getCell("D3").fill = { type: "pattern", pattern: "solid", fgColor: { argb: palette.ivory } };
+  worksheet.getCell("E3").fill = { type: "pattern", pattern: "solid", fgColor: { argb: palette.ivory } };
 
   const headerRow = worksheet.getRow(4);
   headerRow.values = [
     "STT",
     "Cụm tên khách",
+    "Ghi chú nội bộ",
     "Mời tham gia tiệc sau Hôn phối",
     "Link thiệp",
   ];
@@ -1108,11 +1139,12 @@ export async function buildInviteLinksWorkbook(invitees: Invitee[], origin = "")
       bottom: { style: "thin", color: { argb: palette.champagne } },
     };
   });
-  worksheet.autoFilter = "A4:D4";
+  worksheet.autoFilter = "A4:E4";
 
   invitees.forEach((invitee, inviteeIndex) => {
     const row = worksheet.addRow({
       guestName: invitee.invitationName || invitee.guestName || invitee.displayLabel,
+      internalNote: clean(invitee.notes) || null,
       postCeremonyPartyInvited: invitee.postCeremonyPartyInvited ? "Có" : "Không",
       inviteUrl: buildInviteUrl(invitee.token, origin),
     });
@@ -1125,7 +1157,7 @@ export async function buildInviteLinksWorkbook(invitees: Invitee[], origin = "")
   worksheet.eachRow((row, rowIndex) => {
     if (rowIndex <= 4) return;
     row.height = 42;
-    row.eachCell((cell) => {
+    row.eachCell({ includeEmpty: true }, (cell) => {
       cell.font = { name: "Arial", size: 12, color: { argb: palette.text } };
       cell.fill = {
         type: "pattern",
@@ -1146,7 +1178,10 @@ export async function buildInviteLinksWorkbook(invitees: Invitee[], origin = "")
     const guestCell = row.getCell(2);
     guestCell.font = { name: "Arial", size: 13, bold: true, color: { argb: palette.text } };
 
-    const postCeremonyCell = row.getCell(3);
+    const internalNoteCell = row.getCell(3);
+    internalNoteCell.font = { name: "Arial", size: 11, italic: true, color: { argb: palette.muted } };
+
+    const postCeremonyCell = row.getCell(4);
     const isInvited = cellText(postCeremonyCell) === "Có";
     postCeremonyCell.alignment = { vertical: "middle", horizontal: "center" };
     postCeremonyCell.font = {
@@ -1162,7 +1197,7 @@ export async function buildInviteLinksWorkbook(invitees: Invitee[], origin = "")
     };
   });
 
-  worksheet.getColumn(4).eachCell((cell, rowIndex) => {
+  worksheet.getColumn(5).eachCell((cell, rowIndex) => {
     if (rowIndex <= 4) return;
     const url = cellText(cell);
     cell.value = { text: url, hyperlink: url, tooltip: "Bấm để mở thiệp" };
@@ -1171,7 +1206,7 @@ export async function buildInviteLinksWorkbook(invitees: Invitee[], origin = "")
   });
 
   worksheet.pageSetup.printTitlesRow = "1:4";
-  worksheet.pageSetup.printArea = `A1:D${Math.max(4, worksheet.rowCount)}`;
+  worksheet.pageSetup.printArea = `A1:E${Math.max(4, worksheet.rowCount)}`;
 
   return workbook;
 }

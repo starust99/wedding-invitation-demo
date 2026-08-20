@@ -97,6 +97,10 @@ identity at runtime and is not an administrator input, so new templates do not
 export that column. Import remains compatible with older workbooks that still
 contain it and ignores any stale value in favor of the runtime-derived copy.
 
+Row-specific administrator notes may be carried in the workbook's hidden
+system sheet. They are imported into `Invitee.notes`, never alter `Cụm tên
+khách`, and appear only in administrator surfaces and link-export workbooks.
+
 No extra lodging column is required. The two existing classification inputs
 have separate responsibilities:
 
@@ -122,6 +126,8 @@ Admin derives side-specific invitation-link workbooks from the existing
 
 These exports preserve the canonical `/g/<token>` invitation URL and do not
 change guest identity, event access, lodging eligibility, or RSVP behavior.
+The export includes a `Ghi chú nội bộ` column next to `Cụm tên khách`, allowing
+duplicate display names to be distinguished without changing guest-facing copy.
 
 ## Post-Ceremony Party
 

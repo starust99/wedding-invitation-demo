@@ -23,7 +23,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ tok
         if (invitee) {
           return NextResponse.json({
             backend: "local-cache",
-            invitee,
+            invitee: { ...invitee, phone: "", email: "", notes: "" },
           });
         }
         return NextResponse.json({ error: "Invite not found" }, { status: 404 });
@@ -65,6 +65,6 @@ export async function GET(_request: Request, { params }: { params: Promise<{ tok
 
   return NextResponse.json({
     backend: "supabase",
-    invitee: mappedInvitee,
+    invitee: { ...mappedInvitee, phone: "", email: "", notes: "" },
   });
 }

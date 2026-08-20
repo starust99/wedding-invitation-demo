@@ -31,6 +31,9 @@ without manually filtering the guest list. The Nhà Trai export includes all
 - Each action shows its current guest count, is disabled for an empty scope,
   preserves canonical `/g/<token>` links, and downloads a side-specific file.
 - Existing full-list and recently imported exports remain available.
+- Link workbooks include an administrator-only note beside each guest name so
+  duplicate display names can be distinguished without altering either link's
+  guest-facing invitation copy.
 
 ## Design Notes
 
@@ -40,6 +43,8 @@ without manually filtering the guest list. The Nhà Trai export includes all
 - API: reuse the authenticated invite-links workbook route with a filtered
   invitee payload.
 - Tables: unchanged.
+- Internal notes reuse `Invitee.notes`; the seven visible import columns remain
+  unchanged and optional row-note metadata lives in the very-hidden system sheet.
 - Domain rules: side ownership is derived only from normalized `Nhóm khách`.
 - UI surfaces: `/admin`, tab `Khách mời & Link`.
 
@@ -48,7 +53,7 @@ without manually filtering the guest list. The Nhà Trai export includes all
 | Layer | Expected proof |
 | --- | --- |
 | Unit | Accent-insensitive side classification across canonical and legacy group labels. |
-| Integration | Generated workbooks contain only the intended side and canonical `/g/` links. |
+| Integration | Generated workbooks contain only the intended side, canonical `/g/` links, and internal notes that do not alter duplicate invitation names. |
 | E2E | Admin source/browser check exposes both actions, counts, and disabled empty states. |
 | Platform | TypeScript, scoped lint, and production build pass. |
 | Release | Vercel production is Ready and `/admin` serves the updated bundle. |
