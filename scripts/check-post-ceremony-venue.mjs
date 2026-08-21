@@ -12,6 +12,7 @@ assert.match(rsvpSource, /ludocid=740771515627976404/);
 assert.match(rsvpSource, /function PostCeremonyVenue/);
 assert.equal((rsvpSource.match(/<PostCeremonyVenue/g) ?? []).length, 2);
 assert.match(rsvpSource, /<PostCeremonyVenue compact \/>/);
+assert.equal((rsvpSource.match(/intimate-party-cloche-v2\.png/g) ?? []).length, 2);
 assert.match(rsvpSource, /compact \? "font-normal text-\[#252934\]\/72" : "font-semibold text-\[#252934\] sm:text-base"/);
 assert.match(rsvpSource, /target="_blank"/);
 assert.match(rsvpSource, /rel="noreferrer"/);

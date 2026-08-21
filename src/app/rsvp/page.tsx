@@ -1948,7 +1948,7 @@ export default function RSVPPage() {
                     <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-[1.2rem] border border-[#f2e5e0] bg-white shadow-[0_8px_20px_rgba(242,229,224,0.5)] sm:h-16 sm:w-16 sm:rounded-[1.5rem]">
                       <Image
                         data-rsvp-intimate-party-icon="true"
-                        src="/assets/wedding/ui/rsvp/intimate-party-cloche.png"
+                        src="/assets/wedding/ui/rsvp/intimate-party-cloche-v2.png"
                         alt=""
                         aria-hidden="true"
                         width={48}
@@ -2181,7 +2181,7 @@ export default function RSVPPage() {
                           >
                             <Image
                               data-rsvp-intimate-party-icon="true"
-                              src="/assets/wedding/ui/rsvp/intimate-party-cloche.png"
+                              src="/assets/wedding/ui/rsvp/intimate-party-cloche-v2.png"
                               alt=""
                               aria-hidden="true"
                               width={40}
