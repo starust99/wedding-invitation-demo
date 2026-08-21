@@ -28,7 +28,6 @@ const spreadsheet = require(join(outputDir, "lib", "invite-spreadsheet.js"));
 const inviteMapper = require(join(outputDir, "lib", "invite-mapper.js"));
 const postCeremony = require(join(outputDir, "lib", "post-ceremony-rsvp.js"));
 const rsvpMapper = require(join(outputDir, "lib", "rsvp-mapper.js"));
-const rsvpWish = require(join(outputDir, "lib", "rsvp-wish.js"));
 
 const workbook = await spreadsheet.buildInviteTemplateWorkbook({ coupleDisplayName: "Nhật & Phương" });
 await workbook.xlsx.writeFile(join(outputDir, "mau-danh-sach-khach-moi.xlsx"));
@@ -241,8 +240,6 @@ const mappedInvitee = inviteMapper.mapInviteeRow({
   expected_guest_count: 4,
   post_ceremony_party_invited: true,
   terracotta_lodging_eligible: true,
-  phone: "",
-  email: "",
   notes: "",
   invite_status: "invited",
   created_at: "2026-07-31T00:00:00.000Z",
@@ -258,18 +255,15 @@ const response = {
   inviteToken: mappedInvitee.token,
   displayLabel: mappedInvitee.displayLabel,
   name: mappedInvitee.displayLabel,
-  phone: "",
   attendingCeremony: true,
   attendingPostCeremonyParty: true,
   attendingBanquet: false,
   attending: "yes",
   guestCount: 4,
   guestGroup: mappedInvitee.guestGroup,
-  transportNeeded: false,
   accommodationNeeded: false,
   lodgingGuests: [],
   childrenCount: 0,
-  elderlySupportNeeded: false,
 };
 const insert = rsvpMapper.toRSVPInsert(response);
 assert.equal(insert.attending_ceremony, true);
@@ -284,24 +278,18 @@ const roundTrip = rsvpMapper.mapRSVPRow({
   invite_token: mappedInvitee.token,
   display_label: mappedInvitee.displayLabel,
   name: mappedInvitee.displayLabel,
-  phone: "",
   attending_ceremony: true,
   attending_post_ceremony_party: true,
   attending_banquet: false,
   attending: "yes",
   guest_count: 4,
   guest_group: mappedInvitee.guestGroup,
-  dietary_note: null,
-  transport_needed: false,
   accommodation_needed: false,
   staying_guest_count: 0,
   lodging_guests: [],
   check_in_date: null,
   check_out_date: null,
-  room_type: null,
   children_count: 0,
-  elderly_support_needed: false,
-  notes: null,
   wish_message: "Chúc hai bạn trăm năm hạnh phúc!",
   wish_sent_at: "2026-08-18T05:30:00.000Z",
   submitted_at: "2026-07-31T00:00:00.000Z",
@@ -309,46 +297,6 @@ const roundTrip = rsvpMapper.mapRSVPRow({
 assert.equal(roundTrip.attendingPostCeremonyParty, true);
 assert.equal(roundTrip.wishMessage, "Chúc hai bạn trăm năm hạnh phúc!");
 assert.equal(roundTrip.wishSentAt, "2026-08-18T05:30:00.000Z");
-
-const legacyWishMarker = rsvpWish.encodeLegacyRsvpWish({
-  message: "Chúc hai bạn luôn bình an!",
-  sentAt: "2026-08-18T05:31:00.000Z",
-});
-assert.deepEqual(rsvpWish.parseLegacyRsvpWish(legacyWishMarker), {
-  message: "Chúc hai bạn luôn bình an!",
-  sentAt: "2026-08-18T05:31:00.000Z",
-});
-assert.equal(rsvpWish.preserveLegacyRsvpWishNotes(legacyWishMarker, null), legacyWishMarker);
-assert.equal(rsvpWish.preserveLegacyRsvpWishNotes("Ghi chú thường", null), null);
-const legacyWishRoundTrip = rsvpMapper.mapRSVPRow({
-  id: "33333333-3333-4333-8333-333333333333",
-  invitee_id: mappedInvitee.id,
-  invite_token: mappedInvitee.token,
-  display_label: mappedInvitee.displayLabel,
-  name: mappedInvitee.displayLabel,
-  phone: "",
-  attending_ceremony: true,
-  attending_post_ceremony_party: false,
-  attending_banquet: true,
-  attending: "yes",
-  guest_count: 1,
-  guest_group: mappedInvitee.guestGroup,
-  dietary_note: null,
-  transport_needed: false,
-  accommodation_needed: false,
-  staying_guest_count: 0,
-  lodging_guests: [],
-  check_in_date: null,
-  check_out_date: null,
-  room_type: null,
-  children_count: 0,
-  elderly_support_needed: false,
-  notes: legacyWishMarker,
-  submitted_at: "2026-08-18T05:00:00.000Z",
-});
-assert.equal(legacyWishRoundTrip.notes, undefined);
-assert.equal(legacyWishRoundTrip.wishMessage, "Chúc hai bạn luôn bình an!");
-assert.equal(legacyWishRoundTrip.wishSentAt, "2026-08-18T05:31:00.000Z");
 
 assert.deepEqual(
   postCeremony.resolvePostCeremonyPartyAnswer({

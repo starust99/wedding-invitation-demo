@@ -177,10 +177,14 @@ guests are not asked for another number.
 ## Lodging Input Presentation
 
 Lodging guest-card headings stay visually prominent, while guest-entered names,
-ages, notes, dietary notes, and placeholders use normal font weight. When a
+ages, and placeholders use normal font weight. When a
 guest is marked as a child, RSVP explains that the numeric age helps the family
 arrange a suitable room and bed, keeps `VD: 5` in the age input, and reports a
 missing value as `Nhập tuổi của bé`.
+
+RSVP lodging does not collect phone numbers, government IDs, room preferences,
+transport requests, or freeform notes. The stored lodging identity is limited
+to the name and, for children, age.
 
 ## RSVP Review and Invalid Invitation Presentation
 

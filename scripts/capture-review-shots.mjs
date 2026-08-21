@@ -29,8 +29,6 @@ const sampleInvitee = {
   guestGroup: "Họ nội",
   audienceTags: ["family", "paternal"],
   expectedGuestCount: 2,
-  phone: "",
-  email: "",
   notes: "Case ba mẹ đứng mời, khách là vai ông với cô dâu/chú rể nhưng trên thiệp gọi Chú Sáu.",
   inviteStatus: "invited",
   createdAt: now,

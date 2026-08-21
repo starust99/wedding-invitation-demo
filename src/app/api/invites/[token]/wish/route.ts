@@ -1,10 +1,6 @@
 import { NextResponse } from "next/server";
 import { mapRSVPRow, type RSVPDatabaseRow } from "@/lib/rsvp-mapper";
-import {
-  encodeLegacyRsvpWish,
-  isMissingWishColumnError,
-  rsvpWishSchema,
-} from "@/lib/rsvp-wish";
+import { rsvpWishSchema } from "@/lib/rsvp-wish";
 import { getSupabaseServerClient, hasSupabaseEnv } from "@/lib/supabase-server";
 
 export const dynamic = "force-dynamic";
@@ -69,7 +65,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ tok
   }
 
   const wishSentAt = new Date().toISOString();
-  let { data: updatedResponse, error: updateError } = await supabase
+  const { data: updatedResponse, error: updateError } = await supabase
     .from("rsvp_responses")
     .update({
       wish_message: parsedBody.data.message,
@@ -79,30 +75,6 @@ export async function POST(request: Request, { params }: { params: Promise<{ tok
     .is("wish_message", null)
     .select("*")
     .maybeSingle();
-
-  if (updateError && isMissingWishColumnError(updateError)) {
-    if (responseResult.data.notes !== null && responseResult.data.notes !== undefined) {
-      return NextResponse.json(
-        { error: "Chưa thể ghi lời chúc vào hồi đáp này. Vui lòng liên hệ gia đình." },
-        { status: 503 },
-      );
-    }
-
-    const fallbackResult = await supabase
-      .from("rsvp_responses")
-      .update({
-        notes: encodeLegacyRsvpWish({
-          message: parsedBody.data.message,
-          sentAt: wishSentAt,
-        }),
-      })
-      .eq("id", responseResult.data.id)
-      .is("notes", null)
-      .select("*")
-      .maybeSingle();
-    updatedResponse = fallbackResult.data;
-    updateError = fallbackResult.error;
-  }
 
   if (updateError) return NextResponse.json({ error: updateError.message }, { status: 500 });
   if (!updatedResponse) {

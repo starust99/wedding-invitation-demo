@@ -30,8 +30,6 @@ function createInvitee({ token, invited, guestGroup }) {
     audienceTags: [],
     expectedGuestCount: 1,
     postCeremonyPartyInvited: invited,
-    phone: "",
-    email: "",
     notes: "",
     inviteStatus: "invited",
     createdAt: now,

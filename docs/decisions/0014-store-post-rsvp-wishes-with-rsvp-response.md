@@ -81,3 +81,9 @@ Tradeoffs:
 - Browser checks cover default, composer, submitted, gift, reduced-motion,
   and narrow/mobile layouts.
 - Admin and workbook checks cover filters, content, and sent time.
+
+## Follow-Up
+
+The temporary `notes` compatibility path was retired by decision 0017 after
+typed wish storage reached production. `wish_message` and `wish_sent_at` are now
+the only runtime wish source of truth.

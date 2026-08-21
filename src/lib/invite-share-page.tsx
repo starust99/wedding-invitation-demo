@@ -63,8 +63,6 @@ function toSharedInvitee(invitee: Invitee): Invitee {
   return {
     ...invitee,
     audienceTags: [],
-    phone: "",
-    email: "",
     notes: "",
     inviteStatus: "invited",
     createdAt: "",
@@ -111,14 +109,12 @@ async function readSharedInvitee(token: string): Promise<Invitee | null> {
   if (error) throw error;
   if (!data) return null;
 
-  // Contact details and admin notes are intentionally excluded from the
+  // Admin notes are intentionally excluded from the
   // edge-cached share document. The dynamic invitation API remains the source
   // of truth after hydration.
   return toSharedInvitee(mapInviteeRow({
-    ...(data as unknown as Omit<InviteeDatabaseRow, "phone" | "email" | "notes" | "invite_status" | "audience_tags" | "created_at" | "updated_at">),
+    ...(data as unknown as Omit<InviteeDatabaseRow, "notes" | "invite_status" | "audience_tags" | "created_at" | "updated_at">),
     audience_tags: [],
-    phone: "",
-    email: "",
     notes: "",
     created_at: "",
     updated_at: "",

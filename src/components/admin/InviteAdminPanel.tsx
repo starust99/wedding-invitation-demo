@@ -1249,7 +1249,6 @@ export function InviteAdminPanel() {
                         </button>
                       </th>
                       <th className="p-4">Tên khách</th>
-                      <th className="p-4">Số điện thoại</th>
                       <th className="p-4">Phản hồi</th>
                       <th className="p-4">Sự kiện</th>
                       <th className="p-4">Số người <span className="block text-[10px] font-normal">Ước lượng</span></th>
@@ -1257,13 +1256,12 @@ export function InviteAdminPanel() {
                       <th className="p-4">Lưu trú</th>
                       <th className="p-4">Người lưu trú</th>
                       <th className="p-4">Lời chúc</th>
-                      <th className="p-4">Lưu ý</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-[#E8DDCC]">
                     {filteredResponses.length === 0 ? (
                       <tr>
-                        <td colSpan={11} className="p-8 text-center text-[#8A8178] bg-[#FCFAF4]/30">
+                        <td colSpan={9} className="p-8 text-center text-[#8A8178] bg-[#FCFAF4]/30">
                           Chưa có lời hồi đáp phù hợp.
                         </td>
                       </tr>
@@ -1282,7 +1280,6 @@ export function InviteAdminPanel() {
                           <p className="font-semibold text-[#2E2A25]">{response.name}</p>
                           <p className="mt-0.5 text-[10px] text-[#8A8178]">{formatDate(response.submittedAt)}</p>
                         </td>
-                        <td className="p-4 text-xs">{response.phone}</td>
                         <td className="p-4 text-xs font-semibold">{attendingLabel(response.attending)}</td>
                         <td className="p-4 text-[11px] leading-relaxed text-[#665d54]">
                           <span className="block">Thánh lễ: <b>{ceremonyStatusLabel(response)}</b></span>
@@ -1309,7 +1306,6 @@ export function InviteAdminPanel() {
                             </>
                           ) : "—"}
                         </td>
-                        <td className="p-4 text-xs max-w-[220px] truncate text-[#665d54]">{response.dietaryNote || response.notes || "—"}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -1785,10 +1781,6 @@ export function InviteAdminPanel() {
                           </label>
                         </div>
                       </details>
-                      <label className="grid gap-1.5 font-semibold text-[#8A8178] uppercase tracking-wider">
-                        Số điện thoại
-                        <input className={panelInput} value={selectedInvitee.phone} onChange={(event) => patchSelectedInvitee({ phone: event.target.value })} />
-                      </label>
                       <label className="grid gap-1.5 font-semibold text-[#8A8178] uppercase tracking-wider sm:col-span-2">
                         Ghi chú
                         <textarea className={`${panelInput} min-h-20 py-2.5`} value={selectedInvitee.notes} onChange={(event) => patchSelectedInvitee({ notes: event.target.value })} />
@@ -1815,7 +1807,6 @@ export function InviteAdminPanel() {
                             }</b>.
                           </p>
                           {selectedRsvp.accommodationNeeded && <p>Cần lưu trú: <b>{selectedRsvp.stayingGuestCount ?? selectedRsvp.lodgingGuests?.length ?? 0} người</b> <span className="text-[#8A8178]">(ước lượng)</span> ({selectedRsvp.lodgingGuests?.length ? summarizeLodgingGuests(selectedRsvp.lodgingGuests) : "Chưa điền tên"}).</p>}
-                          {(selectedRsvp.dietaryNote || selectedRsvp.notes) && <p>Ghi chú/Ẩm thực: <i>{selectedRsvp.dietaryNote || selectedRsvp.notes}</i></p>}
                           {selectedRsvp.wishMessage ? (
                             <div className="mt-3 rounded-lg border border-[#E8DDCC] bg-white px-3 py-2.5">
                               <p className="font-semibold text-[#2E2A25]">Lời chúc · {formatDate(selectedRsvp.wishSentAt || "")}</p>

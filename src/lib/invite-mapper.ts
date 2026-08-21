@@ -34,8 +34,6 @@ export type InviteeDatabaseRow = {
   expected_guest_count: number;
   post_ceremony_party_invited?: boolean | null;
   terracotta_lodging_eligible?: boolean | null;
-  phone: string;
-  email: string;
   notes: string;
   invite_status: InviteStatus;
   created_at: string;
@@ -110,8 +108,6 @@ export function mapInviteeRow(row: InviteeDatabaseRow, supplement?: InviteSupple
     expectedGuestCount: row.expected_guest_count,
     postCeremonyPartyInvited: row.post_ceremony_party_invited ?? false,
     terracottaLodgingEligible: row.terracotta_lodging_eligible ?? false,
-    phone: row.phone,
-    email: row.email,
     notes: row.notes,
     inviteStatus: row.invite_status,
     createdAt: row.created_at,
@@ -148,8 +144,6 @@ export function toInviteeUpsert(invitee: Invitee) {
       invitee.guestGroup,
       invitee.terracottaLodgingEligible,
     ),
-    phone: invitee.phone,
-    email: invitee.email,
     notes: invitee.notes,
     invite_status: invitee.inviteStatus,
     updated_at: new Date().toISOString(),

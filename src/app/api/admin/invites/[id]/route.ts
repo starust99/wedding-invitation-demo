@@ -27,8 +27,6 @@ type PatchBody = Partial<{
   expected_guest_count: number;
   post_ceremony_party_invited: boolean;
   terracotta_lodging_eligible: boolean;
-  phone: string;
-  email: string;
   notes: string;
   invite_status: string;
 }>;

@@ -10,7 +10,6 @@ import type { RSVPResponse } from "@/lib/rsvp-storage";
 import { getSupabaseServerClient, hasSupabaseEnv } from "@/lib/supabase-server";
 import { resolvePostCeremonyPartyAnswer } from "@/lib/post-ceremony-rsvp";
 import { resolveInviteEventAccess } from "@/lib/invite-event-access";
-import { preserveLegacyRsvpWishNotes } from "@/lib/rsvp-wish";
 import {
   isGroomFamilyLodgingGuestGroup,
   isTerracottaLodgingEligible,
@@ -19,28 +18,21 @@ import {
 const guestRsvpSchema = z.object({
   displayLabel: z.string().trim().optional(),
   name: z.string().trim().min(1).max(200),
-  phone: z.string().trim().max(30).default(""),
   attendingCeremony: z.boolean(),
   attendingPostCeremonyParty: z.boolean().optional(),
   attendingBanquet: z.boolean(),
   guestCount: z.coerce.number().int().min(0).max(50),
   guestGroup: z.string().trim().max(200).default(""),
-  dietaryNote: z.string().trim().max(1000).optional(),
-  transportNeeded: z.boolean().default(false),
   accommodationNeeded: z.boolean().default(false),
   stayingGuestCount: z.coerce.number().int().min(0).max(50).optional(),
   lodgingGuests: z.array(z.object({
     fullName: z.string().trim().max(200),
-    idNumber: z.string().trim().max(100).default(""),
     isChild: z.boolean().default(false),
     age: z.coerce.number().int().min(0).max(120).optional(),
   })).max(50).default([]),
   checkInDate: z.string().date().optional(),
   checkOutDate: z.string().date().optional(),
-  roomType: z.string().trim().max(100).optional(),
   childrenCount: z.coerce.number().int().min(0).max(50).default(0),
-  elderlySupportNeeded: z.boolean().default(false),
-  notes: z.string().trim().max(2000).optional(),
 });
 
 export async function POST(request: Request, { params }: { params: Promise<{ token: string }> }) {
@@ -127,7 +119,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ tok
 
   const existing = await supabase
     .from("rsvp_responses")
-    .select("id, notes")
+    .select("id")
     .or(`invitee_id.eq.${invitee.id},invite_token.eq.${token}`)
     .order("submitted_at", { ascending: false })
     .limit(1)
@@ -136,11 +128,10 @@ export async function POST(request: Request, { params }: { params: Promise<{ tok
   if (existing.error) return NextResponse.json({ error: existing.error.message }, { status: 500 });
 
   const submittedAt = new Date().toISOString();
-  const mutate = (includeEventAttendanceColumns: boolean) => {
-    const rsvpInsert = toRSVPInsert(payload, { includeEventAttendanceColumns });
+  const mutate = () => {
+    const rsvpInsert = toRSVPInsert(payload);
     const insertPayload = {
       ...rsvpInsert,
-      notes: preserveLegacyRsvpWishNotes(existing.data?.notes, rsvpInsert.notes),
       submitted_at: submittedAt,
     };
     const mutation = existing.data
@@ -149,7 +140,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ tok
     return mutation.select("*").single();
   };
 
-  const { data, error } = await mutate(true);
+  const { data, error } = await mutate();
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 

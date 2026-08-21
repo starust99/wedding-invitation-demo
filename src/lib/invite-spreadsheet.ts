@@ -495,8 +495,6 @@ export function createInviteeFromSimpleEntry(
       inferred.guestGroup,
       normalizeText(values.terracottaLodgingEligible) === "co",
     ),
-    phone: "",
-    email: "",
     notes: "",
   }, existingTokens);
 }
@@ -1039,8 +1037,6 @@ export async function parseInviteWorkbook(buffer: ArrayBuffer, existingInvitees:
           inferred.guestGroup,
           terracottaLodgingValue === "co",
         ),
-        phone: "",
-        email: "",
         notes: clean(simplifiedValues.guestDetail) || internalNotesByDataRow.get(rowIndex) || "",
       }, tokenPool, existingToken || undefined);
 
@@ -1128,8 +1124,6 @@ export async function parseInviteWorkbook(buffer: ArrayBuffer, existingInvitees:
         guestGroup,
         terracottaLodgingValue === "co",
       ),
-      phone: "",
-      email: "",
       notes: clean(read(indexes.guestDetail)) || internalNotesByDataRow.get(rowIndex) || "",
     }, tokenPool, existingToken || undefined);
 

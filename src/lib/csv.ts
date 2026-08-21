@@ -6,7 +6,6 @@ const columns: Array<[string, (response: RSVPResponse) => string | number | bool
   ["Tên hiển thị", (response) => response.displayLabel],
   ["ID khách", (response) => response.inviteeId],
   ["Tên khách", (response) => response.name],
-  ["Số điện thoại", (response) => response.phone],
   ["Tham dự", (response) => attendingLabel(response.attending)],
   ["Dự Thánh lễ", (response) => response.attendingCeremony === undefined ? "" : response.attendingCeremony ? "Có" : "Không"],
   ["Dự tiệc sau Hôn phối", (response) => {
@@ -17,17 +16,12 @@ const columns: Array<[string, (response: RSVPResponse) => string | number | bool
   ["Dự Tiệc cưới", (response) => response.attendingBanquet === undefined ? "" : response.attendingBanquet ? "Có" : "Không"],
   ["Số khách", (response) => response.guestCount],
   ["Nhóm khách", (response) => response.guestGroup],
-  ["Ghi chú thực đơn", (response) => response.dietaryNote],
-  ["Cần đưa đón", (response) => response.transportNeeded],
   ["Cần lưu trú", (response) => response.accommodationNeeded],
   ["Số khách lưu trú", (response) => response.stayingGuestCount],
   ["Danh sách người lưu trú", (response) => summarizeLodgingGuests(response.lodgingGuests ?? [])],
   ["Ngày nhận phòng", (response) => response.checkInDate],
   ["Ngày trả phòng", (response) => response.checkOutDate],
-  ["Loại phòng", (response) => response.roomType],
   ["Số trẻ em", (response) => response.childrenCount],
-  ["Cần hỗ trợ người lớn tuổi", (response) => response.elderlySupportNeeded],
-  ["Ghi chú", (response) => response.notes],
   ["Lời chúc", (response) => response.wishMessage],
   ["Thời gian gửi lời chúc", (response) => response.wishSentAt],
   ["Thời gian gửi", (response) => response.submittedAt],
@@ -65,7 +59,6 @@ export function serializeInviteLinksCsv(invitees: Invitee[], origin = "") {
     "Số khách dự kiến",
     "Hỏi tiệc sau Hôn phối",
     "Trạng thái RSVP",
-    "Số điện thoại",
     "Ghi chú",
   ].join(",");
 
@@ -80,7 +73,6 @@ export function serializeInviteLinksCsv(invitees: Invitee[], origin = "") {
     escapeCsv(invitee.expectedGuestCount),
     escapeCsv(invitee.postCeremonyPartyInvited ? "Có" : ""),
     escapeCsv(inviteStatusLabels[invitee.inviteStatus]),
-    escapeCsv(invitee.phone),
     escapeCsv(invitee.notes),
   ].join(","));
 

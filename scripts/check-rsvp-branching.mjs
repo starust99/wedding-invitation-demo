@@ -32,8 +32,6 @@ function createInvitee({ token, invited, guestGroup = "[Nhật] Bạn bè & Đ�
     audienceTags: [],
     expectedGuestCount: 1,
     postCeremonyPartyInvited: invited,
-    phone: "",
-    email: "",
     notes: "",
     inviteStatus: "invited",
     createdAt: now,

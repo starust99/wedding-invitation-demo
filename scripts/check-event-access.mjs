@@ -86,8 +86,6 @@ const sourceAssertions = [
   ["src/app/rsvp/page.tsx", /isRegularGuestFlow = eventAccess\.canUsePostCeremonyFallback/],
   ["src/app/api/invites/[token]/rsvp/route.ts", /attendingCeremony = eventAccess\.canViewCeremony/],
   ["src/app/api/invites/[token]/rsvp/route.ts", /invitee\.terracotta_lodging_eligible/],
-  ["src/app/api/rsvp/route.ts", /allowFallback: eventAccess\.canUsePostCeremonyFallback/],
-  ["src/app/api/rsvp/route.ts", /const lodgingEligible = matchingInvitee[\s\S]*isTerracottaLodgingEligible/],
   ["src/lib/invite-mapper.ts", /terracotta_lodging_eligible: isTerracottaLodgingEligible/],
   ["src/app/calendar/[event]/route.ts", /!eventAccess\.canViewCeremony/],
   ["src/components/admin/InviteAdminPanel.tsx", /ceremonyStatusLabel/],

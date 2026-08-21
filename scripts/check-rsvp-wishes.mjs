@@ -18,7 +18,7 @@ function source(path) {
 const qr = readFileSync(join(rootDir, "public/assets/wedding/ui/rsvp/cash-gift-qr.png"));
 assert.equal(createHash("sha256").update(qr).digest("hex"), suppliedQrSha256);
 
-const migration = source("supabase/migrations/20260818_add_rsvp_wishes.sql");
+const migration = source("supabase/migrations/20260822_minimize_guest_rsvp_data.sql");
 assert.match(migration, /wish_message text/);
 assert.match(migration, /wish_sent_at timestamptz/);
 assert.match(migration, /char_length\(wish_message\) between 1 and 500/);
@@ -27,10 +27,9 @@ assert.match(migration, /notify pgrst, 'reload schema'/);
 const routeSource = source("src/app/api/invites/[token]/wish/route.ts");
 assert.match(routeSource, /rsvpWishSchema\.safeParse/);
 assert.match(routeSource, /\.is\("wish_message", null\)/);
-assert.match(routeSource, /encodeLegacyRsvpWish/);
-assert.match(routeSource, /\.is\("notes", null\)/);
+assert.doesNotMatch(routeSource, /Legacy|notes/);
 assert.match(routeSource, /status: 409/);
-assert.match(source("src/app/api/invites/[token]/rsvp/route.ts"), /preserveLegacyRsvpWishNotes/);
+assert.doesNotMatch(source("src/app/api/invites/[token]/rsvp/route.ts"), /Legacy|notes/);
 
 const pageSource = source("src/app/rsvp/page.tsx");
 assert.match(pageSource, /cash-gift-qr\.png/);
@@ -68,8 +67,6 @@ const invitee = {
   audienceTags: [],
   expectedGuestCount: 1,
   postCeremonyPartyInvited: false,
-  phone: "",
-  email: "",
   notes: "",
   inviteStatus: "invited",
   createdAt: now,
@@ -83,18 +80,15 @@ function buildResponse(wishMessage, wishSentAt) {
     inviteToken: token,
     displayLabel: invitee.displayLabel,
     name: invitee.displayLabel,
-    phone: "",
     attendingCeremony: true,
     attendingBanquet: true,
     attending: "yes",
     guestCount: 1,
     guestGroup: invitee.guestGroup,
-    transportNeeded: false,
     accommodationNeeded: false,
     stayingGuestCount: 0,
     lodgingGuests: [],
     childrenCount: 0,
-    elderlySupportNeeded: false,
     wishMessage,
     wishSentAt,
     submittedAt: now,

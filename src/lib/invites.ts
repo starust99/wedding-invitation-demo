@@ -47,8 +47,6 @@ export type Invitee = {
   expectedGuestCount: number;
   postCeremonyPartyInvited: boolean;
   terracottaLodgingEligible: boolean;
-  phone: string;
-  email: string;
   notes: string;
   inviteStatus: InviteStatus;
   createdAt: string;
@@ -109,8 +107,6 @@ export const inviteCsvColumns = [
   "expected_guest_count",
   "post_ceremony_party_invited",
   "terracotta_lodging_eligible",
-  "phone",
-  "email",
   "notes",
 ] as const;
 
@@ -139,8 +135,6 @@ export const inviteCsvColumnLabels: Record<InviteCsvColumn, string> = {
   expected_guest_count: "Số khách",
   post_ceremony_party_invited: "Tham gia tiệc sau Hôn phối",
   terracotta_lodging_eligible: "Lưu trú tại Terracotta",
-  phone: "Số điện thoại",
-  email: "Email",
   notes: "Ghi chú",
 };
 
@@ -167,8 +161,6 @@ const inviteCsvColumnAliases: Record<InviteCsvColumn, string[]> = {
   expected_guest_count: ["expected_guest_count", "expectedGuestCount", "so khach du kien", "số khách dự kiến"],
   post_ceremony_party_invited: ["post_ceremony_party_invited", "postCeremonyPartyInvited", "tham gia tiec sau hon phoi", "tham gia tiệc sau hôn phối"],
   terracotta_lodging_eligible: ["terracotta_lodging_eligible", "terracottaLodgingEligible", "luu tru tai terracotta", "lưu trú tại terracotta"],
-  phone: ["phone", "so dien thoai", "số điện thoại", "dien thoai", "điện thoại"],
-  email: ["email"],
   notes: ["notes", "ghi chu", "ghi chú"],
 };
 
@@ -283,8 +275,6 @@ export const inviteTemplateRows = [
     expected_guest_count: "2",
     post_ceremony_party_invited: "",
     terracotta_lodging_eligible: "Có",
-    phone: "",
-    email: "",
     notes: "",
   },
   {
@@ -310,8 +300,6 @@ export const inviteTemplateRows = [
     expected_guest_count: "2",
     post_ceremony_party_invited: "",
     terracotta_lodging_eligible: "Có",
-    phone: "",
-    email: "",
     notes: "",
   },
   {
@@ -337,8 +325,6 @@ export const inviteTemplateRows = [
     expected_guest_count: "1",
     post_ceremony_party_invited: "",
     terracotta_lodging_eligible: "",
-    phone: "",
-    email: "",
     notes: "",
   },
   {
@@ -364,8 +350,6 @@ export const inviteTemplateRows = [
     expected_guest_count: "1",
     post_ceremony_party_invited: "",
     terracotta_lodging_eligible: "",
-    phone: "",
-    email: "",
     notes: "",
   },
   {
@@ -391,8 +375,6 @@ export const inviteTemplateRows = [
     expected_guest_count: "1",
     post_ceremony_party_invited: "",
     terracotta_lodging_eligible: "",
-    phone: "",
-    email: "",
     notes: "",
   },
 ];
@@ -575,8 +557,6 @@ export function serializeInviteesCsv(invitees: Invitee[]) {
       expected_guest_count: invitee.expectedGuestCount,
       post_ceremony_party_invited: invitee.postCeremonyPartyInvited ? "Có" : "",
       terracotta_lodging_eligible: invitee.terracottaLodgingEligible ? "Có" : "",
-      phone: invitee.phone,
-      email: invitee.email,
       notes: invitee.notes,
     };
 
@@ -697,8 +677,6 @@ export function createInvitee(input: InviteeInput, existingTokens = new Set<stri
       clean(input.guestGroup),
       input.terracottaLodgingEligible,
     ),
-    phone: clean(input.phone),
-    email: clean(input.email),
     notes: clean(input.notes),
     inviteStatus: pickEnum(input.inviteStatus, ["invited", "rsvp_yes", "rsvp_no", "rsvp_maybe", "supplement_ready", "album_ready"], "invited"),
     createdAt: clean(input.createdAt) || now,
@@ -756,8 +734,6 @@ export function parseInviteCsv(text: string, existingInvitees: Invitee[] = []): 
       expectedGuestCount: Number(row.expected_guest_count || row.expectedGuestCount),
       postCeremonyPartyInvited,
       terracottaLodgingEligible,
-      phone: row.phone,
-      email: row.email,
       notes: row.notes,
     }, tokenPool);
 

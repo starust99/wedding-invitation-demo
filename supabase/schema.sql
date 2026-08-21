@@ -6,24 +6,18 @@ create table if not exists rsvp_responses (
   invite_token text,
   display_label text,
   name text not null,
-  phone text not null,
   attending_ceremony boolean,
   attending_banquet boolean,
   attending_post_ceremony_party boolean,
   attending text not null check (attending in ('yes', 'no', 'maybe')),
   guest_count int not null default 1 check (guest_count >= 0),
   guest_group text not null,
-  dietary_note text,
-  transport_needed boolean not null default false,
   accommodation_needed boolean not null default false,
   staying_guest_count int check (staying_guest_count is null or staying_guest_count >= 0),
   lodging_guests jsonb not null default '[]'::jsonb,
   check_in_date date,
   check_out_date date,
-  room_type text,
   children_count int not null default 0 check (children_count >= 0),
-  elderly_support_needed boolean not null default false,
-  notes text,
   wish_message text,
   wish_sent_at timestamptz,
   submitted_at timestamptz not null default now()
@@ -87,8 +81,6 @@ create table if not exists invitees (
   expected_guest_count int not null default 1 check (expected_guest_count >= 1),
   post_ceremony_party_invited boolean not null default false,
   terracotta_lodging_eligible boolean not null default false,
-  phone text not null default '',
-  email text not null default '',
   notes text not null default '',
   invite_status text not null default 'invited' check (invite_status in ('invited', 'rsvp_yes', 'rsvp_no', 'rsvp_maybe', 'supplement_ready', 'album_ready')),
   created_at timestamptz not null default now(),
@@ -119,8 +111,7 @@ create index if not exists invitees_audience_tags_idx on invitees using gin (aud
 alter table rsvp_responses
   add constraint rsvp_responses_invitee_id_fkey
   foreign key (invitee_id) references invitees(id)
-  on delete set null
-  not valid;
+  on delete set null;
 
 create table if not exists invite_supplements (
   id uuid primary key default gen_random_uuid(),

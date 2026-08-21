@@ -1,6 +1,5 @@
 export type LodgingGuest = {
   fullName: string;
-  idNumber?: string;
   isChild: boolean;
   age?: number;
 };
@@ -12,24 +11,18 @@ export type RSVPResponse = {
   displayLabel?: string;
   postCeremonyPartyInvited?: boolean;
   name: string;
-  phone: string;
   attendingCeremony?: boolean;
   attendingPostCeremonyParty?: boolean;
   attendingBanquet?: boolean;
   attending: "yes" | "no" | "maybe";
   guestCount: number;
   guestGroup: string;
-  dietaryNote?: string;
-  transportNeeded: boolean;
   accommodationNeeded: boolean;
   stayingGuestCount?: number;
   lodgingGuests: LodgingGuest[];
   checkInDate?: string;
   checkOutDate?: string;
-  roomType?: string;
   childrenCount: number;
-  elderlySupportNeeded: boolean;
-  notes?: string;
   wishMessage?: string;
   wishSentAt?: string;
   submittedAt: string;
@@ -60,9 +53,6 @@ export function saveRSVPResponse(response: Omit<RSVPResponse, "id" | "submittedA
   const existing = responses.find((item) => {
     if (next.inviteeId && item.inviteeId === next.inviteeId) return true;
     if (next.inviteToken && item.inviteToken === next.inviteToken) return true;
-    if (!next.inviteeId && !next.inviteToken && !item.inviteeId && !item.inviteToken) {
-      return item.name === next.name && item.phone === next.phone;
-    }
     return false;
   });
   const saved = existing ? { ...existing, ...next, id: existing.id } : next;
@@ -131,7 +121,6 @@ export function formatLodgingGuestLabel(guest: LodgingGuest) {
     parts.push(`trẻ em${typeof guest.age === "number" ? ` ${guest.age} tuổi` : ""}`);
   } else {
     parts.push("người lớn");
-    if (guest.idNumber) parts.push(`CCCD ${guest.idNumber}`);
   }
   return parts.filter(Boolean).join(" · ");
 }

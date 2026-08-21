@@ -24,9 +24,9 @@
   and a repeat open within the same session may still bypass it.
 - Opening the shared URL preserves the personalized invitation experience. The
   edge-cached HTML contains a public invitation projection so `Cụm tên khách`
-  is present in SSR content and OG metadata. Phone, email, admin notes, and RSVP
-  responses are excluded; the invitation API refreshes dynamic state after
-  hydration.
+  is present in SSR content and OG metadata. Admin notes and RSVP responses are
+  excluded; obsolete invitation contact fields are not stored. The invitation
+  API refreshes dynamic state after hydration.
 - The first HTML response exposes a complete Open Graph card with a title,
   description, canonical page URL, locale, and an absolute HTTPS JPEG image.
 - Preview media is a baseline 1200×630 JPEG below 300 KiB and uses a versioned

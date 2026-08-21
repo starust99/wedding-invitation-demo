@@ -26,7 +26,6 @@ import {
 } from "lucide-react";
 import {
   countLodgingChildren,
-  formatLodgingGuestLabel,
   saveRSVPResponse,
   readRSVPResponses,
   removeRSVPResponses,
@@ -121,7 +120,6 @@ const lodgingGuestSchema = z.object({
 const rsvpFormFieldsSchema = z.object({
   honorific: z.string().optional(),
   name: z.string().trim().optional().default(""),
-  phone: z.string().trim().optional().default(""),
   attendingCeremony: z.enum(["yes", "no"]).nullable().default(null),
   postCeremonyPartyInvited: z.boolean().default(false),
   terracottaLodgingEligible: z.boolean().default(false),
@@ -133,8 +131,6 @@ const rsvpFormFieldsSchema = z.object({
   stayDecision: z.enum(["25", "26", "both", "none"]).nullable().default(null),
   accommodationNeeded: z.boolean().default(false),
   lodgingGuests: z.array(lodgingGuestSchema).default([]),
-  dietaryNote: z.string().trim().optional(),
-  notes: z.string().trim().optional(),
 });
 
 function validateRsvpForm(
@@ -326,25 +322,10 @@ function normalizeLodgingGuests(guests: Array<Partial<LodgingGuestForm> | undefi
 
     return [{
       fullName,
-      idNumber: "",
       isChild: Boolean(guest.isChild),
       age: guest.isChild ? age : undefined,
     }];
   });
-}
-
-function buildTerracottaNote(guests: LodgingGuest[]) {
-  const childCount = countLodgingChildren(guests);
-
-  if (childCount === 0) return "";
-  return `${childCount} trẻ em đi cùng đã được ghi nhận.`;
-}
-
-function inlineRecipientLabel(label: string) {
-  const trimmed = label.trim();
-  if (!trimmed) return "khách mời";
-  if (/^(Ông|Bà|Ông Bà|Bố Mẹ|Ba Mẹ)\b/.test(trimmed)) return trimmed;
-  return trimmed.charAt(0).toLowerCase() + trimmed.slice(1);
 }
 
 function Field({ label, error, children }: { label: ReactNode; error?: string; children: ReactNode }) {
@@ -564,7 +545,6 @@ export default function RSVPPage() {
     defaultValues: {
       honorific: "",
       name: "",
-      phone: "",
       attendingCeremony: null,
       postCeremonyPartyInvited: false,
       terracottaLodgingEligible: false,
@@ -576,8 +556,6 @@ export default function RSVPPage() {
       stayDecision: null,
       accommodationNeeded: false,
       lodgingGuests: [],
-      dietaryNote: "",
-      notes: "",
     },
   });
 
@@ -608,7 +586,6 @@ export default function RSVPPage() {
     [attending, effectiveAttendingCeremony, attendingBanquet, inviteCopy, guestIdentity, inviteeContext],
   );
   const lodgingGuests = normalizeLodgingGuests((watchedLodgingGuests ?? []) as Array<Partial<LodgingGuestForm> | undefined>);
-  const terracottaNote = buildTerracottaNote(lodgingGuests);
   const canRequestLodging = isTerracottaLodgingEligible(
     activeGuestGroup,
     terracottaLodgingEligible || inviteeContext?.terracottaLodgingEligible,
@@ -793,7 +770,6 @@ export default function RSVPPage() {
       setValue("terracottaLodgingEligible", Boolean(invitee.terracottaLodgingEligible), { shouldDirty: false });
       if (hasUserEditedFormRef.current) return;
       setValue("name", response?.name ?? invitee.displayLabel, { shouldDirty: false });
-      setValue("phone", response?.phone ?? invitee.phone, { shouldDirty: false });
       const hydratedGuestGroup = response?.guestGroup ?? invitee.guestGroup;
       setValue("guestGroup", hydratedGuestGroup, { shouldDirty: false });
       setValue("guestCount", resolveHydratedGuestCount({
@@ -807,7 +783,6 @@ export default function RSVPPage() {
       setValue("attendingPostCeremonyParty", normalizeBoolean(response?.attendingPostCeremonyParty), { shouldDirty: false });
       setValue("attendingBanquet", normalizeBoolean(response?.attendingBanquet), { shouldDirty: false });
       setValue("attending", normalizeAttendanceForForm(response?.attending), { shouldDirty: false });
-      setValue("dietaryNote", response?.dietaryNote ?? "", { shouldDirty: false });
       let initialStayDecision: StayDecision = response ? "none" : null;
       if (response?.accommodationNeeded) {
         const inDate = response.checkInDate;
@@ -825,7 +800,6 @@ export default function RSVPPage() {
       initialStayDecision = normalizeStayDecisionForGuestGroup(hydratedGuestGroup, initialStayDecision);
       setValue("accommodationNeeded", initialStayDecision !== null && initialStayDecision !== "none", { shouldDirty: false });
       setValue("stayDecision", initialStayDecision, { shouldDirty: false });
-      setValue("notes", response?.notes ?? "", { shouldDirty: false });
       replace(response?.lodgingGuests?.length
         ? response.lodgingGuests
         : initialStayDecision !== null && initialStayDecision !== "none"
@@ -839,7 +813,6 @@ export default function RSVPPage() {
       setSubmittedWishMessage(response.wishMessage ?? "");
       setSubmittedWishAt(response.wishSentAt ?? "");
       setValue("name", response.name || "", { shouldDirty: false });
-      setValue("phone", response.phone || "", { shouldDirty: false });
       const hydratedGuestGroup = response.guestGroup || "";
       setValue("guestGroup", hydratedGuestGroup, { shouldDirty: false });
       setValue("guestCount", resolveHydratedGuestCount({
@@ -852,7 +825,6 @@ export default function RSVPPage() {
       setValue("attendingPostCeremonyParty", normalizeBoolean(response.attendingPostCeremonyParty), { shouldDirty: false });
       setValue("attendingBanquet", normalizeBoolean(response.attendingBanquet), { shouldDirty: false });
       setValue("attending", normalizeAttendanceForForm(response.attending), { shouldDirty: false });
-      setValue("dietaryNote", response.dietaryNote ?? "", { shouldDirty: false });
       
       let initialStayDecision: StayDecision = "none";
       if (response.accommodationNeeded) {
@@ -871,7 +843,6 @@ export default function RSVPPage() {
       initialStayDecision = normalizeStayDecisionForGuestGroup(hydratedGuestGroup, initialStayDecision);
       setValue("accommodationNeeded", initialStayDecision !== null && initialStayDecision !== "none", { shouldDirty: false });
       setValue("stayDecision", initialStayDecision, { shouldDirty: false });
-      setValue("notes", response.notes ?? "", { shouldDirty: false });
       replace(response.lodgingGuests?.length
         ? response.lodgingGuests
         : initialStayDecision !== null && initialStayDecision !== "none"
@@ -884,7 +855,6 @@ export default function RSVPPage() {
       hasUserEditedFormRef.current = true;
       setValue("honorific", values.honorific ?? "", { shouldDirty: true });
       setValue("name", values.name ?? "", { shouldDirty: true });
-      setValue("phone", values.phone ?? "", { shouldDirty: true });
       setValue("attendingCeremony", values.attendingCeremony, { shouldDirty: true });
       setValue("attendingPostCeremonyParty", values.attendingPostCeremonyParty, { shouldDirty: true });
       setValue("attendingBanquet", values.attendingBanquet, { shouldDirty: true });
@@ -900,8 +870,6 @@ export default function RSVPPage() {
       const normalizedStayDecision = normalizeStayDecisionForGuestGroup(hydratedGuestGroup, values.stayDecision);
       setValue("stayDecision", normalizedStayDecision, { shouldDirty: true });
       setValue("accommodationNeeded", normalizedStayDecision !== null && normalizedStayDecision !== "none", { shouldDirty: true });
-      setValue("dietaryNote", values.dietaryNote ?? "", { shouldDirty: true });
-      setValue("notes", values.notes ?? "", { shouldDirty: true });
       replace(values.lodgingGuests ?? []);
     }
 
@@ -1201,7 +1169,6 @@ export default function RSVPPage() {
       || guestIdentity.name
       || guestIdentity.displayLabel
       || "Người được mời";
-    const resolvedPhone = data.phone?.trim() || inviteeContext?.phone || "";
     const resolvedGuestCount = resolvedAttendance === "no"
       ? 0
       : canRequestLodging
@@ -1228,7 +1195,6 @@ export default function RSVPPage() {
       inviteToken: inviteeContext?.token ?? (inviteToken || searchToken || undefined),
       displayLabel: inviteeContext?.displayLabel ?? guestIdentity.displayLabel,
       name: resolvedName,
-      phone: resolvedPhone,
       attendingCeremony: resolvedAttendingCeremony,
       attendingPostCeremonyParty: postCeremonyPartyApplies
         ? data.attendingPostCeremonyParty === "yes"
@@ -1237,22 +1203,18 @@ export default function RSVPPage() {
       attending: resolvedAttendance,
       guestCount: resolvedGuestCount,
       guestGroup: resolvedGroup,
-      dietaryNote: undefined,
-      transportNeeded: false,
       accommodationNeeded: isStaying,
       stayingGuestCount,
       lodgingGuests: cleanLodgingGuests,
       checkInDate,
       checkOutDate,
-      roomType: undefined,
       childrenCount,
-      elderlySupportNeeded: false,
-      notes: undefined,
     };
 
     try {
       const targetToken = searchToken || inviteToken || inviteeContext?.token || payload.inviteToken;
-      const endpoint = targetToken ? `/api/invites/${encodeURIComponent(targetToken)}/rsvp` : "/api/rsvp";
+      if (!targetToken) throw new Error("Không tìm thấy link thiệp mời để gửi hồi đáp.");
+      const endpoint = `/api/invites/${encodeURIComponent(targetToken)}/rsvp`;
       const apiResponse = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -1793,9 +1755,6 @@ export default function RSVPPage() {
                     <strong className="block text-balance text-lg font-semibold text-[#252934] sm:text-xl">
                       <GuestNameText text={inviteeContext?.displayLabel || guestIdentity.displayLabel || formValues.name || inviteCopy.shortRecipientLabel} />
                     </strong>
-                    {formValues.phone && (
-                      <span className="mt-1 block text-sm font-normal text-[#7a6a5d]">{formValues.phone}</span>
-                    )}
                   </div>
                 </header>
 

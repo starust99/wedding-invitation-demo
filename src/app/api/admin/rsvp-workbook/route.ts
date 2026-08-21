@@ -41,24 +41,18 @@ function normalizeResponses(value: unknown): RSVPResponse[] {
       displayLabel: response.displayLabel ? text(response.displayLabel) : undefined,
       postCeremonyPartyInvited: typeof response.postCeremonyPartyInvited === "boolean" ? response.postCeremonyPartyInvited : undefined,
       name: text(response.name),
-      phone: text(response.phone),
       attendingCeremony: typeof response.attendingCeremony === "boolean" ? response.attendingCeremony : undefined,
       attendingPostCeremonyParty: typeof response.attendingPostCeremonyParty === "boolean" ? response.attendingPostCeremonyParty : undefined,
       attendingBanquet: typeof response.attendingBanquet === "boolean" ? response.attendingBanquet : undefined,
       attending: response.attending === "no" ? "no" : response.attending === "maybe" ? "maybe" : "yes",
       guestCount: Number(response.guestCount) || 0,
       guestGroup: text(response.guestGroup),
-      dietaryNote: response.dietaryNote ? text(response.dietaryNote) : undefined,
-      transportNeeded: Boolean(response.transportNeeded),
       accommodationNeeded: Boolean(response.accommodationNeeded),
       stayingGuestCount: typeof response.stayingGuestCount === "number" ? response.stayingGuestCount : undefined,
       lodgingGuests: Array.isArray(response.lodgingGuests) ? response.lodgingGuests : [],
       checkInDate: response.checkInDate ? text(response.checkInDate) : undefined,
       checkOutDate: response.checkOutDate ? text(response.checkOutDate) : undefined,
-      roomType: response.roomType ? text(response.roomType) : undefined,
       childrenCount: Number(response.childrenCount) || 0,
-      elderlySupportNeeded: Boolean(response.elderlySupportNeeded),
-      notes: response.notes ? text(response.notes) : undefined,
       wishMessage: response.wishMessage ? text(response.wishMessage) : undefined,
       wishSentAt: response.wishSentAt ? text(response.wishSentAt) : undefined,
       submittedAt: text(response.submittedAt),
@@ -112,7 +106,6 @@ function addSummarySheet(workbook: ExcelJS.Workbook, responses: RSVPResponse[], 
     ["Số yêu cầu lưu trú", stayingResponses.length],
     ["Tổng người ở lại", stayingGuests],
     ["Trẻ em ở lại", responses.reduce((sum, response) => sum + response.childrenCount, 0)],
-    ["Người lớn tuổi cần hỗ trợ", responses.filter((response) => response.elderlySupportNeeded).length],
     ["Số lời chúc đã nhận", responses.filter((response) => response.wishMessage).length],
   ].forEach(([label, value]) => worksheet.addRow({ label, value }));
 
@@ -133,22 +126,17 @@ function addResponsesSheet(workbook: ExcelJS.Workbook, responses: RSVPResponse[]
   worksheet.columns = [
     { key: "displayLabel", header: "Tên trên link", width: 28 },
     { key: "name", header: "Họ tên khách điền", width: 30 },
-    { key: "phone", header: "Số điện thoại", width: 18 },
     { key: "attendingCeremony", header: "Dự Thánh lễ", width: 18 },
     { key: "attendingPostCeremonyParty", header: "Dự tiệc sau Hôn phối", width: 24 },
     { key: "attendingBanquet", header: "Dự Tiệc mừng", width: 18 },
     { key: "attending", header: "Phản hồi chung", width: 20 },
     { key: "guestCount", header: "Số khách", width: 12 },
     { key: "guestGroup", header: "Nhóm khách", width: 22 },
-    { key: "transport", header: "Cần đưa đón", width: 14 },
     { key: "accommodation", header: "Cần lưu trú", width: 14 },
     { key: "stayingGuestCount", header: "Số người ở lại", width: 16 },
     { key: "checkInDate", header: "Ngày nhận phòng", width: 18 },
     { key: "checkOutDate", header: "Ngày trả phòng", width: 18 },
-    { key: "roomType", header: "Loại phòng", width: 18 },
     { key: "lodgingGuests", header: "Danh sách người lưu trú", width: 58 },
-    { key: "dietaryNote", header: "Ghi chú thực đơn", width: 30 },
-    { key: "notes", header: "Ghi chú khác", width: 34 },
     { key: "wishMessage", header: "Lời chúc", width: 52 },
     { key: "wishSentAt", header: "Thời gian gửi lời chúc", width: 24 },
     { key: "submittedAt", header: "Thời gian gửi", width: 24 },
@@ -158,7 +146,6 @@ function addResponsesSheet(workbook: ExcelJS.Workbook, responses: RSVPResponse[]
     worksheet.addRow({
       displayLabel: response.displayLabel || response.inviteToken || "",
       name: response.name,
-      phone: response.phone,
       attendingCeremony: response.attendingCeremony !== undefined ? formatBoolean(response.attendingCeremony) : "-",
       attendingPostCeremonyParty: !response.postCeremonyPartyInvited || !response.attendingCeremony
         ? "Không áp dụng"
@@ -169,38 +156,29 @@ function addResponsesSheet(workbook: ExcelJS.Workbook, responses: RSVPResponse[]
       attending: attendingLabel(response.attending),
       guestCount: response.guestCount,
       guestGroup: response.guestGroup,
-      transport: formatBoolean(response.transportNeeded),
       accommodation: formatBoolean(response.accommodationNeeded),
       stayingGuestCount: response.stayingGuestCount ?? response.lodgingGuests.length,
       checkInDate: response.checkInDate,
       checkOutDate: response.checkOutDate,
-      roomType: response.roomType,
       lodgingGuests: summarizeLodgingGuests(response.lodgingGuests),
-      dietaryNote: response.dietaryNote,
-      notes: response.notes,
       wishMessage: response.wishMessage,
       wishSentAt: response.wishSentAt,
       submittedAt: response.submittedAt,
     });
   });
 
-  styleWorksheet(worksheet, "A1:U1");
+  styleWorksheet(worksheet, "A1:P1");
 }
 
 function addLodgingSheet(workbook: ExcelJS.Workbook, responses: RSVPResponse[]) {
   const worksheet = workbook.addWorksheet("Danh sách lưu trú");
   worksheet.columns = [
     { key: "inviteGuest", header: "Khách đại diện", width: 28 },
-    { key: "phone", header: "Số điện thoại", width: 18 },
     { key: "lodgingName", header: "Họ tên người ở lại", width: 30 },
-    { key: "idNumber", header: "CCCD/Hộ chiếu", width: 22 },
     { key: "type", header: "Người lớn/trẻ em", width: 18 },
     { key: "age", header: "Tuổi trẻ em", width: 14 },
     { key: "checkInDate", header: "Ngày nhận phòng", width: 18 },
     { key: "checkOutDate", header: "Ngày trả phòng", width: 18 },
-    { key: "roomType", header: "Loại phòng mong muốn", width: 24 },
-    { key: "elderlySupport", header: "Cần hỗ trợ người lớn tuổi", width: 26 },
-    { key: "notes", header: "Ghi chú", width: 36 },
   ];
 
   responses.filter((response) => response.accommodationNeeded).forEach((response) => {
@@ -211,21 +189,16 @@ function addLodgingSheet(workbook: ExcelJS.Workbook, responses: RSVPResponse[]) 
     guests.forEach((guest) => {
       worksheet.addRow({
         inviteGuest: response.displayLabel || response.name,
-        phone: response.phone,
         lodgingName: guest.fullName,
-        idNumber: guest.idNumber,
         type: guest.isChild ? "Trẻ em" : "Người lớn",
         age: guest.age,
         checkInDate: response.checkInDate,
         checkOutDate: response.checkOutDate,
-        roomType: response.roomType,
-        elderlySupport: formatBoolean(response.elderlySupportNeeded),
-        notes: response.notes,
       });
     });
   });
 
-  styleWorksheet(worksheet, "A1:K1");
+  styleWorksheet(worksheet, "A1:F1");
 }
 
 export async function POST(request: Request) {

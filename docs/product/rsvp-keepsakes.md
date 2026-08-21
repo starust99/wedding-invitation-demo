@@ -30,9 +30,8 @@ and disabled when the guest requests reduced motion.
   `Gửi quà mừng` adopts the same white-pill treatment as the calendar and
   album actions.
 - Wishes are stored with the RSVP response and include their own sent time.
-- A temporary compatibility marker in personalized RSVP notes keeps the live
-  flow operational before the typed-column migration; the shared mapper hides
-  that marker and the migration backfills it automatically.
+- Wishes use typed RSVP columns exclusively. RSVP edits do not write those
+  columns, so an existing wish survives attendance or lodging changes.
 
 ## Gift QR Rules
 
@@ -49,6 +48,14 @@ Admin can filter responses by whether a wish exists, see the wish and its sent
 time in the response list and guest detail, and include both fields in CSV and
 Excel RSVP exports. RSVP deletion keeps its current semantics and therefore
 also removes the wish stored on that response.
+
+## Data Minimization
+
+The current RSVP does not collect or retain phone numbers, government IDs,
+dietary notes, transport requests, room types, elderly-support requests, or
+freeform RSVP notes. Lodging guests provide only a name, child/adult status, and
+child age when applicable. Invitation-side planning notes remain private Admin
+metadata and are not part of the RSVP response.
 
 ## Accessibility and Responsive Behavior
 

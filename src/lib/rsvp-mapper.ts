@@ -1,5 +1,4 @@
 import type { LodgingGuest, RSVPResponse } from "@/lib/rsvp-storage";
-import { parseLegacyRsvpWish } from "@/lib/rsvp-wish";
 
 export type RSVPDatabaseRow = {
   id: string;
@@ -7,63 +6,27 @@ export type RSVPDatabaseRow = {
   invite_token: string | null;
   display_label: string | null;
   name: string;
-  phone: string;
-  attending_ceremony?: boolean | null;
-  attending_post_ceremony_party?: boolean | null;
-  attending_banquet?: boolean | null;
+  attending_ceremony: boolean | null;
+  attending_post_ceremony_party: boolean | null;
+  attending_banquet: boolean | null;
   attending: "yes" | "no" | "maybe";
   guest_count: number;
   guest_group: string;
-  dietary_note: string | null;
-  transport_needed: boolean;
   accommodation_needed: boolean;
   staying_guest_count: number | null;
-  lodging_guests: unknown | null;
+  lodging_guests: unknown;
   check_in_date: string | null;
   check_out_date: string | null;
-  room_type: string | null;
   children_count: number;
-  elderly_support_needed: boolean;
-  notes: string | null;
-  wish_message?: string | null;
-  wish_sent_at?: string | null;
+  wish_message: string | null;
+  wish_sent_at: string | null;
   submitted_at: string;
 };
 
-type LegacyRsvpMetadata = {
-  guests: LodgingGuest[];
-  attendingCeremony?: boolean;
-  attendingPostCeremonyParty?: boolean;
-  attendingBanquet?: boolean;
-};
+function parseLodgingGuests(value: unknown): LodgingGuest[] {
+  if (!Array.isArray(value)) return [];
 
-function parseLegacyRsvpMetadata(value: unknown): LegacyRsvpMetadata {
-  if (typeof value === "string") {
-    try {
-      return parseLegacyRsvpMetadata(JSON.parse(value));
-    } catch {
-      return { guests: [] };
-    }
-  }
-
-  let rawGuests: unknown = value;
-  let attendingCeremony: boolean | undefined;
-  let attendingPostCeremonyParty: boolean | undefined;
-  let attendingBanquet: boolean | undefined;
-
-  if (value && typeof value === "object" && !Array.isArray(value)) {
-    const metadata = value as Record<string, unknown>;
-    rawGuests = metadata.guests;
-    attendingCeremony = typeof metadata.attendingCeremony === "boolean" ? metadata.attendingCeremony : undefined;
-    attendingPostCeremonyParty = typeof metadata.attendingPostCeremonyParty === "boolean" ? metadata.attendingPostCeremonyParty : undefined;
-    attendingBanquet = typeof metadata.attendingBanquet === "boolean" ? metadata.attendingBanquet : undefined;
-  }
-
-  if (!Array.isArray(rawGuests)) {
-    return { guests: [], attendingCeremony, attendingPostCeremonyParty, attendingBanquet };
-  }
-
-  const guests = rawGuests.flatMap((item) => {
+  return value.flatMap((item) => {
     if (!item || typeof item !== "object") return [];
     const guest = item as Record<string, unknown>;
     const fullName = typeof guest.fullName === "string"
@@ -73,11 +36,6 @@ function parseLegacyRsvpMetadata(value: unknown): LegacyRsvpMetadata {
         : "";
     if (!fullName.trim()) return [];
 
-    const idNumber = typeof guest.idNumber === "string"
-      ? guest.idNumber
-      : typeof guest.id_number === "string"
-        ? guest.id_number
-        : "";
     const ageValue = typeof guest.age === "number"
       ? guest.age
       : typeof guest.age === "string" && guest.age.trim() !== ""
@@ -86,95 +44,54 @@ function parseLegacyRsvpMetadata(value: unknown): LegacyRsvpMetadata {
 
     return [{
       fullName: fullName.trim(),
-      idNumber: idNumber.trim(),
       isChild: Boolean(guest.isChild ?? guest.is_child),
       age: typeof ageValue === "number" && Number.isFinite(ageValue) ? ageValue : undefined,
     }];
   });
-
-  return { guests, attendingCeremony, attendingPostCeremonyParty, attendingBanquet };
 }
 
 export function mapRSVPRow(row: RSVPDatabaseRow): RSVPResponse {
-  const legacyMetadata = parseLegacyRsvpMetadata(row.lodging_guests);
-  const legacyWish = parseLegacyRsvpWish(row.notes);
-
   return {
     id: row.id,
     inviteeId: row.invitee_id ?? undefined,
     inviteToken: row.invite_token ?? undefined,
     displayLabel: row.display_label ?? undefined,
     name: row.name,
-    phone: row.phone,
-    attendingCeremony: row.attending_ceremony ?? legacyMetadata.attendingCeremony,
-    attendingPostCeremonyParty: row.attending_post_ceremony_party ?? legacyMetadata.attendingPostCeremonyParty,
-    attendingBanquet: row.attending_banquet ?? legacyMetadata.attendingBanquet,
+    attendingCeremony: row.attending_ceremony ?? undefined,
+    attendingPostCeremonyParty: row.attending_post_ceremony_party ?? undefined,
+    attendingBanquet: row.attending_banquet ?? undefined,
     attending: row.attending,
     guestCount: row.guest_count,
     guestGroup: row.guest_group,
-    dietaryNote: row.dietary_note ?? undefined,
-    transportNeeded: row.transport_needed,
     accommodationNeeded: row.accommodation_needed,
     stayingGuestCount: row.staying_guest_count ?? undefined,
-    lodgingGuests: legacyMetadata.guests,
+    lodgingGuests: parseLodgingGuests(row.lodging_guests),
     checkInDate: row.check_in_date ?? undefined,
     checkOutDate: row.check_out_date ?? undefined,
-    roomType: row.room_type ?? undefined,
     childrenCount: row.children_count,
-    elderlySupportNeeded: row.elderly_support_needed,
-    notes: legacyWish ? undefined : row.notes ?? undefined,
-    wishMessage: row.wish_message ?? legacyWish?.message,
-    wishSentAt: row.wish_sent_at ?? legacyWish?.sentAt,
+    wishMessage: row.wish_message ?? undefined,
+    wishSentAt: row.wish_sent_at ?? undefined,
     submittedAt: row.submitted_at,
   };
 }
 
-export function toRSVPInsert(
-  response: Omit<RSVPResponse, "id" | "submittedAt">,
-  options: { includeEventAttendanceColumns?: boolean } = {},
-) {
-  const includeEventAttendanceColumns = options.includeEventAttendanceColumns ?? true;
-  const tokenColumns = response.inviteeId || response.inviteToken || response.displayLabel
-    ? {
-        invitee_id: response.inviteeId || null,
-        invite_token: response.inviteToken || null,
-        display_label: response.displayLabel || null,
-      }
-    : {};
-  const eventAttendanceColumns = includeEventAttendanceColumns
-    ? {
-        attending_ceremony: response.attendingCeremony ?? null,
-        attending_post_ceremony_party: response.attendingPostCeremonyParty ?? null,
-        attending_banquet: response.attendingBanquet ?? null,
-      }
-    : {};
-  const lodgingGuests = includeEventAttendanceColumns
-    ? response.lodgingGuests
-    : {
-        guests: response.lodgingGuests ?? [],
-        attendingCeremony: response.attendingCeremony,
-        attendingPostCeremonyParty: response.attendingPostCeremonyParty,
-        attendingBanquet: response.attendingBanquet,
-      };
-
+export function toRSVPInsert(response: Omit<RSVPResponse, "id" | "submittedAt">) {
   return {
-    ...tokenColumns,
-    ...eventAttendanceColumns,
+    invitee_id: response.inviteeId || null,
+    invite_token: response.inviteToken || null,
+    display_label: response.displayLabel || null,
     name: response.name,
-    phone: response.phone,
+    attending_ceremony: response.attendingCeremony ?? null,
+    attending_post_ceremony_party: response.attendingPostCeremonyParty ?? null,
+    attending_banquet: response.attendingBanquet ?? null,
     attending: response.attending,
     guest_count: response.guestCount,
     guest_group: response.guestGroup,
-    dietary_note: response.dietaryNote || null,
-    transport_needed: response.transportNeeded,
     accommodation_needed: response.accommodationNeeded,
     staying_guest_count: response.stayingGuestCount ?? null,
-    lodging_guests: lodgingGuests,
+    lodging_guests: response.lodgingGuests,
     check_in_date: response.checkInDate || null,
     check_out_date: response.checkOutDate || null,
-    room_type: response.roomType || null,
     children_count: response.childrenCount,
-    elderly_support_needed: response.elderlySupportNeeded,
-    notes: response.notes || null,
   };
 }
