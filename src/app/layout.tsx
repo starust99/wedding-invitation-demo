@@ -105,7 +105,7 @@ export default function RootLayout({
       <body>
         <script
           dangerouslySetInnerHTML={{
-            __html: `
+            __html: String.raw`
               try {
                 var href = window.location.href || "";
                 var search = window.location.search || "";

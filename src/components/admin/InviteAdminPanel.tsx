@@ -13,6 +13,8 @@ import {
   Plus,
   RefreshCw,
   Search,
+  Save,
+  Sparkles,
   Square,
   Trash2,
   ClipboardList,
@@ -80,6 +82,9 @@ const panelInput =
   "min-h-11 w-full rounded-2xl border border-[#E8DDCC] bg-white px-4 text-sm font-normal normal-case tracking-normal text-[#2E2A25] outline-none transition placeholder:text-[#8A8178] focus:border-[#6B7A5A] focus:ring-4 focus:ring-[#6B7A5A]/12";
 
 const panelSelect = `${panelInput} pr-8`;
+
+const panelFieldLabel =
+  "grid gap-1.5 text-xs font-semibold text-[#746C64]";
 
 const emptySimpleInviteEntry: SimpleInviteEntry = {
   salutationCluster: "",
@@ -1644,133 +1649,189 @@ export function InviteAdminPanel() {
                 {/* Panel 1: Basic Info */}
                 <div className="rounded-2xl border border-[#DED4C5] bg-white shadow-sm">
                   <div className="p-4 sm:p-5">
-                    
-                    <div className="flex flex-wrap items-start justify-between gap-4 border-b border-[#E8DDCC] pb-4 mb-4">
-                      <div>
-                        <span className="text-[10px] font-bold uppercase tracking-wider text-[#b4975a]">THÔNG TIN KHÁCH MỜI</span>
-                        <h3 className="mt-1 text-xl font-bold text-[#2E2A25]">{selectedInvitee.displayLabel}</h3>
+                    <header className="flex flex-col gap-4 border-b border-[#E8DDCC] pb-5">
+                      <div className="min-w-0">
+                        <span className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#A38243]">Khách mời đang chọn</span>
+                        <h3 className="mt-1 truncate text-xl font-bold text-[#2E2A25]">{selectedInvitee.displayLabel}</h3>
+                        <p className="mt-1 text-xs leading-relaxed text-[#7B7168]">
+                          {selectedInvitee.guestGroup || "Chưa phân nhóm"}
+                          <span aria-hidden="true"> · </span>
+                          {householdModeLabels[selectedInvitee.householdMode]}
+                          <span aria-hidden="true"> · </span>
+                          {selectedInvitee.expectedGuestCount} người dự kiến
+                        </p>
                       </div>
-                      
-                      <div className="flex flex-wrap gap-1.5">
-                        <button type="button" onClick={() => void regenerateToken()} className="inline-flex h-9 items-center gap-1 px-3 rounded-full border border-[#E8DDCC] bg-white text-xs font-semibold text-[#2E2A25]">
-                          <RefreshCw className="h-3 w-3" /> Đổi mã
-                        </button>
-                        <button type="button" onClick={copyInviteLink} className="inline-flex h-9 items-center gap-1 px-3 rounded-full bg-[#5F6F4E] text-xs font-semibold text-white shadow-sm">
-                          <Copy className="h-3 w-3" /> Sao chép link
-                        </button>
-                        <button type="button" onClick={regenerateSelectedInviteCopy} className="inline-flex h-9 items-center gap-1 px-3 rounded-full border border-[#D6BFA3] bg-[#FCFAF4] text-xs font-semibold text-[#2E2A25]">
-                          Cập nhật xưng hô
-                        </button>
-                        <button type="button" onClick={() => void saveSelectedInvitee()} className="inline-flex h-9 items-center gap-1 px-3.5 rounded-full bg-[#5F6F4E] text-xs font-bold text-white shadow-sm" disabled={busy}>
-                          Lưu
-                        </button>
-                        <button type="button" onClick={() => void deleteSelectedInvitee()} className="inline-flex h-9 items-center gap-1 px-3 rounded-full border border-[#E8DDCC] bg-white text-xs font-semibold text-[#9B4E5C]" disabled={busy}>
-                          Xoá
-                        </button>
-                      </div>
-                    </div>
 
-                    {/* Inputs grid */}
-                    <div className="grid gap-3.5 sm:grid-cols-2 text-xs">
-                      <label className="grid gap-1.5 font-semibold text-[#8A8178] uppercase tracking-wider">
-                        Tên hiển thị (Admin)
-                        <input className={panelInput} value={selectedInvitee.displayLabel} onChange={(event) => patchSelectedInvitee({ displayLabel: event.target.value })} />
-                      </label>
-                      <label className="grid gap-1.5 font-semibold text-[#8A8178] uppercase tracking-wider">
-                        Cụm danh xưng
-                        <input className={panelInput} value={selectedInvitee.salutationCluster} onChange={(event) => patchSelectedInvitee({ salutationCluster: event.target.value })} />
-                      </label>
-                      <label className="grid gap-1.5 font-semibold text-[#8A8178] uppercase tracking-wider">
-                        Cụm tên khách
-                        <input className={panelInput} value={selectedInvitee.guestName} onChange={(event) => patchSelectedInvitee({ guestName: event.target.value })} />
-                      </label>
-                      <label className="grid gap-1.5 font-semibold text-[#8A8178] uppercase tracking-wider">
-                        Tên in trên thiệp cưới
-                        <input className={panelInput} value={selectedInvitee.invitationName} onChange={(event) => patchSelectedInvitee({ invitationName: event.target.value })} />
-                      </label>
-                      <label className="grid gap-1.5 font-semibold text-[#8A8178] uppercase tracking-wider">
-                        Nhóm khách
-                        <input
-                          className={panelInput}
-                          value={selectedInvitee.guestGroup}
-                          onChange={(event) => patchSelectedInvitee({
-                            guestGroup: event.target.value,
-                            terracottaLodgingEligible: isFamilyLodgingGuestGroup(event.target.value)
-                              ? true
-                              : selectedInvitee.terracottaLodgingEligible,
-                          })}
-                        />
-                      </label>
-                      <label className="grid gap-1.5 font-semibold text-[#8A8178] uppercase tracking-wider">
-                        Đơn vị khách
-                        <select className={panelSelect} value={selectedInvitee.householdMode} onChange={(event) => patchSelectedGuestUnit(event.target.value as Invitee["householdMode"])}>
-                          <option value="single">{householdModeLabels.single}</option>
-                          <option value="couple">{householdModeLabels.couple}</option>
-                          <option value="family">{householdModeLabels.family}</option>
-                          <option value="widowed">{householdModeLabels.widowed}</option>
-                        </select>
-                      </label>
-                      <label className="grid gap-1.5 font-semibold text-[#8A8178] uppercase tracking-wider">
-                        Số người (ước lượng)
-                        <input className={panelInput} type="number" min={1} value={selectedInvitee.expectedGuestCount} onChange={(event) => patchSelectedInvitee({ expectedGuestCount: Math.max(1, Number(event.target.value) || 1) })} />
-                      </label>
-                      <label className="flex min-h-11 cursor-pointer items-center gap-3 self-end rounded-2xl border border-[#E8DDCC] bg-white px-4 text-xs font-semibold normal-case tracking-normal text-[#2E2A25]">
-                        <input
-                          type="checkbox"
-                          checked={selectedInvitee.postCeremonyPartyInvited}
-                          onChange={(event) => patchSelectedInvitee({ postCeremonyPartyInvited: event.target.checked })}
-                          className="h-4 w-4 rounded accent-[#5F6F4E]"
-                        />
-                        Hỏi khách về tiệc sau Hôn phối
-                      </label>
-                      <label className="flex min-h-11 cursor-pointer items-center gap-3 self-end rounded-2xl border border-[#E8DDCC] bg-white px-4 text-xs font-semibold normal-case tracking-normal text-[#2E2A25]">
-                        <input
-                          type="checkbox"
-                          checked={isFamilyLodgingGuestGroup(selectedInvitee.guestGroup) || selectedInvitee.terracottaLodgingEligible}
-                          onChange={(event) => patchSelectedInvitee({ terracottaLodgingEligible: event.target.checked })}
-                          disabled={isFamilyLodgingGuestGroup(selectedInvitee.guestGroup)}
-                          className="h-4 w-4 rounded accent-[#5F6F4E]"
-                        />
-                        Cho phép lưu trú tại Terracotta
-                      </label>
-                      <label className="grid gap-1.5 font-semibold text-[#8A8178] uppercase tracking-wider">
-                        Dòng ngoài phong bì
-                        <input className={panelInput} value={selectedInvitee.envelopeLine} onChange={(event) => patchSelectedInvitee({ envelopeLine: event.target.value })} />
-                      </label>
-                      <label className="grid gap-1.5 font-semibold text-[#8A8178] uppercase tracking-wider">
-                        Lời mời trong thiệp
-                        <input className={panelInput} value={selectedInvitee.insideInviteLine} onChange={(event) => patchSelectedInvitee({ insideInviteLine: event.target.value })} />
-                      </label>
-                      <details className="group rounded-xl border border-[#E8DDCC] bg-[#FCFAF4] sm:col-span-2">
-                        <summary className="flex min-h-11 cursor-pointer list-none items-center px-4 text-xs font-semibold normal-case tracking-normal text-[#665D54] marker:hidden">
-                          Thông tin nâng cao
-                          <span className="ml-auto text-[11px] font-normal text-[#8A8178]">Chỉ mở khi cần</span>
+                      <div className="grid grid-cols-2 gap-2">
+                        <a
+                          href={buildInviteUrl(selectedInvitee.token, window.location.origin)}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="inline-flex min-h-10 items-center justify-center gap-1.5 rounded-full border border-[#E8DDCC] bg-white px-3.5 text-xs font-semibold text-[#4F4943] transition hover:border-[#BCAE9A] hover:bg-[#FCFAF4] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#6B7A5A]/12"
+                        >
+                          <ExternalLink className="h-3.5 w-3.5" /> Xem thiệp
+                        </a>
+                        <button
+                          type="button"
+                          onClick={copyInviteLink}
+                          className="inline-flex min-h-10 items-center justify-center gap-1.5 rounded-full border border-[#C8D0BD] bg-[#F4F6EF] px-3.5 text-xs font-semibold text-[#46523B] transition hover:bg-[#E9EEE2] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#6B7A5A]/12"
+                        >
+                          <Copy className="h-3.5 w-3.5" /> Sao chép link
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => void saveSelectedInvitee()}
+                          className="col-span-2 inline-flex min-h-10 items-center justify-center gap-1.5 rounded-full bg-[#5F6F4E] px-4 text-xs font-bold text-[#FDFBF7] shadow-sm transition hover:bg-[#526143] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#6B7A5A]/20 disabled:opacity-50"
+                          disabled={busy}
+                        >
+                          {busy ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Save className="h-3.5 w-3.5" />}
+                          Lưu thay đổi
+                        </button>
+                      </div>
+                    </header>
+
+                    <div className="mt-6 space-y-7">
+                      <section aria-labelledby="invitation-display-heading">
+                        <h4 id="invitation-display-heading" className="text-sm font-bold text-[#2E2A25]">Hiển thị trên thiệp</h4>
+                        <p className="mt-0.5 text-xs leading-relaxed text-[#7B7168]">Những nội dung khách sẽ đọc khi mở link thiệp riêng.</p>
+
+                        <div className="mt-3.5 grid gap-3.5 sm:grid-cols-2">
+                          <label className={panelFieldLabel}>
+                            Cách xưng hô
+                            <input className={panelInput} value={selectedInvitee.salutationCluster} onChange={(event) => patchSelectedInvitee({ salutationCluster: event.target.value })} />
+                          </label>
+                          <label className={panelFieldLabel}>
+                            Tên khách
+                            <input className={panelInput} value={selectedInvitee.guestName} onChange={(event) => patchSelectedInvitee({ guestName: event.target.value })} />
+                          </label>
+                          <label className={`${panelFieldLabel} sm:col-span-2`}>
+                            Tên hiển thị trên thiệp
+                            <input className={panelInput} value={selectedInvitee.invitationName} onChange={(event) => patchSelectedInvitee({ invitationName: event.target.value })} />
+                          </label>
+                        </div>
+
+                        <details className="group mt-3.5 border-y border-[#E8DDCC]">
+                          <summary className="flex min-h-11 cursor-pointer list-none items-center py-3 text-xs font-semibold text-[#5E574F] marker:hidden">
+                            Câu chữ trên thiệp
+                            <span className="ml-auto text-[11px] font-normal text-[#8A8178] group-open:hidden">Mở để kiểm tra</span>
+                            <span className="ml-auto hidden text-[11px] font-normal text-[#8A8178] group-open:inline">Thu gọn</span>
+                          </summary>
+                          <div className="grid gap-3.5 border-t border-[#E8DDCC] py-4 sm:grid-cols-2">
+                            <div className="flex flex-col items-start justify-between gap-3 sm:col-span-2 sm:flex-row">
+                              <p className="max-w-md text-xs leading-relaxed text-[#7B7168]">Hai dòng này thường được tạo tự động từ cách xưng hô và tên khách. Chỉ sửa tay khi có trường hợp đặc biệt.</p>
+                              <button type="button" onClick={regenerateSelectedInviteCopy} className="inline-flex min-h-9 shrink-0 items-center gap-1.5 rounded-full border border-[#D6BFA3] bg-[#FCFAF4] px-3 text-xs font-semibold text-[#5E574F] transition hover:bg-[#F6F0E6]">
+                                <Sparkles className="h-3.5 w-3.5" /> Tạo lại tự động
+                              </button>
+                            </div>
+                            <label className={panelFieldLabel}>
+                              Dòng ngoài phong bì
+                              <textarea className={`${panelInput} min-h-20 py-3`} value={selectedInvitee.envelopeLine} onChange={(event) => patchSelectedInvitee({ envelopeLine: event.target.value })} />
+                            </label>
+                            <label className={panelFieldLabel}>
+                              Lời mời trong thiệp
+                              <textarea className={`${panelInput} min-h-20 py-3`} value={selectedInvitee.insideInviteLine} onChange={(event) => patchSelectedInvitee({ insideInviteLine: event.target.value })} />
+                            </label>
+                          </div>
+                        </details>
+                      </section>
+
+                      <section aria-labelledby="internal-planning-heading" className="border-t border-[#E8DDCC] pt-6">
+                        <h4 id="internal-planning-heading" className="text-sm font-bold text-[#2E2A25]">Quản lý nội bộ</h4>
+                        <p className="mt-0.5 text-xs leading-relaxed text-[#7B7168]">Dùng để tìm kiếm, phân nhóm và dự trù số lượng. Khách không nhìn thấy các mục này.</p>
+
+                        <div className="mt-3.5 grid gap-3.5 sm:grid-cols-2">
+                          <label className={panelFieldLabel}>
+                            Tên trong danh sách
+                            <input className={panelInput} value={selectedInvitee.displayLabel} onChange={(event) => patchSelectedInvitee({ displayLabel: event.target.value })} />
+                          </label>
+                          <label className={panelFieldLabel}>
+                            Nhóm khách
+                            <input
+                              className={panelInput}
+                              value={selectedInvitee.guestGroup}
+                              onChange={(event) => patchSelectedInvitee({
+                                guestGroup: event.target.value,
+                                terracottaLodgingEligible: isFamilyLodgingGuestGroup(event.target.value)
+                                  ? true
+                                  : selectedInvitee.terracottaLodgingEligible,
+                              })}
+                            />
+                          </label>
+                          <label className={panelFieldLabel}>
+                            Đơn vị khách
+                            <select className={panelSelect} value={selectedInvitee.householdMode} onChange={(event) => patchSelectedGuestUnit(event.target.value as Invitee["householdMode"])}>
+                              <option value="single">{householdModeLabels.single}</option>
+                              <option value="couple">{householdModeLabels.couple}</option>
+                              <option value="family">{householdModeLabels.family}</option>
+                              <option value="widowed">{householdModeLabels.widowed}</option>
+                            </select>
+                          </label>
+                          <label className={panelFieldLabel}>
+                            Số người dự kiến
+                            <input className={panelInput} type="number" min={1} value={selectedInvitee.expectedGuestCount} onChange={(event) => patchSelectedInvitee({ expectedGuestCount: Math.max(1, Number(event.target.value) || 1) })} />
+                          </label>
+                          <label className={`${panelFieldLabel} sm:col-span-2`}>
+                            Chi tiết nội bộ <span className="font-normal text-[#8A8178]">(không bắt buộc)</span>
+                            <textarea className={`${panelInput} min-h-20 py-3`} value={selectedInvitee.notes} onChange={(event) => patchSelectedInvitee({ notes: event.target.value })} placeholder="Ví dụ: DNCG, ưu tiên xếp cùng bàn…" />
+                          </label>
+                        </div>
+                      </section>
+
+                      <section aria-labelledby="invitation-access-heading" className="border-t border-[#E8DDCC] pt-6">
+                        <h4 id="invitation-access-heading" className="text-sm font-bold text-[#2E2A25]">Quyền mời</h4>
+                        <p className="mt-0.5 text-xs leading-relaxed text-[#7B7168]">Quyết định các lựa chọn bổ sung khách được thấy khi hồi đáp.</p>
+
+                        <div className="mt-3.5 grid gap-3 sm:grid-cols-2">
+                          <label className={`flex min-h-[92px] cursor-pointer items-start gap-3 rounded-2xl border px-4 py-3.5 transition ${selectedInvitee.postCeremonyPartyInvited ? "border-[#B8C3AA] bg-[#F4F6EF]" : "border-[#E8DDCC] bg-[#FCFAF4]"}`}>
+                            <input type="checkbox" checked={selectedInvitee.postCeremonyPartyInvited} onChange={(event) => patchSelectedInvitee({ postCeremonyPartyInvited: event.target.checked })} className="mt-0.5 h-5 w-5 shrink-0 rounded accent-[#5F6F4E]" />
+                            <span>
+                              <span className="block text-xs font-bold text-[#2E2A25]">Mời tiệc sau Thánh lễ</span>
+                              <span className="mt-1 block text-[11px] leading-relaxed text-[#746C64]">Khách sẽ được hỏi có tham dự buổi tiệc thân mật sau Thánh lễ hay không.</span>
+                            </span>
+                          </label>
+                          <label className={`flex min-h-[92px] items-start gap-3 rounded-2xl border px-4 py-3.5 transition ${isFamilyLodgingGuestGroup(selectedInvitee.guestGroup) || selectedInvitee.terracottaLodgingEligible ? "border-[#B8C3AA] bg-[#F4F6EF]" : "border-[#E8DDCC] bg-[#FCFAF4]"} ${isFamilyLodgingGuestGroup(selectedInvitee.guestGroup) ? "cursor-not-allowed" : "cursor-pointer"}`}>
+                            <input type="checkbox" checked={isFamilyLodgingGuestGroup(selectedInvitee.guestGroup) || selectedInvitee.terracottaLodgingEligible} onChange={(event) => patchSelectedInvitee({ terracottaLodgingEligible: event.target.checked })} disabled={isFamilyLodgingGuestGroup(selectedInvitee.guestGroup)} className="mt-0.5 h-5 w-5 shrink-0 rounded accent-[#5F6F4E]" />
+                            <span>
+                              <span className="block text-xs font-bold text-[#2E2A25]">Cho phép đăng ký lưu trú</span>
+                              <span className="mt-1 block text-[11px] leading-relaxed text-[#746C64]">
+                                {isFamilyLodgingGuestGroup(selectedInvitee.guestGroup) ? "Đang bật tự động vì thuộc nhóm gia đình." : "Nếu dự tiệc tại Terracotta, khách có thể đăng ký người lưu trú."}
+                              </span>
+                            </span>
+                          </label>
+                        </div>
+                      </section>
+
+                      <details className="group border-t border-[#E8DDCC] pt-2">
+                        <summary className="flex min-h-11 cursor-pointer list-none items-center py-2 text-xs font-semibold text-[#5E574F] marker:hidden">
+                          Thông tin và công cụ nâng cao
+                          <span className="ml-auto text-[11px] font-normal text-[#8A8178] group-open:hidden">Chỉ mở khi cần</span>
+                          <span className="ml-auto hidden text-[11px] font-normal text-[#8A8178] group-open:inline">Thu gọn</span>
                         </summary>
-                        <div className="grid gap-3.5 border-t border-[#E8DDCC] p-4 sm:grid-cols-2">
-                          <label className="grid gap-1.5 font-semibold text-[#8A8178] uppercase tracking-wider">
+                        <div className="grid gap-3.5 border-t border-[#E8DDCC] py-4 sm:grid-cols-2">
+                          <label className={panelFieldLabel}>
                             Xưng hô đơn
                             <input className={panelInput} value={selectedInvitee.honorific} onChange={(event) => patchSelectedInvitee({ honorific: event.target.value })} />
                           </label>
-                          <label className="grid gap-1.5 font-semibold text-[#8A8178] uppercase tracking-wider">
+                          <label className={panelFieldLabel}>
                             Đơn vị mời
                             <select className={panelSelect} value={selectedInvitee.inviteUnit} onChange={(event) => patchSelectedInvitee({ inviteUnit: event.target.value === "household" ? "household" : "individual" })}>
                               <option value="individual">{inviteUnitLabels.individual}</option>
                               <option value="household">{inviteUnitLabels.household}</option>
                             </select>
                           </label>
-                          <label className="grid gap-1.5 font-semibold text-[#8A8178] uppercase tracking-wider">
+                          <label className={panelFieldLabel}>
                             Ai đứng mời
                             <select className={panelSelect} value={selectedInvitee.invitedBy} onChange={(event) => patchSelectedInvitee({ invitedBy: event.target.value === "parents" ? "parents" : "couple" })}>
                               <option value="couple">{invitedByLabels.couple}</option>
                               <option value="parents">{invitedByLabels.parents}</option>
                             </select>
                           </label>
-                          <label className="grid gap-1.5 font-semibold text-[#8A8178] uppercase tracking-wider">
+                          <label className={panelFieldLabel}>
                             Mối quan hệ
                             <input className={panelInput} value={selectedInvitee.relationship} onChange={(event) => patchSelectedInvitee({ relationship: event.target.value })} />
                           </label>
-                          <label className="grid gap-1.5 font-semibold text-[#8A8178] uppercase tracking-wider">
-                            Chính sách +1
+                          <label className={panelFieldLabel}>
+                            Chính sách người đi cùng
                             <select className={panelSelect} value={selectedInvitee.plusOnePolicy} onChange={(event) => patchSelectedInvitee({ plusOnePolicy: event.target.value as Invitee["plusOnePolicy"] })}>
                               <option value="none">{plusOnePolicyLabels.none}</option>
                               <option value="spouse">{plusOnePolicyLabels.spouse}</option>
@@ -1779,21 +1840,22 @@ export function InviteAdminPanel() {
                               <option value="open_plus_one">{plusOnePolicyLabels.open_plus_one}</option>
                             </select>
                           </label>
+                          <div className="flex flex-col gap-2 border-t border-[#E8DDCC] pt-4 sm:col-span-2 sm:flex-row sm:items-center">
+                            <button type="button" onClick={() => void regenerateToken()} className="inline-flex min-h-10 items-center justify-center gap-1.5 rounded-full border border-[#E8DDCC] bg-white px-3.5 text-xs font-semibold text-[#5E574F]">
+                              <RefreshCw className="h-3.5 w-3.5" /> Tạo link thiệp mới
+                            </button>
+                            <button type="button" onClick={() => void deleteSelectedInvitee()} className="inline-flex min-h-10 items-center justify-center gap-1.5 rounded-full border border-[#E5C9CE] bg-[#FFF9F9] px-3.5 text-xs font-semibold text-[#9B4E5C] sm:ml-auto" disabled={busy}>
+                              <Trash2 className="h-3.5 w-3.5" /> Xoá khách mời
+                            </button>
+                          </div>
                         </div>
                       </details>
-                      <label className="grid gap-1.5 font-semibold text-[#8A8178] uppercase tracking-wider sm:col-span-2">
-                        Ghi chú
-                        <textarea className={`${panelInput} min-h-20 py-2.5`} value={selectedInvitee.notes} onChange={(event) => patchSelectedInvitee({ notes: event.target.value })} />
-                      </label>
                     </div>
 
-                    {/* Bottom Link Details */}
-                    <div className="mt-4 p-3.5 rounded-xl bg-[#FCFAF4] border border-[#E8DDCC] text-xs text-[#665d54]">
-                      <b className="text-[#2E2A25]">Link thiệp riêng của khách:</b>
-                      <p className="mt-1 font-mono break-all text-[#5F6F4E] select-all">{buildInviteUrl(selectedInvitee.token, window.location.origin)}</p>
+                    <section aria-labelledby="guest-response-heading" className="mt-7 border-t border-[#E8DDCC] pt-6 text-xs text-[#665D54]">
+                      <h4 id="guest-response-heading" className="text-sm font-bold text-[#2E2A25]">Phản hồi của khách</h4>
                       {selectedRsvp ? (
-                        <div className="mt-3 pt-3 border-t border-[#E8DDCC] space-y-1">
-                          <p className="font-semibold text-[#2E2A25]">Hồi đáp từ form:</p>
+                        <div className="mt-3 space-y-1.5 leading-relaxed">
                           <p>Trạng thái: <b>{attendingLabel(selectedRsvp.attending)}</b> · Dự {selectedRsvp.guestCount} người <span className="text-[#8A8178]">(ước lượng)</span>.</p>
                           <p>
                             Tiệc sau Hôn phối: <b>{
@@ -1808,21 +1870,21 @@ export function InviteAdminPanel() {
                           </p>
                           {selectedRsvp.accommodationNeeded && <p>Cần lưu trú: <b>{selectedRsvp.stayingGuestCount ?? selectedRsvp.lodgingGuests?.length ?? 0} người</b> <span className="text-[#8A8178]">(ước lượng)</span> ({selectedRsvp.lodgingGuests?.length ? summarizeLodgingGuests(selectedRsvp.lodgingGuests) : "Chưa điền tên"}).</p>}
                           {selectedRsvp.wishMessage ? (
-                            <div className="mt-3 rounded-lg border border-[#E8DDCC] bg-white px-3 py-2.5">
+                            <blockquote className="mt-3 border-y border-[#E8DDCC] py-3">
                               <p className="font-semibold text-[#2E2A25]">Lời chúc · {formatDate(selectedRsvp.wishSentAt || "")}</p>
                               <p className="mt-1 whitespace-pre-wrap leading-relaxed">{selectedRsvp.wishMessage}</p>
-                            </div>
+                            </blockquote>
                           ) : (
-                            <p className="text-[#8A8178]">Chưa gửi lời chúc.</p>
+                            <p className="text-[#8A8178]">Khách chưa gửi lời chúc.</p>
                           )}
                         </div>
                       ) : (
-                        <p className="mt-2 text-[#8A8178]">Khách chưa hồi đáp RSVP.</p>
+                        <p className="mt-2 text-[#8A8178]">Chưa có phản hồi RSVP từ khách này.</p>
                       )}
-                    </div>
+                    </section>
 
-                    {message && <p className="mt-3 text-xs font-semibold text-[#5F6F4E]">{message}</p>}
-                    {error && <p className="mt-3 text-xs font-semibold text-[#9B4E5C]">{error}</p>}
+                    {message && <p className="mt-4 rounded-xl bg-[#F4F6EF] px-4 py-3 text-xs font-semibold text-[#4F6042]">{message}</p>}
+                    {error && <p className="mt-4 rounded-xl bg-[#FFF4F5] px-4 py-3 text-xs font-semibold text-[#9B4E5C]">{error}</p>}
                   </div>
                 </div>
 
