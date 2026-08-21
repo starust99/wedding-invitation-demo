@@ -85,7 +85,7 @@ not add non-breaking characters to stored invitation data.
 
 ## Guest Capacity
 
-- `Bố` and `Mẹ` are single-person invitations with expected count `1`.
+- `Bố`, `Ba`, and `Mẹ` are single-person invitations with expected count `1`.
 - `Bố mẹ`, `Ba mẹ`, and `Ông bà` are couple invitations with expected count `2`.
 
 ## Invite Workbook Classification

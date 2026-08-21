@@ -58,6 +58,8 @@ assert.equal(
   "Gia đình anh chị Tuấn",
 );
 assert.equal(naming.resolveSalutationCluster("", "Bố"), "Bố");
+assert.equal(naming.resolveSalutationCluster("", "Ba"), "Ba");
+assert.equal(naming.resolveSalutationCluster("", "Bà"), "Bà");
 assert.equal(naming.resolveSalutationCluster("", "Mẹ"), "Mẹ");
 assert.equal(naming.resolveSalutationCluster("", "Cha Linh Hướng Giuse"), "Cha");
 
@@ -80,6 +82,23 @@ assert.equal(clergyCopy.presenceSubject, "Cha");
 assert.equal(clergyCopy.closingLine, "Sự hiện diện của Cha là niềm vinh hạnh và lời chúc phúc trọn vẹn nhất.");
 assert(clergyCopy.insideInviteLine.includes("\nCha đến chung vui"));
 assert.equal(clergyCopy.insideInviteLine.includes("\nCha Linh Hướng Giuse đến chung vui"), false);
+
+const fatherIdentity = {
+  salutationCluster: "Ba",
+  displaySalutation: "Ba",
+  invitationName: "Ba",
+  displayLabel: "Ba",
+  guestName: "Ba",
+  honorific: "ba",
+  hostRelationship: "ba",
+  relationship: "bố/mẹ của cô dâu/chú rể",
+  invitedBy: "couple",
+  householdMode: "single",
+};
+const fatherCopy = personalization.buildInvitationCopy(fatherIdentity);
+assert.equal(fatherCopy.guestLabel, "Ba");
+assert.equal(fatherCopy.greeting, "Ba thân mến");
+assert.equal(fatherCopy.presenceSubject, "Ba");
 
 const clusterInput = {
   salutationCluster: "Gia đình anh chị",

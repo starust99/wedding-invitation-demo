@@ -54,6 +54,7 @@ const knownSalutationClusters = [
   "Anh",
   "Chị",
   "Em",
+  "Ba",
   "Bà",
   "Bố",
   "Mẹ",
@@ -72,6 +73,10 @@ function normalize(value: string) {
     .trim();
 }
 
+function normalizeExact(value: string) {
+  return value.toLocaleLowerCase("vi").replace(/\s+/g, " ").trim();
+}
+
 export function capitalizeFirst(value: string) {
   const clean = value.trim();
   return clean ? clean.charAt(0).toLocaleUpperCase("vi") + clean.slice(1) : clean;
@@ -83,6 +88,13 @@ export function lowercaseFirst(value: string) {
 }
 
 export function inferSalutationCluster(fullGuestName: string) {
+  const exactName = normalizeExact(fullGuestName);
+  const exactMatch = knownSalutationClusters.find((cluster) => {
+    const exactCluster = normalizeExact(cluster);
+    return exactName === exactCluster || exactName.startsWith(`${exactCluster} `);
+  });
+  if (exactMatch) return exactMatch;
+
   const normalizedName = normalize(fullGuestName);
   const matched = knownSalutationClusters.find((cluster) => {
     const normalizedCluster = normalize(cluster);

@@ -78,6 +78,7 @@ const salutationDefinitions: SalutationDefinition[] = [
   { label: "Ông bà", hostRelationship: "ông bà", relationship: "ông bà của cô dâu/chú rể", householdMode: "couple", needsName: false, coupleHostPronoun: "chúng con", parentsHostPronoun: "gia đình chúng con" },
   { label: "Bố mẹ", hostRelationship: "bố mẹ", relationship: "bố mẹ của cô dâu/chú rể", householdMode: "couple", needsName: false, coupleHostPronoun: "chúng con", parentsHostPronoun: "gia đình chúng con" },
   { label: "Ba mẹ", hostRelationship: "ba mẹ", relationship: "bố mẹ của cô dâu/chú rể", householdMode: "couple", needsName: false, coupleHostPronoun: "chúng con", parentsHostPronoun: "gia đình chúng con" },
+  { label: "Ba", hostRelationship: "ba", relationship: "bố/mẹ của cô dâu/chú rể", householdMode: "single", needsName: false, coupleHostPronoun: "chúng con", parentsHostPronoun: "gia đình chúng con" },
   { label: "Bố", hostRelationship: "bố", relationship: "bố/mẹ của cô dâu/chú rể", householdMode: "single", needsName: false, coupleHostPronoun: "chúng con", parentsHostPronoun: "gia đình chúng con" },
   { label: "Mẹ", hostRelationship: "mẹ", relationship: "bố/mẹ của cô dâu/chú rể", householdMode: "single", needsName: false, coupleHostPronoun: "chúng con", parentsHostPronoun: "gia đình chúng con" },
   { label: "Bác", hostRelationship: "bác", relationship: "bác của cô dâu/chú rể", householdMode: "single", needsName: true, coupleHostPronoun: "chúng con", parentsHostPronoun: "gia đình chúng con" },
@@ -301,6 +302,12 @@ function buildDisplayGuestName(salutationCluster: string, guestNameCore: string)
 }
 
 function findSalutationDefinition(value: string) {
+  const exactValue = clean(value).toLocaleLowerCase("vi");
+  const exactMatch = salutationDefinitions.find(
+    (item) => clean(item.label).toLocaleLowerCase("vi") === exactValue,
+  );
+  if (exactMatch) return exactMatch;
+
   const normalized = normalizeText(value);
   return salutationDefinitions.find((item) => normalizeText(item.label) === normalized);
 }
@@ -566,7 +573,7 @@ function deriveExpectedGuestCount(householdMode: HouseholdMode) {
 }
 
 function deriveHonorific(hostRelationship: string) {
-  const titleRelationships = new Set(["cha", "ông", "bà", "bác", "cô", "chú", "dì", "cậu", "mợ", "thím", "anh", "chị", "em", "cháu"]);
+  const titleRelationships = new Set(["cha", "ông", "bà", "ba", "bác", "cô", "chú", "dì", "cậu", "mợ", "thím", "anh", "chị", "em", "cháu"]);
   return titleRelationships.has(hostRelationship.toLowerCase()) ? hostRelationship : "";
 }
 
@@ -816,7 +823,7 @@ function applyInputConditionalFormatting(worksheet: ExcelJS.Worksheet) {
     rules: [{
       type: "expression",
       priority: 2,
-      formulae: [`AND($B${firstDataRow}<>"",$C${firstDataRow}="",NOT(OR($B${firstDataRow}="Ông bà",$B${firstDataRow}="Bố mẹ",$B${firstDataRow}="Ba mẹ",$B${firstDataRow}="Bố",$B${firstDataRow}="Mẹ")))`],
+      formulae: [`AND($B${firstDataRow}<>"",$C${firstDataRow}="",NOT(OR($B${firstDataRow}="Ông bà",$B${firstDataRow}="Bố mẹ",$B${firstDataRow}="Ba mẹ",$B${firstDataRow}="Ba",$B${firstDataRow}="Bố",$B${firstDataRow}="Mẹ")))`],
       style: warningStyle,
     }],
   });
