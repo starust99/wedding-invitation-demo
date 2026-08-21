@@ -15,6 +15,7 @@ import {
   ChevronDown,
   Gift,
   Mail,
+  MapPin,
   Minus,
   Plus,
   CalendarDays,
@@ -107,6 +108,33 @@ function RsvpSuccessUtilityCard({ children, reveal }: { children: ReactNode; rev
           {children}
         </div>
       </motion.div>
+    </div>
+  );
+}
+
+const POST_CEREMONY_VENUE_NAME = "Francis Hội Restaurant";
+const POST_CEREMONY_VENUE_ADDRESS = "187 Gia Long, Lái Thiêu, Hồ Chí Minh";
+const POST_CEREMONY_VENUE_URL = "https://www.google.com/search?sca_esv=182ba94e7364ae48&sxsrf=APpeQnuqQ9XR3wfP5EbW_Ldw7WOEp7vffw:1787323966328&q=francis+h%E1%BB%99i+restaurant+%C4%91%E1%BB%8Ba+ch%E1%BB%89&ludocid=740771515627976404&sa=X&ved=2ahUKEwjHyfHQ_LGWAxWUjOEIHRvSGmAQ6BN6BAg1EAI&biw=1280&bih=615&dpr=2";
+
+function PostCeremonyVenue({ compact = false }: { compact?: boolean }) {
+  return (
+    <div
+      data-rsvp-post-ceremony-venue="true"
+      className={compact ? "mt-2 text-center sm:text-left" : "mx-auto mt-5 max-w-lg text-center"}
+    >
+      <p className="whitespace-nowrap text-sm font-semibold leading-relaxed text-[#252934] sm:text-base">
+        {POST_CEREMONY_VENUE_NAME}
+      </p>
+      <a
+        href={POST_CEREMONY_VENUE_URL}
+        target="_blank"
+        rel="noreferrer"
+        aria-label={`Mở địa chỉ ${POST_CEREMONY_VENUE_NAME} trên Google`}
+        className={`mt-1 inline-flex items-start justify-center gap-1.5 text-xs font-normal leading-relaxed text-[#5f655f] underline decoration-[#8faadc]/55 underline-offset-4 transition-colors hover:text-[#252934] focus-visible:rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-serenity ${compact ? "sm:justify-start" : ""}`}
+      >
+        <MapPin className="mt-0.5 h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+        <span className="text-balance">{POST_CEREMONY_VENUE_ADDRESS}</span>
+      </a>
     </div>
   );
 }
@@ -1932,9 +1960,7 @@ export default function RSVPPage() {
                     <p className="mt-1 text-sm font-semibold leading-relaxed text-[#252934] sm:text-base">
                       {postCeremonyDateLine}
                     </p>
-                    <p className="mx-auto mt-5 max-w-lg text-sm font-normal leading-relaxed text-[#252934]/78 sm:text-base">
-                      Kính mời Quý khách dự buổi tiệc chung vui cùng gia đình sau <span data-rsvp-unbreakable-ceremony="true" className="whitespace-nowrap">Thánh lễ</span>
-                    </p>
+                    <PostCeremonyVenue />
 
                     <div className="mt-6 flex flex-col items-center gap-1.5">
                       <span className="text-[11px] font-bold uppercase tracking-[0.14em] text-[#7a6a5d]">
@@ -2165,9 +2191,7 @@ export default function RSVPPage() {
                             <p className="mt-1 text-sm font-semibold leading-relaxed text-[#252934] sm:whitespace-nowrap">
                               {postCeremonyDateLine}
                             </p>
-                            <p className="mt-1 text-sm leading-relaxed text-[#252934]/72">
-                              Kính mời Quý khách dự buổi tiệc chung vui cùng gia đình sau <span data-rsvp-unbreakable-ceremony="true" className="whitespace-nowrap">Thánh lễ</span>
-                            </p>
+                            <PostCeremonyVenue compact />
                           </div>
                           <div
                             data-rsvp-event-response="true"

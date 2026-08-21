@@ -15,6 +15,7 @@
     "check:event-access": "node scripts/check-event-access.mjs",
     "check:event-access-browser": "node scripts/check-event-access-browser.mjs",
     "check:post-ceremony-rsvp": "node scripts/check-post-ceremony-rsvp.mjs",
+    "check:post-ceremony-venue": "node scripts/check-post-ceremony-venue.mjs",
     "check:rsvp-branching": "node scripts/check-rsvp-branching.mjs",
     "check:rsvp-backend-cleanup": "node scripts/check-rsvp-backend-cleanup.mjs",
     "check:admin-guest-editor": "node scripts/check-admin-guest-editor.mjs",

@@ -146,9 +146,11 @@ try {
   await regular.page.getByText("11:30 – Chủ Nhật, 20/12/2026", { exact: true }).waitFor();
   assert.equal(await regular.page.getByText("Nhà Thờ Giáo Xứ Tam Hải", { exact: true }).count(), 0);
   assert.equal(await regular.page.locator('img[data-rsvp-intimate-party-icon="true"]').count(), 1);
-  await regular.page.getByText("Kính mời Quý khách dự buổi tiệc chung vui cùng gia đình sau Thánh lễ", { exact: true }).waitFor();
+  await regular.page.getByText("Francis Hội Restaurant", { exact: true }).waitFor();
+  await regular.page.getByText("187 Gia Long, Lái Thiêu, Hồ Chí Minh", { exact: true }).waitFor();
+  await regular.page.getByRole("link", { name: "Mở địa chỉ Francis Hội Restaurant trên Google", exact: true }).waitFor();
   const unbreakableCeremonyPhrases = regular.page.locator('[data-rsvp-unbreakable-ceremony="true"]');
-  assert.equal(await unbreakableCeremonyPhrases.count(), 2);
+  assert.equal(await unbreakableCeremonyPhrases.count(), 1);
   for (const phrase of await unbreakableCeremonyPhrases.all()) {
     assert.equal(await phrase.evaluate((element) => getComputedStyle(element).whiteSpace), "nowrap");
   }
@@ -203,6 +205,8 @@ try {
   await close.page.getByRole("button", { name: "Có", exact: true }).nth(0).click();
   await close.page.getByText("Tiệc thân mật", { exact: true }).waitFor();
   await close.page.getByText("11:30 – Chủ Nhật, 20/12/2026", { exact: true }).waitFor();
+  await close.page.getByText("Francis Hội Restaurant", { exact: true }).waitFor();
+  await close.page.getByText("187 Gia Long, Lái Thiêu, Hồ Chí Minh", { exact: true }).waitFor();
   assert.equal(await close.page.locator('img[data-rsvp-intimate-party-icon="true"]').count(), 1);
   await close.page.waitForTimeout(350);
   const ceremonyGuides = await readEventColumnGuides(close.page, "ceremony");
