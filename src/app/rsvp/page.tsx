@@ -122,7 +122,12 @@ function PostCeremonyVenue({ compact = false }: { compact?: boolean }) {
       data-rsvp-post-ceremony-venue="true"
       className={compact ? "mt-2 text-center sm:text-left" : "mx-auto mt-5 max-w-lg text-center"}
     >
-      <p className="whitespace-nowrap text-sm font-semibold leading-relaxed text-[#252934] sm:text-base">
+      <p
+        className={[
+          "whitespace-nowrap text-sm leading-relaxed",
+          compact ? "font-normal text-[#252934]/72" : "font-semibold text-[#252934] sm:text-base",
+        ].join(" ")}
+      >
         {POST_CEREMONY_VENUE_NAME}
       </p>
       <a
