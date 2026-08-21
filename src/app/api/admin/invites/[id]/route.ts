@@ -3,6 +3,7 @@ import { hasAdminSession } from "@/lib/admin-auth";
 import { revalidateSharedInvitation } from "@/lib/invite-share-cache";
 import { mapInviteeRow, type InviteeDatabaseRow } from "@/lib/invite-mapper";
 import { getSupabaseServerClient, hasSupabaseEnv } from "@/lib/supabase-server";
+import { isMissingSupabaseColumn } from "@/lib/supabase-errors";
 
 type PatchBody = Partial<{
   token: string;
@@ -24,6 +25,8 @@ type PatchBody = Partial<{
   guest_group: string;
   audience_tags: string[];
   expected_guest_count: number;
+  post_ceremony_party_invited: boolean;
+  terracotta_lodging_eligible: boolean;
   phone: string;
   email: string;
   notes: string;
@@ -52,7 +55,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     return NextResponse.json({ error: readError.message }, { status: 500 });
   }
 
-  const { data, error } = await supabase
+  let mutation = await supabase
     .from("invitees")
     .update({
       ...body,
@@ -61,6 +64,25 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     .eq("id", id)
     .select("*")
     .single();
+
+  let migrationRequired = false;
+  if (isMissingSupabaseColumn(mutation.error, "terracotta_lodging_eligible")) {
+    migrationRequired = true;
+    const legacyBody = Object.fromEntries(
+      Object.entries(body).filter(([key]) => key !== "terracotta_lodging_eligible"),
+    );
+    mutation = await supabase
+      .from("invitees")
+      .update({
+        ...legacyBody,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", id)
+      .select("*")
+      .single();
+  }
+
+  const { data, error } = mutation;
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
@@ -74,6 +96,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
 
   return NextResponse.json({
     invitee: mapInviteeRow(data as InviteeDatabaseRow),
+    migrationRequired,
   });
 }
 

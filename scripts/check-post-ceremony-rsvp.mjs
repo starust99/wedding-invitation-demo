@@ -45,18 +45,22 @@ assert.equal(sheet.views[0]?.xSplit, 4);
 assert.equal(sheet.views[0]?.ySplit, 4);
 assert(sheet.sheetProtection, "The input sheet must protect formula and presentation cells.");
 assert.deepEqual(
-  [1, 2, 3, 4, 5, 6, 7, 8].map((column) => sheet.getCell(4, column).text),
-  ["STT", "Cụm danh xưng", "Tên khách", "Cụm tên khách", "Đơn vị khách", "Nhóm khách", "Chi tiết (Optional)", "Tham gia tiệc sau Hôn phối"],
+  [1, 2, 3, 4, 5, 6, 7, 8, 9].map((column) => sheet.getCell(4, column).text),
+  ["STT", "Cụm danh xưng", "Tên khách", "Cụm tên khách", "Đơn vị khách", "Nhóm khách", "Chi tiết (Optional)", "Tham gia tiệc sau Hôn phối", "Lưu trú tại Terracotta"],
 );
-assert.equal(sheet.getCell("I4").text, "", "The derived invitation sentence must not be exported as an input column.");
-assert.equal(sheet.getCell("H1").isMerged, true);
-assert.equal(sheet.getCell("I1").isMerged, false);
+assert.equal(sheet.getCell("J4").text, "", "The derived invitation sentence must not be exported as an input column.");
+assert.equal(sheet.getCell("I1").isMerged, true);
+assert.equal(sheet.getCell("J1").isMerged, false);
 assert.equal(sheet.getCell("G5").text, "", "New rows must leave the optional field blank.");
 assert.equal(sheet.getCell("G5").protection.locked, false);
 assert.equal(sheet.getCell("G5").dataValidation, undefined);
 assert.equal(sheet.getCell("H5").dataValidation.allowBlank, true);
 assert.equal(sheet.getCell("H5").dataValidation.type, "list");
 assert.notEqual(sheet.getCell("H5").dataValidation.showInputMessage, true);
+assert.equal(sheet.getCell("I5").dataValidation.allowBlank, true);
+assert.equal(sheet.getCell("I5").dataValidation.type, "list");
+assert.match(sheet.getCell("I5").formula, /Nhà Trai.*Họ nội/);
+assert.match(sheet.getCell("I5").formula, /Nhà Gái.*Họ ngoại/);
 assert.equal(sheet.getCell("F5").dataValidation.type, "list");
 const guestGroupOptions = spreadsheet.getSimpleInviteEntryOptions().guestGroups;
 assert(spreadsheet.getSimpleInviteEntryOptions().salutationClusters.includes("Cha"));
@@ -86,6 +90,7 @@ sheet.getCell("C5").value = "Tuấn";
 sheet.getCell("F5").value = "[Nhật] Bạn bè & Đồng nghiệp";
 sheet.getCell("G5").value = "DNCG";
 sheet.getCell("H5").value = "Có";
+sheet.getCell("I5").value = "Có";
 workbook.getWorksheet("_Dữ liệu hệ thống").getCell("N2").value = 5;
 workbook.getWorksheet("_Dữ liệu hệ thống").getCell("O2").value = "Ghi chú cũ";
 sheet.getCell("B6").value = "Chị + Người thương";
@@ -110,10 +115,13 @@ await workbook.xlsx.writeFile(join(outputDir, "mau-danh-sach-khach-moi-co-du-lie
 const parsed = await spreadsheet.parseInviteWorkbook(await workbook.xlsx.writeBuffer());
 assert.deepEqual(parsed.errors, []);
 assert.equal(parsed.hasPostCeremonyPartyColumn, true);
+assert.equal(parsed.hasTerracottaLodgingColumn, true);
 assert.equal(parsed.invitees.length, 6);
 assert.equal(parsed.invitees[0].postCeremonyPartyInvited, true);
+assert.equal(parsed.invitees[0].terracottaLodgingEligible, true);
 assert.equal(parsed.invitees[0].notes, "DNCG");
 assert.equal(parsed.invitees[1].postCeremonyPartyInvited, false);
+assert.equal(parsed.invitees[1].terracottaLodgingEligible, false);
 assert.equal(parsed.invitees[1].displayLabel, "Chị Chi & Người thương");
 assert.equal(parsed.invitees[1].salutationCluster, "Anh chị");
 assert.equal(parsed.invitees[1].householdMode, "couple");
@@ -136,13 +144,15 @@ assert.equal(parsed.invitees[5].salutationCluster, "Bà ngoại");
 assert.equal(parsed.invitees[5].guestName, "Bà ngoại");
 assert.equal(parsed.invitees[5].householdMode, "single");
 assert.equal(parsed.invitees[5].expectedGuestCount, 1);
+assert.equal(parsed.invitees[5].terracottaLodgingEligible, true, "Family groups must receive lodging automatically even when the cell is blank.");
 
-sheet.getCell("H7").value = "Không";
+sheet.getCell("I7").value = "Không";
 const invalid = await spreadsheet.parseInviteWorkbook(await workbook.xlsx.writeBuffer());
 assert.match(invalid.errors.join(" "), /chỉ nhận giá trị Có hoặc để trống/);
 
 const legacyWorkbook = await spreadsheet.buildInviteTemplateWorkbook({ coupleDisplayName: "Nhật & Phương" });
 const legacySheet = legacyWorkbook.getWorksheet("Danh sách khách mời");
+legacySheet.spliceColumns(9, 1);
 legacySheet.spliceColumns(7, 1);
 legacySheet.getCell("B5").value = "Anh";
 legacySheet.getCell("C5").value = "Dũng";
@@ -151,10 +161,13 @@ legacySheet.getCell("G5").value = "Có";
 const legacyParsed = await spreadsheet.parseInviteWorkbook(await legacyWorkbook.xlsx.writeBuffer());
 assert.deepEqual(legacyParsed.errors, []);
 assert.equal(legacyParsed.hasPostCeremonyPartyColumn, true);
+assert.equal(legacyParsed.hasTerracottaLodgingColumn, false);
 assert.equal(legacyParsed.invitees[0].postCeremonyPartyInvited, true);
+assert.equal(legacyParsed.invitees[0].terracottaLodgingEligible, false);
 
 const noPostCeremonyWorkbook = await spreadsheet.buildInviteTemplateWorkbook({ coupleDisplayName: "Nhật & Phương" });
 const noPostCeremonySheet = noPostCeremonyWorkbook.getWorksheet("Danh sách khách mời");
+noPostCeremonySheet.spliceColumns(9, 1);
 noPostCeremonySheet.spliceColumns(8, 1);
 noPostCeremonySheet.getCell("B5").value = "Anh";
 noPostCeremonySheet.getCell("C5").value = "Dũng";
@@ -162,6 +175,7 @@ noPostCeremonySheet.getCell("F5").value = "[Nhật] Bạn bè & Đồng nghiệp
 const noPostCeremonyParsed = await spreadsheet.parseInviteWorkbook(await noPostCeremonyWorkbook.xlsx.writeBuffer());
 assert.deepEqual(noPostCeremonyParsed.errors, []);
 assert.equal(noPostCeremonyParsed.hasPostCeremonyPartyColumn, false);
+assert.equal(noPostCeremonyParsed.hasTerracottaLodgingColumn, false);
 assert.equal(noPostCeremonyParsed.invitees[0].postCeremonyPartyInvited, false);
 
 const oldTemplateWorkbook = await spreadsheet.buildInviteTemplateWorkbook({ coupleDisplayName: "Nhật & Phương" });
@@ -176,14 +190,15 @@ const oldTemplateParsed = await spreadsheet.parseInviteWorkbook(await oldTemplat
 assert.deepEqual(oldTemplateParsed.errors, []);
 assert.equal(oldTemplateParsed.invitees.length, 1);
 assert.equal(oldTemplateParsed.invitees[0].postCeremonyPartyInvited, true);
+assert.equal(oldTemplateParsed.hasTerracottaLodgingColumn, false);
 assert.notEqual(oldTemplateParsed.invitees[0].insideInviteLine, oldTemplateSheet.getCell("H5").text);
 
 const linkWorkbook = await spreadsheet.buildInviteLinksWorkbook(parsed.invitees, "https://nhatphuong.love");
 const linkSheet = linkWorkbook.getWorksheet("Link thiệp mời");
 assert(linkSheet, "Invite-link sheet is missing.");
 assert.deepEqual(
-  [1, 2, 3, 4, 5, 6].map((column) => linkSheet.getCell(4, column).text),
-  ["STT", "Cụm tên khách", "Nhóm khách", "Chi tiết (Optional)", "Tham gia tiệc sau Hôn phối", "Link thiệp"],
+  [1, 2, 3, 4, 5, 6, 7].map((column) => linkSheet.getCell(4, column).text),
+  ["STT", "Cụm tên khách", "Nhóm khách", "Chi tiết (Optional)", "Tham gia tiệc sau Hôn phối", "Lưu trú tại Terracotta", "Link thiệp"],
 );
 assert.equal(linkSheet.getCell("A5").result, 1);
 assert.match(linkSheet.getCell("A5").formula, /COUNTIF\(\$B\$5:B5/);
@@ -191,7 +206,8 @@ assert.equal(linkSheet.getCell("B5").text, "Gia đình anh chị Tuấn");
 assert.equal(linkSheet.getCell("C5").text, "[Nhật] Bạn bè & Đồng nghiệp");
 assert.equal(linkSheet.getCell("D5").text, "DNCG");
 assert.equal(linkSheet.getCell("E5").text, "Có");
-assert.equal(linkSheet.getCell("F5").hyperlink, `https://nhatphuong.love/g/${parsed.invitees[0].token}`);
+assert.equal(linkSheet.getCell("F5").text, "Có");
+assert.equal(linkSheet.getCell("G5").hyperlink, `https://nhatphuong.love/g/${parsed.invitees[0].token}`);
 assert.equal(linkSheet.getCell("C9").text, "[Nhà Gái] Khách ba");
 assert.equal(linkSheet.getCell("D9").text, "Cha đạo");
 
@@ -214,6 +230,7 @@ const mappedInvitee = inviteMapper.mapInviteeRow({
   audience_tags: [],
   expected_guest_count: 4,
   post_ceremony_party_invited: true,
+  terracotta_lodging_eligible: true,
   phone: "",
   email: "",
   notes: "",
@@ -222,7 +239,9 @@ const mappedInvitee = inviteMapper.mapInviteeRow({
   updated_at: "2026-07-31T00:00:00.000Z",
 });
 assert.equal(mappedInvitee.postCeremonyPartyInvited, true);
+assert.equal(mappedInvitee.terracottaLodgingEligible, true);
 assert.equal(inviteMapper.toInviteeUpsert(mappedInvitee).post_ceremony_party_invited, true);
+assert.equal(inviteMapper.toInviteeUpsert(mappedInvitee).terracotta_lodging_eligible, true);
 
 const response = {
   inviteeId: mappedInvitee.id,

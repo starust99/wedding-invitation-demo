@@ -16,6 +16,7 @@ import {
 } from "@/lib/invite-preview";
 import type { Invitee } from "@/lib/invites";
 import { getSupabaseServerClient, hasSupabaseEnv } from "@/lib/supabase-server";
+import { isMissingSupabaseColumn } from "@/lib/supabase-errors";
 
 export type SharedInvitationTokenRouteProps = {
   params: Promise<{ token: string }>;
@@ -51,7 +52,12 @@ const sharedInviteeColumns = [
   "guest_group",
   "expected_guest_count",
   "post_ceremony_party_invited",
+  "terracotta_lodging_eligible",
 ].join(",");
+const legacySharedInviteeColumns = sharedInviteeColumns
+  .split(",")
+  .filter((column) => column !== "terracotta_lodging_eligible")
+  .join(",");
 
 function toSharedInvitee(invitee: Invitee): Invitee {
   return {
@@ -83,11 +89,24 @@ async function readSharedInvitee(token: string): Promise<Invitee | null> {
     }
   }
 
-  const { data, error } = await getSupabaseServerClient()
+  const supabase = getSupabaseServerClient();
+  let result = await supabase
     .from("invitees")
     .select(sharedInviteeColumns)
     .eq("token", token)
     .maybeSingle();
+
+  // Shared links must stay readable during the additive migration window.
+  // The legacy family-group rule still resolves true when the column is absent.
+  if (isMissingSupabaseColumn(result.error, "terracotta_lodging_eligible")) {
+    result = await supabase
+      .from("invitees")
+      .select(legacySharedInviteeColumns)
+      .eq("token", token)
+      .maybeSingle();
+  }
+
+  const { data, error } = result;
 
   if (error) throw error;
   if (!data) return null;

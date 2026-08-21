@@ -9,7 +9,10 @@ import {
 import { getSupabaseServerClient, hasSupabaseEnv } from "@/lib/supabase-server";
 import { resolvePostCeremonyPartyAnswer } from "@/lib/post-ceremony-rsvp";
 import { resolveInviteEventAccess } from "@/lib/invite-event-access";
-import { isGroomFamilyLodgingGuestGroup } from "@/lib/rsvp-guest-group";
+import {
+  isGroomFamilyLodgingGuestGroup,
+  isTerracottaLodgingEligible,
+} from "@/lib/rsvp-guest-group";
 import { preserveLegacyRsvpWishNotes } from "@/lib/rsvp-wish";
 
 export const dynamic = "force-dynamic";
@@ -50,9 +53,9 @@ export async function POST(request: Request) {
   const displayLabel = body.displayLabel?.trim();
 
   // Search for matching invitee in Supabase
-  let matchingInvitee: { id: string; token: string; guest_group: string | null; post_ceremony_party_invited: boolean | null } | null = null;
+  let matchingInvitee: { id: string; token: string; guest_group: string | null; post_ceremony_party_invited: boolean | null; terracotta_lodging_eligible: boolean | null } | null = null;
   if (inviteeId || token || displayLabel || name) {
-    let query = supabase.from("invitees").select("id, token, guest_group, post_ceremony_party_invited");
+    let query = supabase.from("invitees").select("*");
     if (inviteeId) {
       query = query.eq("id", inviteeId);
     } else if (token) {
@@ -69,6 +72,14 @@ export async function POST(request: Request) {
   }
 
   const resolvedGuestGroup = matchingInvitee?.guest_group || body.guestGroup || "";
+  // Lodging is an invite-scoped permission. Never trust a guest-supplied
+  // group or flag when no matching invite exists on the server.
+  const lodgingEligible = matchingInvitee
+    ? isTerracottaLodgingEligible(
+        matchingInvitee.guest_group,
+        matchingInvitee.terracotta_lodging_eligible,
+      )
+    : false;
   const eventAccess = resolveInviteEventAccess({
     guestGroup: resolvedGuestGroup,
     postCeremonyPartyInvited: matchingInvitee?.post_ceremony_party_invited,
@@ -85,8 +96,11 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: postCeremonyParty.error }, { status: 400 });
   }
 
+  const accommodationNeeded = body.accommodationNeeded === true
+    && body.attendingBanquet === true
+    && lodgingEligible;
   if (
-    body.accommodationNeeded === true
+    accommodationNeeded
     && isGroomFamilyLodgingGuestGroup(resolvedGuestGroup)
     && (body.checkInDate !== "2026-12-26" || body.checkOutDate !== "2026-12-27")
   ) {
@@ -106,6 +120,12 @@ export async function POST(request: Request) {
     attending: attendingCeremony || body.attendingBanquet === true || postCeremonyParty.value === true
       ? "yes"
       : "no",
+    accommodationNeeded,
+    lodgingGuests: accommodationNeeded ? body.lodgingGuests ?? [] : [],
+    stayingGuestCount: accommodationNeeded ? body.stayingGuestCount : 0,
+    checkInDate: accommodationNeeded ? body.checkInDate : undefined,
+    checkOutDate: accommodationNeeded ? body.checkOutDate : undefined,
+    childrenCount: accommodationNeeded ? body.childrenCount : 0,
   };
 
   let existingId: string | null = null;

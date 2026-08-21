@@ -21,7 +21,12 @@ symlinkSync(outputDir, join(outputDir, "node_modules", "@", "lib"), "dir");
 
 const { resolveInviteEventAccess } = require(join(outputDir, "invite-event-access.js"));
 const { doesPostCeremonyPartyApply, resolvePostCeremonyPartyAnswer } = require(join(outputDir, "post-ceremony-rsvp.js"));
-const { isFamilyLodgingGuestGroup, isGroomFamilyLodgingGuestGroup, isGroomSideGuestGroup } = require(join(outputDir, "rsvp-guest-group.js"));
+const {
+  isFamilyLodgingGuestGroup,
+  isGroomFamilyLodgingGuestGroup,
+  isGroomSideGuestGroup,
+  isTerracottaLodgingEligible,
+} = require(join(outputDir, "rsvp-guest-group.js"));
 
 for (const group of [
   "[Nhà Trai] Họ nội",
@@ -72,12 +77,18 @@ assert.equal(isFamilyLodgingGuestGroup("[Nhà Trai] Họ nội"), true);
 assert.equal(isFamilyLodgingGuestGroup("[Nhà Trai] Khách ba"), false);
 assert.equal(isGroomFamilyLodgingGuestGroup("[Nhà Trai] Họ ngoại"), true);
 assert.equal(isGroomFamilyLodgingGuestGroup("[Nhà Gái] Họ ngoại"), false);
+assert.equal(isTerracottaLodgingEligible("[Nhà Gái] Họ nội", false), true);
+assert.equal(isTerracottaLodgingEligible("[Nhật] Bạn bè & Đồng nghiệp", false), false);
+assert.equal(isTerracottaLodgingEligible("[Nhật] Bạn bè & Đồng nghiệp", true), true);
 
 const sourceAssertions = [
   ["src/components/InviteTokenPage.tsx", /eventAccess\.canViewCeremony/],
   ["src/app/rsvp/page.tsx", /isRegularGuestFlow = eventAccess\.canUsePostCeremonyFallback/],
   ["src/app/api/invites/[token]/rsvp/route.ts", /attendingCeremony = eventAccess\.canViewCeremony/],
+  ["src/app/api/invites/[token]/rsvp/route.ts", /invitee\.terracotta_lodging_eligible/],
   ["src/app/api/rsvp/route.ts", /allowFallback: eventAccess\.canUsePostCeremonyFallback/],
+  ["src/app/api/rsvp/route.ts", /const lodgingEligible = matchingInvitee[\s\S]*isTerracottaLodgingEligible/],
+  ["src/lib/invite-mapper.ts", /terracotta_lodging_eligible: isTerracottaLodgingEligible/],
   ["src/app/calendar/[event]/route.ts", /!eventAccess\.canViewCeremony/],
   ["src/components/admin/InviteAdminPanel.tsx", /ceremonyStatusLabel/],
 ];
@@ -87,4 +98,12 @@ for (const [file, pattern] of sourceAssertions) {
   assert.match(source, pattern, `Expected event-access enforcement in ${file}`);
 }
 
-console.log("Event-access checks passed: all Nhà Trai groups are flag-gated, fallback is disabled, and lodging eligibility is unchanged.");
+const lodgingMigration = readFileSync(
+  join(rootDir, "supabase", "migrations", "20260821_add_terracotta_lodging_eligibility.sql"),
+  "utf8",
+);
+assert.match(lodgingMigration, /add column if not exists terracotta_lodging_eligible boolean not null default false/);
+assert.match(lodgingMigration, /\[Nhà Trai\] Họ nội/);
+assert.match(lodgingMigration, /\[Nhà Gái\] Họ ngoại/);
+
+console.log("Event-access checks passed: Nhà Trai access stays flag-gated, family lodging is automatic, and selected non-family invites can be opted in.");

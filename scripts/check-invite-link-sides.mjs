@@ -61,7 +61,7 @@ const invitees = [
   createInvitee({ guestName: "Khách nhà trai", displayLabel: "Khách nhà trai", invitationName: "Khách nhà trai", guestGroup: "[Nhà Trai] Họ nội" }),
   createInvitee({ guestName: "Bạn Nhật", displayLabel: "Bạn Nhật", invitationName: "Bạn Nhật", guestGroup: "[Nhật] Bạn bè & Đồng nghiệp" }),
   createInvitee({ guestName: "Khách nhà gái", displayLabel: "Khách nhà gái", invitationName: "Khách nhà gái", guestGroup: "[Nhà Gái] Họ ngoại" }),
-  createInvitee({ guestName: "Bạn Phương", displayLabel: "Bạn Phương", invitationName: "Bạn Phương", guestGroup: "[Phương] Bạn bè & Đồng nghiệp" }),
+  createInvitee({ guestName: "Bạn Phương", displayLabel: "Bạn Phương", invitationName: "Bạn Phương", guestGroup: "[Phương] Bạn bè & Đồng nghiệp", terracottaLodgingEligible: true }),
   createInvitee({ guestName: "Chưa phân nhóm", displayLabel: "Chưa phân nhóm", invitationName: "Chưa phân nhóm", guestGroup: "Khác" }),
 ];
 
@@ -78,12 +78,15 @@ assert.equal(groomSheet.rowCount, 6);
 assert.equal(groomSheet.getCell("C4").text, "Nhóm khách");
 assert.equal(groomSheet.getCell("D4").text, "Chi tiết (Optional)");
 assert.equal(groomSheet.getCell("E4").text, "Tham gia tiệc sau Hôn phối");
+assert.equal(groomSheet.getCell("F4").text, "Lưu trú tại Terracotta");
 assert.equal(groomSheet.getCell("B5").text, "Khách nhà trai");
 assert.equal(groomSheet.getCell("B6").text, "Bạn Nhật");
 assert.equal(groomSheet.getCell("C5").text, "[Nhà Trai] Họ nội");
 assert.equal(groomSheet.getCell("C6").text, "[Nhật] Bạn bè & Đồng nghiệp");
 assert.equal(groomSheet.getCell("D5").text, "");
-assert.match(groomSheet.getCell("F5").text, /^https:\/\/nhatphuong\.love\/g\//);
+assert.equal(groomSheet.getCell("F5").text, "Có");
+assert.equal(groomSheet.getCell("F6").text, "Không");
+assert.match(groomSheet.getCell("G5").text, /^https:\/\/nhatphuong\.love\/g\//);
 assert.doesNotMatch(groomSheet.getCell("B5").text + groomSheet.getCell("B6").text, /nhà gái|Phương/i);
 
 const brideWorkbook = await buildInviteLinksWorkbook(brideInvitees, "https://nhatphuong.love");
@@ -95,7 +98,9 @@ assert.equal(brideSheet.getCell("B6").text, "Bạn Phương");
 assert.equal(brideSheet.getCell("C5").text, "[Nhà Gái] Họ ngoại");
 assert.equal(brideSheet.getCell("C6").text, "[Phương] Bạn bè & Đồng nghiệp");
 assert.equal(brideSheet.getCell("D5").text, "");
-assert.match(brideSheet.getCell("F6").text, /^https:\/\/nhatphuong\.love\/g\//);
+assert.equal(brideSheet.getCell("F5").text, "Có");
+assert.equal(brideSheet.getCell("F6").text, "Có");
+assert.match(brideSheet.getCell("G6").text, /^https:\/\/nhatphuong\.love\/g\//);
 assert.doesNotMatch(brideSheet.getCell("B5").text + brideSheet.getCell("B6").text, /nhà trai|Nhật/i);
 
 const duplicateFamilyName = "Gia đình anh Trung";
@@ -112,8 +117,10 @@ assert.equal(duplicateSheet.getCell("C5").text, "[Nhà Gái] Khách ba");
 assert.equal(duplicateSheet.getCell("C6").text, "[Nhà Gái] Khách ba");
 assert.equal(duplicateSheet.getCell("D5").text, "");
 assert.equal(duplicateSheet.getCell("D6").text, "Công giáo");
-assert.match(duplicateSheet.getCell("F5").text, /^https:\/\/nhatphuong\.love\/g\//);
-assert.match(duplicateSheet.getCell("F6").text, /^https:\/\/nhatphuong\.love\/g\//);
+assert.equal(duplicateSheet.getCell("F5").text, "Không");
+assert.equal(duplicateSheet.getCell("F6").text, "Không");
+assert.match(duplicateSheet.getCell("G5").text, /^https:\/\/nhatphuong\.love\/g\//);
+assert.match(duplicateSheet.getCell("G6").text, /^https:\/\/nhatphuong\.love\/g\//);
 
 const priestFullName = "Cha Linh Hướng Giuse";
 const priestWorkbook = await buildInviteLinksWorkbook([
@@ -141,4 +148,25 @@ assert.equal(preservedDuplicates[0].token, duplicateInvitees[0].token);
 assert.equal(preservedDuplicates[1].token, duplicateInvitees[1].token);
 assert.equal(preservedDuplicates[1].notes, "Công giáo");
 
-console.log("Invite-link side checks passed: both exports keep Nhóm khách, Chi tiết (Optional), and post-ceremony access in separate columns, while preserving side filtering.");
+const existingEligibleFriend = createInvitee({
+  guestName: "Bạn được bố trí phòng",
+  displayLabel: "Bạn được bố trí phòng",
+  invitationName: "Bạn được bố trí phòng",
+  guestGroup: "[Phương] Bạn bè & Đồng nghiệp",
+  terracottaLodgingEligible: true,
+});
+const importedFromOldWorkbook = createInvitee({
+  ...existingEligibleFriend,
+  id: undefined,
+  token: undefined,
+  terracottaLodgingEligible: false,
+});
+const preservedOldWorkbookEligibility = preserveExistingInviteLinks(
+  [importedFromOldWorkbook],
+  [existingEligibleFriend],
+  true,
+  false,
+);
+assert.equal(preservedOldWorkbookEligibility[0].terracottaLodgingEligible, true);
+
+console.log("Invite-link side checks passed: both exports keep group, detail, post-ceremony, and Terracotta-lodging controls in separate columns while preserving side filtering.");

@@ -31,7 +31,7 @@ assert.match(rsvpSource, /SỐ NGƯỜI THAM DỰ:/);
 assert.doesNotMatch(rsvpSource, /Vui lòng tính cả người được mời\./);
 assert.match(guestGroupSource, /ho \(\?:noi\|ngoai\)/);
 assert.match(guestGroupSource, /\^nha trai ho \(\?:noi\|ngoai\)\$/);
-assert.match(tokenRouteSource, /isFamilyLodgingGuestGroup\(guestGroup\)/);
+assert.match(tokenRouteSource, /isTerracottaLodgingEligible\([\s\S]*guestGroup,[\s\S]*invitee\.terracotta_lodging_eligible/);
 assert.match(tokenRouteSource, /isGroomFamilyLodgingGuestGroup\(guestGroup\)/);
 assert.match(tokenRouteSource, /body\.checkInDate !== "2026-12-26"/);
 assert.match(tokenRouteSource, /body\.checkOutDate !== "2026-12-27"/);

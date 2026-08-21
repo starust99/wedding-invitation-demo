@@ -58,6 +58,7 @@ import { usePublishedSettings } from "@/lib/use-published-settings";
 import {
   isFamilyLodgingGuestGroup,
   isGroomFamilyLodgingGuestGroup,
+  isTerracottaLodgingEligible,
 } from "@/lib/rsvp-guest-group";
 import { doesPostCeremonyPartyApply } from "@/lib/post-ceremony-rsvp";
 import { resolveInviteEventAccess } from "@/lib/invite-event-access";
@@ -123,6 +124,7 @@ const rsvpFormFieldsSchema = z.object({
   phone: z.string().trim().optional().default(""),
   attendingCeremony: z.enum(["yes", "no"]).nullable().default(null),
   postCeremonyPartyInvited: z.boolean().default(false),
+  terracottaLodgingEligible: z.boolean().default(false),
   attendingPostCeremonyParty: z.enum(["yes", "no"]).nullable().default(null),
   attendingBanquet: z.enum(["yes", "no"]).nullable().default(null),
   attending: z.enum(["yes", "no"]),
@@ -159,7 +161,7 @@ function validateRsvpForm(
   if (requirePostCeremonyParty && postCeremonyPartyApplies && !data.attendingPostCeremonyParty) {
     ctx.addIssue({ code: "custom", path: ["attendingPostCeremonyParty"], message: "Vui lòng chọn phản hồi cho Tiệc thân mật." });
   }
-  if (isFamilyLodgingGuestGroup(data.guestGroup) && data.attendingBanquet === "yes" && data.stayDecision === null) {
+  if (isTerracottaLodgingEligible(data.guestGroup, data.terracottaLodgingEligible) && data.attendingBanquet === "yes" && data.stayDecision === null) {
     ctx.addIssue({ code: "custom", path: ["stayDecision"], message: "Vui lòng chọn phương án lưu trú." });
   }
   if (
@@ -177,7 +179,7 @@ function validateRsvpForm(
   }
 
   if (
-    isFamilyLodgingGuestGroup(data.guestGroup)
+    isTerracottaLodgingEligible(data.guestGroup, data.terracottaLodgingEligible)
     && data.attending === "yes"
     && data.attendingBanquet === "yes"
     && data.stayDecision !== null
@@ -565,6 +567,7 @@ export default function RSVPPage() {
       phone: "",
       attendingCeremony: null,
       postCeremonyPartyInvited: false,
+      terracottaLodgingEligible: false,
       attendingPostCeremonyParty: null,
       attendingBanquet: null,
       attending: "yes",
@@ -582,6 +585,7 @@ export default function RSVPPage() {
   const attending = useWatch({ control, name: "attending" });
   const attendingCeremony = useWatch({ control, name: "attendingCeremony" });
   const postCeremonyPartyInvited = useWatch({ control, name: "postCeremonyPartyInvited" });
+  const terracottaLodgingEligible = useWatch({ control, name: "terracottaLodgingEligible" });
   const attendingPostCeremonyParty = useWatch({ control, name: "attendingPostCeremonyParty" });
   const attendingBanquet = useWatch({ control, name: "attendingBanquet" });
   const guestCount = useWatch({ control, name: "guestCount" });
@@ -605,7 +609,10 @@ export default function RSVPPage() {
   );
   const lodgingGuests = normalizeLodgingGuests((watchedLodgingGuests ?? []) as Array<Partial<LodgingGuestForm> | undefined>);
   const terracottaNote = buildTerracottaNote(lodgingGuests);
-  const canRequestLodging = isFamilyLodgingGuestGroup(activeGuestGroup);
+  const canRequestLodging = isTerracottaLodgingEligible(
+    activeGuestGroup,
+    terracottaLodgingEligible || inviteeContext?.terracottaLodgingEligible,
+  );
   const hasGroomFamilyLodgingOptions = isGroomFamilyLodgingGuestGroup(activeGuestGroup);
   const canRegisterStay = attending !== "no";
   const shouldAskPostCeremonyParty = doesPostCeremonyPartyApply({
@@ -620,6 +627,7 @@ export default function RSVPPage() {
     attending,
     attendingCeremony,
     postCeremonyPartyInvited,
+    terracottaLodgingEligible,
     attendingPostCeremonyParty,
     attendingBanquet,
     guestCount: selectedGuestCount,
@@ -782,6 +790,7 @@ export default function RSVPPage() {
       applyIdentity(identity);
       setInviteeContext(invitee);
       setValue("postCeremonyPartyInvited", Boolean(invitee.postCeremonyPartyInvited), { shouldDirty: false });
+      setValue("terracottaLodgingEligible", Boolean(invitee.terracottaLodgingEligible), { shouldDirty: false });
       if (hasUserEditedFormRef.current) return;
       setValue("name", response?.name ?? invitee.displayLabel, { shouldDirty: false });
       setValue("phone", response?.phone ?? invitee.phone, { shouldDirty: false });
@@ -1170,7 +1179,10 @@ export default function RSVPPage() {
       || (postCeremonyPartyApplies && data.attendingPostCeremonyParty === "yes")
       ? "yes"
       : "no";
-    const isStaying = isFamilyLodgingGuestGroup(resolvedGroup)
+    const isStaying = isTerracottaLodgingEligible(
+      resolvedGroup,
+      data.terracottaLodgingEligible || inviteeContext?.terracottaLodgingEligible,
+    )
       && resolvedAttendance === "yes"
       && data.attendingBanquet === "yes"
       && data.stayDecision !== null

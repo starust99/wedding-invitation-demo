@@ -183,6 +183,7 @@ try {
     guestGroup: "[Nhật] Bạn bè & Đồng nghiệp",
     expectedGuestCount: 4,
     postCeremonyPartyInvited: false,
+    terracottaLodgingEligible: false,
     inviteStatus: "invited",
     rsvp: undefined,
   };
@@ -226,6 +227,32 @@ try {
     0,
     "Friends and colleagues must not be asked for resort lodging.",
   );
+
+  const eligibleFriendToken = "rsvp-eligible-friend-lodging-test";
+  const eligibleFriendInvitee = {
+    ...friendInvitee,
+    id: `${invitePayload.invitee.id}-eligible-friend-test`,
+    token: eligibleFriendToken,
+    terracottaLodgingEligible: true,
+  };
+  const eligibleFriendContext = await browser.newContext({ viewport: { width: 390, height: 844 } });
+  await eligibleFriendContext.addInitScript((invitee) => {
+    window.localStorage.setItem("wedding-demo-invitees", JSON.stringify([invitee]));
+  }, eligibleFriendInvitee);
+  const eligibleFriendPage = await eligibleFriendContext.newPage();
+  await eligibleFriendPage.route(`**/api/invites/${eligibleFriendToken}`, async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({ invitee: eligibleFriendInvitee }),
+    });
+  });
+  await eligibleFriendPage.goto(`${baseUrl}/rsvp?invite=${eligibleFriendToken}`, { waitUntil: "domcontentloaded" });
+  const eligibleFriendYesButtons = eligibleFriendPage.getByRole("button", { name: "Có", exact: true });
+  await eligibleFriendYesButtons.first().waitFor({ state: "visible" });
+  await eligibleFriendYesButtons.nth(1).click();
+  await eligibleFriendPage.getByText("LƯU TRÚ", { exact: true }).waitFor();
+  await eligibleFriendContext.close();
   const noButtons = friendPage.getByRole("button", { name: "Không", exact: true });
   await noButtons.nth(0).click();
   await noButtons.nth(1).click();

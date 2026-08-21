@@ -1,6 +1,7 @@
 import type { RSVPResponse } from "@/lib/rsvp-storage";
 import { buildInvitationCopy } from "@/lib/guest-personalization";
 import { canonicalizeGuestFullName, resolveSalutationCluster } from "@/lib/guest-naming";
+import { isTerracottaLodgingEligible } from "@/lib/rsvp-guest-group";
 
 export type InviteUnit = "individual" | "household";
 export type InvitedBy = "parents" | "couple";
@@ -45,6 +46,7 @@ export type Invitee = {
   audienceTags: string[];
   expectedGuestCount: number;
   postCeremonyPartyInvited: boolean;
+  terracottaLodgingEligible: boolean;
   phone: string;
   email: string;
   notes: string;
@@ -75,6 +77,7 @@ export type InviteImportResult = {
   invitees: Invitee[];
   errors: string[];
   hasPostCeremonyPartyColumn?: boolean;
+  hasTerracottaLodgingColumn?: boolean;
 };
 
 export type InviteeInput = Partial<Invitee>;
@@ -105,6 +108,7 @@ export const inviteCsvColumns = [
   "audience_tags",
   "expected_guest_count",
   "post_ceremony_party_invited",
+  "terracotta_lodging_eligible",
   "phone",
   "email",
   "notes",
@@ -134,6 +138,7 @@ export const inviteCsvColumnLabels: Record<InviteCsvColumn, string> = {
   audience_tags: "Nhóm xem album",
   expected_guest_count: "Số khách",
   post_ceremony_party_invited: "Tham gia tiệc sau Hôn phối",
+  terracotta_lodging_eligible: "Lưu trú tại Terracotta",
   phone: "Số điện thoại",
   email: "Email",
   notes: "Ghi chú",
@@ -161,6 +166,7 @@ const inviteCsvColumnAliases: Record<InviteCsvColumn, string[]> = {
   audience_tags: ["audience_tags", "audienceTags", "nhom xem album", "nhóm xem album", "nhom duoc xem album", "nhóm được xem album", "tag album"],
   expected_guest_count: ["expected_guest_count", "expectedGuestCount", "so khach du kien", "số khách dự kiến"],
   post_ceremony_party_invited: ["post_ceremony_party_invited", "postCeremonyPartyInvited", "tham gia tiec sau hon phoi", "tham gia tiệc sau hôn phối"],
+  terracotta_lodging_eligible: ["terracotta_lodging_eligible", "terracottaLodgingEligible", "luu tru tai terracotta", "lưu trú tại terracotta"],
   phone: ["phone", "so dien thoai", "số điện thoại", "dien thoai", "điện thoại"],
   email: ["email"],
   notes: ["notes", "ghi chu", "ghi chú"],
@@ -276,6 +282,7 @@ export const inviteTemplateRows = [
     audience_tags: "gia đình;họ ngoại",
     expected_guest_count: "2",
     post_ceremony_party_invited: "",
+    terracotta_lodging_eligible: "Có",
     phone: "",
     email: "",
     notes: "",
@@ -302,6 +309,7 @@ export const inviteTemplateRows = [
     audience_tags: "gia đình;họ nội",
     expected_guest_count: "2",
     post_ceremony_party_invited: "",
+    terracotta_lodging_eligible: "Có",
     phone: "",
     email: "",
     notes: "",
@@ -328,6 +336,7 @@ export const inviteTemplateRows = [
     audience_tags: "bạn bè;bạn đại học",
     expected_guest_count: "1",
     post_ceremony_party_invited: "",
+    terracotta_lodging_eligible: "",
     phone: "",
     email: "",
     notes: "",
@@ -354,6 +363,7 @@ export const inviteTemplateRows = [
     audience_tags: "đồng nghiệp",
     expected_guest_count: "1",
     post_ceremony_party_invited: "",
+    terracotta_lodging_eligible: "",
     phone: "",
     email: "",
     notes: "",
@@ -380,6 +390,7 @@ export const inviteTemplateRows = [
     audience_tags: "bạn bè",
     expected_guest_count: "1",
     post_ceremony_party_invited: "",
+    terracotta_lodging_eligible: "",
     phone: "",
     email: "",
     notes: "",
@@ -563,6 +574,7 @@ export function serializeInviteesCsv(invitees: Invitee[]) {
       audience_tags: joinAudienceTags(invitee.audienceTags),
       expected_guest_count: invitee.expectedGuestCount,
       post_ceremony_party_invited: invitee.postCeremonyPartyInvited ? "Có" : "",
+      terracotta_lodging_eligible: invitee.terracottaLodgingEligible ? "Có" : "",
       phone: invitee.phone,
       email: invitee.email,
       notes: invitee.notes,
@@ -681,6 +693,10 @@ export function createInvitee(input: InviteeInput, existingTokens = new Set<stri
     audienceTags: Array.isArray(input.audienceTags) ? input.audienceTags.filter(Boolean) : splitTags(input.audienceTags),
     expectedGuestCount: Math.max(1, Number(input.expectedGuestCount) || 1),
     postCeremonyPartyInvited: Boolean(input.postCeremonyPartyInvited),
+    terracottaLodgingEligible: isTerracottaLodgingEligible(
+      clean(input.guestGroup),
+      input.terracottaLodgingEligible,
+    ),
     phone: clean(input.phone),
     email: clean(input.email),
     notes: clean(input.notes),
@@ -699,6 +715,7 @@ export function parseInviteCsv(text: string, existingInvitees: Invitee[] = []): 
   const firstLine = text.replace(/^\uFEFF/, "").split(/\r?\n/).find((line) => line.trim()) ?? "";
   const resolvedHeaders = parseCsvLine(firstLine).map(resolveInviteCsvColumn);
   const hasPostCeremonyPartyColumn = resolvedHeaders.includes("post_ceremony_party_invited");
+  const hasTerracottaLodgingColumn = resolvedHeaders.includes("terracotta_lodging_eligible");
   const errors: string[] = [];
   const invitees = rows.map((row, index) => {
     const displayLabel = row.display_label || row.displayLabel || row.guest_name || row.guestName;
@@ -709,6 +726,11 @@ export function parseInviteCsv(text: string, existingInvitees: Invitee[] = []): 
     const postCeremonyPartyInvited = normalizeCsvKey(postCeremonyPartyValue) === "co";
     if (postCeremonyPartyValue && !postCeremonyPartyInvited) {
       errors.push(`Dòng ${index + 2}: cột Tham gia tiệc sau Hôn phối chỉ nhận giá trị Có hoặc để trống.`);
+    }
+    const terracottaLodgingValue = clean(row.terracotta_lodging_eligible || row.terracottaLodgingEligible);
+    const terracottaLodgingEligible = normalizeCsvKey(terracottaLodgingValue) === "co";
+    if (terracottaLodgingValue && !terracottaLodgingEligible) {
+      errors.push(`Dòng ${index + 2}: cột Lưu trú tại Terracotta chỉ nhận giá trị Có hoặc để trống.`);
     }
 
     const invitee = createInvitee({
@@ -733,6 +755,7 @@ export function parseInviteCsv(text: string, existingInvitees: Invitee[] = []): 
       audienceTags: parseAudienceTags(row.audience_tags || row.audienceTags),
       expectedGuestCount: Number(row.expected_guest_count || row.expectedGuestCount),
       postCeremonyPartyInvited,
+      terracottaLodgingEligible,
       phone: row.phone,
       email: row.email,
       notes: row.notes,
@@ -742,7 +765,7 @@ export function parseInviteCsv(text: string, existingInvitees: Invitee[] = []): 
     return invitee;
   });
 
-  return { invitees, errors, hasPostCeremonyPartyColumn };
+  return { invitees, errors, hasPostCeremonyPartyColumn, hasTerracottaLodgingColumn };
 }
 
 export function readLocalInvitees(): Invitee[] {

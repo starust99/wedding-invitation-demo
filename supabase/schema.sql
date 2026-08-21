@@ -86,6 +86,7 @@ create table if not exists invitees (
   audience_tags text[] not null default '{}',
   expected_guest_count int not null default 1 check (expected_guest_count >= 1),
   post_ceremony_party_invited boolean not null default false,
+  terracotta_lodging_eligible boolean not null default false,
   phone text not null default '',
   email text not null default '',
   notes text not null default '',
@@ -100,6 +101,16 @@ alter table invitees add column if not exists host_relationship text not null de
 alter table invitees add column if not exists host_pronoun text not null default '';
 alter table invitees add column if not exists couple_reference text not null default '';
 alter table invitees add column if not exists post_ceremony_party_invited boolean not null default false;
+alter table invitees add column if not exists terracotta_lodging_eligible boolean not null default false;
+
+update invitees
+set terracotta_lodging_eligible = true
+where guest_group in (
+  '[Nhà Trai] Họ nội',
+  '[Nhà Trai] Họ ngoại',
+  '[Nhà Gái] Họ nội',
+  '[Nhà Gái] Họ ngoại'
+);
 
 create index if not exists invitees_guest_group_idx on invitees (guest_group);
 create index if not exists invitees_invite_status_idx on invitees (invite_status);

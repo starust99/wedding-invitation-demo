@@ -18,7 +18,7 @@ Tên khách: Tuấn
 Cụm tên khách: Gia đình anh chị Tuấn
 ```
 
-Clergy use the same seven-column workbook without another title field:
+Clergy use the same invite workbook without another title field:
 
 - `Cụm danh xưng` is `Cha`.
 - `Tên khách` contains the remaining formal title and saint name, for example
@@ -90,29 +90,32 @@ not add non-breaking characters to stored invitation data.
 
 ## Invite Workbook Classification
 
-The visible invite workbook keeps seven columns: `STT`, `Cụm danh xưng`,
-`Tên khách`, `Cụm tên khách`, `Đơn vị khách`, `Nhóm khách`, and
-`Tham gia tiệc sau Hôn phối`. `Lời mời trong thiệp` is derived from the guest
+The visible invite workbook keeps nine columns: `STT`, `Cụm danh xưng`,
+`Tên khách`, `Cụm tên khách`, `Đơn vị khách`, `Nhóm khách`,
+`Chi tiết (Optional)`, `Tham gia tiệc sau Hôn phối`, and
+`Lưu trú tại Terracotta`. `Lời mời trong thiệp` is derived from the guest
 identity at runtime and is not an administrator input, so new templates do not
 export that column. Import remains compatible with older workbooks that still
 contain it and ignores any stale value in favor of the runtime-derived copy.
 
-Row-specific administrator notes may be carried in the workbook's hidden
-system sheet. They are imported into `Invitee.notes`, never alter `Cụm tên
-khách`, and appear only in administrator surfaces and link-export workbooks.
+`Chi tiết (Optional)` is administrator-only planning metadata. It is imported
+into `Invitee.notes`, never alters `Cụm tên khách`, and appears only in
+administrator surfaces and link-export workbooks.
 
-No extra lodging column is required. The two existing classification inputs
-have separate responsibilities:
+The three invitation-scope inputs have separate responsibilities:
 
 - `Tham gia tiệc sau Hôn phối` controls the initial intimate-party invitation
   scope described below.
-- `Nhóm khách` controls Terracotta lodging eligibility. Guests in the
+- `Nhóm khách` determines the automatic family default. Guests in the
   `[Nhà Trai] Họ nội`, `[Nhà Trai] Họ ngoại`, `[Nhà Gái] Họ nội`, or
-  `[Nhà Gái] Họ ngoại` groups are asked about lodging only when they accept the
-  Terracotta wedding. The two Nhà Trai family groups may choose only the night
-  of 26/12 or no stay; the two Nhà Gái family groups may choose 25/12, 26/12,
-  both nights, or no stay. Other groups answer the banquet party-size question
-  instead of lodging.
+  `[Nhà Gái] Họ ngoại` groups automatically receive lodging eligibility.
+- `Lưu trú tại Terracotta` grants the same invite-scoped eligibility to a
+  selected non-family guest when set to `Có`; blank means no lodging offer.
+
+Lodging is shown only after that invite accepts the Terracotta wedding. The two
+Nhà Trai family groups may choose only the night of 26/12 or no stay. Every
+other eligible invite may choose 25/12, 26/12, both nights, or no stay. A family
+salutation or `Đơn vị khách = Gia đình` does not grant lodging by itself.
 
 ## Invitation Link Exports By Family Side
 
@@ -126,8 +129,9 @@ Admin derives side-specific invitation-link workbooks from the existing
 
 These exports preserve the canonical `/g/<token>` invitation URL and do not
 change guest identity, event access, lodging eligibility, or RSVP behavior.
-The export includes a `Ghi chú nội bộ` column next to `Cụm tên khách`, allowing
-duplicate display names to be distinguished without changing guest-facing copy.
+They include `Nhóm khách`, `Chi tiết (Optional)`, `Tham gia tiệc sau Hôn phối`,
+and `Lưu trú tại Terracotta` before `Link thiệp`, allowing permissions and
+duplicate display names to be audited without changing guest-facing copy.
 
 ## Post-Ceremony Party
 
@@ -140,9 +144,10 @@ The invite workbook contains `Tham gia tiệc sau Hôn phối`:
   gallery, and tokenized calendar flow.
 - A banquet-only Nhà Trai guest does not receive the fallback intimate-party
   invitation after declining Terracotta.
-- This event-access rule does not change lodging. Nhà Trai Họ nội/Họ ngoại may
-  still register the night of 26/12 after accepting Terracotta; Nhà Trai Khách
-  ba/Khách mẹ remain ineligible for lodging.
+- This event-access rule is independent from lodging. Nhà Trai Họ nội/Họ ngoại
+  still receive the night of 26/12 automatically after accepting Terracotta;
+  any other Nhà Trai invite receives lodging only when its per-invite flag is
+  enabled.
 
 - `Có` means the invitee is invited from the start and sees the intimate-party
   question inside the ceremony card after accepting the wedding ceremony.

@@ -23,6 +23,7 @@ export function preserveExistingInviteLinks(
   nextInvitees: Invitee[],
   existingInvitees: Invitee[],
   hasPostCeremonyPartyColumn = true,
+  hasTerracottaLodgingColumn = true,
 ) {
   const candidatesByKey = new Map<string, Invitee[]>();
   for (const invitee of existingInvitees) {
@@ -55,6 +56,9 @@ export function preserveExistingInviteLinks(
       postCeremonyPartyInvited: hasPostCeremonyPartyColumn
         ? invitee.postCeremonyPartyInvited
         : match.postCeremonyPartyInvited,
+      terracottaLodgingEligible: hasTerracottaLodgingColumn
+        ? invitee.terracottaLodgingEligible
+        : match.terracottaLodgingEligible,
       rsvp: match.rsvp,
     };
   });

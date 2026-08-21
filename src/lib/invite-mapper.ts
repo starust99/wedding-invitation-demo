@@ -9,6 +9,7 @@ import {
   type SupplementStatus,
 } from "@/lib/invites";
 import type { RSVPResponse } from "@/lib/rsvp-storage";
+import { isTerracottaLodgingEligible } from "@/lib/rsvp-guest-group";
 
 export type InviteeDatabaseRow = {
   id: string;
@@ -32,6 +33,7 @@ export type InviteeDatabaseRow = {
   audience_tags: string[] | null;
   expected_guest_count: number;
   post_ceremony_party_invited?: boolean | null;
+  terracotta_lodging_eligible?: boolean | null;
   phone: string;
   email: string;
   notes: string;
@@ -107,6 +109,7 @@ export function mapInviteeRow(row: InviteeDatabaseRow, supplement?: InviteSupple
     audienceTags: row.audience_tags ?? [],
     expectedGuestCount: row.expected_guest_count,
     postCeremonyPartyInvited: row.post_ceremony_party_invited ?? false,
+    terracottaLodgingEligible: row.terracotta_lodging_eligible ?? false,
     phone: row.phone,
     email: row.email,
     notes: row.notes,
@@ -141,6 +144,10 @@ export function toInviteeUpsert(invitee: Invitee) {
     audience_tags: invitee.audienceTags,
     expected_guest_count: invitee.expectedGuestCount,
     post_ceremony_party_invited: invitee.postCeremonyPartyInvited,
+    terracotta_lodging_eligible: isTerracottaLodgingEligible(
+      invitee.guestGroup,
+      invitee.terracottaLodgingEligible,
+    ),
     phone: invitee.phone,
     email: invitee.email,
     notes: invitee.notes,

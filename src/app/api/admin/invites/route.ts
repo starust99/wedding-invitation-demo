@@ -9,6 +9,7 @@ import {
 } from "@/lib/invite-mapper";
 import { mapRSVPRow, type RSVPDatabaseRow } from "@/lib/rsvp-mapper";
 import { getSupabaseServerClient, hasSupabaseEnv } from "@/lib/supabase-server";
+import { isMissingSupabaseColumn } from "@/lib/supabase-errors";
 import {
   createInviteeFromSimpleEntry,
   getSimpleInviteEntryOptions,
@@ -118,13 +119,28 @@ export async function POST(request: Request) {
   }
 
   const supabase = getSupabaseServerClient();
-  const { data, error } = await supabase
+  const upsertPayloads = invitees.map((invitee) => ({
+    ...toInviteeUpsert(invitee),
+    created_at: invitee.createdAt,
+  }));
+  let mutation = await supabase
     .from("invitees")
-    .upsert(invitees.map((invitee) => ({
-      ...toInviteeUpsert(invitee),
-      created_at: invitee.createdAt,
-    })), { onConflict: "token" })
+    .upsert(upsertPayloads, { onConflict: "token" })
     .select("*");
+
+  let migrationRequired = false;
+  if (isMissingSupabaseColumn(mutation.error, "terracotta_lodging_eligible")) {
+    migrationRequired = true;
+    const legacyPayloads = upsertPayloads.map((payload) => Object.fromEntries(
+      Object.entries(payload).filter(([key]) => key !== "terracotta_lodging_eligible"),
+    ));
+    mutation = await supabase
+      .from("invitees")
+      .upsert(legacyPayloads, { onConflict: "token" })
+      .select("*");
+  }
+
+  const { data, error } = mutation;
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
@@ -138,5 +154,6 @@ export async function POST(request: Request) {
     ok: true,
     backend: "supabase",
     invitees: (data ?? []).map((row) => mapInviteRow(row as InviteeDatabaseRow)),
+    migrationRequired,
   });
 }

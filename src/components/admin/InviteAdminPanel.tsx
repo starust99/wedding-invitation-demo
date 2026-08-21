@@ -54,12 +54,14 @@ import { AlbumGroupManager } from "@/components/admin/AlbumGroupManager";
 import { resolveInviteEventAccess } from "@/lib/invite-event-access";
 import { filterInviteesByLinkSide } from "@/lib/invite-link-side";
 import { preserveExistingInviteLinks } from "@/lib/invite-import";
+import { isFamilyLodgingGuestGroup } from "@/lib/rsvp-guest-group";
 
 type SimpleInviteEntry = {
   salutationCluster: string;
   guestNameCore: string;
   guestGroup: string;
   postCeremonyPartyInvited?: string;
+  terracottaLodgingEligible?: string;
 };
 
 type SimpleInviteEntryOptions = {
@@ -71,6 +73,7 @@ type InviteAdminApiResponse = {
   backend: "local" | "supabase";
   invitees?: Invitee[];
   simpleInviteEntryOptions?: SimpleInviteEntryOptions;
+  migrationRequired?: boolean;
 };
 
 const panelInput =
@@ -83,6 +86,7 @@ const emptySimpleInviteEntry: SimpleInviteEntry = {
   guestNameCore: "",
   guestGroup: "",
   postCeremonyPartyInvited: "",
+  terracottaLodgingEligible: "",
 };
 
 const inviteStatusLabels: Record<Invitee["inviteStatus"], string> = {
@@ -464,10 +468,12 @@ export function InviteAdminPanel() {
         });
 
         if (!response.ok) throw new Error("Không lưu được khách mời.");
-        const result = await response.json() as { invitee: Invitee };
+        const result = await response.json() as { invitee: Invitee; migrationRequired?: boolean };
         setInvitees((current) => current.map((item) => item.id === result.invitee.id ? result.invitee : item));
         const preparation = await prepareInvitePreviews([result.invitee], window.location.origin);
-        if (preparation.failedTokens.length > 0) {
+        if (result.migrationRequired) {
+          setError("Đã lưu các thay đổi khác, nhưng quyền Lưu trú tại Terracotta chưa được lưu vì cơ sở dữ liệu đang chờ cập nhật.");
+        } else if (preparation.failedTokens.length > 0) {
           setError("Đã lưu khách mời nhưng link xem trước chưa sẵn sàng. Hãy bấm Lưu lại trước khi gửi link.");
         } else {
           setMessage("Đã lưu khách mời và chuẩn bị xong link gửi khách.");
@@ -662,7 +668,9 @@ export function InviteAdminPanel() {
       setSimpleInviteEntry(emptySimpleInviteEntry);
       if (backend === "supabase") {
         const preparation = await prepareInvitePreviews([savedInvitee], window.location.origin);
-        if (preparation.failedTokens.length > 0) {
+        if (result.migrationRequired) {
+          setError("Đã tạo khách mời, nhưng quyền Lưu trú tại Terracotta chưa được lưu vì cơ sở dữ liệu đang chờ cập nhật.");
+        } else if (preparation.failedTokens.length > 0) {
           setError("Đã tạo khách mời nhưng link xem trước chưa sẵn sàng. Hãy bấm Lưu trước khi gửi.");
         } else {
           setMessage("Đã tạo khách mời và chuẩn bị xong link gửi khách.");
@@ -691,10 +699,23 @@ export function InviteAdminPanel() {
       }
 
       const hasPostCeremonyPartyColumn = parsed.hasPostCeremonyPartyColumn !== false;
-      const nextInvitees = preserveExistingInviteLinks(parsed.invitees, invitees, hasPostCeremonyPartyColumn);
+      const hasTerracottaLodgingColumn = parsed.hasTerracottaLodgingColumn !== false;
+      const nextInvitees = preserveExistingInviteLinks(
+        parsed.invitees,
+        invitees,
+        hasPostCeremonyPartyColumn,
+        hasTerracottaLodgingColumn,
+      );
       if (nextInvitees.length === 0) throw new Error("File Excel chưa có dòng khách mời hợp lệ.");
+      const compatibilityNotices: string[] = [];
       if (!hasPostCeremonyPartyColumn) {
-        setImportNotice("File Excel cũ chưa có cột Tham gia tiệc sau Hôn phối. Hệ thống đã giữ nguyên thiết lập hiện tại của khách cũ; khách mới mặc định không được hỏi.");
+        compatibilityNotices.push("File Excel cũ chưa có cột Tham gia tiệc sau Hôn phối; hệ thống giữ nguyên thiết lập hiện tại của khách cũ.");
+      }
+      if (!hasTerracottaLodgingColumn) {
+        compatibilityNotices.push("File Excel cũ chưa có cột Lưu trú tại Terracotta; hệ thống giữ nguyên quyền của khách cũ và vẫn tự cấp quyền cho nhóm Họ nội/Họ ngoại.");
+      }
+      if (compatibilityNotices.length > 0) {
+        setImportNotice(compatibilityNotices.join(" "));
       }
 
       if (backend === "supabase") {
@@ -711,6 +732,9 @@ export function InviteAdminPanel() {
         setInvitees([...byToken.values()]);
         setLastImportedInviteeIds(savedInvitees.map((invitee) => invitee.id));
         setSelectedInviteeId(savedInvitees[0]?.id || selectedInviteeId);
+        if (result.migrationRequired) {
+          setImportNotice("Danh sách đã được nhập, nhưng cột Lưu trú tại Terracotta chưa được lưu vì cơ sở dữ liệu đang chờ cập nhật.");
+        }
         const preparation = await prepareInvitePreviews(savedInvitees, window.location.origin);
         if (preparation.failedTokens.length > 0) {
           setError(`Đã nhập khách mời nhưng ${preparation.failedTokens.length} link chưa sẵn sàng. Hãy thử nhập lại hoặc lưu từng khách trước khi xuất.`);
@@ -1567,7 +1591,13 @@ export function InviteAdminPanel() {
                       <select
                         className={panelSelect}
                         value={simpleInviteEntry.guestGroup}
-                        onChange={(event) => setSimpleInviteEntry((current) => ({ ...current, guestGroup: event.target.value }))}
+                        onChange={(event) => setSimpleInviteEntry((current) => ({
+                          ...current,
+                          guestGroup: event.target.value,
+                          terracottaLodgingEligible: isFamilyLodgingGuestGroup(event.target.value)
+                            ? "Có"
+                            : current.terracottaLodgingEligible,
+                        }))}
                         required
                       >
                         <option value="">Chọn nhóm khách</option>
@@ -1583,6 +1613,16 @@ export function InviteAdminPanel() {
                         className="h-4 w-4 rounded accent-[#5F6F4E]"
                       />
                       Mời tham gia tiệc sau Hôn phối
+                    </label>
+                    <label className="flex min-h-12 cursor-pointer items-center gap-3 rounded-2xl border border-[#E8DDCC] bg-[#FCFAF4] px-4 text-sm font-semibold text-[#2E2A25] sm:col-span-2">
+                      <input
+                        type="checkbox"
+                        checked={isFamilyLodgingGuestGroup(simpleInviteEntry.guestGroup) || simpleInviteEntry.terracottaLodgingEligible === "Có"}
+                        onChange={(event) => setSimpleInviteEntry((current) => ({ ...current, terracottaLodgingEligible: event.target.checked ? "Có" : "" }))}
+                        disabled={isFamilyLodgingGuestGroup(simpleInviteEntry.guestGroup)}
+                        className="h-4 w-4 rounded accent-[#5F6F4E]"
+                      />
+                      Lưu trú tại Terracotta
                     </label>
                   </div>
 
@@ -1654,7 +1694,16 @@ export function InviteAdminPanel() {
                       </label>
                       <label className="grid gap-1.5 font-semibold text-[#8A8178] uppercase tracking-wider">
                         Nhóm khách
-                        <input className={panelInput} value={selectedInvitee.guestGroup} onChange={(event) => patchSelectedInvitee({ guestGroup: event.target.value })} />
+                        <input
+                          className={panelInput}
+                          value={selectedInvitee.guestGroup}
+                          onChange={(event) => patchSelectedInvitee({
+                            guestGroup: event.target.value,
+                            terracottaLodgingEligible: isFamilyLodgingGuestGroup(event.target.value)
+                              ? true
+                              : selectedInvitee.terracottaLodgingEligible,
+                          })}
+                        />
                       </label>
                       <label className="grid gap-1.5 font-semibold text-[#8A8178] uppercase tracking-wider">
                         Đơn vị khách
@@ -1677,6 +1726,16 @@ export function InviteAdminPanel() {
                           className="h-4 w-4 rounded accent-[#5F6F4E]"
                         />
                         Hỏi khách về tiệc sau Hôn phối
+                      </label>
+                      <label className="flex min-h-11 cursor-pointer items-center gap-3 self-end rounded-2xl border border-[#E8DDCC] bg-white px-4 text-xs font-semibold normal-case tracking-normal text-[#2E2A25]">
+                        <input
+                          type="checkbox"
+                          checked={isFamilyLodgingGuestGroup(selectedInvitee.guestGroup) || selectedInvitee.terracottaLodgingEligible}
+                          onChange={(event) => patchSelectedInvitee({ terracottaLodgingEligible: event.target.checked })}
+                          disabled={isFamilyLodgingGuestGroup(selectedInvitee.guestGroup)}
+                          className="h-4 w-4 rounded accent-[#5F6F4E]"
+                        />
+                        Cho phép lưu trú tại Terracotta
                       </label>
                       <label className="grid gap-1.5 font-semibold text-[#8A8178] uppercase tracking-wider">
                         Dòng ngoài phong bì

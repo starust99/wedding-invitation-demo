@@ -12,8 +12,8 @@ import { resolvePostCeremonyPartyAnswer } from "@/lib/post-ceremony-rsvp";
 import { resolveInviteEventAccess } from "@/lib/invite-event-access";
 import { preserveLegacyRsvpWishNotes } from "@/lib/rsvp-wish";
 import {
-  isFamilyLodgingGuestGroup,
   isGroomFamilyLodgingGuestGroup,
+  isTerracottaLodgingEligible,
 } from "@/lib/rsvp-guest-group";
 
 const guestRsvpSchema = z.object({
@@ -58,7 +58,8 @@ export async function POST(request: Request, { params }: { params: Promise<{ tok
   const supabase = getSupabaseServerClient();
   const { data: invitee, error: inviteeError } = await supabase
     .from("invitees")
-    .select("id, token, display_label, guest_group, expected_guest_count, post_ceremony_party_invited")
+    // Keep invite reads available while the additive column rolls out.
+    .select("*")
     .eq("token", token)
     .maybeSingle();
 
@@ -85,7 +86,10 @@ export async function POST(request: Request, { params }: { params: Promise<{ tok
 
   const expectedGuestCount = Math.max(1, Number(invitee.expected_guest_count) || 1);
   const attending = attendingCeremony || body.attendingBanquet || postCeremonyParty.value === true ? "yes" : "no";
-  const accommodationNeeded = isFamilyLodgingGuestGroup(guestGroup)
+  const accommodationNeeded = isTerracottaLodgingEligible(
+    guestGroup,
+    invitee.terracotta_lodging_eligible,
+  )
     && attending === "yes"
     && body.attendingBanquet
     && body.accommodationNeeded;

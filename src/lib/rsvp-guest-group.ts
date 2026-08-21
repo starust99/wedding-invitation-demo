@@ -18,13 +18,24 @@ export function isGroomSideGuestGroup(value?: string | null) {
 }
 
 /**
- * Resort lodging is reserved for the paternal and maternal family groups
- * imported from the guest workbook. Parent friends, colleagues and other
- * invitees answer the party-size question instead.
+ * The paternal and maternal family groups keep their legacy automatic lodging
+ * eligibility. Other invitees require the separate invite-scoped flag.
  */
 export function isFamilyLodgingGuestGroup(value?: string | null) {
   const group = normalizeGuestGroup(value);
   return /(?:^| )ho (?:noi|ngoai)(?: |$)/.test(group);
+}
+
+/**
+ * Lodging is an invite-scoped permission. The legacy family groups stay
+ * eligible as a compatibility/default rule, while selected non-family guests
+ * can be opted in explicitly by Admin.
+ */
+export function isTerracottaLodgingEligible(
+  guestGroup?: string | null,
+  terracottaLodgingEligible?: boolean | null,
+) {
+  return Boolean(terracottaLodgingEligible) || isFamilyLodgingGuestGroup(guestGroup);
 }
 
 /**

@@ -12,6 +12,7 @@ import {
   type PlusOnePolicy,
 } from "@/lib/invites";
 import { buildInvitationCopy } from "@/lib/guest-personalization";
+import { isTerracottaLodgingEligible } from "@/lib/rsvp-guest-group";
 import { weddingConfig } from "@/config/wedding.config";
 
 const inviteSheetName = "Danh sách khách mời";
@@ -153,6 +154,7 @@ const columns = [
   { key: "guestGroup", header: "Nhóm khách", width: 40 },
   { key: "guestDetail", header: "Chi tiết (Optional)", width: 26 },
   { key: "postCeremonyPartyInvited", header: "Tham gia tiệc sau Hôn phối", width: 32 },
+  { key: "terracottaLodgingEligible", header: "Lưu trú tại Terracotta", width: 28 },
 ] as const;
 
 const inviteColumn = {
@@ -164,6 +166,7 @@ const inviteColumn = {
   guestGroup: 6,
   guestDetail: 7,
   postCeremonyPartyInvited: 8,
+  terracottaLodgingEligible: 9,
 } as const;
 
 export type SimpleInviteEntry = {
@@ -172,6 +175,7 @@ export type SimpleInviteEntry = {
   guestGroup: string;
   guestDetail?: string;
   postCeremonyPartyInvited?: string;
+  terracottaLodgingEligible?: string;
 };
 
 type TemplateRowValues = SimpleInviteEntry;
@@ -179,7 +183,8 @@ type TemplateRowValues = SimpleInviteEntry;
 type OptionKey =
   | "salutationCluster"
   | "guestGroup"
-  | "postCeremonyPartyInvited";
+  | "postCeremonyPartyInvited"
+  | "terracottaLodgingEligible";
 
 type SpreadsheetOptions = {
   coupleDisplayName?: string;
@@ -197,6 +202,7 @@ function getOptionColumns(coupleDisplayName: string): Record<OptionKey, string[]
     salutationCluster: salutationDefinitions.map((item) => item.label),
     guestGroup: guestGroupDefinitions.map((item) => item.label),
     postCeremonyPartyInvited: ["Có"],
+    terracottaLodgingEligible: ["Có"],
   };
 }
 
@@ -430,6 +436,10 @@ export function previewSimpleInviteEntry(values: SimpleInviteEntry, spreadsheetO
   if (postCeremonyPartyValue && postCeremonyPartyValue !== "co") {
     errors.push("Mời tiệc sau Hôn phối chỉ nhận Có hoặc để trống.");
   }
+  const terracottaLodgingValue = normalizeText(values.terracottaLodgingEligible);
+  if (terracottaLodgingValue && terracottaLodgingValue !== "co") {
+    errors.push("Lưu trú tại Terracotta chỉ nhận Có hoặc để trống.");
+  }
 
   return {
     guestName: salutation ? inferred.guestName : "",
@@ -474,6 +484,10 @@ export function createInviteeFromSimpleEntry(
     audienceTags: parseAudienceTags(inferred.audienceTagsText),
     expectedGuestCount: deriveExpectedGuestCount(inferred.householdMode),
     postCeremonyPartyInvited: normalizeText(values.postCeremonyPartyInvited) === "co",
+    terracottaLodgingEligible: isTerracottaLodgingEligible(
+      inferred.guestGroup,
+      normalizeText(values.terracottaLodgingEligible) === "co",
+    ),
     phone: "",
     email: "",
     notes: "",
@@ -510,12 +524,13 @@ function cellText(cell: ExcelJS.Cell) {
   if (value === null || value === undefined) return "";
   if (value instanceof Date) return value.toISOString();
   if (typeof value === "object") {
-    const richTextValue = value as { richText?: { text?: string }[]; text?: string; result?: unknown };
+    const richTextValue = value as { richText?: { text?: string }[]; text?: string; result?: unknown; formula?: string; sharedFormula?: string };
     if (Array.isArray(richTextValue.richText)) {
       return richTextValue.richText.map((item) => item.text ?? "").join("").trim();
     }
     if (typeof richTextValue.text === "string") return richTextValue.text.trim();
     if (richTextValue.result !== undefined && richTextValue.result !== null) return String(richTextValue.result).trim();
+    if (richTextValue.formula || richTextValue.sharedFormula) return "";
   }
   return String(value).trim();
 }
@@ -664,6 +679,22 @@ function applyTemplateRows(worksheet: ExcelJS.Worksheet, options: ReturnType<typ
       errorStyle: "stop",
       errorTitle: "Chỉ chọn Có hoặc để trống",
       error: "Để trống nếu không hỏi. Chỉ chọn Có với khách được mời dự tiệc sau Hôn phối.",
+    };
+
+    const lodgingCell = row.getCell(inviteColumn.terracottaLodgingEligible);
+    styleInputCell(lodgingCell, true);
+    lodgingCell.value = {
+      formula: `IF(OR($F${rowIndex}=${excelText("[Nhà Trai] Họ nội")},$F${rowIndex}=${excelText("[Nhà Trai] Họ ngoại")},$F${rowIndex}=${excelText("[Nhà Gái] Họ nội")},$F${rowIndex}=${excelText("[Nhà Gái] Họ ngoại")}),${excelText("Có")},"")`,
+      result: "",
+    };
+    lodgingCell.dataValidation = {
+      type: "list",
+      allowBlank: true,
+      formulae: [optionRange("terracottaLodgingEligible", 3, optionColumns)],
+      showErrorMessage: true,
+      errorStyle: "stop",
+      errorTitle: "Chỉ chọn Có hoặc để trống",
+      error: "Họ nội/Họ ngoại tự động có quyền lưu trú. Với khách khác, chọn Có nếu gia đình bố trí phòng tại Terracotta.",
     };
 
     applyFormulaCells(row, rowIndex);
@@ -912,12 +943,14 @@ export async function parseInviteWorkbook(buffer: ArrayBuffer, existingInvitees:
     guestGroup: findKeyByHeader(headers, ["Nhóm khách", "Nhóm khách mời", "guest_group", "guestGroup"]),
     guestDetail: findKeyByHeader(headers, ["Chi tiết (Optional)", "Chi tiết", "guest_detail", "guestDetail", "notes"]),
     postCeremonyPartyInvited: findKeyByHeader(headers, ["Tham gia tiệc sau Hôn phối", "post_ceremony_party_invited", "postCeremonyPartyInvited"]),
+    terracottaLodgingEligible: findKeyByHeader(headers, ["Lưu trú tại Terracotta", "terracotta_lodging_eligible", "terracottaLodgingEligible"]),
     audienceTags: findKeyByHeader(headers, ["Nhóm xem album", "audience_tags", "audienceTags"]),
     token: findKeyByHeader(headers, ["token", "Mã link riêng", "ma link rieng"]),
   };
 
   const isSimplifiedWorkbook = Boolean(indexes.salutationCluster && indexes.guestNameCore && indexes.guestGroup);
   const hasPostCeremonyPartyColumn = Boolean(indexes.postCeremonyPartyInvited);
+  const hasTerracottaLodgingColumn = Boolean(indexes.terracottaLodgingEligible);
   const internalNotesByDataRow = readInternalNotesByDataRow(workbook);
   if (!indexes.guestName && !isSimplifiedWorkbook) {
     return { invitees: [], errors: ["File Excel thiếu cột Cụm tên khách hoặc bộ 3 cột rút gọn."] };
@@ -939,6 +972,7 @@ export async function parseInviteWorkbook(buffer: ArrayBuffer, existingInvitees:
         guestGroup: read(indexes.guestGroup),
         guestDetail: read(indexes.guestDetail),
         postCeremonyPartyInvited: read(indexes.postCeremonyPartyInvited),
+        terracottaLodgingEligible: read(indexes.terracottaLodgingEligible),
       };
       if (!simplifiedValues.salutationCluster && !simplifiedValues.guestNameCore && !simplifiedValues.guestGroup) return;
 
@@ -962,6 +996,11 @@ export async function parseInviteWorkbook(buffer: ArrayBuffer, existingInvitees:
       const postCeremonyPartyValue = normalizeText(simplifiedValues.postCeremonyPartyInvited);
       if (postCeremonyPartyValue && postCeremonyPartyValue !== "co") {
         errors.push(`Dòng ${rowIndex}: cột Tham gia tiệc sau Hôn phối chỉ nhận giá trị Có hoặc để trống.`);
+        return;
+      }
+      const terracottaLodgingValue = normalizeText(simplifiedValues.terracottaLodgingEligible);
+      if (terracottaLodgingValue && terracottaLodgingValue !== "co") {
+        errors.push(`Dòng ${rowIndex}: cột Lưu trú tại Terracotta chỉ nhận giá trị Có hoặc để trống.`);
         return;
       }
 
@@ -989,6 +1028,10 @@ export async function parseInviteWorkbook(buffer: ArrayBuffer, existingInvitees:
         audienceTags: parseAudienceTags(inferred.audienceTagsText),
         expectedGuestCount: deriveExpectedGuestCount(inferred.householdMode),
         postCeremonyPartyInvited: postCeremonyPartyValue === "co",
+        terracottaLodgingEligible: isTerracottaLodgingEligible(
+          inferred.guestGroup,
+          terracottaLodgingValue === "co",
+        ),
         phone: "",
         email: "",
         notes: clean(simplifiedValues.guestDetail) || internalNotesByDataRow.get(rowIndex) || "",
@@ -1023,12 +1066,17 @@ export async function parseInviteWorkbook(buffer: ArrayBuffer, existingInvitees:
     const audienceTagsText = dropdownValues.audienceTags || legacyFallbackRowValues.audienceTagsText;
     const audienceTags = parseAudienceTags(audienceTagsText);
     const postCeremonyPartyValue = normalizeText(read(indexes.postCeremonyPartyInvited));
+    const terracottaLodgingValue = normalizeText(read(indexes.terracottaLodgingEligible));
 
     if (missingDropdowns || audienceTags.length === 0) {
       errors.push(`Dòng ${rowIndex}: thiếu lựa chọn dropdown.`);
     }
     if (postCeremonyPartyValue && postCeremonyPartyValue !== "co") {
       errors.push(`Dòng ${rowIndex}: cột Tham gia tiệc sau Hôn phối chỉ nhận giá trị Có hoặc để trống.`);
+      return;
+    }
+    if (terracottaLodgingValue && terracottaLodgingValue !== "co") {
+      errors.push(`Dòng ${rowIndex}: cột Lưu trú tại Terracotta chỉ nhận giá trị Có hoặc để trống.`);
       return;
     }
 
@@ -1069,6 +1117,10 @@ export async function parseInviteWorkbook(buffer: ArrayBuffer, existingInvitees:
       audienceTags,
       expectedGuestCount: deriveExpectedGuestCount(householdMode),
       postCeremonyPartyInvited: postCeremonyPartyValue === "co",
+      terracottaLodgingEligible: isTerracottaLodgingEligible(
+        guestGroup,
+        terracottaLodgingValue === "co",
+      ),
       phone: "",
       email: "",
       notes: clean(read(indexes.guestDetail)) || internalNotesByDataRow.get(rowIndex) || "",
@@ -1078,7 +1130,7 @@ export async function parseInviteWorkbook(buffer: ArrayBuffer, existingInvitees:
     invitees.push(invitee);
   });
 
-  return { invitees, errors, hasPostCeremonyPartyColumn };
+  return { invitees, errors, hasPostCeremonyPartyColumn, hasTerracottaLodgingColumn };
 }
 
 export async function buildInviteLinksWorkbook(invitees: Invitee[], origin = "") {
@@ -1105,10 +1157,11 @@ export async function buildInviteLinksWorkbook(invitees: Invitee[], origin = "")
     { key: "guestGroup", width: 32 },
     { key: "guestDetail", width: 26 },
     { key: "postCeremonyPartyInvited", width: 38 },
+    { key: "terracottaLodgingEligible", width: 30 },
     { key: "inviteUrl", width: 76 },
   ];
 
-  worksheet.mergeCells("A1:F1");
+  worksheet.mergeCells("A1:G1");
   const titleCell = worksheet.getCell("A1");
   titleCell.value = "DANH SÁCH LINK THIỆP MỜI";
   titleCell.font = { name: "Georgia", size: 22, bold: true, color: { argb: palette.white } };
@@ -1116,7 +1169,7 @@ export async function buildInviteLinksWorkbook(invitees: Invitee[], origin = "")
   titleCell.alignment = { vertical: "middle", horizontal: "center" };
   worksheet.getRow(1).height = 46;
 
-  worksheet.mergeCells("A2:F2");
+  worksheet.mergeCells("A2:G2");
   const subtitleCell = worksheet.getCell("A2");
   subtitleCell.value = `Lễ thành hôn ${defaultCoupleDisplayName}`;
   subtitleCell.font = { name: "Arial", size: 12, italic: true, color: { argb: palette.text } };
@@ -1132,6 +1185,7 @@ export async function buildInviteLinksWorkbook(invitees: Invitee[], origin = "")
   worksheet.getCell("D3").fill = { type: "pattern", pattern: "solid", fgColor: { argb: palette.ivory } };
   worksheet.getCell("E3").fill = { type: "pattern", pattern: "solid", fgColor: { argb: palette.ivory } };
   worksheet.getCell("F3").fill = { type: "pattern", pattern: "solid", fgColor: { argb: palette.ivory } };
+  worksheet.getCell("G3").fill = { type: "pattern", pattern: "solid", fgColor: { argb: palette.ivory } };
 
   const headerRow = worksheet.getRow(4);
   headerRow.values = [
@@ -1140,6 +1194,7 @@ export async function buildInviteLinksWorkbook(invitees: Invitee[], origin = "")
     "Nhóm khách",
     "Chi tiết (Optional)",
     "Tham gia tiệc sau Hôn phối",
+    "Lưu trú tại Terracotta",
     "Link thiệp",
   ];
   headerRow.height = 44;
@@ -1152,7 +1207,7 @@ export async function buildInviteLinksWorkbook(invitees: Invitee[], origin = "")
       bottom: { style: "thin", color: { argb: palette.champagne } },
     };
   });
-  worksheet.autoFilter = "A4:F4";
+  worksheet.autoFilter = "A4:G4";
 
   invitees.forEach((invitee, inviteeIndex) => {
     const row = worksheet.addRow({
@@ -1163,6 +1218,10 @@ export async function buildInviteLinksWorkbook(invitees: Invitee[], origin = "")
       guestGroup: clean(invitee.guestGroup) || "Khác",
       guestDetail: clean(invitee.notes),
       postCeremonyPartyInvited: invitee.postCeremonyPartyInvited ? "Có" : "Không",
+      terracottaLodgingEligible: isTerracottaLodgingEligible(
+        invitee.guestGroup,
+        invitee.terracottaLodgingEligible,
+      ) ? "Có" : "Không",
       inviteUrl: buildInviteUrl(invitee.token, origin),
     });
     row.getCell(1).value = {
@@ -1215,9 +1274,24 @@ export async function buildInviteLinksWorkbook(invitees: Invitee[], origin = "")
       pattern: "solid",
       fgColor: { argb: isInvited ? "FFEAF0E3" : rowIndex % 2 === 0 ? palette.ivory : palette.white },
     };
+
+    const lodgingCell = row.getCell(6);
+    const isLodgingEligible = cellText(lodgingCell) === "Có";
+    lodgingCell.alignment = { vertical: "middle", horizontal: "center" };
+    lodgingCell.font = {
+      name: "Arial",
+      size: 12,
+      bold: isLodgingEligible,
+      color: { argb: isLodgingEligible ? palette.oliveDark : palette.muted },
+    };
+    lodgingCell.fill = {
+      type: "pattern",
+      pattern: "solid",
+      fgColor: { argb: isLodgingEligible ? "FFEAF0E3" : rowIndex % 2 === 0 ? palette.ivory : palette.white },
+    };
   });
 
-  worksheet.getColumn(6).eachCell((cell, rowIndex) => {
+  worksheet.getColumn(7).eachCell((cell, rowIndex) => {
     if (rowIndex <= 4) return;
     const url = cellText(cell);
     cell.value = { text: url, hyperlink: url, tooltip: "Bấm để mở thiệp" };
@@ -1226,7 +1300,7 @@ export async function buildInviteLinksWorkbook(invitees: Invitee[], origin = "")
   });
 
   worksheet.pageSetup.printTitlesRow = "1:4";
-  worksheet.pageSetup.printArea = `A1:F${Math.max(4, worksheet.rowCount)}`;
+  worksheet.pageSetup.printArea = `A1:G${Math.max(4, worksheet.rowCount)}`;
 
   return workbook;
 }
